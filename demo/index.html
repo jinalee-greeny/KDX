@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KDX 홈페이지 — 디자인 시스템 데모 (v0.14)</title>
+<title>KDX 홈페이지 — 디자인 시스템 데모 (v0.15)</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css">
 <style>
 /* ===== TIER 0 SCALE + 뉴트럴 ===== */
@@ -390,12 +390,8 @@ html[data-view="tokens"] .tokens{display:block}
 .board3{display:none;gap:20px;justify-content:center;overflow-x:auto;width:100%}
 html[data-view="compare"] .board3{display:flex}
 .col{flex:0 0 340px;width:340px}
-.col-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-weight:700;font-size:14px}.col-head .cdot{width:12px;height:12px;border-radius:50%;flex:none}
-.col-bar{display:flex;flex-wrap:wrap;gap:5px;background:var(--bg);border:1px solid var(--line-2);border-radius:11px 11px 0 0;padding:8px;border-bottom:none}
-.col-bar .cseg{display:flex;background:#f1f2f5;border-radius:7px;padding:2px;gap:1px}
-.col-bar .cseg button{font-size:9.5px;font-weight:700;color:var(--fg-sub);padding:3px 6px;border-radius:5px}
-.col-bar .cseg button.on{background:#fff;color:var(--fg);box-shadow:var(--sh-1)}
-.col-frame{height:600px;overflow-y:auto;overflow-x:hidden;background:var(--bg);border:1px solid var(--line-2);border-radius:0 0 14px 14px;container-type:inline-size;container-name:page;box-shadow:var(--sh-frame)}
+.col-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-weight:700;font-size:14px}.col-head .cdot{width:12px;height:12px;border-radius:50%;flex:none}
+.col-frame{height:640px;overflow-y:auto;overflow-x:hidden;background:var(--bg);border:1px solid var(--line-2);border-radius:14px;container-type:inline-size;container-name:page;box-shadow:var(--sh-frame)}
 .col-frame::-webkit-scrollbar{width:7px}.col-frame::-webkit-scrollbar-thumb{background:#cfd2d8;border-radius:99px}
 </style>
 </head>
@@ -574,7 +570,7 @@ html[data-view="compare"] .board3{display:flex}
 
   <!-- ============ 우: 인스펙터(컨트롤) ============ -->
   <aside class="inspector">
-    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.14</p></div></div>
+    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.15</p></div></div>
     <div class="grp"><span class="gl">View</span><div class="seg" id="viewSeg"><button data-v="interactive" class="on">프리뷰</button><button data-v="compare">비교</button><button data-v="components">컴포넌트</button><button data-v="tokens">토큰</button></div></div>
     <div class="grp"><span class="gl">Brand <em>교체 지점</em></span><div class="brands" id="brands">
       <button class="brandbtn on" data-b="deepblue"><span class="bdot" style="background:#1245BA"></span><span class="bn">Deep Blue</span><span class="bhex">#1245BA</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
@@ -590,7 +586,7 @@ html[data-view="compare"] .board3{display:flex}
       <div class="grp"><span class="gl">크기 <em>Size</em></span><div class="seg sm" data-attr="data-size"><button data-val="s">S</button><button data-val="m" class="on">M</button><button data-val="l">L</button></div></div>
       <div class="grp"><span class="gl">해석된 토큰 값</span><div class="readout" id="readout"></div></div>
     </div>
-    <div id="compareNote" class="grp" style="display:none"><span class="gl">비교 모드</span><p class="hintnote">각 컬럼 상단에서 <b>독립</b>으로 조절합니다. 브랜드별 곡률·간격·보더·크기를 나란히 비교하세요.</p></div>
+    <div id="compareNote" class="grp" style="display:none"><span class="gl">비교 모드</span><p class="hintnote">3개 브랜드를 <b>동일 조건</b>으로 나란히 비교합니다. 스크롤은 동기화됩니다.</p></div>
     <div id="tokNote" class="grp" style="display:none"><span class="gl">토큰 뷰</span><p class="hintnote">Figma로 내보낸 변수 컬렉션입니다. 위 <b>Brand</b>를 바꾸면 Semantic의 accent·link 토큰 값이 실시간 반영됩니다. Radius는 3개 모드를 함께 표기합니다.</p></div>
   </aside>
 </div>
@@ -630,10 +626,8 @@ const BRANDS=[['deepblue','Deep Blue','#1245BA'],['emerald','Emerald','#098A68']
 const KNOBDEF=[['data-layout',[['grid','Grid'],['carousel','Car'],['list','List']]],['data-radius',[['sharp','Sh'],['default','Df'],['rounded','Rd']]],['data-density',[['compact','Cp'],['default','Df'],['comfortable','Cf']]],['data-border',[['hairline','H'],['default','D'],['strong','S']]],['data-size',[['s','S'],['m','M'],['l','L']]]];
 function buildBoard(){const tpl=document.getElementById('pageTpl');board3.innerHTML='';
   BRANDS.forEach(([b,name,c])=>{const col=document.createElement('div');col.className='col';col.setAttribute('data-brand',b);KNOBS.forEach(([a,d])=>col.setAttribute(a,d));
-    const bar=KNOBDEF.map(([attr,opts])=>`<div class="cseg" data-attr="${attr}">`+opts.map(([v,t])=>`<button data-val="${v}" class="${col.getAttribute(attr)===v?'on':''}">${t}</button>`).join('')+`</div>`).join('');
-    col.innerHTML=`<div class="col-head"><span class="cdot" style="background:${c}"></span>${name}</div><div class="col-bar">${bar}</div><div class="col-frame"></div>`;
+    col.innerHTML=`<div class="col-head"><span class="cdot" style="background:${c}"></span>${name}</div><div class="col-frame"></div>`;
     col.querySelector('.col-frame').appendChild(tpl.cloneNode(true));
-    col.querySelector('.col-bar').addEventListener('click',e=>{const btn=e.target.closest('button');if(!btn)return;const seg=btn.closest('.cseg');col.setAttribute(seg.dataset.attr,btn.dataset.val);seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===btn));});
     board3.appendChild(col);});
   const frames=[...board3.querySelectorAll('.col-frame')];let lock=false;
   frames.forEach(f=>f.addEventListener('scroll',()=>{if(lock)return;lock=true;frames.forEach(o=>{if(o!==f)o.scrollTop=f.scrollTop;});requestAnimationFrame(()=>lock=false);}));}
