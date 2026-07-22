@@ -374,6 +374,29 @@ html[data-view="modules"] .modules{display:block}
 .faq .fitem.open .fq svg{transform:rotate(180deg)}
 .faq .fa{max-height:0;overflow:hidden;transition:max-height .25s ease;color:var(--fg-sub);font-size:15px;line-height:1.65}
 .faq .fitem.open .fa{max-height:220px;padding:0 4px 18px}
+/* ===== 인증 페이지 (로그인 · 회원가입) ===== */
+.authframe{display:none}
+html[data-view="auth"] #frame{display:none}
+html[data-view="auth"] .authframe{display:block}
+.authtop{display:flex;align-items:center;justify-content:space-between;height:64px}
+.authtop .authback{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--fg-mut)}
+.authtop .authback svg{width:15px;height:15px}
+.authwrap{padding:calc(40px*var(--dens)) 0 calc(64px*var(--dens));display:flex;flex-direction:column;align-items:center}
+.authcard{width:100%;max-width:404px;background:var(--bg);border:var(--bw) solid var(--bc);border-radius:var(--r-l);box-shadow:var(--sh-2);padding:calc(32px*var(--dens)) 30px}
+.authh{font-size:24px;font-weight:800;text-align:center;letter-spacing:-.02em}
+.authsub{text-align:center;color:var(--fg-sub);font-size:14px;margin-top:9px;margin-bottom:26px;line-height:1.5}
+.authform{display:flex;flex-direction:column;gap:15px}
+.authform .fld{width:100%}
+.authrow{display:flex;align-items:center;justify-content:space-between;font-size:13px;margin-top:2px}
+.authrow a{color:var(--accent);font-weight:600}
+.authdiv{display:flex;align-items:center;gap:12px;color:var(--fg-mut);font-size:12px;margin:22px 0}
+.authdiv::before,.authdiv::after{content:"";height:1px;background:var(--line);flex:1}
+.authagree{display:flex;flex-direction:column;gap:11px;margin-top:4px}
+.authagree .opt{font-size:12.5px;color:var(--fg-sub);align-items:flex-start}
+.authnote{display:flex;align-items:center;gap:7px;justify-content:center;margin-top:20px;font-size:12px;color:var(--fg-mut)}
+.authnote svg{width:14px;height:14px;color:var(--accent)}
+.authfoot{text-align:center;margin-top:22px;font-size:13.5px;color:var(--fg-sub)}
+.authfoot a{color:var(--accent);font-weight:700;cursor:pointer}
 .tk-top{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);padding:20px 28px 0;z-index:2}
 .tk-title{font-size:15px;font-weight:800;letter-spacing:-.01em}.tk-title span{font-weight:500;color:var(--fg-mut);font-size:12.5px}
 .tk-tabs{display:flex;gap:2px;margin-top:16px;overflow-x:auto}
@@ -473,6 +496,8 @@ html[data-view="compare"] .board3{display:flex}
       <div class="nav-group">
         <div class="nav-gl">페이지</div>
         <button class="nav-item on" data-view="interactive">홈</button>
+        <button class="nav-item" data-view="auth" data-tab="login">로그인</button>
+        <button class="nav-item" data-view="auth" data-tab="signup">회원가입</button>
         <button class="nav-item" data-view="compare">브랜드 비교</button>
       </div>
       <div class="nav-group">
@@ -592,6 +617,8 @@ html[data-view="compare"] .board3{display:flex}
         </div>
       </div>
     </div>
+    <!-- 인증 페이지 (로그인 · 회원가입) -->
+    <div class="frame authframe" id="authView" data-radius="default" data-density="default" data-border="default" data-size="m"></div>
     <div class="board3" id="board3"></div>
     <!-- 컴포넌트 뷰 (정식 컴포넌트 문서: 변형·상태) -->
     <div class="components" id="componentsView" data-radius="default" data-density="default" data-border="default" data-size="m">
@@ -622,7 +649,7 @@ html[data-view="compare"] .board3{display:flex}
 
   <!-- ============ 우: 인스펙터(컨트롤) ============ -->
   <aside class="inspector">
-    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.18</p></div></div>
+    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.19</p></div></div>
     <div class="grp" id="brandGrp"><span class="gl">Brand <em>교체 지점</em></span><div class="brands" id="brands">
       <button class="brandbtn on" data-b="deepblue"><span class="bdot" style="background:#1245BA"></span><span class="bn">Deep Blue</span><span class="bhex">#1245BA</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
       <button class="brandbtn" data-b="emerald"><span class="bdot" style="background:#098A68"></span><span class="bn">Emerald</span><span class="bhex">#098A68</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
@@ -643,7 +670,7 @@ html[data-view="compare"] .board3{display:flex}
 </div>
 
 <script>
-const html=document.documentElement, frame=document.getElementById('frame'), navEl=document.getElementById('nav'), componentsEl=document.getElementById('componentsView'), modulesEl=document.getElementById('modulesView');
+const html=document.documentElement, frame=document.getElementById('frame'), navEl=document.getElementById('nav'), componentsEl=document.getElementById('componentsView'), modulesEl=document.getElementById('modulesView'), authEl=document.getElementById('authView');
 const RAD={sharp:{m:4,l:6},default:{m:12,l:16},rounded:{m:20,l:24}}, DENS={compact:.84,default:1,comfortable:1.22},
       BORD={hairline:1,default:1,strong:1.5}, SIZE={s:{ctrl:38,icon:20},m:{ctrl:46,icon:22},l:{ctrl:54,icon:26}};
 const KNOBS=[['data-layout','grid'],['data-radius','default'],['data-density','default'],['data-border','default'],['data-size','m']];
@@ -656,7 +683,7 @@ function renderReadout(scope,el){const r=scope.getAttribute('data-radius'),d=DEN
   el.innerHTML=[['comp/radius/button → radius/m',RAD[r].m+'px'],['comp/radius/card → radius/l',RAD[r].l+'px'],['spacing ×','×'+d],['border/'+bd,BORD[bd]+'px'],['size/control/'+sz,SIZE[sz].ctrl+'px'],['size/icon',SIZE[sz].icon+'px']]
    .map(([k,v])=>`<div class="rr"><span class="rk">${k}</span><span class="rv">${v}</span></div>`).join('');}
 document.querySelectorAll('#presetCtl .seg').forEach(seg=>seg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const a=seg.dataset.attr;
-  frame.setAttribute(a,b.dataset.val); if(a!=='data-layout'){ componentsEl.setAttribute(a,b.dataset.val); modulesEl.setAttribute(a,b.dataset.val); }
+  frame.setAttribute(a,b.dataset.val); if(a!=='data-layout'){ componentsEl.setAttribute(a,b.dataset.val); modulesEl.setAttribute(a,b.dataset.val); authEl.setAttribute(a,b.dataset.val); }
   seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); renderReadout(frame,document.getElementById('readout'));}));
 renderReadout(frame,document.getElementById('readout'));
 
@@ -685,10 +712,10 @@ function buildBoard(){const tpl=document.getElementById('pageTpl');board3.innerH
 function route(view,tab){
   html.setAttribute('data-view',view);
   document.querySelectorAll('#nav .nav-item').forEach(x=>x.classList.toggle('on',x.dataset.view===view && (!x.dataset.tab||x.dataset.tab===tab)));
-  const cmp=view==='compare',tok=view==='tokens',comp=view==='components',mod=view==='modules',home=view==='interactive';
-  document.getElementById('presetCtl').style.display=(home||comp||mod)?'':'none';  // 노브: 홈+컴포넌트+모듈
-  document.getElementById('deviceGrp').style.display=home?'':'none';            // 디바이스: 홈에만
-  document.getElementById('brandGrp').style.display=cmp?'none':'';              // 브랜드 토글: 비교 뷰에선 숨김
+  const cmp=view==='compare',tok=view==='tokens',comp=view==='components',mod=view==='modules',auth=view==='auth',home=view==='interactive';
+  document.getElementById('presetCtl').style.display=(home||comp||mod||auth)?'':'none';  // 노브: 홈+컴포넌트+모듈+인증
+  document.getElementById('deviceGrp').style.display=(home||auth)?'':'none';        // 디바이스: 페이지형(홈·인증)
+  document.getElementById('brandGrp').style.display=cmp?'none':'';                  // 브랜드 토글: 비교 뷰에선 숨김
   document.getElementById('modNote').style.display=mod?'':'none';
   document.getElementById('compareNote').style.display=cmp?'':'none';
   document.getElementById('tokNote').style.display=tok?'':'none';
@@ -696,6 +723,7 @@ function route(view,tab){
   if(tok)renderTokenTab(tab||curTab);
   if(comp)renderCmpTab(tab||curCmpTab);
   if(mod)renderModTab(tab||curModTab);
+  if(auth)renderAuth(tab||curAuthTab);
 }
 document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('.nav-item');if(!b)return;route(b.dataset.view,b.dataset.tab);});
 
@@ -897,6 +925,52 @@ document.getElementById('modPanel').addEventListener('click',e=>{
   if(lb){const st=document.getElementById('modProductsStage');if(st)st.setAttribute('data-layout',lb.dataset.val);lb.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===lb));return;}
   const fq=e.target.closest('.faq .fq');
   if(fq){fq.parentNode.classList.toggle('open');}
+});
+
+/* ================= AUTH PAGES (로그인 · 회원가입) ================= */
+let curAuthTab='login';
+const AUTH_TOP=`<div class="inner"><div class="authtop"><div class="logo"><span class="mark"><svg class="i"><use href="#icon-brand-logo"/></svg></span>KDX</div><span class="authback" data-goto="interactive">홈으로 <svg class="i"><use href="#icon-nav-right"/></svg></span></div></div>`;
+const AUTH={
+  login:`<div class="inner"><div class="authwrap"><div class="authcard">
+    <h1 class="authh">로그인</h1>
+    <p class="authsub">KDX 계정으로 조각투자를 이어가세요.</p>
+    <div class="authform">
+      <div class="fld"><label class="fl">이메일</label><div class="inp"><span class="ph">you@example.com</span></div></div>
+      <div class="fld"><label class="fl">비밀번호</label><div class="inp"><span class="ph">비밀번호 입력</span><svg class="i" style="margin-left:auto"><use href="#icon-feature-secure"/></svg></div></div>
+      <div class="authrow"><span class="opt"><span class="chk on"><svg class="i"><use href="#icon-status-success"/></svg></span>로그인 상태 유지</span><a>비밀번호 찾기</a></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:4px">로그인</button>
+    </div>
+    <div class="authdiv">또는</div>
+    <button class="btn btn-ghost" style="width:100%">휴대폰 번호로 간편 로그인</button>
+  </div>
+  <p class="authfoot">아직 회원이 아니신가요? <a data-goto="signup">회원가입 →</a></p>
+  </div></div>`,
+  signup:`<div class="inner"><div class="authwrap"><div class="authcard">
+    <h1 class="authh">회원가입</h1>
+    <p class="authsub">몇 가지 정보만 입력하면 바로 시작할 수 있어요.</p>
+    <div class="authform">
+      <div class="fld"><label class="fl">이름</label><div class="inp"><span class="ph">실명 입력</span></div></div>
+      <div class="fld"><label class="fl">이메일</label><div class="inp"><span class="ph">you@example.com</span></div></div>
+      <div class="fld"><label class="fl">비밀번호</label><div class="inp"><span class="ph">비밀번호 입력</span><svg class="i" style="margin-left:auto"><use href="#icon-feature-secure"/></svg></div><div class="fh">영문·숫자·특수문자 포함 8자 이상.</div></div>
+      <div class="fld"><label class="fl">휴대폰 번호</label><div class="inp"><span class="ph">010-0000-0000</span></div></div>
+      <div class="authagree">
+        <span class="opt"><span class="chk on"><svg class="i"><use href="#icon-status-success"/></svg></span>[필수] 이용약관 및 개인정보 처리방침에 동의합니다.</span>
+        <span class="opt"><span class="chk"></span>[선택] 마케팅 정보 수신에 동의합니다.</span>
+      </div>
+      <button class="btn btn-primary" style="width:100%;margin-top:4px">가입하고 시작하기</button>
+    </div>
+    <p class="authnote"><svg class="i"><use href="#icon-feature-secure"/></svg> 실명·본인확인 정보는 제도권 기준에 따라 안전하게 보호됩니다.</p>
+  </div>
+  <p class="authfoot">이미 계정이 있으신가요? <a data-goto="login">로그인 →</a></p>
+  </div></div>`
+};
+function renderAuth(tab){curAuthTab=tab;
+  authEl.innerHTML=`<div class="page">${AUTH_TOP}${AUTH[tab]}</div>`;
+}
+/* 인증 페이지 내부 링크(회원가입↔로그인, 홈으로) */
+authEl.addEventListener('click',e=>{const g=e.target.closest('[data-goto]');if(!g)return;
+  const to=g.dataset.goto;
+  if(to==='interactive'){route('interactive');}else{route('auth',to);}
 });
 
 /* 초기 라우트 */
