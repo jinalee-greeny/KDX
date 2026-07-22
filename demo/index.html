@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KDX 홈페이지 — 디자인 시스템 데모 (v0.13)</title>
+<title>KDX 홈페이지 — 디자인 시스템 데모 (v0.14)</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css">
 <style>
 /* ===== TIER 0 SCALE + 뉴트럴 ===== */
@@ -110,7 +110,7 @@ html[data-view="compare"] #frame{display:none}
 .elev{display:flex;align-items:center;gap:12px;padding:2px 0}
 .ebox{width:56px;height:38px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-s);flex:none}
 .emeta{display:flex;flex-direction:column;line-height:1.35}
-.emeta b{font-size:12px;font-weight:700;font-family:ui-monospace,Menlo,monospace}
+.emeta b{font-size:12px;font-weight:700;font-family:'Pretendard Variable',system-ui,sans-serif}
 .emeta span{font-size:11px;color:var(--fg-mut)}
 
 /* ===== INSPECTOR (우 · 컨트롤) ===== */
@@ -132,12 +132,12 @@ html[data-view="compare"] #frame{display:none}
 .brandbtn{display:flex;align-items:center;gap:10px;padding:9px 11px;border:1.5px solid var(--line-2);border-radius:11px;transition:.15s;text-align:left}
 .brandbtn:hover{border-color:#cfd3da;background:var(--bg-sunken)} .brandbtn.on{border-color:var(--fg)}
 .brandbtn .bdot{width:20px;height:20px;border-radius:6px;flex:none}
-.brandbtn .bn{font-size:13px;font-weight:700} .brandbtn .bhex{font-size:10.5px;color:var(--fg-mut);font-family:ui-monospace,Menlo,monospace}
+.brandbtn .bn{font-size:13px;font-weight:700} .brandbtn .bhex{font-size:10.5px;color:var(--fg-mut);font-family:'Pretendard Variable',system-ui,sans-serif}
 .brandbtn .bck{margin-left:auto;width:17px;height:17px;border-radius:50%;border:1.5px solid var(--line-2);display:grid;place-items:center;color:transparent}
 .brandbtn .bck svg{width:11px;height:11px}
 .brandbtn.on .bck{background:var(--fg);border-color:var(--fg);color:#fff}
 .readout{background:var(--bg-sunken);border:1px solid var(--line);border-radius:11px;padding:11px 12px;display:flex;flex-direction:column;gap:6px}
-.readout .rr{display:flex;justify-content:space-between;gap:8px;font-size:11px;font-family:ui-monospace,Menlo,monospace}
+.readout .rr{display:flex;justify-content:space-between;gap:8px;font-size:11px;font-family:'Pretendard Variable',system-ui,sans-serif}
 .readout .rr .rk{color:var(--fg-mut)} .readout .rr .rv{color:var(--fg);font-weight:700}
 .hintnote{font-size:11px;color:var(--fg-mut);line-height:1.5;padding:2px}
 
@@ -279,10 +279,10 @@ html[data-view="components"] .components{display:block}
 .cmp-sec{margin-bottom:38px}
 .cmp-h{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
 .cmp-h h3{font-size:19px;font-weight:800;letter-spacing:-.02em}
-.cmp-h .anat{font-family:ui-monospace,monospace;font-size:11px;color:var(--fg-mut)}
+.cmp-h .anat{font-family:'Pretendard Variable',system-ui,sans-serif;font-size:11px;color:var(--fg-mut)}
 .cmp-desc{font-size:13.5px;color:var(--fg-sub);margin-bottom:18px;max-width:62ch;line-height:1.55}
 .cmp-sub{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--fg-mut);margin:20px 0 12px}
-.cmp-note{font-size:11.5px;color:var(--fg-sub);background:var(--bg-sunken);border-radius:9px;padding:10px 13px;margin-top:16px;font-family:ui-monospace,Menlo,monospace;line-height:1.65}
+.cmp-note{font-size:11.5px;color:var(--fg-sub);background:var(--bg-sunken);border-radius:9px;padding:10px 13px;margin-top:16px;font-family:'Pretendard Variable',system-ui,sans-serif;line-height:1.65}
 .cmp-note b{color:var(--accent)}
 /* button state matrix */
 .cmatrix{display:grid;grid-template-columns:80px repeat(5,minmax(0,1fr));gap:14px 12px;align-items:center;max-width:840px}
@@ -348,31 +348,31 @@ html[data-view="tokens"] .tokens{display:block}
 .tk-grp .c{color:var(--fg-sub);font-weight:600;text-transform:none;letter-spacing:0;margin-left:6px}
 /* ramps */
 .tk-ramp{display:flex;gap:16px;align-items:flex-start;padding:7px 0;flex-wrap:wrap}
-.tk-rl{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--fg-sub);width:120px;flex:none;padding-top:6px}
+.tk-rl{font-family:'Pretendard Variable',system-ui,sans-serif;font-size:12px;color:var(--fg-sub);width:120px;flex:none;padding-top:6px}
 .tk-sws{display:flex;gap:6px;flex-wrap:wrap}
 .tk-sw{width:62px}.tk-sw .c{display:block;height:38px;border-radius:7px;border:1px solid #0000000f}
-.tk-sw .n{display:block;font-family:ui-monospace,monospace;font-size:10px;font-weight:700;margin-top:4px}
-.tk-sw .h{display:block;font-family:ui-monospace,monospace;font-size:8.5px;color:var(--fg-mut);text-transform:uppercase}
+.tk-sw .n{display:block;font-family:'Pretendard Variable',system-ui,sans-serif;font-size:10px;font-weight:700;margin-top:4px}
+.tk-sw .h{display:block;font-family:'Pretendard Variable',system-ui,sans-serif;font-size:8.5px;color:var(--fg-mut);text-transform:uppercase}
 /* pills */
 .tk-pills{display:flex;flex-wrap:wrap;gap:7px}
-.tk-pill{font-family:ui-monospace,monospace;font-size:12px;background:var(--bg-sunken);border:1px solid var(--line);border-radius:8px;padding:6px 11px}
+.tk-pill{font-family:'Pretendard Variable',system-ui,sans-serif;font-size:12px;background:var(--bg-sunken);border:1px solid var(--line);border-radius:8px;padding:6px 11px}
 .tk-pill b{color:var(--accent)}
 /* semantic rows */
 .tk-srow{display:flex;align-items:center;gap:12px;padding:7px 6px;border-bottom:1px solid var(--line)}
 .tk-chip{width:26px;height:26px;border-radius:6px;flex:none;border:1px solid #0000001a;background-image:linear-gradient(45deg,#eee 25%,transparent 25%),linear-gradient(-45deg,#eee 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#eee 75%),linear-gradient(-45deg,transparent 75%,#eee 75%);background-size:8px 8px;background-position:0 0,0 4px,4px -4px,-4px 0}
 .tk-chip i{display:block;width:100%;height:100%;border-radius:5px}
-.tk-tn{font-family:ui-monospace,monospace;font-size:12.5px;font-weight:600;min-width:190px}
-.tk-arr{color:var(--fg-mut)}.tk-ref{font-family:ui-monospace,monospace;font-size:12px;color:var(--fg-sub);flex:1}
+.tk-tn{font-family:'Pretendard Variable',system-ui,sans-serif;font-size:12.5px;font-weight:600;min-width:190px}
+.tk-arr{color:var(--fg-mut)}.tk-ref{font-family:'Pretendard Variable',system-ui,sans-serif;font-size:12px;color:var(--fg-sub);flex:1}
 .tk-ref.br{color:var(--accent);font-weight:700}
-.tk-hex{font-family:ui-monospace,monospace;font-size:11px;color:var(--fg-mut);text-transform:uppercase}
+.tk-hex{font-family:'Pretendard Variable',system-ui,sans-serif;font-size:11px;color:var(--fg-mut);text-transform:uppercase}
 /* table */
 .tk-tbl{width:100%;border-collapse:collapse;max-width:640px}
 .tk-tbl th{font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--fg-mut);text-align:left;padding:8px 12px;border-bottom:2px solid var(--line-2)}
-.tk-tbl td{font-family:ui-monospace,monospace;font-size:12.5px;padding:8px 12px;border-bottom:1px solid var(--line)}
+.tk-tbl td{font-family:'Pretendard Variable',system-ui,sans-serif;font-size:12.5px;padding:8px 12px;border-bottom:1px solid var(--line)}
 .tk-tbl td:first-child{font-weight:700;color:var(--fg)}
 /* type */
 .tk-type{display:flex;align-items:baseline;gap:20px;padding:11px 0;border-bottom:1px solid var(--line)}
-.tk-type .lab{font-family:ui-monospace,monospace;font-size:11.5px;color:var(--fg-sub);width:170px;flex:none}
+.tk-type .lab{font-family:'Pretendard Variable',system-ui,sans-serif;font-size:11.5px;color:var(--fg-sub);width:170px;flex:none}
 .tk-type .lab span{color:var(--fg-mut)}
 .tk-type .samp{letter-spacing:-.01em;color:var(--fg)}
 /* elevation */
@@ -380,11 +380,11 @@ html[data-view="tokens"] .tokens{display:block}
 .tk-ic{display:flex;align-items:center;gap:11px;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 .tk-ic .ib{width:36px;height:36px;border-radius:8px;background:var(--bg-sunken);display:grid;place-items:center;color:var(--fg);flex:none}
 .tk-ic .ib svg{width:19px;height:19px}
-.tk-ic .in{display:block;font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:700;line-height:1.3}
+.tk-ic .in{display:block;font-family:'Pretendard Variable',system-ui,sans-serif;font-size:11px;font-weight:700;line-height:1.3}
 .tk-ic .ir{display:block;font-size:11px;color:var(--fg-mut);margin-top:1px}
 .tk-elevs{display:flex;flex-wrap:wrap;gap:22px}
 .tk-elev{width:150px}.tk-elev .b{height:76px;background:var(--bg);border:1px solid var(--line);border-radius:12px}
-.tk-elev .n{font-family:ui-monospace,monospace;font-size:12px;font-weight:700;margin-top:12px}.tk-elev .u{font-size:11px;color:var(--fg-mut);margin-top:2px}
+.tk-elev .n{font-family:'Pretendard Variable',system-ui,sans-serif;font-size:12px;font-weight:700;margin-top:12px}.tk-elev .u{font-size:11px;color:var(--fg-mut);margin-top:2px}
 
 /* compare */
 .board3{display:none;gap:20px;justify-content:center;overflow-x:auto;width:100%}
@@ -574,7 +574,7 @@ html[data-view="compare"] .board3{display:flex}
 
   <!-- ============ 우: 인스펙터(컨트롤) ============ -->
   <aside class="inspector">
-    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.13</p></div></div>
+    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.14</p></div></div>
     <div class="grp"><span class="gl">View</span><div class="seg" id="viewSeg"><button data-v="interactive" class="on">프리뷰</button><button data-v="compare">비교</button><button data-v="components">컴포넌트</button><button data-v="tokens">토큰</button></div></div>
     <div class="grp"><span class="gl">Brand <em>교체 지점</em></span><div class="brands" id="brands">
       <button class="brandbtn on" data-b="deepblue"><span class="bdot" style="background:#1245BA"></span><span class="bn">Deep Blue</span><span class="bhex">#1245BA</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
@@ -781,7 +781,7 @@ function renderCmpTab(tab){curCmpTab=tab;
     h+='</div><div class="cmp-note">status=<b>st-success/warning/critical</b>(브랜드 무관) · info=<b>accent-subtle</b> · chart 배지=<b>up/down</b>(빨강·파랑 고정)</div></div>';
   } else if(tab==='icon'){
     h+='<div class="cmp-sec"><div class="cmp-h"><h3>Icon</h3><span class="anat">&lt;svg class="i"&gt;&lt;use href="#icon-…"/&gt;&lt;/svg&gt;</span></div><div class="cmp-desc">아이콘은 <b>currentColor</b>를 상속하고 크기는 <b>size/icon</b> 토큰을 따릅니다. 전체 목록·소스·교체는 토큰 뷰 → <b>Icons</b>(교체 지점) 참고.</div>';
-    h+='<div class="cmp-sub">Size · size/icon</div><div class="crow" style="align-items:flex-end;gap:22px">'+ICON_SZ.map(([k,px])=>`<span style="display:flex;flex-direction:column;align-items:center;gap:6px"><svg class="i" style="width:${px}px;height:${px}px"><use href="#icon-action-search"/></svg><span style="font-family:ui-monospace,monospace;font-size:10px;color:var(--fg-mut)">${k} · ${px}</span></span>`).join('')+'</div>';
+    h+='<div class="cmp-sub">Size · size/icon</div><div class="crow" style="align-items:flex-end;gap:22px">'+ICON_SZ.map(([k,px])=>`<span style="display:flex;flex-direction:column;align-items:center;gap:6px"><svg class="i" style="width:${px}px;height:${px}px"><use href="#icon-action-search"/></svg><span style="font-family:'Pretendard Variable',system-ui,sans-serif;font-size:10px;color:var(--fg-mut)">${k} · ${px}</span></span>`).join('')+'</div>';
     h+='<div class="cmp-sub">Color · currentColor 상속</div><div class="crow" style="gap:14px">'
       +'<span style="color:var(--fg)"><svg class="i" style="width:22px;height:22px"><use href="#icon-status-success"/></svg></span>'
       +'<span style="color:var(--accent)"><svg class="i" style="width:22px;height:22px"><use href="#icon-status-success"/></svg></span>'
