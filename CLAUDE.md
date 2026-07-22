@@ -66,9 +66,16 @@ Scale(원시)  →  Brand(교체 지점)  →  Semantic(의미)  →  Radius(곡
 - **`brand/shape/radius-scale` 고아 변수**: 곡률이 모드 방식으로 이관되면서 사용처가 없어짐. (A) 삭제 / (B) "브랜드→권장 Radius 모드"를 지정하는 힌트로 재정의. 데모는 B(권장값 힌트)로 두고 곡률은 프리셋에서 직접 선택 중.
 - **Semantic Dark 모드**: 구조는 잡혀 있으나 다크 값 미추출. 진행 시 dark 값 정의 필요.
 
+## 모듈 레이어 (범용 재사용 섹션)
+컴포넌트(원자/분자) 위, 페이지 아래에 **모듈** 계층이 있다. 컴포넌트를 조립한 **재사용 섹션**이며 페이지의 구성 단위다. 데모의 좌측 탐색 → **모듈** 그룹에서 각 모듈을 개별 문서로 확인한다.
+- 현재 모듈: `header(GNB)` · `hero` · `stats(통계 밴드)` · `steps(이용 절차)` · `products(상품 리스트)` · `features(특징 카드)` · `cta` · `footer` + 범용 `logowall(로고월)` · `faq`.
+- **레이아웃(Grid·Carousel·List)은 전역 설정이 아니라 `상품 리스트` 모듈의 변형(variant)이다.** `[data-layout]`를 모듈 컨테이너에 걸어 `.plist`/`.pcard` 구조를 전환한다. 레이아웃 같은 배치 성격은 그 배치를 갖는 모듈에 귀속시킨다(전역 노브로 두지 않는다).
+- 모든 모듈은 곡률·간격·보더·크기 노브와 Brand 스왑을 실시간 반영한다(반응형은 `@container page`).
+- 새 범용 모듈 추가 시: 데모 `M`(마크업)·`MOD_META`(문서)·`MOD_ORDER`·좌측 탐색 nav-item에 각각 등록. 신규 섹션 CSS는 토큰 var만 사용(하드코딩 px 금지).
+
 ## 추천 다음 작업 (NEXT)
-1. 기초 컴포넌트를 토큰 바인딩으로: **Button**(primary/secondary/ghost · S/M/L · hover/press/disabled) → **Input/Field** → **Card** → **Chip/Badge**.
-2. 실제 홈페이지 섹션(nav/hero/stats/features/products/CTA/footer)을 `brand-swap-demo.html` 구조를 참조해 코드로.
+1. 기초 컴포넌트를 토큰 바인딩으로: **Button**(primary/secondary/ghost · S/M/L · hover/press/disabled) → **Input/Field** → **Card** → **Chip/Badge**. (데모에 정식화 완료)
+2. 모듈을 실제 홈페이지 코드로: 위 모듈 레이어를 컴포넌트 단위로 마크업/구현하고, 페이지는 모듈을 조립해 구성. 배치 변형은 모듈 속성으로.
 3. Dark 모드 값 추출 후 Semantic에 두 번째 모드 추가.
 
 ## 아이콘 시스템 (교체 지점)

@@ -343,6 +343,37 @@ html[data-view="components"] .components{display:block}
 .tokens{display:none;width:100%;max-width:1080px;background:var(--bg);border-radius:16px;box-shadow:var(--sh-frame);overflow:hidden}
 html[data-view="tokens"] #frame,html[data-view="tokens"] .board3{display:none}
 html[data-view="tokens"] .tokens{display:block}
+/* ===== 모듈 뷰 ===== */
+.modules{display:none;width:100%;max-width:1080px}
+html[data-view="modules"] #frame,html[data-view="modules"] .board3{display:none}
+html[data-view="modules"] .modules{display:block}
+.mod-top{margin-bottom:18px}
+.mod-sec{background:var(--bg);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh-1);padding:24px 24px 28px;margin-bottom:20px}
+.mod-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.mod-head h3{font-size:19px;font-weight:800;letter-spacing:-.01em}
+.mod-head .anat{font-family:'Pretendard Variable',system-ui,sans-serif;font-size:12px;color:var(--fg-mut)}
+.mod-desc{margin-top:8px;font-size:14px;color:var(--fg-sub);line-height:1.6;max-width:74ch}
+.mod-varbar{display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
+.mod-varbar .vl{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--fg-mut)}
+.mod-stage{margin-top:18px;border:1px solid var(--line-2);border-radius:14px;overflow:hidden;background:var(--bg);container-type:inline-size;container-name:page}
+.mod-stage .page{--sect:34px;font-size:15px}
+.mod-stage .inner{padding-top:8px;padding-bottom:8px}
+.mod-note{margin-top:16px;font-size:12px;line-height:1.7;color:var(--fg-sub);background:var(--bg-sunken);border-radius:10px;padding:11px 14px}
+.mod-note b{color:var(--accent);font-weight:700}
+/* 로고월 */
+.logowall{padding:calc(var(--sect)*.7) 0;text-align:center}
+.logowall .ll{font-size:12px;font-weight:600;letter-spacing:.02em;color:var(--fg-mut);margin-bottom:22px}
+.logowall .lrow{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:22px 40px}
+.logowall .lg{display:flex;align-items:center;gap:7px;font-weight:800;font-size:17px;color:var(--fg-subtler,var(--fg-mut));opacity:.65;letter-spacing:-.01em}
+.logowall .lg svg{width:20px;height:20px}
+/* FAQ */
+.faq{padding:calc(var(--sect)*.7) 0;max-width:720px;margin:0 auto}
+.faq .fitem{border-bottom:1px solid var(--line)}
+.faq .fq{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 4px;text-align:left;font-size:16px;font-weight:600;color:var(--fg)}
+.faq .fq svg{width:20px;height:20px;color:var(--fg-mut);transition:transform .2s;flex:none}
+.faq .fitem.open .fq svg{transform:rotate(180deg)}
+.faq .fa{max-height:0;overflow:hidden;transition:max-height .25s ease;color:var(--fg-sub);font-size:15px;line-height:1.65}
+.faq .fitem.open .fa{max-height:220px;padding:0 4px 18px}
 .tk-top{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);padding:20px 28px 0;z-index:2}
 .tk-title{font-size:15px;font-weight:800;letter-spacing:-.01em}.tk-title span{font-weight:500;color:var(--fg-mut);font-size:12.5px}
 .tk-tabs{display:flex;gap:2px;margin-top:16px;overflow-x:auto}
@@ -453,6 +484,19 @@ html[data-view="compare"] .board3{display:flex}
         <button class="nav-item" data-view="components" data-tab="icon">Icon</button>
       </div>
       <div class="nav-group">
+        <div class="nav-gl">모듈 <span style="font-weight:600;text-transform:none;letter-spacing:0;color:var(--fg-mut)">· 범용 섹션</span></div>
+        <button class="nav-item" data-view="modules" data-tab="header">헤더 · GNB</button>
+        <button class="nav-item" data-view="modules" data-tab="hero">Hero</button>
+        <button class="nav-item" data-view="modules" data-tab="stats">통계 밴드</button>
+        <button class="nav-item" data-view="modules" data-tab="steps">이용 절차</button>
+        <button class="nav-item" data-view="modules" data-tab="products">상품 리스트</button>
+        <button class="nav-item" data-view="modules" data-tab="features">특징 카드</button>
+        <button class="nav-item" data-view="modules" data-tab="cta">CTA 밴드</button>
+        <button class="nav-item" data-view="modules" data-tab="footer">푸터</button>
+        <button class="nav-item" data-view="modules" data-tab="logowall">로고월</button>
+        <button class="nav-item" data-view="modules" data-tab="faq">FAQ</button>
+      </div>
+      <div class="nav-group">
         <div class="nav-gl">파운데이션 · 토큰</div>
         <button class="nav-item" data-view="tokens" data-tab="scale">Scale</button>
         <button class="nav-item" data-view="tokens" data-tab="brand">Brand</button>
@@ -516,7 +560,7 @@ html[data-view="compare"] .board3{display:flex}
           </section>
 
           <section class="section">
-            <div class="sec-head"><span class="tag">Products</span><h2 class="disp">Investment products.</h2><p>우측 인스펙터의 레이아웃으로 Grid · Carousel · List 구조를 전환해 보세요.</p></div>
+            <div class="sec-head"><span class="tag">Products</span><h2 class="disp">Investment products.</h2><p>검증된 조각투자 상품을 카테고리별로 만나보세요.</p></div>
             <div class="plist">
               <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#icon-cat-realestate"/></svg></span></div><div class="pbody"><span class="pcat">부동산</span><h3 class="ptitle">강남 오피스 빌딩 조각</h3><div class="pmeta"><span class="pprice">₩50,000/조각</span><span class="pyield">목표 8.2%</span></div></div></article>
               <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#icon-cat-art"/></svg></span></div><div class="pbody"><span class="pcat">미술품</span><h3 class="ptitle">현대미술 컬렉션</h3><div class="pmeta"><span class="pprice">₩30,000/조각</span><span class="pyield">목표 6.5%</span></div></div></article>
@@ -566,11 +610,19 @@ html[data-view="compare"] .board3{display:flex}
       </div>
       <div class="tk-panel" id="tkPanel"></div>
     </div>
+
+    <!-- 모듈 뷰 (범용 재사용 섹션) -->
+    <div class="modules" id="modulesView" data-radius="default" data-density="default" data-border="default" data-size="m">
+      <div class="mod-top">
+        <div class="tk-title">모듈 <span>· 컴포넌트로 조립한 재사용 섹션 · 페이지의 구성 단위</span></div>
+      </div>
+      <div class="mod-panel" id="modPanel"></div>
+    </div>
   </main>
 
   <!-- ============ 우: 인스펙터(컨트롤) ============ -->
   <aside class="inspector">
-    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.17</p></div></div>
+    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.18</p></div></div>
     <div class="grp" id="brandGrp"><span class="gl">Brand <em>교체 지점</em></span><div class="brands" id="brands">
       <button class="brandbtn on" data-b="deepblue"><span class="bdot" style="background:#1245BA"></span><span class="bn">Deep Blue</span><span class="bhex">#1245BA</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
       <button class="brandbtn" data-b="emerald"><span class="bdot" style="background:#098A68"></span><span class="bn">Emerald</span><span class="bhex">#098A68</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
@@ -578,20 +630,20 @@ html[data-view="compare"] .board3{display:flex}
     </div></div>
     <div class="grp" id="deviceGrp"><span class="gl">Device</span><div class="seg" id="devSeg"><button data-d="mobile">모바일</button><button data-d="tablet">태블릿</button><button data-d="desktop" class="on">데스크톱</button></div></div>
     <div id="presetCtl">
-      <div class="grp"><span class="gl">레이아웃</span><div class="seg sm" data-attr="data-layout"><button data-val="grid" class="on">Grid</button><button data-val="carousel">Carousel</button><button data-val="list">List</button></div></div>
       <div class="grp"><span class="gl">곡률 <em>Radius</em></span><div class="seg sm" data-attr="data-radius"><button data-val="sharp">Sharp</button><button data-val="default" class="on">Default</button><button data-val="rounded">Rounded</button></div></div>
       <div class="grp"><span class="gl">간격 <em>Density</em></span><div class="seg sm" data-attr="data-density"><button data-val="compact">Compact</button><button data-val="default" class="on">Default</button><button data-val="comfortable">Comfort</button></div></div>
       <div class="grp"><span class="gl">보더 <em>Border</em></span><div class="seg sm" data-attr="data-border"><button data-val="hairline">Hairline</button><button data-val="default" class="on">Default</button><button data-val="strong">Strong</button></div></div>
       <div class="grp"><span class="gl">크기 <em>Size</em></span><div class="seg sm" data-attr="data-size"><button data-val="s">S</button><button data-val="m" class="on">M</button><button data-val="l">L</button></div></div>
       <div class="grp"><span class="gl">해석된 토큰 값</span><div class="readout" id="readout"></div></div>
     </div>
+    <div id="modNote" class="grp" style="display:none"><span class="gl">모듈 뷰</span><p class="hintnote">재사용 <b>범용 섹션(모듈)</b>입니다. 우측 노브(곡률·간격·보더·크기)와 Brand가 실시간 반영됩니다. <b>상품 리스트</b>는 모듈 안에서 Grid·Carousel·List 변형을 전환합니다.</p></div>
     <div id="compareNote" class="grp" style="display:none"><span class="gl">비교 모드</span><p class="hintnote">3개 브랜드를 <b>동일 조건</b>으로 나란히 비교합니다. 스크롤은 동기화됩니다.</p></div>
     <div id="tokNote" class="grp" style="display:none"><span class="gl">토큰 뷰</span><p class="hintnote">Figma로 내보낸 변수 컬렉션입니다. 위 <b>Brand</b>를 바꾸면 Semantic의 accent·link 토큰 값이 실시간 반영됩니다. Radius는 3개 모드를 함께 표기합니다.</p></div>
   </aside>
 </div>
 
 <script>
-const html=document.documentElement, frame=document.getElementById('frame'), navEl=document.getElementById('nav'), componentsEl=document.getElementById('componentsView');
+const html=document.documentElement, frame=document.getElementById('frame'), navEl=document.getElementById('nav'), componentsEl=document.getElementById('componentsView'), modulesEl=document.getElementById('modulesView');
 const RAD={sharp:{m:4,l:6},default:{m:12,l:16},rounded:{m:20,l:24}}, DENS={compact:.84,default:1,comfortable:1.22},
       BORD={hairline:1,default:1,strong:1.5}, SIZE={s:{ctrl:38,icon:20},m:{ctrl:46,icon:22},l:{ctrl:54,icon:26}};
 const KNOBS=[['data-layout','grid'],['data-radius','default'],['data-density','default'],['data-border','default'],['data-size','m']];
@@ -604,7 +656,7 @@ function renderReadout(scope,el){const r=scope.getAttribute('data-radius'),d=DEN
   el.innerHTML=[['comp/radius/button → radius/m',RAD[r].m+'px'],['comp/radius/card → radius/l',RAD[r].l+'px'],['spacing ×','×'+d],['border/'+bd,BORD[bd]+'px'],['size/control/'+sz,SIZE[sz].ctrl+'px'],['size/icon',SIZE[sz].icon+'px']]
    .map(([k,v])=>`<div class="rr"><span class="rk">${k}</span><span class="rv">${v}</span></div>`).join('');}
 document.querySelectorAll('#presetCtl .seg').forEach(seg=>seg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const a=seg.dataset.attr;
-  frame.setAttribute(a,b.dataset.val); if(a!=='data-layout'){ componentsEl.setAttribute(a,b.dataset.val); }
+  frame.setAttribute(a,b.dataset.val); if(a!=='data-layout'){ componentsEl.setAttribute(a,b.dataset.val); modulesEl.setAttribute(a,b.dataset.val); }
   seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); renderReadout(frame,document.getElementById('readout'));}));
 renderReadout(frame,document.getElementById('readout'));
 
@@ -633,15 +685,17 @@ function buildBoard(){const tpl=document.getElementById('pageTpl');board3.innerH
 function route(view,tab){
   html.setAttribute('data-view',view);
   document.querySelectorAll('#nav .nav-item').forEach(x=>x.classList.toggle('on',x.dataset.view===view && (!x.dataset.tab||x.dataset.tab===tab)));
-  const cmp=view==='compare',tok=view==='tokens',comp=view==='components',home=view==='interactive';
-  document.getElementById('presetCtl').style.display=(home||comp)?'':'none';  // 노브: 홈+컴포넌트에만
-  document.getElementById('deviceGrp').style.display=home?'':'none';          // 디바이스: 홈에만
-  document.getElementById('brandGrp').style.display=cmp?'none':'';            // 브랜드 토글: 비교 뷰에선 숨김
+  const cmp=view==='compare',tok=view==='tokens',comp=view==='components',mod=view==='modules',home=view==='interactive';
+  document.getElementById('presetCtl').style.display=(home||comp||mod)?'':'none';  // 노브: 홈+컴포넌트+모듈
+  document.getElementById('deviceGrp').style.display=home?'':'none';            // 디바이스: 홈에만
+  document.getElementById('brandGrp').style.display=cmp?'none':'';              // 브랜드 토글: 비교 뷰에선 숨김
+  document.getElementById('modNote').style.display=mod?'':'none';
   document.getElementById('compareNote').style.display=cmp?'':'none';
   document.getElementById('tokNote').style.display=tok?'':'none';
   if(cmp)buildBoard();
   if(tok)renderTokenTab(tab||curTab);
   if(comp)renderCmpTab(tab||curCmpTab);
+  if(mod)renderModTab(tab||curModTab);
 }
 document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('.nav-item');if(!b)return;route(b.dataset.view,b.dataset.tab);});
 
@@ -793,6 +847,57 @@ function renderCmpTab(tab){curCmpTab=tab;
 }
 document.getElementById('cmpTabs').innerHTML=CMP_TABS.map(([t,l],i)=>`<button data-t="${t}" class="${i===0?'on':''}">${l}</button>`).join('');
 document.getElementById('cmpTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)renderCmpTab(b.dataset.t);});
+
+/* ================= MODULES VIEW (범용 재사용 섹션) ================= */
+let curModTab='hero';
+/* 재사용 섹션 마크업 (홈 템플릿의 실제 마크업을 그대로 승계) */
+const M={
+  header:`<nav class="nav"><div class="logo"><span class="mark"><svg class="i"><use href="#icon-brand-logo"/></svg></span>KDX</div><div class="navlinks"><a>조각투자</a><a>상품</a><a>회사소개</a><a>뉴스룸</a><a>고객지원</a></div><div class="navcta"><button class="btn btn-ghost btn-sm login">로그인</button><button class="btn btn-primary btn-sm">시작하기</button></div></nav>`,
+  hero:`<section class="hero"><div><span class="tag">Fractional Investment</span><h1 class="disp">Own real assets,<br><span class="em">piece by piece.</span></h1><p class="lead">고가의 실물 자산을 작은 단위로 나눠 투자하세요. 검증된 상품과 투명한 정보로, 처음이어도 안전하게 시작할 수 있습니다.</p><div class="actions"><button class="btn btn-primary btn-lg">무료로 시작하기</button><button class="btn btn-ghost btn-lg">상품 둘러보기</button></div></div><div class="visual"><div class="hcard"><div class="hct"><span class="htag"><svg class="i"><use href="#icon-cat-realestate"/></svg>부동산</span></div><div class="hcb"><div class="hcn">강남 오피스 빌딩</div><div class="hmeta"><div><span class="ml">목표 수익률</span><span class="mv ac">8.2%</span></div><div><span class="ml">최소 투자</span><span class="mv">₩50,000</span></div></div><div class="hbar"><i></i></div><div class="hfund"><span>72% 모집</span><span>D-4</span></div></div></div></div></section>`,
+  stats:`<section class="metrics"><div class="metric"><div class="mk">₩1.2조</div><div class="ml">누적 거래액</div></div><div class="metric"><div class="mk">48만+</div><div class="ml">누적 투자 회원</div></div><div class="metric"><div class="mk">320+</div><div class="ml">등록 조각투자 상품</div></div></section>`,
+  steps:`<section class="section"><div class="sec-head"><span class="tag">How it works</span><h2 class="disp">Three steps to start.</h2></div><div class="steps"><div class="step"><span class="snum">01</span><div class="sic"><svg class="i"><use href="#icon-action-search"/></svg></div><h3 class="disp">Explore</h3><p>검증된 조각투자 상품을 카테고리별로 살펴보세요.</p></div><div class="step"><span class="snum">02</span><div class="sic"><svg class="i"><use href="#icon-cat-asset"/></svg></div><h3 class="disp">Invest</h3><p>소액부터, 원하는 만큼 조각 단위로 간편하게 투자합니다.</p></div><div class="step"><span class="snum">03</span><div class="sic"><svg class="i"><use href="#icon-trend-up"/></svg></div><h3 class="disp">Earn</h3><p>배당·시세 변동을 투명하게 확인하며 수익을 관리하세요.</p></div></div></section>`,
+  products:`<section class="section"><div class="sec-head"><span class="tag">Products</span><h2 class="disp">Investment products.</h2></div><div class="plist">
+    <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#icon-cat-realestate"/></svg></span></div><div class="pbody"><span class="pcat">부동산</span><h3 class="ptitle">강남 오피스 빌딩 조각</h3><div class="pmeta"><span class="pprice">₩50,000/조각</span><span class="pyield">목표 8.2%</span></div></div></article>
+    <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#icon-cat-art"/></svg></span></div><div class="pbody"><span class="pcat">미술품</span><h3 class="ptitle">현대미술 컬렉션</h3><div class="pmeta"><span class="pprice">₩30,000/조각</span><span class="pyield">목표 6.5%</span></div></div></article>
+    <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#icon-cat-logistics"/></svg></span></div><div class="pbody"><span class="pcat">물류</span><h3 class="ptitle">인천 물류센터 A동</h3><div class="pmeta"><span class="pprice">₩25,000/조각</span><span class="pyield">목표 7.1%</span></div></div></article>
+    <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#icon-cat-asset"/></svg></span></div><div class="pbody"><span class="pcat">실물자산</span><h3 class="ptitle">골드바 1kg 실물</h3><div class="pmeta"><span class="pprice">₩45,000/조각</span><span class="pyield">목표 5.4%</span></div></div></article>
+    <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#icon-cat-infra"/></svg></span></div><div class="pbody"><span class="pcat">인프라</span><h3 class="ptitle">친환경 태양광 발전</h3><div class="pmeta"><span class="pprice">₩20,000/조각</span><span class="pyield">목표 6.9%</span></div></div></article>
+    <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#icon-cat-luxury"/></svg></span></div><div class="pbody"><span class="pcat">명품</span><h3 class="ptitle">스위스 시계 컬렉션</h3><div class="pmeta"><span class="pprice">₩35,000/조각</span><span class="pyield">목표 5.8%</span></div></div></article>
+  </div></section>`,
+  features:`<section class="section"><div class="sec-head"><span class="tag">Why KDX</span><h2 class="disp">Built on trust.</h2></div><div class="cards"><div class="fcard"><div class="ic"><svg class="i"><use href="#icon-feature-secure"/></svg></div><h3>검증된 안전 거래</h3><p>제도권 기반의 신뢰할 수 있는 거래 구조와 자산 보관으로 투자자를 보호합니다.</p></div><div class="fcard"><div class="ic"><svg class="i"><use href="#icon-feature-transparent"/></svg></div><h3>투명한 정보 공개</h3><p>상품별 실물 정보·시세·수익 지표를 실시간으로 투명하게 제공합니다.</p></div><div class="fcard"><div class="ic"><svg class="i"><use href="#icon-feature-fast"/></svg></div><h3>쉬운 시작</h3><p>소액부터 몇 번의 터치로. 복잡한 절차 없이 바로 첫 투자를 시작하세요.</p></div></div></section>`,
+  cta:`<section class="inner-cta"><div class="ctaband"><h2 class="disp">Start with your first piece.</h2><p>가입하고 KDX의 검증된 조각투자 상품을 만나보세요.</p><button class="btn btn-lg">무료로 시작하기 <svg class="i"><use href="#icon-action-external"/></svg></button></div></section>`,
+  footer:`<footer class="foot"><div><div class="logo"><span class="mark"><svg class="i"><use href="#icon-brand-logo"/></svg></span>KDX</div><p style="margin-top:12px;line-height:1.6">모두를 위한 조각투자.<br>실물 자산 투자의 새로운 기준.</p></div><div><h4>서비스</h4><a>조각투자</a><a>상품 안내</a><a>수수료</a></div><div><h4>회사</h4><a>회사소개</a><a>뉴스룸</a><a>채용</a></div><div><h4>지원</h4><a>고객센터</a><a>공지사항</a><a>이용약관</a></div><div class="copyright">© 2026 KDX. 브랜드 미확정 시스템 데모 (Primary: placeholder Deep Blue).</div></footer>`,
+  logowall:`<section class="logowall"><div class="ll">제도권 파트너와 함께합니다</div><div class="lrow"><span class="lg"><svg class="i"><use href="#icon-feature-secure"/></svg>TRUSTBANK</span><span class="lg"><svg class="i"><use href="#icon-cat-realestate"/></svg>ESTATE Co.</span><span class="lg"><svg class="i"><use href="#icon-finance-won"/></svg>KOSDAQ</span><span class="lg"><svg class="i"><use href="#icon-feature-transparent"/></svg>OPENLEDGER</span><span class="lg"><svg class="i"><use href="#icon-cat-asset"/></svg>GOLDVAULT</span></div></section>`,
+  faq:`<section class="faq"><div class="fitem open"><button class="fq">조각투자는 최소 얼마부터 가능한가요?<svg class="i"><use href="#icon-nav-down"/></svg></button><div class="fa">상품에 따라 다르지만 대부분 1만~5만 원 단위의 소액부터 투자할 수 있습니다. 각 상품 상세에서 최소 투자 금액을 확인하세요.</div></div><div class="fitem"><button class="fq">수익은 어떻게 지급되나요?<svg class="i"><use href="#icon-nav-down"/></svg></button><div class="fa">임대·배당 수익은 정해진 주기에 따라 분배되며, 매각 시 시세 차익이 조각 보유 비율대로 정산됩니다.</div></div><div class="fitem"><button class="fq">자산은 안전하게 보관되나요?<svg class="i"><use href="#icon-nav-down"/></svg></button><div class="fa">실물 자산은 제도권 수탁 기관에 분리 보관되며, 소유권 정보는 투명하게 공개됩니다.</div></div><div class="fitem"><button class="fq">중도에 조각을 팔 수 있나요?<svg class="i"><use href="#icon-nav-down"/></svg></button><div class="fa">유통 시장을 통해 보유 조각을 다른 투자자에게 양도할 수 있습니다. 상품별 유통 가능 여부를 확인하세요.</div></div></section>`
+};
+const MOD_META={
+  header:{t:'헤더 · GNB',anat:'.nav · logo · navlinks · navcta',desc:'전 페이지 상단 글로벌 내비게이션. 로고 마크 + 메뉴 + 로그인/시작하기 CTA로 구성됩니다.',note:'로고=<b>icon-brand-logo</b> · 링크 hover=<b>fg</b> · CTA=<b>Button(primary·ghost / sm)</b> · 높이=<b>70px</b> · 하단선=<b>bdr/subtle</b>'},
+  hero:{t:'Hero',anat:'.hero · tag · disp · lead · actions · hcard',desc:'첫 화면의 핵심 메시지 + 대표 액션 + 상품 프리뷰 카드. 데스크톱에서 2열, 모바일에서 1열로 스택됩니다.',note:'제목=<b>web/display</b>(반응형 36→52→68) · 강조=<b>accent</b> · 버튼=<b>Button/lg</b> · 카드=<b>elev-1</b> · 간격=<b>space/section</b>(간격 노브 연동)'},
+  stats:{t:'통계 밴드',anat:'.metrics · metric(mk · ml)',desc:'신뢰 지표를 나란히 보여주는 밴드. 3개 셀이 데스크톱에서 균등 그리드, 모바일에서 세로로 쌓입니다.',note:'상하 보더=<b>bdr/subtle</b> · 셀 구분선=<b>line</b> · 수치=<b>disp</b> · 라벨=<b>fg/subtle</b> · 그리드=<b>@container 640</b>'},
+  steps:{t:'이용 절차',anat:'.section · sec-head · steps · step(snum · sic)',desc:'서비스 이용 흐름을 3단계로 안내. 번호·아이콘·제목·설명으로 이뤄진 스텝 카드 3-up입니다.',note:'번호=<b>fg/faint</b> · 아이콘칩=<b>accent-subtle</b> · 제목=<b>disp</b> · 간격 배율=<b>density 노브</b> · 3-up=<b>@container 760</b>'},
+  products:{t:'상품 리스트',anat:'.plist[data-layout] · pcard(pthumb · pbody · pmeta)',desc:'조각투자 상품을 나열하는 핵심 모듈. 같은 카드 데이터를 레이아웃 변형(Grid·Carousel·List)으로 전환합니다 — 레이아웃은 이 모듈의 속성입니다.',note:'카드=<b>comp/radius/card→radius/l</b> · 보더=<b>border 노브</b> · 카테고리 아이콘 자동 매핑=<b>icon-cat-*</b> · 레이아웃=<b>data-layout</b>(모듈 변형) · Grid=<b>@container 640/1040</b>'},
+  features:{t:'특징 카드',anat:'.cards · fcard(ic · h3 · p)',desc:'서비스 강점을 아이콘 카드로 제시. hover 시 살짝 떠오르는 상승 인터랙션이 포함됩니다.',note:'카드=<b>radius/l</b> + <b>border</b> · hover=<b>elev-2</b> + translateY · 아이콘칩=<b>accent-subtle</b> · 아이콘=<b>icon-feature-*</b> · 3-up=<b>@container 760</b>'},
+  cta:{t:'CTA 밴드',anat:'.inner-cta · ctaband',desc:'전환을 유도하는 강조 밴드. 브랜드 accent를 배경 면으로 크게 사용하는 유일한 섹션입니다.',note:'배경=<b>accent</b>(브랜드 스왑 반영) · 버튼=반전(<b>white</b> 위 <b>accent-strong</b>) · 곡률=<b>radius/2xl</b> · 텍스트=<b>static/white</b>'},
+  footer:{t:'푸터',anat:'.foot · logo · h4 · a · copyright',desc:'전 페이지 하단 정보 영역. 로고+소개 + 링크 컬럼들로 구성되며 데스크톱에서 4열 그리드입니다.',note:'상단선=<b>line</b> · 제목=<b>fg/subtle</b> · 링크=<b>fg/mut→hover fg</b> · 4열=<b>@container 760</b> · 저작권=<b>fg/mut</b>'},
+  logowall:{t:'로고월',anat:'.logowall · ll · lrow · lg',desc:'제휴·수탁 파트너 신뢰 로고를 한 줄로 나열하는 범용 모듈. 실제 로고 도착 전까지 아이콘+워드마크 플레이스홀더입니다.',note:'로고=<b>fg/subtler</b> + opacity(무채색 처리) · 라벨=<b>fg/mut</b> · 반응형 wrap · 아이콘 교체=<b>Icons 교체 지점</b>'},
+  faq:{t:'FAQ',anat:'.faq · fitem(fq · fa) · [.open]',desc:'자주 묻는 질문 아코디언. 문항 클릭 시 답변이 펼쳐지고 셰브론이 회전하는 범용 모듈입니다.',note:'구분선=<b>line</b> · 셰브론=<b>icon-nav-down</b>(회전) · 펼침 전이=<b>max-height 0.25s</b> · 질문=<b>fg</b> · 답변=<b>fg/subtle</b>'}
+};
+const MOD_ORDER=['header','hero','stats','steps','products','features','cta','footer','logowall','faq'];
+function renderModTab(tab){curModTab=tab;
+  const m=MOD_META[tab];const P=document.getElementById('modPanel');
+  const varbar=tab==='products'
+    ? `<div class="mod-varbar"><span class="vl">Layout · 모듈 변형</span><div class="seg sm" id="modLayoutSeg"><button data-val="grid" class="on">Grid</button><button data-val="carousel">Carousel</button><button data-val="list">List</button></div></div>`
+    : '';
+  const stageAttr=tab==='products'?` id="modProductsStage" data-layout="grid"`:'';
+  P.innerHTML=`<div class="mod-sec"><div class="mod-head"><h3>${m.t}</h3><span class="anat">${m.anat}</span></div><div class="mod-desc">${m.desc}</div>${varbar}<div class="mod-stage"${stageAttr}><div class="page"><div class="inner">${M[tab]}</div></div></div><div class="mod-note">${m.note}</div></div>`;
+}
+/* 모듈 뷰 델리게이트: 상품 리스트 레이아웃 변형 + FAQ 아코디언 */
+document.getElementById('modPanel').addEventListener('click',e=>{
+  const lb=e.target.closest('#modLayoutSeg button');
+  if(lb){const st=document.getElementById('modProductsStage');if(st)st.setAttribute('data-layout',lb.dataset.val);lb.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===lb));return;}
+  const fq=e.target.closest('.faq .fq');
+  if(fq){fq.parentNode.classList.toggle('open');}
+});
 
 /* 초기 라우트 */
 route('interactive');
