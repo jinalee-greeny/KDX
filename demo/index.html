@@ -649,7 +649,7 @@ html[data-view="compare"] .board3{display:flex}
 
   <!-- ============ 우: 인스펙터(컨트롤) ============ -->
   <aside class="inspector">
-    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.19</p></div></div>
+    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.19.1</p></div></div>
     <div class="grp" id="brandGrp"><span class="gl">Brand <em>교체 지점</em></span><div class="brands" id="brands">
       <button class="brandbtn on" data-b="deepblue"><span class="bdot" style="background:#1245BA"></span><span class="bn">Deep Blue</span><span class="bhex">#1245BA</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
       <button class="brandbtn" data-b="emerald"><span class="bdot" style="background:#098A68"></span><span class="bn">Emerald</span><span class="bhex">#098A68</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
@@ -795,9 +795,8 @@ function renderTokenTab(tab){curTab=tab;
     h+=`<div class="tk-note"><b>Web</b> · 반응형. 모바일 1st · 3 모드. 초대형 타이틀만 반응형, 본문류는 전 해상도 고정. 10 변수.</div>`;
     h+=`<table class="tk-tbl"><tr><th></th><th>mobile</th><th>tablet</th><th>desktop</th></tr>`+WEBROWS.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')+`</table>`;
   } else if(tab==='type'){
-    const fam=getComputedStyle(html).getPropertyValue('--brand-font');
     h+=`<div class="tk-note"><b>Text Styles</b> · 서체는 <b>brand/font</b>(스왑됨), 사이즈·행간은 프리미티브 조합. 42 스타일 중 대표.</div>`;
-    h+=TYPES.map(([n,sz,lh,w])=>`<div class="tk-type"><span class="lab">${n}<br><span>${sz}/${lh} · ${w}</span></span><span class="samp" style="font-family:${fam};font-size:${sz}px;line-height:${lh}px;font-weight:${w}">Own real assets 조각투자 Ag</span></div>`).join('');
+    h+=TYPES.map(([n,sz,lh,w])=>`<div class="tk-type"><span class="lab">${n}<br><span>${sz}/${lh} · ${w}</span></span><span class="samp" style="font-family:var(--brand-font);font-size:${sz}px;line-height:${lh}px;font-weight:${w}">Own real assets 조각투자 Ag</span></div>`).join('');
   } else if(tab==='icons'){
     h+=`<div class="tk-note">★ <b>Icon Set</b> · 교체 지점. 네이밍 <b>icon-{group}-{name}</b> · 현재 Lucide(ISC). 커스텀 아이콘 도착 시 같은 id의 &lt;symbol&gt; path만 갈아끼우면 전 화면 아이콘이 동시 스왑됩니다. <b>${ICON_REG.length}종</b>.</div>`;
     const gn={brand:'브랜드',action:'액션',nav:'내비게이션',status:'상태',trend:'시세',finance:'금융',feature:'특성',category:'카테고리(자산)'};
