@@ -70,3 +70,10 @@ Scale(원시)  →  Brand(교체 지점)  →  Semantic(의미)  →  Radius(곡
 1. 기초 컴포넌트를 토큰 바인딩으로: **Button**(primary/secondary/ghost · S/M/L · hover/press/disabled) → **Input/Field** → **Card** → **Chip/Badge**.
 2. 실제 홈페이지 섹션(nav/hero/stats/features/products/CTA/footer)을 `brand-swap-demo.html` 구조를 참조해 코드로.
 3. Dark 모드 값 추출 후 Semantic에 두 번째 모드 추가.
+
+## 아이콘 시스템 (교체 지점)
+아이콘은 브랜드처럼 **한 곳에서 통째 교체**하는 스왑 레이어다.
+- 소스: `icons/icons.svg`(스프라이트) · 레지스트리: `icons/icons.json`(20종)
+- 네이밍: `icon-{group}-{name}` · group = brand·action·nav·status·trend·finance·feature·category
+- 사용: `<svg class="i"><use href="#icon-action-search"/></svg>`
+- 교체: 커스텀 아이콘 도착 시 icons.svg에서 **같은 id의 `<symbol>` path만** 갈아끼우면 전 화면 아이콘이 동시 스왑된다(id·네이밍 유지). 현재 소스는 Lucide(MIT).

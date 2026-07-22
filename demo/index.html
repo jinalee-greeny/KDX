@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KDX 홈페이지 — 디자인 시스템 데모 (v0.11)</title>
+<title>KDX 홈페이지 — 디자인 시스템 데모 (v0.12)</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css">
 <style>
 /* ===== TIER 0 SCALE + 뉴트럴 ===== */
@@ -376,6 +376,12 @@ html[data-view="tokens"] .tokens{display:block}
 .tk-type .lab span{color:var(--fg-mut)}
 .tk-type .samp{letter-spacing:-.01em;color:var(--fg)}
 /* elevation */
+.tk-icons{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:10px;margin-bottom:6px}
+.tk-ic{display:flex;align-items:center;gap:11px;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.tk-ic .ib{width:36px;height:36px;border-radius:8px;background:var(--bg-sunken);display:grid;place-items:center;color:var(--fg);flex:none}
+.tk-ic .ib svg{width:19px;height:19px}
+.tk-ic .in{display:block;font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:700;line-height:1.3}
+.tk-ic .ir{display:block;font-size:11px;color:var(--fg-mut);margin-top:1px}
 .tk-elevs{display:flex;flex-wrap:wrap;gap:22px}
 .tk-elev{width:150px}.tk-elev .b{height:76px;background:var(--bg);border:1px solid var(--line);border-radius:12px}
 .tk-elev .n{font-family:ui-monospace,monospace;font-size:12px;font-weight:700;margin-top:12px}.tk-elev .u{font-size:11px;color:var(--fg-mut);margin-top:2px}
@@ -395,70 +401,74 @@ html[data-view="compare"] .board3{display:flex}
 </head>
 <body>
 
-<!-- ===== ICON SPRITE (Lucide · MIT License) ===== -->
+<!-- ============================================================
+     ICON SET · ★ 교체 지점 ★  (현재: Lucide · MIT / 네이밍: icon-{group}-{name})
+     커스텀 아이콘 도착 시 아래 <symbol>의 path만 같은 id로 교체하면 전 화면 아이콘이 동시 스왑됩니다.
+     그룹: brand · action · nav · status · trend · finance · feature · cat(category)
+     ============================================================ -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-<symbol id="i-gem" viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></symbol>
-<symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
-<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.06 12.35a1 1 0 0 1 0-.7 10.94 10.94 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.94 10.94 0 0 1-19.88 0"/><circle cx="12" cy="12" r="3"/></symbol>
-<symbol id="i-zap" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol>
-<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
-<symbol id="i-coins" viewBox="0 0 24 24"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></symbol>
-<symbol id="i-trend" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></symbol>
-<symbol id="i-trenddn" viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></symbol>
-<symbol id="i-building" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/></symbol>
-<symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/></symbol>
-<symbol id="i-truck" viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol>
-<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
-<symbol id="i-watch" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/><polyline points="12 10 12 12 13 13"/><path d="m16.13 7.66-.81-4.05a2 2 0 0 0-2-1.61h-2.68a2 2 0 0 0-2 1.61l-.78 4.05"/><path d="m7.88 16.36.8 4a2 2 0 0 0 2 1.61h2.72a2 2 0 0 0 2-1.61l.81-4.05"/></symbol>
-<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
-<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></symbol>
-<symbol id="i-chevl" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
-<symbol id="i-chevr" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
-<symbol id="i-chevd" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
-<symbol id="i-won" viewBox="0 0 24 24"><path d="M4 5l3.5 14L12 8l4.5 11L20 5M3 10h18M3 14h18"/></symbol>
-<symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></symbol>
+<symbol id="icon-brand-logo" viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></symbol>
+<symbol id="icon-feature-secure" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+<symbol id="icon-feature-transparent" viewBox="0 0 24 24"><path d="M2.06 12.35a1 1 0 0 1 0-.7 10.94 10.94 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.94 10.94 0 0 1-19.88 0"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="icon-feature-fast" viewBox="0 0 24 24"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></symbol>
+<symbol id="icon-action-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+<symbol id="icon-cat-asset" viewBox="0 0 24 24"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></symbol>
+<symbol id="icon-trend-up" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></symbol>
+<symbol id="icon-trend-down" viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></symbol>
+<symbol id="icon-cat-realestate" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/></symbol>
+<symbol id="icon-cat-art" viewBox="0 0 24 24"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/></symbol>
+<symbol id="icon-cat-logistics" viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol>
+<symbol id="icon-cat-infra" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></symbol>
+<symbol id="icon-cat-luxury" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/><polyline points="12 10 12 12 13 13"/><path d="m16.13 7.66-.81-4.05a2 2 0 0 0-2-1.61h-2.68a2 2 0 0 0-2 1.61l-.78 4.05"/><path d="m7.88 16.36.8 4a2 2 0 0 0 2 1.61h2.72a2 2 0 0 0 2-1.61l.81-4.05"/></symbol>
+<symbol id="icon-status-success" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+<symbol id="icon-action-external" viewBox="0 0 24 24"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></symbol>
+<symbol id="icon-nav-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+<symbol id="icon-nav-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+<symbol id="icon-nav-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+<symbol id="icon-finance-won" viewBox="0 0 24 24"><path d="M4 5l3.5 14L12 8l4.5 11L20 5M3 10h18M3 14h18"/></symbol>
+<symbol id="icon-status-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></symbol>
 </defs></svg>
 
 <div class="app">
 
   <!-- ============ 좌: 컴포넌트 라이브러리 ============ -->
   <aside class="library" id="library" data-radius="default" data-density="default" data-border="default" data-size="m">
-    <div class="lib-head"><span class="lt">컴포넌트 <em>현재 토큰</em></span><button class="iconbtn" id="libClose" title="접기"><svg class="i"><use href="#i-chevl"/></svg></button></div>
+    <div class="lib-head"><span class="lt">컴포넌트 <em>현재 토큰</em></span><button class="iconbtn" id="libClose" title="접기"><svg class="i"><use href="#icon-nav-left"/></svg></button></div>
     <div class="lib-body">
       <div class="lib-note">현재 <b>브랜드·곡률·간격·보더·크기</b>가 그대로 반영됩니다. 우측 인스펙터를 바꾸면 함께 갱신돼요. 오른쪽 경계를 드래그하면 폭 조절.</div>
-      <section class="lib-sec"><button class="lib-sh">Buttons<svg class="i"><use href="#i-chevd"/></svg></button><div class="lib-c">
+      <section class="lib-sec"><button class="lib-sh">Buttons<svg class="i"><use href="#icon-nav-down"/></svg></button><div class="lib-c">
         <div class="statehead"><span class="sh-lab">Default</span><span class="sh-lab">Disabled</span></div>
         <div class="lib-lab">Primary</div><div class="lib-row brow"><button class="btn btn-primary">Primary</button><button class="btn btn-primary" disabled>Primary</button></div>
         <div class="lib-lab">Neutral</div><div class="lib-row brow"><button class="btn btn-neutral">Neutral</button><button class="btn btn-neutral" disabled>Neutral</button></div>
         <div class="lib-lab">Ghost</div><div class="lib-row brow"><button class="btn btn-ghost">Ghost</button><button class="btn btn-ghost" disabled>Ghost</button></div>
         <div class="lib-lab">Small (Primary · Ghost)</div><div class="lib-row brow"><button class="btn btn-primary btn-sm">Small</button><button class="btn btn-ghost btn-sm">Small</button></div>
       </div></section>
-      <section class="lib-sec"><button class="lib-sh">Inputs<svg class="i"><use href="#i-chevd"/></svg></button><div class="lib-c">
-        <div class="lib-lab">Default</div><div class="field ph"><svg class="i"><use href="#i-search"/></svg>상품 검색</div>
-        <div class="lib-lab">Focus</div><div class="field foc"><svg class="i"><use href="#i-won"/></svg>50,000</div>
+      <section class="lib-sec"><button class="lib-sh">Inputs<svg class="i"><use href="#icon-nav-down"/></svg></button><div class="lib-c">
+        <div class="lib-lab">Default</div><div class="field ph"><svg class="i"><use href="#icon-action-search"/></svg>상품 검색</div>
+        <div class="lib-lab">Focus</div><div class="field foc"><svg class="i"><use href="#icon-finance-won"/></svg>50,000</div>
         <div class="lib-lab">Disabled</div><div class="field dis">비활성 필드</div>
       </div></section>
-      <section class="lib-sec"><button class="lib-sh">Chips &amp; Badges<svg class="i"><use href="#i-chevd"/></svg></button><div class="lib-c">
+      <section class="lib-sec"><button class="lib-sh">Chips &amp; Badges<svg class="i"><use href="#icon-nav-down"/></svg></button><div class="lib-c">
         <div class="lib-row"><span class="chip accent">부동산</span><span class="chip neutral">미술품</span><span class="chip neutral">물류</span></div>
-        <div class="lib-lab">Status</div><div class="lib-row"><span class="badge suc"><svg class="i"><use href="#i-check"/></svg>성공</span><span class="badge warn">경고</span><span class="badge crit">오류</span></div>
-        <div class="lib-lab">Chart (브랜드 무관)</div><div class="lib-row"><span class="badge up"><svg class="i"><use href="#i-trend"/></svg>3.2%</span><span class="badge down"><svg class="i"><use href="#i-trenddn"/></svg>1.4%</span></div>
+        <div class="lib-lab">Status</div><div class="lib-row"><span class="badge suc"><svg class="i"><use href="#icon-status-success"/></svg>성공</span><span class="badge warn">경고</span><span class="badge crit">오류</span></div>
+        <div class="lib-lab">Chart (브랜드 무관)</div><div class="lib-row"><span class="badge up"><svg class="i"><use href="#icon-trend-up"/></svg>3.2%</span><span class="badge down"><svg class="i"><use href="#icon-trend-down"/></svg>1.4%</span></div>
       </div></section>
-      <section class="lib-sec"><button class="lib-sh">Card<svg class="i"><use href="#i-chevd"/></svg></button><div class="lib-c">
+      <section class="lib-sec"><button class="lib-sh">Card<svg class="i"><use href="#icon-nav-down"/></svg></button><div class="lib-c">
         <div class="mini-card"><div class="mt"></div><div class="mb"><div class="mc">부동산</div><div class="mtt">강남 오피스 빌딩</div><div class="mm"><span>₩50,000</span><span class="my">목표 8.2%</span></div></div></div>
       </div></section>
-      <section class="lib-sec"><button class="lib-sh">Elevation<svg class="i"><use href="#i-chevd"/></svg></button><div class="lib-c">
+      <section class="lib-sec"><button class="lib-sh">Elevation<svg class="i"><use href="#icon-nav-down"/></svg></button><div class="lib-c">
         <div class="elev"><span class="ebox" style="box-shadow:var(--elev-1)"></span><span class="emeta"><b>elev-1</b><span>카드 rest</span></span></div>
         <div class="elev"><span class="ebox" style="box-shadow:var(--elev-2)"></span><span class="emeta"><b>elev-2</b><span>카드 hover</span></span></div>
         <div class="elev"><span class="ebox" style="box-shadow:var(--elev-3)"></span><span class="emeta"><b>elev-3</b><span>드롭다운·팝오버</span></span></div>
         <div class="elev"><span class="ebox" style="box-shadow:var(--elev-4)"></span><span class="emeta"><b>elev-4</b><span>모달·다이얼로그</span></span></div>
         <div class="elev"><span class="ebox" style="box-shadow:var(--elev-up)"></span><span class="emeta"><b>elev-up</b><span>바텀시트·스티키</span></span></div>
       </div></section>
-      <section class="lib-sec"><button class="lib-sh">Radius · Size<svg class="i"><use href="#i-chevd"/></svg></button><div class="lib-c">
+      <section class="lib-sec"><button class="lib-sh">Radius · Size<svg class="i"><use href="#icon-nav-down"/></svg></button><div class="lib-c">
         <div class="lib-lab">radius (현재 모드)</div><div class="swrow"><span class="swb" style="width:32px;height:32px;border-radius:var(--r-xs)"></span><span class="swb" style="width:32px;height:32px;border-radius:var(--r-s)"></span><span class="swb" style="width:32px;height:32px;border-radius:var(--r-m)"></span><span class="swb" style="width:32px;height:32px;border-radius:var(--r-l)"></span></div>
         <div class="lib-lab">size/control</div><div class="swrow"><span class="swb" style="width:var(--ctrl-h);height:var(--ctrl-h);border-radius:var(--r-s)"></span></div>
       </div></section>
     </div>
-    <div class="lib-expand"><button class="iconbtn" id="libOpen" title="펼치기"><svg class="i"><use href="#i-chevr"/></svg></button><span class="vlabel">컴포넌트</span></div>
+    <div class="lib-expand"><button class="iconbtn" id="libOpen" title="펼치기"><svg class="i"><use href="#icon-nav-right"/></svg></button><span class="vlabel">컴포넌트</span></div>
   </aside>
 
   <div class="resizer" id="resizer"></div>
@@ -469,7 +479,7 @@ html[data-view="compare"] .board3{display:flex}
       <div class="page" id="pageTpl">
         <div class="inner">
           <nav class="nav">
-            <div class="logo"><span class="mark"><svg class="i"><use href="#i-gem"/></svg></span>KDX</div>
+            <div class="logo"><span class="mark"><svg class="i"><use href="#icon-brand-logo"/></svg></span>KDX</div>
             <div class="navlinks"><a>조각투자</a><a>상품</a><a>회사소개</a><a>뉴스룸</a><a>고객지원</a></div>
             <div class="navcta"><button class="btn btn-ghost btn-sm login">로그인</button><button class="btn btn-primary btn-sm">시작하기</button></div>
           </nav>
@@ -483,7 +493,7 @@ html[data-view="compare"] .board3{display:flex}
             </div>
             <div class="visual">
               <div class="hcard">
-                <div class="hct"><span class="htag"><svg class="i"><use href="#i-building"/></svg>부동산</span></div>
+                <div class="hct"><span class="htag"><svg class="i"><use href="#icon-cat-realestate"/></svg>부동산</span></div>
                 <div class="hcb">
                   <div class="hcn">강남 오피스 빌딩</div>
                   <div class="hmeta"><div><span class="ml">목표 수익률</span><span class="mv ac">8.2%</span></div><div><span class="ml">최소 투자</span><span class="mv">₩50,000</span></div></div>
@@ -503,37 +513,37 @@ html[data-view="compare"] .board3{display:flex}
           <section class="section">
             <div class="sec-head"><span class="tag">How it works</span><h2 class="disp">Three steps to start.</h2></div>
             <div class="steps">
-              <div class="step"><span class="snum">01</span><div class="sic"><svg class="i"><use href="#i-search"/></svg></div><h3 class="disp">Explore</h3><p>검증된 조각투자 상품을 카테고리별로 살펴보세요.</p></div>
-              <div class="step"><span class="snum">02</span><div class="sic"><svg class="i"><use href="#i-coins"/></svg></div><h3 class="disp">Invest</h3><p>소액부터, 원하는 만큼 조각 단위로 간편하게 투자합니다.</p></div>
-              <div class="step"><span class="snum">03</span><div class="sic"><svg class="i"><use href="#i-trend"/></svg></div><h3 class="disp">Earn</h3><p>배당·시세 변동을 투명하게 확인하며 수익을 관리하세요.</p></div>
+              <div class="step"><span class="snum">01</span><div class="sic"><svg class="i"><use href="#icon-action-search"/></svg></div><h3 class="disp">Explore</h3><p>검증된 조각투자 상품을 카테고리별로 살펴보세요.</p></div>
+              <div class="step"><span class="snum">02</span><div class="sic"><svg class="i"><use href="#icon-cat-asset"/></svg></div><h3 class="disp">Invest</h3><p>소액부터, 원하는 만큼 조각 단위로 간편하게 투자합니다.</p></div>
+              <div class="step"><span class="snum">03</span><div class="sic"><svg class="i"><use href="#icon-trend-up"/></svg></div><h3 class="disp">Earn</h3><p>배당·시세 변동을 투명하게 확인하며 수익을 관리하세요.</p></div>
             </div>
           </section>
 
           <section class="section">
             <div class="sec-head"><span class="tag">Products</span><h2 class="disp">Investment products.</h2><p>우측 인스펙터의 레이아웃으로 Grid · Carousel · List 구조를 전환해 보세요.</p></div>
             <div class="plist">
-              <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#i-building"/></svg></span></div><div class="pbody"><span class="pcat">부동산</span><h3 class="ptitle">강남 오피스 빌딩 조각</h3><div class="pmeta"><span class="pprice">₩50,000/조각</span><span class="pyield">목표 8.2%</span></div></div></article>
-              <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#i-palette"/></svg></span></div><div class="pbody"><span class="pcat">미술품</span><h3 class="ptitle">현대미술 컬렉션</h3><div class="pmeta"><span class="pprice">₩30,000/조각</span><span class="pyield">목표 6.5%</span></div></div></article>
-              <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#i-truck"/></svg></span></div><div class="pbody"><span class="pcat">물류</span><h3 class="ptitle">인천 물류센터 A동</h3><div class="pmeta"><span class="pprice">₩25,000/조각</span><span class="pyield">목표 7.1%</span></div></div></article>
-              <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#i-coins"/></svg></span></div><div class="pbody"><span class="pcat">실물자산</span><h3 class="ptitle">골드바 1kg 실물</h3><div class="pmeta"><span class="pprice">₩45,000/조각</span><span class="pyield">목표 5.4%</span></div></div></article>
-              <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#i-sun"/></svg></span></div><div class="pbody"><span class="pcat">인프라</span><h3 class="ptitle">친환경 태양광 발전</h3><div class="pmeta"><span class="pprice">₩20,000/조각</span><span class="pyield">목표 6.9%</span></div></div></article>
-              <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#i-watch"/></svg></span></div><div class="pbody"><span class="pcat">명품</span><h3 class="ptitle">스위스 시계 컬렉션</h3><div class="pmeta"><span class="pprice">₩35,000/조각</span><span class="pyield">목표 5.8%</span></div></div></article>
+              <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#icon-cat-realestate"/></svg></span></div><div class="pbody"><span class="pcat">부동산</span><h3 class="ptitle">강남 오피스 빌딩 조각</h3><div class="pmeta"><span class="pprice">₩50,000/조각</span><span class="pyield">목표 8.2%</span></div></div></article>
+              <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#icon-cat-art"/></svg></span></div><div class="pbody"><span class="pcat">미술품</span><h3 class="ptitle">현대미술 컬렉션</h3><div class="pmeta"><span class="pprice">₩30,000/조각</span><span class="pyield">목표 6.5%</span></div></div></article>
+              <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#icon-cat-logistics"/></svg></span></div><div class="pbody"><span class="pcat">물류</span><h3 class="ptitle">인천 물류센터 A동</h3><div class="pmeta"><span class="pprice">₩25,000/조각</span><span class="pyield">목표 7.1%</span></div></div></article>
+              <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#icon-cat-asset"/></svg></span></div><div class="pbody"><span class="pcat">실물자산</span><h3 class="ptitle">골드바 1kg 실물</h3><div class="pmeta"><span class="pprice">₩45,000/조각</span><span class="pyield">목표 5.4%</span></div></div></article>
+              <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#icon-cat-infra"/></svg></span></div><div class="pbody"><span class="pcat">인프라</span><h3 class="ptitle">친환경 태양광 발전</h3><div class="pmeta"><span class="pprice">₩20,000/조각</span><span class="pyield">목표 6.9%</span></div></div></article>
+              <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#icon-cat-luxury"/></svg></span></div><div class="pbody"><span class="pcat">명품</span><h3 class="ptitle">스위스 시계 컬렉션</h3><div class="pmeta"><span class="pprice">₩35,000/조각</span><span class="pyield">목표 5.8%</span></div></div></article>
             </div>
           </section>
 
           <section class="section">
             <div class="sec-head"><span class="tag">Why KDX</span><h2 class="disp">Built on trust.</h2></div>
             <div class="cards">
-              <div class="fcard"><div class="ic"><svg class="i"><use href="#i-shield"/></svg></div><h3>검증된 안전 거래</h3><p>제도권 기반의 신뢰할 수 있는 거래 구조와 자산 보관으로 투자자를 보호합니다.</p></div>
-              <div class="fcard"><div class="ic"><svg class="i"><use href="#i-eye"/></svg></div><h3>투명한 정보 공개</h3><p>상품별 실물 정보·시세·수익 지표를 실시간으로 투명하게 제공합니다.</p></div>
-              <div class="fcard"><div class="ic"><svg class="i"><use href="#i-zap"/></svg></div><h3>쉬운 시작</h3><p>소액부터 몇 번의 터치로. 복잡한 절차 없이 바로 첫 투자를 시작하세요.</p></div>
+              <div class="fcard"><div class="ic"><svg class="i"><use href="#icon-feature-secure"/></svg></div><h3>검증된 안전 거래</h3><p>제도권 기반의 신뢰할 수 있는 거래 구조와 자산 보관으로 투자자를 보호합니다.</p></div>
+              <div class="fcard"><div class="ic"><svg class="i"><use href="#icon-feature-transparent"/></svg></div><h3>투명한 정보 공개</h3><p>상품별 실물 정보·시세·수익 지표를 실시간으로 투명하게 제공합니다.</p></div>
+              <div class="fcard"><div class="ic"><svg class="i"><use href="#icon-feature-fast"/></svg></div><h3>쉬운 시작</h3><p>소액부터 몇 번의 터치로. 복잡한 절차 없이 바로 첫 투자를 시작하세요.</p></div>
             </div>
           </section>
 
-          <section class="inner-cta"><div class="ctaband"><h2 class="disp">Start with your first piece.</h2><p>가입하고 KDX의 검증된 조각투자 상품을 만나보세요.</p><button class="btn btn-lg">무료로 시작하기 <svg class="i"><use href="#i-arrow"/></svg></button></div></section>
+          <section class="inner-cta"><div class="ctaband"><h2 class="disp">Start with your first piece.</h2><p>가입하고 KDX의 검증된 조각투자 상품을 만나보세요.</p><button class="btn btn-lg">무료로 시작하기 <svg class="i"><use href="#icon-action-external"/></svg></button></div></section>
 
           <footer class="foot">
-            <div><div class="logo"><span class="mark"><svg class="i"><use href="#i-gem"/></svg></span>KDX</div><p style="margin-top:12px;line-height:1.6">모두를 위한 조각투자.<br>실물 자산 투자의 새로운 기준.</p></div>
+            <div><div class="logo"><span class="mark"><svg class="i"><use href="#icon-brand-logo"/></svg></span>KDX</div><p style="margin-top:12px;line-height:1.6">모두를 위한 조각투자.<br>실물 자산 투자의 새로운 기준.</p></div>
             <div><h4>서비스</h4><a>조각투자</a><a>상품 안내</a><a>수수료</a></div>
             <div><h4>회사</h4><a>회사소개</a><a>뉴스룸</a><a>채용</a></div>
             <div><h4>지원</h4><a>고객센터</a><a>공지사항</a><a>이용약관</a></div>
@@ -564,12 +574,12 @@ html[data-view="compare"] .board3{display:flex}
 
   <!-- ============ 우: 인스펙터(컨트롤) ============ -->
   <aside class="inspector">
-    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#i-gem"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.11</p></div></div>
+    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.12</p></div></div>
     <div class="grp"><span class="gl">View</span><div class="seg" id="viewSeg"><button data-v="interactive" class="on">프리뷰</button><button data-v="compare">비교</button><button data-v="components">컴포넌트</button><button data-v="tokens">토큰</button></div></div>
     <div class="grp"><span class="gl">Brand <em>교체 지점</em></span><div class="brands" id="brands">
-      <button class="brandbtn on" data-b="deepblue"><span class="bdot" style="background:#1245BA"></span><span class="bn">Deep Blue</span><span class="bhex">#1245BA</span><span class="bck"><svg class="i"><use href="#i-check"/></svg></span></button>
-      <button class="brandbtn" data-b="emerald"><span class="bdot" style="background:#098A68"></span><span class="bn">Emerald</span><span class="bhex">#098A68</span><span class="bck"><svg class="i"><use href="#i-check"/></svg></span></button>
-      <button class="brandbtn" data-b="violet"><span class="bdot" style="background:#5B14B8"></span><span class="bn">Violet</span><span class="bhex">#5B14B8</span><span class="bck"><svg class="i"><use href="#i-check"/></svg></span></button>
+      <button class="brandbtn on" data-b="deepblue"><span class="bdot" style="background:#1245BA"></span><span class="bn">Deep Blue</span><span class="bhex">#1245BA</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
+      <button class="brandbtn" data-b="emerald"><span class="bdot" style="background:#098A68"></span><span class="bn">Emerald</span><span class="bhex">#098A68</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
+      <button class="brandbtn" data-b="violet"><span class="bdot" style="background:#5B14B8"></span><span class="bn">Violet</span><span class="bhex">#5B14B8</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
     </div></div>
     <div class="grp" id="deviceGrp"><span class="gl">Device</span><div class="seg" id="devSeg"><button data-d="mobile">모바일</button><button data-d="tablet">태블릿</button><button data-d="desktop" class="on">데스크톱</button></div></div>
     <div id="presetCtl">
@@ -660,7 +670,17 @@ function resolve(alias){if(alias.indexOf('color/primary/')===0)return brandHex(a
 function ramp(name,steps){return `<div class="tk-ramp"><div class="tk-rl">${name}</div><div class="tk-sws">`+steps.map(s=>{const h=SCALE['color/'+name.split('/').pop()+'/'+s]||SCALE['color/alpha/'+name.split('/').slice(-1)+'/'+s];return `<div class="tk-sw"><span class="c" style="background:${h}"></span><span class="n">${s}</span><span class="h">${h}</span></div>`;}).join('')+`</div></div>`;}
 function rampFor(prefix,steps){return `<div class="tk-ramp"><div class="tk-rl">${prefix}</div><div class="tk-sws">`+steps.map(s=>{const h=SCALE[prefix+'/'+s];return `<div class="tk-sw"><span class="c" style="background:${h}"></span><span class="n">${s}</span><span class="h">${h}</span></div>`;}).join('')+`</div></div>`;}
 
-const TABS=[['scale','Scale'],['brand','Brand'],['semantic','Semantic'],['radius','Radius'],['web','Web'],['type','Type'],['elevation','Elevation']];
+const TABS=[['scale','Scale'],['brand','Brand'],['semantic','Semantic'],['radius','Radius'],['web','Web'],['type','Type'],['icons','Icons'],['elevation','Elevation']];
+const ICON_REG=[
+ ['icon-brand-logo','brand','로고 마크'],
+ ['icon-action-search','action','검색'],['icon-action-external','action','외부·새 탭 이동'],
+ ['icon-nav-left','nav','이전·왼쪽'],['icon-nav-right','nav','다음·오른쪽'],['icon-nav-down','nav','펼침·드롭다운'],
+ ['icon-status-success','status','성공·체크'],['icon-status-alert','status','경고·오류'],
+ ['icon-trend-up','trend','상승(빨강 맥락)'],['icon-trend-down','trend','하락(파랑 맥락)'],
+ ['icon-finance-won','finance','원화·금액'],
+ ['icon-feature-secure','feature','안전·보안'],['icon-feature-transparent','feature','투명·공개'],['icon-feature-fast','feature','빠름·간편'],
+ ['icon-cat-realestate','category','부동산'],['icon-cat-art','category','미술품'],['icon-cat-logistics','category','물류'],['icon-cat-asset','category','실물자산'],['icon-cat-infra','category','인프라'],['icon-cat-luxury','category','명품'],
+];
 let curTab='scale';
 function stepsOf(prefix){return Object.keys(SCALE).filter(k=>k.indexOf(prefix+'/')===0).map(k=>k.split('/').pop());}
 function renderTokenTab(tab){curTab=tab;
@@ -699,6 +719,15 @@ function renderTokenTab(tab){curTab=tab;
     const fam=getComputedStyle(html).getPropertyValue('--brand-font');
     h+=`<div class="tk-note"><b>Text Styles</b> · 서체는 <b>brand/font</b>(스왑됨), 사이즈·행간은 프리미티브 조합. 42 스타일 중 대표.</div>`;
     h+=TYPES.map(([n,sz,lh,w])=>`<div class="tk-type"><span class="lab">${n}<br><span>${sz}/${lh} · ${w}</span></span><span class="samp" style="font-family:${fam};font-size:${sz}px;line-height:${lh}px;font-weight:${w}">Own real assets 조각투자 Ag</span></div>`).join('');
+  } else if(tab==='icons'){
+    h+=`<div class="tk-note">★ <b>Icon Set</b> · 교체 지점. 네이밍 <b>icon-{group}-{name}</b> · 현재 Lucide(MIT). 커스텀 아이콘 도착 시 같은 id의 &lt;symbol&gt; path만 갈아끼우면 전 화면 아이콘이 동시 스왑됩니다. <b>${ICON_REG.length}종</b>.</div>`;
+    const gn={brand:'브랜드',action:'액션',nav:'내비게이션',status:'상태',trend:'시세',finance:'금융',feature:'특성',category:'카테고리(자산)'};
+    let cur='';
+    ICON_REG.forEach(([id,g,role])=>{
+      if(g!==cur){ if(cur)h+='</div>'; cur=g; h+=`<div class="tk-grp">${g} <span class="c">${gn[g]||''}</span></div><div class="tk-icons">`; }
+      h+=`<div class="tk-ic"><span class="ib"><svg class="i"><use href="#${id}"/></svg></span><span><span class="in">${id}</span><span class="ir">${role}</span></span></div>`;
+    });
+    h+='</div>';
   } else if(tab==='elevation'){
     h+=`<div class="tk-note"><b>Elevation</b> · 브랜드 무관 그림자 스케일. 표면 위계에 따라 rest→hover→overlay→modal.</div><div class="tk-elevs">`+ELEVS.map(([n,u])=>`<div class="tk-elev"><div class="b" style="box-shadow:var(--${n})"></div><div class="n">${n}</div><div class="u">${u}</div></div>`).join('')+`</div>`;
   }
@@ -723,27 +752,27 @@ function renderCmpTab(tab){curCmpTab=tab;
     BVAR.forEach(([lab,cls])=>{h+=`<span class="rh">${lab}</span>`+BST.map(([st])=>`<span class="cell"><button class="btn ${cls} ${st}">${lab}</button></span>`).join('');});
     h+='</div>';
     h+='<div class="cmp-sub">Sizes</div><div class="crow"><button class="btn btn-primary btn-sm">Small</button><button class="btn btn-primary">Medium</button><button class="btn btn-primary btn-lg">Large</button></div>';
-    h+='<div class="cmp-sub">With icon</div><div class="crow"><button class="btn btn-primary">시작하기 <svg class="i"><use href="#i-arrow"/></svg></button><button class="btn btn-ghost"><svg class="i"><use href="#i-search"/></svg> 검색</button></div>';
+    h+='<div class="cmp-sub">With icon</div><div class="crow"><button class="btn btn-primary">시작하기 <svg class="i"><use href="#icon-action-external"/></svg></button><button class="btn btn-ghost"><svg class="i"><use href="#icon-action-search"/></svg> 검색</button></div>';
     h+='<div class="cmp-note">fill=<b>comp/fill/accent/primary</b> · hover=<b>accent/strong</b> · pressed=<b>accent/press</b> · focus=<b>focus-ring</b> · disabled=<b>comp-disabled</b> · radius=<b>comp/radius/button→radius/m</b> · height=<b>size/control</b> · pad=<b>comp/pad/button</b></div></div>';
   } else if(tab==='forms'){
-    const fld=(stt,cls,val,ph,helper,err)=>`<div class="fld"><span class="stt">${stt}</span><label class="fl">투자 금액${err?' <span class="req">*</span>':''}</label><div class="inp ${cls}"><svg class="i"><use href="#i-won"/></svg><span class="${val?'':'ph'}">${val||ph}</span></div>${err?`<div class="fe"><svg class="i"><use href="#i-alert"/></svg>${err}</div>`:helper?`<div class="fh">${helper}</div>`:''}</div>`;
+    const fld=(stt,cls,val,ph,helper,err)=>`<div class="fld"><span class="stt">${stt}</span><label class="fl">투자 금액${err?' <span class="req">*</span>':''}</label><div class="inp ${cls}"><svg class="i"><use href="#icon-finance-won"/></svg><span class="${val?'':'ph'}">${val||ph}</span></div>${err?`<div class="fe"><svg class="i"><use href="#icon-status-alert"/></svg>${err}</div>`:helper?`<div class="fh">${helper}</div>`:''}</div>`;
     h+='<div class="cmp-sec"><div class="cmp-h"><h3>Input / Field</h3><span class="anat">.inp · .is-{hover|focus|error|disabled}</span></div><div class="cmp-desc">라벨 · 필드 · 헬퍼/에러. 상태별 보더·포커스 링·배경이 토큰에 바인딩됩니다.</div><div class="flds">';
     h+=fld('Default','','','50,000','원 단위로 입력','');
     h+=fld('Focus','is-focus','50,000','','원 단위로 입력','');
     h+=fld('Error','is-error','5,00','','','최소 10,000원 이상 입력하세요');
     h+=fld('Disabled','is-disabled','','비활성 필드','','');
-    h+='</div><div class="cmp-sub">Select</div><div class="fld"><div class="inp"><span>부동산</span><svg class="i" style="margin-left:auto"><use href="#i-chevd"/></svg></div></div>';
+    h+='</div><div class="cmp-sub">Select</div><div class="fld"><div class="inp"><span>부동산</span><svg class="i" style="margin-left:auto"><use href="#icon-nav-down"/></svg></div></div>';
     h+='<div class="cmp-note">border=<b>border/default→dimension/1</b> · focus=<b>focus-ring</b> · error=<b>status/critical</b> · disabled bg=<b>bg/sunken</b> · radius=<b>comp/radius/input→radius/s</b> · height=<b>size/control</b></div></div>';
   } else if(tab==='selection'){
     h+='<div class="cmp-sec"><div class="cmp-h"><h3>Selection</h3><span class="anat">.chk · .rdo · .tgl</span></div><div class="cmp-desc">체크박스 · 라디오 · 토글. 선택 상태는 accent, 비활성은 disabled 토큰.</div>';
-    h+='<div class="cmp-sub">Checkbox</div><div class="crow" style="gap:22px"><span class="opt"><span class="chk on"><svg class="i"><use href="#i-check"/></svg></span>선택됨</span><span class="opt"><span class="chk"></span>미선택</span><span class="opt dis"><span class="chk dis"></span>비활성</span></div>';
+    h+='<div class="cmp-sub">Checkbox</div><div class="crow" style="gap:22px"><span class="opt"><span class="chk on"><svg class="i"><use href="#icon-status-success"/></svg></span>선택됨</span><span class="opt"><span class="chk"></span>미선택</span><span class="opt dis"><span class="chk dis"></span>비활성</span></div>';
     h+='<div class="cmp-sub">Radio</div><div class="crow" style="gap:22px"><span class="opt"><span class="rdo on"></span>선택됨</span><span class="opt"><span class="rdo"></span>미선택</span><span class="opt dis"><span class="rdo dis"></span>비활성</span></div>';
     h+='<div class="cmp-sub">Toggle</div><div class="crow" style="gap:22px"><span class="opt"><span class="tgl on"></span>On</span><span class="opt"><span class="tgl"></span>Off</span><span class="opt dis"><span class="tgl dis"></span>비활성</span></div>';
     h+='<div class="cmp-note">선택=<b>comp/fill/accent/primary</b> · 보더=<b>bdr</b> · 트랙=<b>comp-track</b> · knob 그림자=<b>elev-1</b> · 비활성=<b>comp-disabled</b></div></div>';
   } else if(tab==='feedback'){
     const al=(cls,ic,t,d)=>`<div class="alert ${cls}"><span class="ai"><svg class="i"><use href="#${ic}"/></svg></span><div><div class="at">${t}</div><div class="ad">${d}</div></div></div>`;
     h+='<div class="cmp-sec"><div class="cmp-h"><h3>Feedback</h3><span class="anat">.alert · .badge · .chip</span></div><div class="cmp-desc">배지 · 칩 · 알림. status 색은 브랜드 무관 고정, info만 accent를 씁니다.</div>';
-    h+='<div class="cmp-sub">Badges</div><div class="crow"><span class="badge suc"><svg class="i"><use href="#i-check"/></svg>성공</span><span class="badge warn">경고</span><span class="badge crit">오류</span><span class="badge up"><svg class="i"><use href="#i-trend"/></svg>3.2%</span><span class="badge down"><svg class="i"><use href="#i-trenddn"/></svg>1.4%</span></div>';
+    h+='<div class="cmp-sub">Badges</div><div class="crow"><span class="badge suc"><svg class="i"><use href="#icon-status-success"/></svg>성공</span><span class="badge warn">경고</span><span class="badge crit">오류</span><span class="badge up"><svg class="i"><use href="#icon-trend-up"/></svg>3.2%</span><span class="badge down"><svg class="i"><use href="#icon-trend-down"/></svg>1.4%</span></div>';
     h+='<div class="cmp-sub">Chips</div><div class="crow"><span class="chip accent">부동산</span><span class="chip neutral">미술품</span><span class="chip neutral">물류</span></div>';
     h+='<div class="cmp-sub">Alerts</div><div class="crow" style="flex-direction:column;align-items:stretch;gap:10px">';
     h+=al('info','i-gem','정보','브랜드 미확정 상태의 시스템 데모입니다.')+al('suc','i-check','성공','투자가 정상적으로 완료되었습니다.')+al('warn','i-alert','경고','모집 마감까지 D-1 남았습니다.')+al('crit','i-alert','오류','최소 투자 금액을 확인해 주세요.');

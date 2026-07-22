@@ -1,0 +1,122 @@
+{
+  "$meta": {
+    "name": "KDX Icon Set",
+    "swap_point": true,
+    "naming": "icon-{group}-{name}",
+    "current_source": "Lucide (MIT)",
+    "groups": [
+      "brand",
+      "action",
+      "nav",
+      "status",
+      "trend",
+      "finance",
+      "feature",
+      "category"
+    ],
+    "how_to_swap": "icons.svg의 같은 id를 가진 <symbol> path를 커스텀 아이콘으로 교체하면 전 화면이 동시 스왑됩니다.",
+    "usage": "<svg class=\"i\"><use href=\"#icon-action-search\"/></svg>"
+  },
+  "icons": [
+    {
+      "name": "icon-brand-logo",
+      "group": "brand",
+      "role": "로고 마크"
+    },
+    {
+      "name": "icon-action-search",
+      "group": "action",
+      "role": "검색"
+    },
+    {
+      "name": "icon-action-external",
+      "group": "action",
+      "role": "외부·새 탭 이동"
+    },
+    {
+      "name": "icon-nav-left",
+      "group": "nav",
+      "role": "이전·왼쪽"
+    },
+    {
+      "name": "icon-nav-right",
+      "group": "nav",
+      "role": "다음·오른쪽"
+    },
+    {
+      "name": "icon-nav-down",
+      "group": "nav",
+      "role": "펼침·드롭다운"
+    },
+    {
+      "name": "icon-status-success",
+      "group": "status",
+      "role": "성공·체크"
+    },
+    {
+      "name": "icon-status-alert",
+      "group": "status",
+      "role": "경고·오류"
+    },
+    {
+      "name": "icon-trend-up",
+      "group": "trend",
+      "role": "상승(빨강 맥락)"
+    },
+    {
+      "name": "icon-trend-down",
+      "group": "trend",
+      "role": "하락(파랑 맥락)"
+    },
+    {
+      "name": "icon-finance-won",
+      "group": "finance",
+      "role": "원화·금액"
+    },
+    {
+      "name": "icon-feature-secure",
+      "group": "feature",
+      "role": "안전·보안"
+    },
+    {
+      "name": "icon-feature-transparent",
+      "group": "feature",
+      "role": "투명·공개"
+    },
+    {
+      "name": "icon-feature-fast",
+      "group": "feature",
+      "role": "빠름·간편"
+    },
+    {
+      "name": "icon-cat-realestate",
+      "group": "category",
+      "role": "부동산"
+    },
+    {
+      "name": "icon-cat-art",
+      "group": "category",
+      "role": "미술품"
+    },
+    {
+      "name": "icon-cat-logistics",
+      "group": "category",
+      "role": "물류"
+    },
+    {
+      "name": "icon-cat-asset",
+      "group": "category",
+      "role": "실물자산"
+    },
+    {
+      "name": "icon-cat-infra",
+      "group": "category",
+      "role": "인프라"
+    },
+    {
+      "name": "icon-cat-luxury",
+      "group": "category",
+      "role": "명품"
+    }
+  ]
+}
