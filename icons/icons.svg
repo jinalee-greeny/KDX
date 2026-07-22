@@ -1,4 +1,4 @@
-<!-- KDX Icon Set · ★ 교체 지점 ★ · 네이밍 icon-{group}-{name} · 현재 Lucide(MIT)
+<!-- KDX Icon Set · ★ 교체 지점 ★ · 네이밍 icon-{group}-{name} · 현재 Lucide(ISC)
      커스텀 아이콘 도착 시 같은 id의 <symbol> path만 교체하면 전 화면이 동시 스왑됩니다.
      사용: <svg class="i"><use href="#icon-action-search"/></svg> -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>

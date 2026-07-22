@@ -3,7 +3,7 @@
     "name": "KDX Icon Set",
     "swap_point": true,
     "naming": "icon-{group}-{name}",
-    "current_source": "Lucide (MIT)",
+    "current_source": "Lucide (ISC)",
     "groups": [
       "brand",
       "action",

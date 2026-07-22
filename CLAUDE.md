@@ -76,4 +76,4 @@ Scale(원시)  →  Brand(교체 지점)  →  Semantic(의미)  →  Radius(곡
 - 소스: `icons/icons.svg`(스프라이트) · 레지스트리: `icons/icons.json`(20종)
 - 네이밍: `icon-{group}-{name}` · group = brand·action·nav·status·trend·finance·feature·category
 - 사용: `<svg class="i"><use href="#icon-action-search"/></svg>`
-- 교체: 커스텀 아이콘 도착 시 icons.svg에서 **같은 id의 `<symbol>` path만** 갈아끼우면 전 화면 아이콘이 동시 스왑된다(id·네이밍 유지). 현재 소스는 Lucide(MIT).
+- 교체: 커스텀 아이콘 도착 시 icons.svg에서 **같은 id의 `<symbol>` path만** 갈아끼우면 전 화면 아이콘이 동시 스왑된다(id·네이밍 유지). 현재 소스는 Lucide(ISC).

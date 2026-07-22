@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KDX 홈페이지 — 디자인 시스템 데모 (v0.15)</title>
+<title>KDX 홈페이지 — 디자인 시스템 데모 (v0.16)</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css">
 <style>
 /* ===== TIER 0 SCALE + 뉴트럴 ===== */
@@ -398,7 +398,7 @@ html[data-view="compare"] .board3{display:flex}
 <body>
 
 <!-- ============================================================
-     ICON SET · ★ 교체 지점 ★  (현재: Lucide · MIT / 네이밍: icon-{group}-{name})
+     ICON SET · ★ 교체 지점 ★  (현재: Lucide · ISC / 네이밍: icon-{group}-{name})
      커스텀 아이콘 도착 시 아래 <symbol>의 path만 같은 id로 교체하면 전 화면 아이콘이 동시 스왑됩니다.
      그룹: brand · action · nav · status · trend · finance · feature · cat(category)
      ============================================================ -->
@@ -570,7 +570,7 @@ html[data-view="compare"] .board3{display:flex}
 
   <!-- ============ 우: 인스펙터(컨트롤) ============ -->
   <aside class="inspector">
-    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.15</p></div></div>
+    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.16</p></div></div>
     <div class="grp"><span class="gl">View</span><div class="seg" id="viewSeg"><button data-v="interactive" class="on">프리뷰</button><button data-v="compare">비교</button><button data-v="components">컴포넌트</button><button data-v="tokens">토큰</button></div></div>
     <div class="grp"><span class="gl">Brand <em>교체 지점</em></span><div class="brands" id="brands">
       <button class="brandbtn on" data-b="deepblue"><span class="bdot" style="background:#1245BA"></span><span class="bn">Deep Blue</span><span class="bhex">#1245BA</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
@@ -714,7 +714,7 @@ function renderTokenTab(tab){curTab=tab;
     h+=`<div class="tk-note"><b>Text Styles</b> · 서체는 <b>brand/font</b>(스왑됨), 사이즈·행간은 프리미티브 조합. 42 스타일 중 대표.</div>`;
     h+=TYPES.map(([n,sz,lh,w])=>`<div class="tk-type"><span class="lab">${n}<br><span>${sz}/${lh} · ${w}</span></span><span class="samp" style="font-family:${fam};font-size:${sz}px;line-height:${lh}px;font-weight:${w}">Own real assets 조각투자 Ag</span></div>`).join('');
   } else if(tab==='icons'){
-    h+=`<div class="tk-note">★ <b>Icon Set</b> · 교체 지점. 네이밍 <b>icon-{group}-{name}</b> · 현재 Lucide(MIT). 커스텀 아이콘 도착 시 같은 id의 &lt;symbol&gt; path만 갈아끼우면 전 화면 아이콘이 동시 스왑됩니다. <b>${ICON_REG.length}종</b>.</div>`;
+    h+=`<div class="tk-note">★ <b>Icon Set</b> · 교체 지점. 네이밍 <b>icon-{group}-{name}</b> · 현재 Lucide(ISC). 커스텀 아이콘 도착 시 같은 id의 &lt;symbol&gt; path만 갈아끼우면 전 화면 아이콘이 동시 스왑됩니다. <b>${ICON_REG.length}종</b>.</div>`;
     const gn={brand:'브랜드',action:'액션',nav:'내비게이션',status:'상태',trend:'시세',finance:'금융',feature:'특성',category:'카테고리(자산)'};
     let cur='';
     ICON_REG.forEach(([id,g,role])=>{
