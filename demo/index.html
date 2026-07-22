@@ -79,6 +79,14 @@ html[data-view="compare"] #frame{display:none}
 .library.collapsed .lib-expand{display:flex;flex-direction:column;align-items:center;gap:14px;width:48px;padding-top:16px;color:var(--fg-mut)}
 .library.collapsed .lib-expand .vlabel{writing-mode:vertical-rl;font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--fg-mut)}
 .lib-body{padding:2px 16px 48px}
+/* navigation sidebar */
+.nav-body{padding:8px 12px 48px}
+.nav-group{margin-bottom:6px}
+.nav-gl{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-mut);padding:16px 8px 6px}
+.nav-item{display:block;width:100%;text-align:left;font-size:13.5px;font-weight:600;color:var(--fg-sub);padding:8px 10px;border-radius:8px;transition:background .12s,color .12s}
+.nav-item:hover{background:var(--bg-sunken);color:var(--fg)}
+.nav-item.on{background:var(--accent-subtle);color:var(--accent);font-weight:700}
+#cmpTabs,#tkTabs{display:none}
 .lib-note{font-size:11px;color:var(--fg-mut);line-height:1.5;padding:12px 2px 6px;border-bottom:1px solid var(--line)}
 .lib-sec{border-bottom:1px solid var(--line)}
 .lib-sh{width:100%;display:flex;align-items:center;justify-content:space-between;padding:13px 2px;font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--fg)}
@@ -428,43 +436,35 @@ html[data-view="compare"] .board3{display:flex}
 <div class="app">
 
   <!-- ============ 좌: 컴포넌트 라이브러리 ============ -->
-  <aside class="library" id="library" data-radius="default" data-density="default" data-border="default" data-size="m">
-    <div class="lib-head"><span class="lt">컴포넌트 <em>현재 토큰</em></span><button class="iconbtn" id="libClose" title="접기"><svg class="i"><use href="#icon-nav-left"/></svg></button></div>
-    <div class="lib-body">
-      <div class="lib-note">현재 <b>브랜드·곡률·간격·보더·크기</b>가 그대로 반영됩니다. 우측 인스펙터를 바꾸면 함께 갱신돼요. 오른쪽 경계를 드래그하면 폭 조절.</div>
-      <section class="lib-sec"><button class="lib-sh">Buttons<svg class="i"><use href="#icon-nav-down"/></svg></button><div class="lib-c">
-        <div class="statehead"><span class="sh-lab">Default</span><span class="sh-lab">Disabled</span></div>
-        <div class="lib-lab">Primary</div><div class="lib-row brow"><button class="btn btn-primary">Primary</button><button class="btn btn-primary" disabled>Primary</button></div>
-        <div class="lib-lab">Neutral</div><div class="lib-row brow"><button class="btn btn-neutral">Neutral</button><button class="btn btn-neutral" disabled>Neutral</button></div>
-        <div class="lib-lab">Ghost</div><div class="lib-row brow"><button class="btn btn-ghost">Ghost</button><button class="btn btn-ghost" disabled>Ghost</button></div>
-        <div class="lib-lab">Small (Primary · Ghost)</div><div class="lib-row brow"><button class="btn btn-primary btn-sm">Small</button><button class="btn btn-ghost btn-sm">Small</button></div>
-      </div></section>
-      <section class="lib-sec"><button class="lib-sh">Inputs<svg class="i"><use href="#icon-nav-down"/></svg></button><div class="lib-c">
-        <div class="lib-lab">Default</div><div class="field ph"><svg class="i"><use href="#icon-action-search"/></svg>상품 검색</div>
-        <div class="lib-lab">Focus</div><div class="field foc"><svg class="i"><use href="#icon-finance-won"/></svg>50,000</div>
-        <div class="lib-lab">Disabled</div><div class="field dis">비활성 필드</div>
-      </div></section>
-      <section class="lib-sec"><button class="lib-sh">Chips &amp; Badges<svg class="i"><use href="#icon-nav-down"/></svg></button><div class="lib-c">
-        <div class="lib-row"><span class="chip accent">부동산</span><span class="chip neutral">미술품</span><span class="chip neutral">물류</span></div>
-        <div class="lib-lab">Status</div><div class="lib-row"><span class="badge suc"><svg class="i"><use href="#icon-status-success"/></svg>성공</span><span class="badge warn">경고</span><span class="badge crit">오류</span></div>
-        <div class="lib-lab">Chart (브랜드 무관)</div><div class="lib-row"><span class="badge up"><svg class="i"><use href="#icon-trend-up"/></svg>3.2%</span><span class="badge down"><svg class="i"><use href="#icon-trend-down"/></svg>1.4%</span></div>
-      </div></section>
-      <section class="lib-sec"><button class="lib-sh">Card<svg class="i"><use href="#icon-nav-down"/></svg></button><div class="lib-c">
-        <div class="mini-card"><div class="mt"></div><div class="mb"><div class="mc">부동산</div><div class="mtt">강남 오피스 빌딩</div><div class="mm"><span>₩50,000</span><span class="my">목표 8.2%</span></div></div></div>
-      </div></section>
-      <section class="lib-sec"><button class="lib-sh">Elevation<svg class="i"><use href="#icon-nav-down"/></svg></button><div class="lib-c">
-        <div class="elev"><span class="ebox" style="box-shadow:var(--elev-1)"></span><span class="emeta"><b>elev-1</b><span>카드 rest</span></span></div>
-        <div class="elev"><span class="ebox" style="box-shadow:var(--elev-2)"></span><span class="emeta"><b>elev-2</b><span>카드 hover</span></span></div>
-        <div class="elev"><span class="ebox" style="box-shadow:var(--elev-3)"></span><span class="emeta"><b>elev-3</b><span>드롭다운·팝오버</span></span></div>
-        <div class="elev"><span class="ebox" style="box-shadow:var(--elev-4)"></span><span class="emeta"><b>elev-4</b><span>모달·다이얼로그</span></span></div>
-        <div class="elev"><span class="ebox" style="box-shadow:var(--elev-up)"></span><span class="emeta"><b>elev-up</b><span>바텀시트·스티키</span></span></div>
-      </div></section>
-      <section class="lib-sec"><button class="lib-sh">Radius · Size<svg class="i"><use href="#icon-nav-down"/></svg></button><div class="lib-c">
-        <div class="lib-lab">radius (현재 모드)</div><div class="swrow"><span class="swb" style="width:32px;height:32px;border-radius:var(--r-xs)"></span><span class="swb" style="width:32px;height:32px;border-radius:var(--r-s)"></span><span class="swb" style="width:32px;height:32px;border-radius:var(--r-m)"></span><span class="swb" style="width:32px;height:32px;border-radius:var(--r-l)"></span></div>
-        <div class="lib-lab">size/control</div><div class="swrow"><span class="swb" style="width:var(--ctrl-h);height:var(--ctrl-h);border-radius:var(--r-s)"></span></div>
-      </div></section>
+  <aside class="library" id="nav">
+    <div class="lib-head"><span class="lt">탐색 <em>Navigator</em></span><button class="iconbtn" id="libClose" title="접기"><svg class="i"><use href="#icon-nav-left"/></svg></button></div>
+    <div class="lib-body nav-body">
+      <div class="nav-group">
+        <div class="nav-gl">페이지</div>
+        <button class="nav-item on" data-view="interactive">홈</button>
+        <button class="nav-item" data-view="compare">브랜드 비교</button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-gl">컴포넌트</div>
+        <button class="nav-item" data-view="components" data-tab="buttons">Buttons</button>
+        <button class="nav-item" data-view="components" data-tab="forms">Forms</button>
+        <button class="nav-item" data-view="components" data-tab="selection">Selection</button>
+        <button class="nav-item" data-view="components" data-tab="feedback">Feedback</button>
+        <button class="nav-item" data-view="components" data-tab="icon">Icon</button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-gl">파운데이션 · 토큰</div>
+        <button class="nav-item" data-view="tokens" data-tab="scale">Scale</button>
+        <button class="nav-item" data-view="tokens" data-tab="brand">Brand</button>
+        <button class="nav-item" data-view="tokens" data-tab="semantic">Semantic</button>
+        <button class="nav-item" data-view="tokens" data-tab="radius">Radius</button>
+        <button class="nav-item" data-view="tokens" data-tab="web">Web</button>
+        <button class="nav-item" data-view="tokens" data-tab="type">Type</button>
+        <button class="nav-item" data-view="tokens" data-tab="icons">Icons</button>
+        <button class="nav-item" data-view="tokens" data-tab="elevation">Elevation</button>
+      </div>
     </div>
-    <div class="lib-expand"><button class="iconbtn" id="libOpen" title="펼치기"><svg class="i"><use href="#icon-nav-right"/></svg></button><span class="vlabel">컴포넌트</span></div>
+    <div class="lib-expand"><button class="iconbtn" id="libOpen" title="펼치기"><svg class="i"><use href="#icon-nav-right"/></svg></button><span class="vlabel">탐색</span></div>
   </aside>
 
   <div class="resizer" id="resizer"></div>
@@ -570,9 +570,8 @@ html[data-view="compare"] .board3{display:flex}
 
   <!-- ============ 우: 인스펙터(컨트롤) ============ -->
   <aside class="inspector">
-    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.16</p></div></div>
-    <div class="grp"><span class="gl">View</span><div class="seg" id="viewSeg"><button data-v="interactive" class="on">프리뷰</button><button data-v="compare">비교</button><button data-v="components">컴포넌트</button><button data-v="tokens">토큰</button></div></div>
-    <div class="grp"><span class="gl">Brand <em>교체 지점</em></span><div class="brands" id="brands">
+    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.17</p></div></div>
+    <div class="grp" id="brandGrp"><span class="gl">Brand <em>교체 지점</em></span><div class="brands" id="brands">
       <button class="brandbtn on" data-b="deepblue"><span class="bdot" style="background:#1245BA"></span><span class="bn">Deep Blue</span><span class="bhex">#1245BA</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
       <button class="brandbtn" data-b="emerald"><span class="bdot" style="background:#098A68"></span><span class="bn">Emerald</span><span class="bhex">#098A68</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
       <button class="brandbtn" data-b="violet"><span class="bdot" style="background:#5B14B8"></span><span class="bn">Violet</span><span class="bhex">#5B14B8</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
@@ -592,7 +591,7 @@ html[data-view="compare"] .board3{display:flex}
 </div>
 
 <script>
-const html=document.documentElement, frame=document.getElementById('frame'), library=document.getElementById('library'), componentsEl=document.getElementById('componentsView');
+const html=document.documentElement, frame=document.getElementById('frame'), navEl=document.getElementById('nav'), componentsEl=document.getElementById('componentsView');
 const RAD={sharp:{m:4,l:6},default:{m:12,l:16},rounded:{m:20,l:24}}, DENS={compact:.84,default:1,comfortable:1.22},
       BORD={hairline:1,default:1,strong:1.5}, SIZE={s:{ctrl:38,icon:20},m:{ctrl:46,icon:22},l:{ctrl:54,icon:26}};
 const KNOBS=[['data-layout','grid'],['data-radius','default'],['data-density','default'],['data-border','default'],['data-size','m']];
@@ -605,19 +604,18 @@ function renderReadout(scope,el){const r=scope.getAttribute('data-radius'),d=DEN
   el.innerHTML=[['comp/radius/button → radius/m',RAD[r].m+'px'],['comp/radius/card → radius/l',RAD[r].l+'px'],['spacing ×','×'+d],['border/'+bd,BORD[bd]+'px'],['size/control/'+sz,SIZE[sz].ctrl+'px'],['size/icon',SIZE[sz].icon+'px']]
    .map(([k,v])=>`<div class="rr"><span class="rk">${k}</span><span class="rv">${v}</span></div>`).join('');}
 document.querySelectorAll('#presetCtl .seg').forEach(seg=>seg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const a=seg.dataset.attr;
-  frame.setAttribute(a,b.dataset.val); if(a!=='data-layout'){ library.setAttribute(a,b.dataset.val); componentsEl.setAttribute(a,b.dataset.val); }
+  frame.setAttribute(a,b.dataset.val); if(a!=='data-layout'){ componentsEl.setAttribute(a,b.dataset.val); }
   seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); renderReadout(frame,document.getElementById('readout'));}));
 renderReadout(frame,document.getElementById('readout'));
 
-/* 라이브러리: 접기/펼치기 + 아코디언 */
-document.getElementById('libClose').addEventListener('click',()=>library.classList.add('collapsed'));
-document.getElementById('libOpen').addEventListener('click',()=>library.classList.remove('collapsed'));
-document.querySelectorAll('.lib-sh').forEach(sh=>sh.addEventListener('click',()=>sh.parentNode.classList.toggle('closed')));
+/* 탐색 패널: 접기/펼치기 */
+document.getElementById('libClose').addEventListener('click',()=>navEl.classList.add('collapsed'));
+document.getElementById('libOpen').addEventListener('click',()=>navEl.classList.remove('collapsed'));
 
-/* 라이브러리 폭 조절 (드래그) */
+/* 탐색 패널 폭 조절 (드래그) */
 const resizer=document.getElementById('resizer');let dragging=false;
 resizer.addEventListener('mousedown',e=>{dragging=true;resizer.classList.add('drag');document.body.style.cursor='col-resize';document.body.style.userSelect='none';e.preventDefault();});
-window.addEventListener('mousemove',e=>{if(!dragging)return;let w=Math.max(220,Math.min(560,e.clientX));library.style.width=w+'px';});
+window.addEventListener('mousemove',e=>{if(!dragging)return;let w=Math.max(220,Math.min(560,e.clientX));navEl.style.width=w+'px';});
 window.addEventListener('mouseup',()=>{dragging=false;resizer.classList.remove('drag');document.body.style.cursor='';document.body.style.userSelect='';});
 
 /* View: 인터랙티브 ↔ 비교 */
@@ -631,16 +629,21 @@ function buildBoard(){const tpl=document.getElementById('pageTpl');board3.innerH
     board3.appendChild(col);});
   const frames=[...board3.querySelectorAll('.col-frame')];let lock=false;
   frames.forEach(f=>f.addEventListener('scroll',()=>{if(lock)return;lock=true;frames.forEach(o=>{if(o!==f)o.scrollTop=f.scrollTop;});requestAnimationFrame(()=>lock=false);}));}
-document.getElementById('viewSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const v=b.dataset.v;html.setAttribute('data-view',v);
-  b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
-  const cmp=v==='compare',tok=v==='tokens',comp=v==='components';
-  document.getElementById('presetCtl').style.display=(cmp||tok)?'none':'';   // 컴포넌트 뷰에선 노브 유지(컴포넌트에 반영)
-  document.getElementById('deviceGrp').style.display=(v==='interactive')?'':'none';
+/* 라우팅: 좌측 탐색(nav) → 뷰/탭 전환 + 인스펙터 역할 정리 */
+function route(view,tab){
+  html.setAttribute('data-view',view);
+  document.querySelectorAll('#nav .nav-item').forEach(x=>x.classList.toggle('on',x.dataset.view===view && (!x.dataset.tab||x.dataset.tab===tab)));
+  const cmp=view==='compare',tok=view==='tokens',comp=view==='components',home=view==='interactive';
+  document.getElementById('presetCtl').style.display=(home||comp)?'':'none';  // 노브: 홈+컴포넌트에만
+  document.getElementById('deviceGrp').style.display=home?'':'none';          // 디바이스: 홈에만
+  document.getElementById('brandGrp').style.display=cmp?'none':'';            // 브랜드 토글: 비교 뷰에선 숨김
   document.getElementById('compareNote').style.display=cmp?'':'none';
   document.getElementById('tokNote').style.display=tok?'':'none';
   if(cmp)buildBoard();
-  if(tok)renderTokenTab(curTab);
-  if(comp)renderCmpTab(curCmpTab);});
+  if(tok)renderTokenTab(tab||curTab);
+  if(comp)renderCmpTab(tab||curCmpTab);
+}
+document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('.nav-item');if(!b)return;route(b.dataset.view,b.dataset.tab);});
 
 /* ================= TOKENS VIEW (Figma 컬렉션 브라우저) ================= */
 const SCALE_STR="color/gray/00|#000000;color/gray/05|#0e0f10;color/gray/10|#1b1c1d;color/gray/20|#2f3032;color/gray/30|#46474a;color/gray/40|#5d5e61;color/gray/50|#76777a;color/gray/60|#909194;color/gray/70|#abacaf;color/gray/80|#c7c8cb;color/gray/90|#e3e4e6;color/gray/94|#edeef0;color/gray/96|#f3f4f6;color/gray/100|#ffffff;color/blue/05|#000e2b;color/blue/10|#001a47;color/blue/20|#002f6e;color/blue/30|#00439a;color/blue/40|#0058c6;color/blue/50|#1772ed;color/blue/60|#6f91ff;color/blue/70|#a2b9ff;color/blue/80|#cbd9ff;color/blue/90|#ebf0ff;color/red/05|#2d0001;color/red/10|#410002;color/red/20|#690005;color/red/30|#93000b;color/red/40|#b7211f;color/red/50|#db3c35;color/red/55|#ec483f;color/red/58|#f75046;color/red/60|#fe554b;color/red/70|#ff897d;color/red/80|#ffb4ab;color/red/90|#ffdad6;color/orange/05|#220a00;color/orange/10|#331200;color/orange/20|#532200;color/orange/30|#763300;color/orange/40|#9b4500;color/orange/50|#bf5a0e;color/orange/60|#df7329;color/orange/70|#ff8d44;color/orange/80|#ffb68d;color/orange/90|#ffdbc9;color/green/05|#07140c;color/green/10|#012111;color/green/20|#003820;color/green/30|#1b5135;color/green/40|#1a6b45;color/green/50|#078955;color/green/60|#00a667;color/green/70|#3ac280;color/green/80|#71db9f;color/green/90|#baefcb;color/purple/05|#19003e;color/purple/10|#260059;color/purple/20|#40008c;color/purple/30|#5823ab;color/purple/40|#7141c4;color/purple/50|#8b5cdf;color/purple/60|#a577fb;color/purple/70|#bd99ff;color/purple/80|#d4bbff;color/purple/90|#ebdcff;color/alpha/black/05|#0000000d;color/alpha/black/10|#0000001a;color/alpha/black/15|#00000026;color/alpha/black/20|#00000033;color/alpha/black/30|#0000004d;color/alpha/black/40|#00000066;color/alpha/black/50|#00000080;color/alpha/black/60|#00000099;color/alpha/white/30|#ffffff4d;color/alpha/white/50|#ffffff80;color/alpha/white/70|#ffffffb2;color/alpha/red/10|#ec483f1a;color/alpha/red/20|#ec483f33;color/alpha/green/10|#0789551a;color/alpha/blue/20|#3880f433;color/alpha/gray/05|#0e0f100d;color/alpha/orange/10|#bf5a0e1a";
@@ -790,6 +793,9 @@ function renderCmpTab(tab){curCmpTab=tab;
 }
 document.getElementById('cmpTabs').innerHTML=CMP_TABS.map(([t,l],i)=>`<button data-t="${t}" class="${i===0?'on':''}">${l}</button>`).join('');
 document.getElementById('cmpTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)renderCmpTab(b.dataset.t);});
+
+/* 초기 라우트 */
+route('interactive');
 </script>
 </body>
 </html>
