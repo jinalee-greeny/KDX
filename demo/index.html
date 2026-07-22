@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KDX 홈페이지 — 디자인 시스템 데모 (v0.10)</title>
+<title>KDX 홈페이지 — 디자인 시스템 데모 (v0.11)</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css">
 <style>
 /* ===== TIER 0 SCALE + 뉴트럴 ===== */
@@ -19,15 +19,18 @@
   --elev-4:0 20px 48px rgba(20,23,28,.16),0 8px 18px rgba(20,23,28,.08);/* 모달·다이얼로그 */
   --elev-up:0 -8px 24px rgba(20,23,28,.08);                             /* 바텀시트·스티키 */
   --sh-1:var(--elev-1); --sh-2:var(--elev-2); --sh-frame:var(--elev-4);
-  --st-success:#0e9f6e; --st-success-bg:#ecfdf5; --st-warning:#c2660a; --st-warning-bg:#fff7ed; --st-critical:#dc2626; --st-critical-bg:#fef2f2;
+  --st-success:#0e9f6e; --st-success-bg:#ecfdf5; --st-warning:#c2660a; --st-warning-bg:#fff7ed; --st-critical:#dc2626; --st-critical-bg:#fef2f2; --st-critical-strong:#b42318;
+  /* 컴포넌트 상태 토큰 (브랜드 무관) */
+  --comp-disabled-fill:#eef0f3; --comp-disabled-fg:#adb2ba; --comp-disabled-bdr:#e6e8ec; --comp-track:#d3d7dd;
 }
 /* ===== TIER 1 BRAND (교체 지점) ===== */
 [data-brand="deepblue"]{--brand-p05:#F2F5FA;--brand-p10:#D9E1F2;--brand-p20:#AFC0E9;--brand-p40:#205CE9;--brand-p50:#1245BA;--brand-p55:#103CA2;--brand-p60:#0E348B;--brand-p70:#0F2762;--brand-font:"Pretendard Variable",system-ui,sans-serif}
 [data-brand="emerald"]{--brand-p05:#EAFAF4;--brand-p10:#C7F0E1;--brand-p20:#8FE0C4;--brand-p40:#12A87C;--brand-p50:#098A68;--brand-p55:#08795B;--brand-p60:#06694E;--brand-p70:#054E3B;--brand-font:"Pretendard Variable",system-ui,sans-serif}
 [data-brand="violet"]{--brand-p05:#F4EEFB;--brand-p10:#E4D3F5;--brand-p20:#C9A8EB;--brand-p40:#7A2FD1;--brand-p50:#5B14B8;--brand-p55:#5012A1;--brand-p60:#450F8B;--brand-p70:#320B63;--brand-font:"Pretendard Variable",system-ui,sans-serif}
 /* ===== TIER 2 SEMANTIC ===== */
-[data-brand]{--accent:var(--brand-p50);--accent-strong:var(--brand-p60);--accent-subtle:var(--brand-p05);--accent-line:var(--brand-p20);--on-accent:#fff;--font:var(--brand-font);
-  --up:#e5484d;--down:#1e6fe0;--flat:#8b909a;--r-full:999px}
+[data-brand]{--accent:var(--brand-p50);--accent-strong:var(--brand-p60);--accent-press:var(--brand-p70);--accent-subtle:var(--brand-p05);--accent-line:var(--brand-p20);--on-accent:#fff;--font:var(--brand-font);
+  --up:#e5484d;--down:#1e6fe0;--flat:#8b909a;--r-full:999px;
+  --focus-ring:0 0 0 3px var(--accent-subtle),0 0 0 1.5px var(--accent)}
 /* ===== 프리셋 노브 ===== */
 [data-radius="sharp"]  {--r-xs:2px;--r-s:2px; --r-m:4px; --r-l:6px; --r-2xl:12px}
 [data-radius="default"]{--r-xs:4px;--r-s:8px; --r-m:12px;--r-l:16px;--r-2xl:24px}
@@ -162,10 +165,21 @@ html[data-view="compare"] #frame{display:none}
 /* buttons */
 .btn{font-weight:600;font-size:var(--ctrl-fs,15px);min-height:var(--ctrl-h,46px);padding:0 var(--ctrl-px,22px);border-radius:var(--r-m);display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:.15s;white-space:nowrap}
 .btn svg{width:1.15em;height:1.15em}
-.btn-primary{background:var(--accent);color:var(--on-accent)}.btn-primary:hover{background:var(--accent-strong)}
-.btn-ghost{background:transparent;color:var(--fg);border:var(--bw) solid var(--bc)}.btn-ghost:hover{border-color:var(--fg);background:var(--bg-sunken)}
+.btn-primary{background:var(--accent);color:var(--on-accent)}
+.btn-primary:hover,.btn-primary.is-hover{background:var(--accent-strong)}
+.btn-primary:active,.btn-primary.is-pressed{background:var(--accent-press)}
 .btn-neutral{background:var(--fg);color:#fff}
-.btn[disabled]{opacity:.42;pointer-events:none}
+.btn-neutral:hover,.btn-neutral.is-hover{background:#2b3038}
+.btn-neutral:active,.btn-neutral.is-pressed{background:#000}
+.btn-ghost{background:transparent;color:var(--fg);border:var(--bw) solid var(--bc)}
+.btn-ghost:hover,.btn-ghost.is-hover{border-color:var(--fg);background:var(--bg-sunken)}
+.btn-ghost:active,.btn-ghost.is-pressed{background:#e7e9ec}
+.btn-danger{background:var(--st-critical);color:#fff}
+.btn-danger:hover,.btn-danger.is-hover{background:var(--st-critical-strong)}
+.btn-danger:active,.btn-danger.is-pressed{background:#991b1b}
+.btn:focus-visible,.btn.is-focus{outline:none;box-shadow:var(--focus-ring)}
+.btn[disabled],.btn.is-disabled{background:var(--comp-disabled-fill);color:var(--comp-disabled-fg);border-color:transparent;pointer-events:none;box-shadow:none}
+.btn-ghost[disabled],.btn-ghost.is-disabled{background:transparent;color:var(--comp-disabled-fg);border-color:var(--comp-disabled-bdr)}
 .btn-sm{min-height:38px;padding:0 15px;font-size:13.5px}
 .btn-lg{min-height:calc(var(--ctrl-h) + 6px);padding:0 calc(var(--ctrl-px) + 6px);font-size:calc(var(--ctrl-fs) + 1px)}
 
@@ -258,6 +272,65 @@ html[data-view="compare"] #frame{display:none}
 .foot a{display:block;padding:4px 0}.foot a:hover{color:var(--fg)}
 .copyright{grid-column:1/-1;border-top:1px solid var(--line);padding-top:18px;font-size:12px}
 
+/* ===== COMPONENTS (정식) — 상태·변형 컴포넌트 + 문서 뷰 ===== */
+.components{display:none;width:100%;max-width:1080px;background:var(--bg);border-radius:16px;box-shadow:var(--sh-frame);overflow:hidden}
+html[data-view="components"] #frame{display:none}
+html[data-view="components"] .components{display:block}
+.cmp-sec{margin-bottom:38px}
+.cmp-h{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+.cmp-h h3{font-size:19px;font-weight:800;letter-spacing:-.02em}
+.cmp-h .anat{font-family:ui-monospace,monospace;font-size:11px;color:var(--fg-mut)}
+.cmp-desc{font-size:13.5px;color:var(--fg-sub);margin-bottom:18px;max-width:62ch;line-height:1.55}
+.cmp-sub{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--fg-mut);margin:20px 0 12px}
+.cmp-note{font-size:11.5px;color:var(--fg-sub);background:var(--bg-sunken);border-radius:9px;padding:10px 13px;margin-top:16px;font-family:ui-monospace,Menlo,monospace;line-height:1.65}
+.cmp-note b{color:var(--accent)}
+/* button state matrix */
+.cmatrix{display:grid;grid-template-columns:80px repeat(5,minmax(0,1fr));gap:14px 12px;align-items:center;max-width:840px}
+.cmatrix .ch{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--fg-mut);text-align:center}
+.cmatrix .rh{font-size:12px;font-weight:700}
+.cmatrix .cell{display:flex;justify-content:center}
+.cmatrix .cell .btn{width:100%;max-width:112px}
+.crow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+/* inputs */
+.inp{width:100%;min-height:var(--ctrl-h);border:var(--bw) solid var(--bc);border-radius:var(--r-s);padding:0 14px;font-size:14px;background:var(--bg);color:var(--fg);display:flex;align-items:center;gap:8px}
+.inp svg{width:16px;height:16px;color:var(--fg-mut);flex:none}
+.inp.is-hover{border-color:#c2c6cd}
+.inp.is-focus{border-color:var(--accent);box-shadow:var(--focus-ring)}
+.inp.is-error{border-color:var(--st-critical);box-shadow:0 0 0 3px var(--st-critical-bg)}
+.inp.is-disabled{background:var(--bg-sunken);color:var(--comp-disabled-fg);border-color:var(--comp-disabled-bdr)}
+.inp .ph{color:var(--fg-mut)}
+.flds{display:flex;flex-wrap:wrap;gap:18px}
+.fld{width:280px}
+.fld .fl{display:block;font-size:12.5px;font-weight:600;margin-bottom:7px}
+.fld .fl .req{color:var(--st-critical)}
+.fld .fh{font-size:11.5px;color:var(--fg-mut);margin-top:7px}
+.fld .fe{font-size:11.5px;color:var(--st-critical);margin-top:7px;display:flex;align-items:center;gap:4px}
+.fld .fe svg{width:12px;height:12px}
+.fld .stt{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--fg-mut);margin-bottom:7px;letter-spacing:.03em}
+/* selection controls */
+.opt{display:inline-flex;align-items:center;gap:9px;font-size:14px;color:var(--fg)}
+.opt.dis{color:var(--comp-disabled-fg)}
+.chk{width:20px;height:20px;border:1.5px solid var(--bc);border-radius:var(--r-xs);flex:none;display:grid;place-items:center;color:#fff;background:var(--bg)}
+.chk svg{width:13px;height:13px;opacity:0}
+.chk.on{background:var(--accent);border-color:var(--accent)} .chk.on svg{opacity:1}
+.chk.dis{background:var(--comp-disabled-fill);border-color:var(--comp-disabled-bdr)}
+.rdo{width:20px;height:20px;border:1.5px solid var(--bc);border-radius:50%;flex:none;display:grid;place-items:center;background:var(--bg)}
+.rdo::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--accent);transform:scale(0);transition:.12s}
+.rdo.on{border-color:var(--accent)} .rdo.on::after{transform:scale(1)}
+.rdo.dis{background:var(--comp-disabled-fill);border-color:var(--comp-disabled-bdr)}
+.tgl{width:40px;height:24px;border-radius:999px;background:var(--comp-track);flex:none;position:relative;transition:.15s}
+.tgl::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:var(--elev-1);transition:.15s}
+.tgl.on{background:var(--accent)} .tgl.on::after{left:19px}
+.tgl.dis{background:var(--comp-disabled-bdr)}
+/* feedback */
+.alert{display:flex;gap:11px;align-items:flex-start;padding:13px 15px;border-radius:var(--r-m);max-width:440px;border:1px solid var(--line-2);background:var(--bg);color:var(--fg)}
+.alert .ai{flex:none;margin-top:1px}.alert .ai svg{width:18px;height:18px}
+.alert .at{font-size:13.5px;font-weight:700}.alert .ad{font-size:12.5px;color:var(--fg-sub);margin-top:2px}
+.alert.suc{background:var(--st-success-bg);border-color:#c7ecd9}.alert.suc .ai{color:var(--st-success)}
+.alert.warn{background:var(--st-warning-bg);border-color:#f2dcc0}.alert.warn .ai{color:var(--st-warning)}
+.alert.crit{background:var(--st-critical-bg);border-color:#f3cfcf}.alert.crit .ai{color:var(--st-critical)}
+.alert.info{background:var(--accent-subtle);border-color:var(--accent-line)}.alert.info .ai{color:var(--accent)}
+
 /* ===== TOKENS VIEW ===== */
 .tokens{display:none;width:100%;max-width:1080px;background:var(--bg);border-radius:16px;box-shadow:var(--sh-frame);overflow:hidden}
 html[data-view="tokens"] #frame,html[data-view="tokens"] .board3{display:none}
@@ -343,6 +416,7 @@ html[data-view="compare"] .board3{display:flex}
 <symbol id="i-chevr" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
 <symbol id="i-chevd" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
 <symbol id="i-won" viewBox="0 0 24 24"><path d="M4 5l3.5 14L12 8l4.5 11L20 5M3 10h18M3 14h18"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></symbol>
 </defs></svg>
 
 <div class="app">
@@ -469,6 +543,15 @@ html[data-view="compare"] .board3{display:flex}
       </div>
     </div>
     <div class="board3" id="board3"></div>
+    <!-- 컴포넌트 뷰 (정식 컴포넌트 문서: 변형·상태) -->
+    <div class="components" id="componentsView" data-radius="default" data-density="default" data-border="default" data-size="m">
+      <div class="tk-top">
+        <div class="tk-title">컴포넌트 <span>· 변형 · 상태(hover·focus·pressed·disabled) · 토큰 바인딩</span></div>
+        <div class="tk-tabs" id="cmpTabs"></div>
+      </div>
+      <div class="tk-panel" id="cmpPanel"></div>
+    </div>
+
     <!-- 토큰 뷰 (Figma 내보낸 컬렉션 브라우저) -->
     <div class="tokens" id="tokensView">
       <div class="tk-top">
@@ -481,8 +564,8 @@ html[data-view="compare"] .board3{display:flex}
 
   <!-- ============ 우: 인스펙터(컨트롤) ============ -->
   <aside class="inspector">
-    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#i-gem"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.10</p></div></div>
-    <div class="grp"><span class="gl">View</span><div class="seg" id="viewSeg"><button data-v="interactive" class="on">프리뷰</button><button data-v="compare">비교</button><button data-v="tokens">토큰</button></div></div>
+    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#i-gem"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.11</p></div></div>
+    <div class="grp"><span class="gl">View</span><div class="seg" id="viewSeg"><button data-v="interactive" class="on">프리뷰</button><button data-v="compare">비교</button><button data-v="components">컴포넌트</button><button data-v="tokens">토큰</button></div></div>
     <div class="grp"><span class="gl">Brand <em>교체 지점</em></span><div class="brands" id="brands">
       <button class="brandbtn on" data-b="deepblue"><span class="bdot" style="background:#1245BA"></span><span class="bn">Deep Blue</span><span class="bhex">#1245BA</span><span class="bck"><svg class="i"><use href="#i-check"/></svg></span></button>
       <button class="brandbtn" data-b="emerald"><span class="bdot" style="background:#098A68"></span><span class="bn">Emerald</span><span class="bhex">#098A68</span><span class="bck"><svg class="i"><use href="#i-check"/></svg></span></button>
@@ -503,7 +586,7 @@ html[data-view="compare"] .board3{display:flex}
 </div>
 
 <script>
-const html=document.documentElement, frame=document.getElementById('frame'), library=document.getElementById('library');
+const html=document.documentElement, frame=document.getElementById('frame'), library=document.getElementById('library'), componentsEl=document.getElementById('componentsView');
 const RAD={sharp:{m:4,l:6},default:{m:12,l:16},rounded:{m:20,l:24}}, DENS={compact:.84,default:1,comfortable:1.22},
       BORD={hairline:1,default:1,strong:1.5}, SIZE={s:{ctrl:38,icon:20},m:{ctrl:46,icon:22},l:{ctrl:54,icon:26}};
 const KNOBS=[['data-layout','grid'],['data-radius','default'],['data-density','default'],['data-border','default'],['data-size','m']];
@@ -516,7 +599,7 @@ function renderReadout(scope,el){const r=scope.getAttribute('data-radius'),d=DEN
   el.innerHTML=[['comp/radius/button → radius/m',RAD[r].m+'px'],['comp/radius/card → radius/l',RAD[r].l+'px'],['spacing ×','×'+d],['border/'+bd,BORD[bd]+'px'],['size/control/'+sz,SIZE[sz].ctrl+'px'],['size/icon',SIZE[sz].icon+'px']]
    .map(([k,v])=>`<div class="rr"><span class="rk">${k}</span><span class="rv">${v}</span></div>`).join('');}
 document.querySelectorAll('#presetCtl .seg').forEach(seg=>seg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const a=seg.dataset.attr;
-  frame.setAttribute(a,b.dataset.val); if(a!=='data-layout') library.setAttribute(a,b.dataset.val);
+  frame.setAttribute(a,b.dataset.val); if(a!=='data-layout'){ library.setAttribute(a,b.dataset.val); componentsEl.setAttribute(a,b.dataset.val); }
   seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); renderReadout(frame,document.getElementById('readout'));}));
 renderReadout(frame,document.getElementById('readout'));
 
@@ -546,13 +629,14 @@ function buildBoard(){const tpl=document.getElementById('pageTpl');board3.innerH
   frames.forEach(f=>f.addEventListener('scroll',()=>{if(lock)return;lock=true;frames.forEach(o=>{if(o!==f)o.scrollTop=f.scrollTop;});requestAnimationFrame(()=>lock=false);}));}
 document.getElementById('viewSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const v=b.dataset.v;html.setAttribute('data-view',v);
   b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
-  const cmp=v==='compare',tok=v==='tokens';
-  document.getElementById('presetCtl').style.display=(cmp||tok)?'none':'';
-  document.getElementById('deviceGrp').style.display=(cmp||tok)?'none':'';
+  const cmp=v==='compare',tok=v==='tokens',comp=v==='components';
+  document.getElementById('presetCtl').style.display=(cmp||tok)?'none':'';   // 컴포넌트 뷰에선 노브 유지(컴포넌트에 반영)
+  document.getElementById('deviceGrp').style.display=(v==='interactive')?'':'none';
   document.getElementById('compareNote').style.display=cmp?'':'none';
   document.getElementById('tokNote').style.display=tok?'':'none';
   if(cmp)buildBoard();
-  if(tok)renderTokenTab(curTab);});
+  if(tok)renderTokenTab(curTab);
+  if(comp)renderCmpTab(curCmpTab);});
 
 /* ================= TOKENS VIEW (Figma 컬렉션 브라우저) ================= */
 const SCALE_STR="color/gray/00|#000000;color/gray/05|#0e0f10;color/gray/10|#1b1c1d;color/gray/20|#2f3032;color/gray/30|#46474a;color/gray/40|#5d5e61;color/gray/50|#76777a;color/gray/60|#909194;color/gray/70|#abacaf;color/gray/80|#c7c8cb;color/gray/90|#e3e4e6;color/gray/94|#edeef0;color/gray/96|#f3f4f6;color/gray/100|#ffffff;color/blue/05|#000e2b;color/blue/10|#001a47;color/blue/20|#002f6e;color/blue/30|#00439a;color/blue/40|#0058c6;color/blue/50|#1772ed;color/blue/60|#6f91ff;color/blue/70|#a2b9ff;color/blue/80|#cbd9ff;color/blue/90|#ebf0ff;color/red/05|#2d0001;color/red/10|#410002;color/red/20|#690005;color/red/30|#93000b;color/red/40|#b7211f;color/red/50|#db3c35;color/red/55|#ec483f;color/red/58|#f75046;color/red/60|#fe554b;color/red/70|#ff897d;color/red/80|#ffb4ab;color/red/90|#ffdad6;color/orange/05|#220a00;color/orange/10|#331200;color/orange/20|#532200;color/orange/30|#763300;color/orange/40|#9b4500;color/orange/50|#bf5a0e;color/orange/60|#df7329;color/orange/70|#ff8d44;color/orange/80|#ffb68d;color/orange/90|#ffdbc9;color/green/05|#07140c;color/green/10|#012111;color/green/20|#003820;color/green/30|#1b5135;color/green/40|#1a6b45;color/green/50|#078955;color/green/60|#00a667;color/green/70|#3ac280;color/green/80|#71db9f;color/green/90|#baefcb;color/purple/05|#19003e;color/purple/10|#260059;color/purple/20|#40008c;color/purple/30|#5823ab;color/purple/40|#7141c4;color/purple/50|#8b5cdf;color/purple/60|#a577fb;color/purple/70|#bd99ff;color/purple/80|#d4bbff;color/purple/90|#ebdcff;color/alpha/black/05|#0000000d;color/alpha/black/10|#0000001a;color/alpha/black/15|#00000026;color/alpha/black/20|#00000033;color/alpha/black/30|#0000004d;color/alpha/black/40|#00000066;color/alpha/black/50|#00000080;color/alpha/black/60|#00000099;color/alpha/white/30|#ffffff4d;color/alpha/white/50|#ffffff80;color/alpha/white/70|#ffffffb2;color/alpha/red/10|#ec483f1a;color/alpha/red/20|#ec483f33;color/alpha/green/10|#0789551a;color/alpha/blue/20|#3880f433;color/alpha/gray/05|#0e0f100d;color/alpha/orange/10|#bf5a0e1a";
@@ -622,8 +706,53 @@ function renderTokenTab(tab){curTab=tab;
 }
 document.getElementById('tkTabs').innerHTML=TABS.map(([t,l],i)=>`<button data-t="${t}" class="${i===0?'on':''}">${l}</button>`).join('');
 document.getElementById('tkTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)renderTokenTab(b.dataset.t);});
-// 브랜드 스왑 시 토큰 뷰도 갱신
+// 브랜드 스왑 시 토큰 뷰도 갱신 (컴포넌트 뷰는 CSS 변수로 자동 반영)
 const _setBrand=setBrand;setBrand=function(b){_setBrand(b);if(html.getAttribute('data-view')==='tokens')renderTokenTab(curTab);};
+
+/* ================= COMPONENTS VIEW (정식 컴포넌트 문서) ================= */
+const CMP_TABS=[['buttons','Buttons'],['forms','Forms'],['selection','Selection'],['feedback','Feedback']];
+let curCmpTab='buttons';
+const BVAR=[['Primary','btn-primary'],['Neutral','btn-neutral'],['Ghost','btn-ghost'],['Danger','btn-danger']];
+const BST=[['','Default'],['is-hover','Hover'],['is-focus','Focus'],['is-pressed','Pressed'],['is-disabled','Disabled']];
+function renderCmpTab(tab){curCmpTab=tab;
+  document.querySelectorAll('#cmpTabs button').forEach(x=>x.classList.toggle('on',x.dataset.t===tab));
+  const P=document.getElementById('cmpPanel');let h='';
+  if(tab==='buttons'){
+    h+='<div class="cmp-sec"><div class="cmp-h"><h3>Button</h3><span class="anat">.btn · .btn-{primary|neutral|ghost|danger} · .btn-{sm|lg}</span></div><div class="cmp-desc">액션 위계 4종 × 상태 5종. 모든 상태가 토큰에 바인딩됩니다.</div>';
+    h+='<div class="cmatrix"><span></span>'+BST.map(([,l])=>`<span class="ch">${l}</span>`).join('');
+    BVAR.forEach(([lab,cls])=>{h+=`<span class="rh">${lab}</span>`+BST.map(([st])=>`<span class="cell"><button class="btn ${cls} ${st}">${lab}</button></span>`).join('');});
+    h+='</div>';
+    h+='<div class="cmp-sub">Sizes</div><div class="crow"><button class="btn btn-primary btn-sm">Small</button><button class="btn btn-primary">Medium</button><button class="btn btn-primary btn-lg">Large</button></div>';
+    h+='<div class="cmp-sub">With icon</div><div class="crow"><button class="btn btn-primary">시작하기 <svg class="i"><use href="#i-arrow"/></svg></button><button class="btn btn-ghost"><svg class="i"><use href="#i-search"/></svg> 검색</button></div>';
+    h+='<div class="cmp-note">fill=<b>comp/fill/accent/primary</b> · hover=<b>accent/strong</b> · pressed=<b>accent/press</b> · focus=<b>focus-ring</b> · disabled=<b>comp-disabled</b> · radius=<b>comp/radius/button→radius/m</b> · height=<b>size/control</b> · pad=<b>comp/pad/button</b></div></div>';
+  } else if(tab==='forms'){
+    const fld=(stt,cls,val,ph,helper,err)=>`<div class="fld"><span class="stt">${stt}</span><label class="fl">투자 금액${err?' <span class="req">*</span>':''}</label><div class="inp ${cls}"><svg class="i"><use href="#i-won"/></svg><span class="${val?'':'ph'}">${val||ph}</span></div>${err?`<div class="fe"><svg class="i"><use href="#i-alert"/></svg>${err}</div>`:helper?`<div class="fh">${helper}</div>`:''}</div>`;
+    h+='<div class="cmp-sec"><div class="cmp-h"><h3>Input / Field</h3><span class="anat">.inp · .is-{hover|focus|error|disabled}</span></div><div class="cmp-desc">라벨 · 필드 · 헬퍼/에러. 상태별 보더·포커스 링·배경이 토큰에 바인딩됩니다.</div><div class="flds">';
+    h+=fld('Default','','','50,000','원 단위로 입력','');
+    h+=fld('Focus','is-focus','50,000','','원 단위로 입력','');
+    h+=fld('Error','is-error','5,00','','','최소 10,000원 이상 입력하세요');
+    h+=fld('Disabled','is-disabled','','비활성 필드','','');
+    h+='</div><div class="cmp-sub">Select</div><div class="fld"><div class="inp"><span>부동산</span><svg class="i" style="margin-left:auto"><use href="#i-chevd"/></svg></div></div>';
+    h+='<div class="cmp-note">border=<b>border/default→dimension/1</b> · focus=<b>focus-ring</b> · error=<b>status/critical</b> · disabled bg=<b>bg/sunken</b> · radius=<b>comp/radius/input→radius/s</b> · height=<b>size/control</b></div></div>';
+  } else if(tab==='selection'){
+    h+='<div class="cmp-sec"><div class="cmp-h"><h3>Selection</h3><span class="anat">.chk · .rdo · .tgl</span></div><div class="cmp-desc">체크박스 · 라디오 · 토글. 선택 상태는 accent, 비활성은 disabled 토큰.</div>';
+    h+='<div class="cmp-sub">Checkbox</div><div class="crow" style="gap:22px"><span class="opt"><span class="chk on"><svg class="i"><use href="#i-check"/></svg></span>선택됨</span><span class="opt"><span class="chk"></span>미선택</span><span class="opt dis"><span class="chk dis"></span>비활성</span></div>';
+    h+='<div class="cmp-sub">Radio</div><div class="crow" style="gap:22px"><span class="opt"><span class="rdo on"></span>선택됨</span><span class="opt"><span class="rdo"></span>미선택</span><span class="opt dis"><span class="rdo dis"></span>비활성</span></div>';
+    h+='<div class="cmp-sub">Toggle</div><div class="crow" style="gap:22px"><span class="opt"><span class="tgl on"></span>On</span><span class="opt"><span class="tgl"></span>Off</span><span class="opt dis"><span class="tgl dis"></span>비활성</span></div>';
+    h+='<div class="cmp-note">선택=<b>comp/fill/accent/primary</b> · 보더=<b>bdr</b> · 트랙=<b>comp-track</b> · knob 그림자=<b>elev-1</b> · 비활성=<b>comp-disabled</b></div></div>';
+  } else if(tab==='feedback'){
+    const al=(cls,ic,t,d)=>`<div class="alert ${cls}"><span class="ai"><svg class="i"><use href="#${ic}"/></svg></span><div><div class="at">${t}</div><div class="ad">${d}</div></div></div>`;
+    h+='<div class="cmp-sec"><div class="cmp-h"><h3>Feedback</h3><span class="anat">.alert · .badge · .chip</span></div><div class="cmp-desc">배지 · 칩 · 알림. status 색은 브랜드 무관 고정, info만 accent를 씁니다.</div>';
+    h+='<div class="cmp-sub">Badges</div><div class="crow"><span class="badge suc"><svg class="i"><use href="#i-check"/></svg>성공</span><span class="badge warn">경고</span><span class="badge crit">오류</span><span class="badge up"><svg class="i"><use href="#i-trend"/></svg>3.2%</span><span class="badge down"><svg class="i"><use href="#i-trenddn"/></svg>1.4%</span></div>';
+    h+='<div class="cmp-sub">Chips</div><div class="crow"><span class="chip accent">부동산</span><span class="chip neutral">미술품</span><span class="chip neutral">물류</span></div>';
+    h+='<div class="cmp-sub">Alerts</div><div class="crow" style="flex-direction:column;align-items:stretch;gap:10px">';
+    h+=al('info','i-gem','정보','브랜드 미확정 상태의 시스템 데모입니다.')+al('suc','i-check','성공','투자가 정상적으로 완료되었습니다.')+al('warn','i-alert','경고','모집 마감까지 D-1 남았습니다.')+al('crit','i-alert','오류','최소 투자 금액을 확인해 주세요.');
+    h+='</div><div class="cmp-note">status=<b>st-success/warning/critical</b>(브랜드 무관) · info=<b>accent-subtle</b> · chart 배지=<b>up/down</b>(빨강·파랑 고정)</div></div>';
+  }
+  P.innerHTML=h;
+}
+document.getElementById('cmpTabs').innerHTML=CMP_TABS.map(([t,l],i)=>`<button data-t="${t}" class="${i===0?'on':''}">${l}</button>`).join('');
+document.getElementById('cmpTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)renderCmpTab(b.dataset.t);});
 </script>
 </body>
 </html>
