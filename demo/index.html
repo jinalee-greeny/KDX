@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KDX 홈페이지 — 디자인 시스템 데모 (v0.12)</title>
+<title>KDX 홈페이지 — 디자인 시스템 데모 (v0.13)</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css">
 <style>
 /* ===== TIER 0 SCALE + 뉴트럴 ===== */
@@ -142,7 +142,7 @@ html[data-view="compare"] #frame{display:none}
 .hintnote{font-size:11px;color:var(--fg-mut);line-height:1.5;padding:2px}
 
 /* ===== KDX PAGE (컨테이너 쿼리) ===== */
-.page{--pad:24px;--gut:calc(20px*var(--dens));--sect:calc(80px*var(--dens));--disp:34px;--h2:26px;color:var(--fg);font-family:var(--font);word-break:keep-all}
+.page{--pad:24px;--gut:calc(20px*var(--dens));--sect:calc(80px*var(--dens));--disp:34px;--h2:26px;color:var(--fg);font-family:var(--font);word-break:keep-all;font-size:15px}
 @container page (min-width:760px){.page{--pad:48px;--gut:calc(24px*var(--dens));--sect:calc(112px*var(--dens));--disp:52px;--h2:34px}}
 @container page (min-width:1040px){.page{--pad:64px;--gut:calc(28px*var(--dens));--sect:calc(136px*var(--dens));--disp:68px;--h2:40px}}
 .inner{padding-left:var(--pad);padding-right:var(--pad)}
@@ -157,7 +157,7 @@ html[data-view="compare"] #frame{display:none}
 .logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:18px;letter-spacing:-.02em}
 .logo .mark{width:28px;height:28px;border-radius:var(--r-xs);background:var(--accent);display:grid;place-items:center;color:#fff}
 .logo .mark svg{width:16px;height:16px}
-.navlinks{display:none;gap:30px;font-size:14.5px;font-weight:500;color:var(--fg-sub)}
+.navlinks{display:none;gap:30px;font-size:15px;font-weight:500;color:var(--fg-sub)}
 .navlinks a:hover{color:var(--fg)}
 .navcta{display:flex;align-items:center;gap:8px}.navcta .login{display:none}
 @container page (min-width:760px){.navlinks{display:flex}.navcta .login{display:inline-flex}}
@@ -188,18 +188,18 @@ html[data-view="compare"] #frame{display:none}
 @container page (min-width:1040px){.hero{grid-template-columns:1fr .9fr;align-items:center;gap:60px}}
 .hero h1{font-size:var(--disp)}
 .hero h1 .em{color:var(--accent)}
-.hero .lead{margin-top:22px;font-size:16.5px;line-height:1.65;color:var(--fg-sub);max-width:42ch}
+.hero .lead{margin-top:22px;font-size:17px;line-height:1.65;color:var(--fg-sub);max-width:42ch}
 .hero .actions{margin-top:30px;display:flex;flex-wrap:wrap;gap:calc(10px*var(--dens))}
 .visual{background:var(--accent-subtle);border-radius:var(--r-2xl);padding:calc(28px*var(--dens));display:grid;place-items:center;min-height:260px}
 .hcard{width:100%;max-width:330px;background:var(--bg);border-radius:var(--r-l);box-shadow:var(--sh-2);overflow:hidden}
 .hcard .hct{height:118px;background:var(--bg-sunken);position:relative;display:flex;align-items:flex-start;padding:12px}
 .hcard .hct::after{content:"";position:absolute;inset:0;background:var(--accent);opacity:.13}
-.hcard .htag{position:relative;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;background:var(--bg);color:var(--accent);padding:5px 10px;border-radius:var(--r-full);box-shadow:var(--sh-1)}
+.hcard .htag{position:relative;display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;background:var(--bg);color:var(--accent);padding:5px 10px;border-radius:var(--r-full);box-shadow:var(--sh-1)}
 .hcard .htag svg{width:13px;height:13px}
 .hcard .hcb{padding:16px 18px}
 .hcard .hcn{font-size:16px;font-weight:700}
 .hcard .hmeta{display:flex;gap:24px;margin-top:14px}
-.hcard .hmeta .ml{display:block;font-size:11px;color:var(--fg-mut);margin-bottom:2px}
+.hcard .hmeta .ml{display:block;font-size:12px;color:var(--fg-mut);margin-bottom:2px}
 .hcard .hmeta .mv{font-size:15px;font-weight:700}.hcard .hmeta .mv.ac{color:var(--accent)}
 .hcard .hbar{margin-top:16px;height:6px;background:var(--bg-sunken);border-radius:99px;overflow:hidden}
 .hcard .hbar i{display:block;height:100%;width:72%;background:var(--accent);border-radius:99px}
@@ -210,7 +210,7 @@ html[data-view="compare"] #frame{display:none}
 @container page (min-width:640px){.metrics{grid-template-columns:repeat(3,1fr)}}
 .metric{background:var(--bg);padding:34px 10px;text-align:center}
 .metric .mk{font-variant-numeric:tabular-nums;font-weight:800;font-size:34px;letter-spacing:-.03em}
-.metric .ml{margin-top:7px;font-size:13.5px;color:var(--fg-sub)}
+.metric .ml{margin-top:7px;font-size:13px;color:var(--fg-sub)}
 
 /* how it works */
 .section{padding-top:var(--sect)}
@@ -220,7 +220,7 @@ html[data-view="compare"] #frame{display:none}
 .step .sic{width:54px;height:54px;border-radius:var(--r-m);background:var(--accent-subtle);color:var(--accent);display:grid;place-items:center;margin:14px 0 18px}
 .step .sic svg{width:25px;height:25px}
 .step h3{font-size:21px;font-weight:800;letter-spacing:-.02em}  /* display EN */
-.step p{margin-top:9px;font-size:14.5px;color:var(--fg-sub);line-height:1.62}
+.step p{margin-top:9px;font-size:15px;color:var(--fg-sub);line-height:1.62}
 
 /* products */
 .plist{display:grid;gap:var(--gut)}
@@ -243,10 +243,10 @@ html[data-view="compare"] #frame{display:none}
 .pthumb .pic{position:absolute;top:12px;left:12px;width:36px;height:36px;border-radius:var(--r-s);background:var(--bg);color:var(--accent);display:grid;place-items:center;box-shadow:var(--sh-1)}
 .pthumb .pic svg{width:19px;height:19px}
 .pbody{padding:16px 18px}
-.pcat{font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--accent)}
-.ptitle{font-size:15.5px;font-weight:700;margin-top:7px;letter-spacing:-.01em}
+.pcat{font-size:12px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--accent)}
+.ptitle{font-size:16px;font-weight:700;margin-top:7px;letter-spacing:-.01em}
 .pmeta{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;gap:8px}
-.pprice{font-variant-numeric:tabular-nums;font-weight:700;font-size:14px}.pyield{font-size:12.5px;font-weight:700;color:var(--accent);white-space:nowrap}
+.pprice{font-variant-numeric:tabular-nums;font-weight:700;font-size:15px}.pyield{font-size:12px;font-weight:700;color:var(--accent);white-space:nowrap}
 
 /* features (why) */
 .cards{display:grid;gap:var(--gut)}
@@ -256,19 +256,19 @@ html[data-view="compare"] #frame{display:none}
 .fcard .ic{width:calc(var(--icon) + 22px);height:calc(var(--icon) + 22px);border-radius:var(--r-s);background:var(--accent-subtle);color:var(--accent);display:grid;place-items:center;margin-bottom:18px}
 .fcard .ic svg{width:var(--icon);height:var(--icon)}
 .fcard h3{font-size:17px;font-weight:700;letter-spacing:-.01em}
-.fcard p{margin-top:9px;font-size:14px;color:var(--fg-sub);line-height:1.62}
+.fcard p{margin-top:9px;font-size:15px;color:var(--fg-sub);line-height:1.62}
 
 /* cta */
 .ctaband{margin-top:var(--sect);border-radius:var(--r-2xl);background:var(--accent);color:#fff;padding:calc(56px*var(--dens)) 32px;text-align:center}
 .ctaband h2{font-size:var(--h2)}
-.ctaband p{margin-top:14px;opacity:.85;font-size:15.5px}
+.ctaband p{margin-top:14px;opacity:.85;font-size:16px}
 .ctaband .btn{margin-top:28px;background:#fff;color:var(--accent-strong)}.ctaband .btn:hover{background:#f0f2f5}
 
 /* footer */
-.foot{margin-top:var(--sect);border-top:1px solid var(--line);padding-top:44px;padding-bottom:52px;display:grid;gap:26px;color:var(--fg-mut);font-size:13.5px}
+.foot{margin-top:var(--sect);border-top:1px solid var(--line);padding-top:44px;padding-bottom:52px;display:grid;gap:26px;color:var(--fg-mut);font-size:13px}
 @container page (min-width:760px){.foot{grid-template-columns:1.5fr 1fr 1fr 1fr}}
 .foot .logo{font-size:16px;color:var(--fg)}
-.foot h4{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--fg-sub);margin-bottom:12px}
+.foot h4{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--fg-sub);margin-bottom:12px}
 .foot a{display:block;padding:4px 0}.foot a:hover{color:var(--fg)}
 .copyright{grid-column:1/-1;border-top:1px solid var(--line);padding-top:18px;font-size:12px}
 
@@ -574,7 +574,7 @@ html[data-view="compare"] .board3{display:flex}
 
   <!-- ============ 우: 인스펙터(컨트롤) ============ -->
   <aside class="inspector">
-    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.12</p></div></div>
+    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.13</p></div></div>
     <div class="grp"><span class="gl">View</span><div class="seg" id="viewSeg"><button data-v="interactive" class="on">프리뷰</button><button data-v="compare">비교</button><button data-v="components">컴포넌트</button><button data-v="tokens">토큰</button></div></div>
     <div class="grp"><span class="gl">Brand <em>교체 지점</em></span><div class="brands" id="brands">
       <button class="brandbtn on" data-b="deepblue"><span class="bdot" style="background:#1245BA"></span><span class="bn">Deep Blue</span><span class="bhex">#1245BA</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
@@ -739,7 +739,9 @@ document.getElementById('tkTabs').addEventListener('click',e=>{const b=e.target.
 const _setBrand=setBrand;setBrand=function(b){_setBrand(b);if(html.getAttribute('data-view')==='tokens')renderTokenTab(curTab);};
 
 /* ================= COMPONENTS VIEW (정식 컴포넌트 문서) ================= */
-const CMP_TABS=[['buttons','Buttons'],['forms','Forms'],['selection','Selection'],['feedback','Feedback']];
+const CMP_TABS=[['buttons','Buttons'],['forms','Forms'],['selection','Selection'],['feedback','Feedback'],['icon','Icon']];
+const ICON_MAP=[['검색 인풋','icon-action-search'],['금액·원화 인풋','icon-finance-won'],['Select · 드롭다운','icon-nav-down'],['외부·새 탭 링크','icon-action-external'],['페이지네이션 이전/다음','icon-nav-left · icon-nav-right'],['성공 알림·체크','icon-status-success'],['경고·오류 알림','icon-status-alert'],['상승/하락 배지','icon-trend-up · icon-trend-down'],['자산 카테고리 칩·카드','icon-cat-*']];
+const ICON_SZ=[['xs',12],['s',16],['m',20],['l',24],['xl',32]];
 let curCmpTab='buttons';
 const BVAR=[['Primary','btn-primary'],['Neutral','btn-neutral'],['Ghost','btn-ghost'],['Danger','btn-danger']];
 const BST=[['','Default'],['is-hover','Hover'],['is-focus','Focus'],['is-pressed','Pressed'],['is-disabled','Disabled']];
@@ -777,6 +779,18 @@ function renderCmpTab(tab){curCmpTab=tab;
     h+='<div class="cmp-sub">Alerts</div><div class="crow" style="flex-direction:column;align-items:stretch;gap:10px">';
     h+=al('info','i-gem','정보','브랜드 미확정 상태의 시스템 데모입니다.')+al('suc','i-check','성공','투자가 정상적으로 완료되었습니다.')+al('warn','i-alert','경고','모집 마감까지 D-1 남았습니다.')+al('crit','i-alert','오류','최소 투자 금액을 확인해 주세요.');
     h+='</div><div class="cmp-note">status=<b>st-success/warning/critical</b>(브랜드 무관) · info=<b>accent-subtle</b> · chart 배지=<b>up/down</b>(빨강·파랑 고정)</div></div>';
+  } else if(tab==='icon'){
+    h+='<div class="cmp-sec"><div class="cmp-h"><h3>Icon</h3><span class="anat">&lt;svg class="i"&gt;&lt;use href="#icon-…"/&gt;&lt;/svg&gt;</span></div><div class="cmp-desc">아이콘은 <b>currentColor</b>를 상속하고 크기는 <b>size/icon</b> 토큰을 따릅니다. 전체 목록·소스·교체는 토큰 뷰 → <b>Icons</b>(교체 지점) 참고.</div>';
+    h+='<div class="cmp-sub">Size · size/icon</div><div class="crow" style="align-items:flex-end;gap:22px">'+ICON_SZ.map(([k,px])=>`<span style="display:flex;flex-direction:column;align-items:center;gap:6px"><svg class="i" style="width:${px}px;height:${px}px"><use href="#icon-action-search"/></svg><span style="font-family:ui-monospace,monospace;font-size:10px;color:var(--fg-mut)">${k} · ${px}</span></span>`).join('')+'</div>';
+    h+='<div class="cmp-sub">Color · currentColor 상속</div><div class="crow" style="gap:14px">'
+      +'<span style="color:var(--fg)"><svg class="i" style="width:22px;height:22px"><use href="#icon-status-success"/></svg></span>'
+      +'<span style="color:var(--accent)"><svg class="i" style="width:22px;height:22px"><use href="#icon-status-success"/></svg></span>'
+      +'<span style="color:var(--fg-mut)"><svg class="i" style="width:22px;height:22px"><use href="#icon-status-success"/></svg></span>'
+      +'<span style="background:var(--accent);color:#fff;padding:8px;border-radius:8px;display:inline-flex"><svg class="i" style="width:22px;height:22px"><use href="#icon-status-success"/></svg></span></div>';
+    h+='<div class="cmp-sub">자동 매핑 · 컴포넌트 기본 아이콘</div><table class="tk-tbl" style="max-width:580px"><tr><th>컴포넌트 / 슬롯</th><th>기본 아이콘</th><th></th></tr>'
+      +ICON_MAP.map(([slot,ic])=>{const first=ic.split(' ')[0].replace('icon-cat-*','icon-cat-realestate');return `<tr><td>${slot}</td><td>${ic}</td><td><svg class="i" style="width:16px;height:16px;color:var(--accent)"><use href="#${first}"/></svg></td></tr>`;}).join('')+'</table>';
+    h+='<div class="cmp-sub">적용 예</div><div class="crow"><div class="fld" style="width:250px"><div class="inp"><svg class="i"><use href="#icon-action-search"/></svg><span class="ph">상품 검색</span></div></div><div class="fld" style="width:180px"><div class="inp"><span>부동산</span><svg class="i" style="margin-left:auto"><use href="#icon-nav-down"/></svg></div></div></div>';
+    h+='<div class="cmp-note">크기=<b>size/icon</b>(12·16·20·24·32) · 색=<b>currentColor</b> 상속 · 매핑된 슬롯엔 기본 아이콘 자동 적용 · 소스/교체=<b>토큰 뷰 → Icons</b></div></div>';
   }
   P.innerHTML=h;
 }
