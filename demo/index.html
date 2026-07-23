@@ -449,17 +449,26 @@ html[data-view="auth"] .authframe{display:block}
 .tk-elev .n{font-family:'Pretendard Variable',system-ui,sans-serif;font-size:12px;font-weight:700;margin-top:12px}.tk-elev .u{font-size:11px;color:var(--fg-mut);margin-top:2px}
 
 /* compare */
-.board3{display:none;overflow-x:auto;width:100%}
+/* ===== 브랜드 비교 = '달라지는 것만' 매트릭스 (행=항목, 열=브랜드) ===== */
+.board3{display:none;overflow-x:auto;width:100%;padding-bottom:6px}
 html[data-view="compare"] .board3{display:block}
-/* 내부 트랙: 폭이 남으면 가운데 정렬, 좁으면 왼쪽부터 스크롤(잘림 방지) */
-.board-track{display:flex;gap:20px;width:max-content;margin:0 auto;padding-bottom:4px}
-/* 컬럼 폭 = 선택된 디바이스 폭(컨테이너 쿼리가 반응) */
-.col{flex:none;width:390px}
-html[data-device="tablet"] .col{width:768px}
-html[data-device="desktop"] .col{width:1080px}
-.col-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-weight:700;font-size:14px}.col-head .cdot{width:12px;height:12px;border-radius:50%;flex:none}
-.col-frame{height:640px;overflow-y:auto;overflow-x:hidden;background:var(--bg);border:1px solid var(--line-2);border-radius:14px;container-type:inline-size;container-name:page;box-shadow:var(--sh-frame)}
-.col-frame::-webkit-scrollbar{width:7px}.col-frame::-webkit-scrollbar-thumb{background:#cfd2d8;border-radius:99px}
+.cmpx{width:100%;min-width:680px;max-width:1060px;margin:0 auto;background:var(--bg);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh-1);overflow:hidden}
+.cmpx-row{display:grid;grid-template-columns:150px repeat(3,1fr);border-top:1px solid var(--line)}
+.cmpx-row:first-child{border-top:none}
+.cmpx-lab{padding:15px 16px;font-size:12px;font-weight:700;color:var(--fg-sub);border-right:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;gap:3px;background:var(--bg-sunken)}
+.cmpx-lab span{font-weight:500;color:var(--fg-mut);font-size:10.5px}
+.cmpx-bhead{padding:14px 16px;font-weight:800;font-size:13.5px;display:flex;align-items:center;gap:8px;border-right:1px solid var(--line)}
+.cmpx-bhead:last-child{border-right:none}
+.cmpx-bhead .cdot{width:12px;height:12px;border-radius:50%;flex:none}
+.cmpx-bhead .hex{font-weight:500;font-size:11px;color:var(--fg-mut);margin-left:auto}
+.cmpx-cell{padding:15px 16px;border-right:1px solid var(--line);display:flex;flex-flow:row wrap;gap:8px;align-items:center}
+.cmpx-cell:last-child{border-right:none}
+.cmpx-sw{display:flex;flex-direction:column;gap:4px;align-items:center}
+.cmpx-sw i{width:32px;height:24px;border-radius:5px;display:block;border:1px solid var(--line-2)}
+.cmpx-sw span{font-size:8.5px;color:var(--fg-mut)}
+.cmpx-ramp{display:flex}
+.cmpx-ramp i{width:20px;height:26px;display:block}
+.cmpx-ramp i:first-child{border-radius:5px 0 0 5px}.cmpx-ramp i:last-child{border-radius:0 5px 5px 0}
 </style>
 </head>
 <body>
@@ -654,7 +663,7 @@ html[data-device="desktop"] .col{width:1080px}
 
   <!-- ============ 우: 인스펙터(컨트롤) ============ -->
   <aside class="inspector">
-    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.20</p></div></div>
+    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.21</p></div></div>
     <div class="grp" id="brandGrp"><span class="gl">Brand <em>교체 지점</em></span><div class="brands" id="brands">
       <button class="brandbtn on" data-b="deepblue"><span class="bdot" style="background:#1245BA"></span><span class="bn">Deep Blue</span><span class="bhex">#1245BA</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
       <button class="brandbtn" data-b="emerald"><span class="bdot" style="background:#098A68"></span><span class="bn">Emerald</span><span class="bhex">#098A68</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
@@ -669,7 +678,7 @@ html[data-device="desktop"] .col{width:1080px}
       <div class="grp"><span class="gl">해석된 토큰 값</span><div class="readout" id="readout"></div></div>
     </div>
     <div id="modNote" class="grp" style="display:none"><span class="gl">모듈 뷰</span><p class="hintnote">재사용 <b>범용 섹션(모듈)</b>입니다. 우측 노브(곡률·간격·보더·크기)와 Brand가 실시간 반영됩니다. <b>상품 리스트</b>는 모듈 안에서 Grid·Carousel·List 변형을 전환합니다.</p></div>
-    <div id="compareNote" class="grp" style="display:none"><span class="gl">비교 모드</span><p class="hintnote">3개 브랜드를 <b>동일 조건</b>으로 나란히 비교합니다. 세로 스크롤은 동기화되고, 위 <b>Device</b>로 모바일·태블릿·데스크톱 폭을 함께 전환합니다. 폭이 좁으면 좌우로 스크롤됩니다(잘리지 않음).</p></div>
+    <div id="compareNote" class="grp" style="display:none"><span class="gl">비교 모드</span><p class="hintnote">브랜드를 바꿀 때 <b>실제로 달라지는 것</b>만 3열로 나란히 봅니다 — primary 램프, accent 계열 토큰, 그리고 브랜드에 민감한 컴포넌트(버튼·포커스·칩·CTA·히어로 강조). 레이아웃·본문 등 <b>브랜드 무관</b> 요소는 생략했습니다.</p></div>
     <div id="tokNote" class="grp" style="display:none"><span class="gl">토큰 뷰</span><p class="hintnote">Figma로 내보낸 변수 컬렉션입니다. 위 <b>Brand</b>를 바꾸면 Semantic의 accent·link 토큰 값이 실시간 반영됩니다. Radius는 3개 모드를 함께 표기합니다.</p></div>
   </aside>
 </div>
@@ -706,21 +715,30 @@ window.addEventListener('mouseup',()=>{dragging=false;resizer.classList.remove('
 const board3=document.getElementById('board3');
 const BRANDS=[['deepblue','Deep Blue','#1245BA'],['emerald','Emerald','#098A68'],['violet','Violet','#5B14B8']];
 const KNOBDEF=[['data-layout',[['grid','Grid'],['carousel','Car'],['list','List']]],['data-radius',[['sharp','Sh'],['default','Df'],['rounded','Rd']]],['data-density',[['compact','Cp'],['default','Df'],['comfortable','Cf']]],['data-border',[['hairline','H'],['default','D'],['strong','S']]],['data-size',[['s','S'],['m','M'],['l','L']]]];
-function buildBoard(){const tpl=document.getElementById('pageTpl');board3.innerHTML='<div class="board-track"></div>';
-  const track=board3.querySelector('.board-track');
-  BRANDS.forEach(([b,name,c])=>{const col=document.createElement('div');col.className='col';col.setAttribute('data-brand',b);KNOBS.forEach(([a,d])=>col.setAttribute(a,d));
-    col.innerHTML=`<div class="col-head"><span class="cdot" style="background:${c}"></span>${name}</div><div class="col-frame"></div>`;
-    col.querySelector('.col-frame').appendChild(tpl.cloneNode(true));
-    track.appendChild(col);});
-  const frames=[...board3.querySelectorAll('.col-frame')];let lock=false;
-  frames.forEach(f=>f.addEventListener('scroll',()=>{if(lock)return;lock=true;frames.forEach(o=>{if(o!==f)o.scrollTop=f.scrollTop;});requestAnimationFrame(()=>lock=false);}));}
+/* 브랜드에서 실제로 달라지는 것만: 행=항목, 열=브랜드 */
+const CMPX_ROWS=[
+  ['Primary 램프','교체 지점 · 05→70', `<div class="cmpx-ramp">${['05','10','20','40','50','55','60','70'].map(s=>`<i style="background:var(--brand-p${s})"></i>`).join('')}</div>`],
+  ['Accent 토큰','semantic → brand', [['--accent','accent'],['--accent-strong','strong'],['--accent-press','press'],['--accent-subtle','subtle'],['--accent-line','line']].map(([v,l])=>`<span class="cmpx-sw"><i style="background:var(${v})"></i><span>${l}</span></span>`).join('')],
+  ['Primary 버튼','fill·hover·press', `<button class="btn btn-primary btn-sm">기본</button><button class="btn btn-primary btn-sm is-hover">호버</button><button class="btn btn-primary btn-sm is-pressed">눌림</button>`],
+  ['Focus 링','포커스 상태', `<div class="inp is-focus" style="width:100%;max-width:210px"><span class="ph">입력 필드</span></div>`],
+  ['Accent 칩 · 링크','', `<span class="chip accent"><svg class="i"><use href="#icon-cat-realestate"/></svg>부동산</span><a style="color:var(--accent);font-weight:600;font-size:13px">자세히 →</a>`],
+  ['CTA 밴드','accent 면', `<div style="background:var(--accent);color:#fff;border-radius:var(--r-m);padding:12px 14px;width:100%;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:8px">지금 시작하기<span style="background:#fff;color:var(--accent);border-radius:6px;padding:3px 9px;font-size:11px">CTA</span></div>`],
+  ['Hero 강조 · 진행 바','', `<div style="width:100%"><div style="font-weight:800;font-size:16px;letter-spacing:-.01em">piece by <span style="color:var(--accent)">piece.</span></div><div style="height:7px;border-radius:99px;background:var(--accent-subtle);margin-top:9px;overflow:hidden"><div style="height:100%;width:72%;background:var(--accent)"></div></div></div>`],
+];
+function buildBoard(){
+  const head=`<div class="cmpx-row"><div class="cmpx-lab" style="background:var(--bg)">비교 항목</div>`+
+    BRANDS.map(([b,name,c])=>`<div class="cmpx-bhead" data-brand="${b}"><span class="cdot" style="background:${c}"></span>${name}<span class="hex">${c}</span></div>`).join('')+`</div>`;
+  const rows=CMPX_ROWS.map(([lab,sub,cell])=>`<div class="cmpx-row"><div class="cmpx-lab">${lab}${sub?`<span>${sub}</span>`:''}</div>`+
+    BRANDS.map(([b])=>`<div class="cmpx-cell" data-brand="${b}">${cell}</div>`).join('')+`</div>`).join('');
+  board3.innerHTML=`<div class="cmpx" data-radius="default" data-density="default" data-border="default" data-size="m">${head}${rows}</div>`;
+}
 /* 라우팅: 좌측 탐색(nav) → 뷰/탭 전환 + 인스펙터 역할 정리 */
 function route(view,tab){
   html.setAttribute('data-view',view);
   document.querySelectorAll('#nav .nav-item').forEach(x=>x.classList.toggle('on',x.dataset.view===view && (!x.dataset.tab||x.dataset.tab===tab)));
   const cmp=view==='compare',tok=view==='tokens',comp=view==='components',mod=view==='modules',auth=view==='auth',home=view==='interactive';
   document.getElementById('presetCtl').style.display=(home||comp||mod||auth)?'':'none';  // 노브: 홈+컴포넌트+모듈+인증
-  document.getElementById('deviceGrp').style.display=(home||auth||cmp)?'':'none';   // 디바이스: 페이지형(홈·인증) + 비교
+  document.getElementById('deviceGrp').style.display=(home||auth)?'':'none';        // 디바이스: 페이지형(홈·인증)
   document.getElementById('brandGrp').style.display=cmp?'none':'';                  // 브랜드 토글: 비교 뷰에선 숨김
   document.getElementById('modNote').style.display=mod?'':'none';
   document.getElementById('compareNote').style.display=cmp?'':'none';
