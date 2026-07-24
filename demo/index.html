@@ -44,16 +44,17 @@
 /* ===== BASE ===== */
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
-body{font-family:var(--font,"Pretendard Variable"),system-ui,sans-serif;color:var(--fg);background:var(--bg-canvas);-webkit-font-smoothing:antialiased;line-height:1.55}
+body{font-family:var(--font,"Pretendard Variable"),system-ui,sans-serif;color:var(--fg);background:var(--bg);-webkit-font-smoothing:antialiased;line-height:1.55}
 button{font-family:inherit;cursor:pointer;border:none;background:none}
 a{color:inherit;text-decoration:none}
 svg.i{display:block;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;width:1em;height:1em}
 
 /* ===== APP SHELL: [라이브러리][리사이저][캔버스][인스펙터] ===== */
 .app{display:flex;height:100vh;overflow:hidden}
-.canvas{flex:1;min-width:0;overflow-y:auto;background:var(--bg-canvas);padding:36px;display:flex;justify-content:center;align-items:flex-start}
-.canvas::-webkit-scrollbar{width:10px}.canvas::-webkit-scrollbar-thumb{background:#cfd2d8;border-radius:99px}
-.frame{width:100%;max-width:1080px;background:var(--bg);border-radius:16px;overflow:hidden;box-shadow:var(--sh-frame);container-type:inline-size;container-name:page;transition:max-width .3s ease}
+.canvas{flex:1;min-width:0;overflow-y:auto;background:var(--bg);padding:36px;display:flex;justify-content:center;align-items:flex-start}
+.canvas::-webkit-scrollbar{width:10px}.canvas::-webkit-scrollbar-thumb{background:#dfe2e7;border-radius:99px}
+/* 페이지 프리뷰: 무거운 카드 대신 얇은 프레임 라인만(디바이스 폭 표시용) */
+.frame{width:100%;max-width:1080px;background:var(--bg);border:1px solid var(--line-2);border-radius:12px;overflow:hidden;container-type:inline-size;container-name:page;transition:max-width .3s ease}
 html[data-device="mobile"] .frame{max-width:390px}
 html[data-device="tablet"] .frame{max-width:768px}
 /* 모듈·컴포넌트 프리뷰도 디바이스 폭으로 반응형 확인 (좁으면 가로 스크롤) */
@@ -317,7 +318,7 @@ html[data-view="compare"] #frame{display:none}
 .copyright{grid-column:1/-1;border-top:1px solid var(--line);padding-top:18px;font-size:12px}
 
 /* ===== COMPONENTS (정식) — 상태·변형 컴포넌트 + 문서 뷰 ===== */
-.components{display:none;width:100%;max-width:1080px;background:var(--bg);border-radius:16px;box-shadow:var(--sh-frame);overflow:hidden}
+.components{display:none;width:100%;max-width:1080px}
 html[data-view="components"] #frame{display:none}
 html[data-view="components"] .components{display:block}
 .cmp-sec{margin-bottom:38px}
@@ -377,7 +378,7 @@ html[data-view="components"] .components{display:block}
 .alert.info{background:var(--accent-subtle);border-color:var(--accent-line)}.alert.info .ai{color:var(--accent)}
 
 /* ===== TOKENS VIEW ===== */
-.tokens{display:none;width:100%;max-width:1080px;background:var(--bg);border-radius:16px;box-shadow:var(--sh-frame);overflow:hidden}
+.tokens{display:none;width:100%;max-width:1080px}
 html[data-view="tokens"] #frame,html[data-view="tokens"] .board3{display:none}
 html[data-view="tokens"] .tokens{display:block}
 /* ===== 모듈 뷰 ===== */
@@ -385,7 +386,7 @@ html[data-view="tokens"] .tokens{display:block}
 html[data-view="modules"] #frame,html[data-view="modules"] .board3{display:none}
 html[data-view="modules"] .modules{display:block}
 .mod-top{margin-bottom:18px}
-.mod-sec{background:var(--bg);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh-1);padding:24px 24px 28px;margin-bottom:20px}
+.mod-sec{margin-bottom:20px}
 .mod-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .mod-head h3{font-size:19px;font-weight:800;letter-spacing:-.01em}
 .mod-head .anat{font-family:'Pretendard Variable',system-ui,sans-serif;font-size:12px;color:var(--fg-mut)}
@@ -701,7 +702,7 @@ html[data-view="compare"] .board3{display:block}
 
   <!-- ============ 우: 인스펙터(컨트롤) ============ -->
   <aside class="inspector">
-    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.24</p></div></div>
+    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.25</p></div></div>
     <div class="grp" id="brandGrp"><span class="gl">Brand <em>교체 지점</em></span><div class="brands" id="brands">
       <button class="brandbtn on" data-b="deepblue"><span class="bdot" style="background:#1245BA"></span><span class="bn">Deep Blue</span><span class="bhex">#1245BA</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
       <button class="brandbtn" data-b="emerald"><span class="bdot" style="background:#098A68"></span><span class="bn">Emerald</span><span class="bhex">#098A68</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
