@@ -385,7 +385,7 @@ html[data-view="tokens"] .tokens{display:block}
 .modules{display:none;width:100%;max-width:1080px}
 html[data-view="modules"] #frame,html[data-view="modules"] .board3{display:none}
 html[data-view="modules"] .modules{display:block}
-.mod-top{margin-bottom:18px}
+.mod-panel{padding:6px 28px 40px}
 .mod-sec{margin-bottom:20px}
 .mod-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .mod-head h3{font-size:19px;font-weight:800;letter-spacing:-.01em}
@@ -435,13 +435,15 @@ html[data-view="auth"] .authframe{display:block}
 .authnote svg{width:14px;height:14px;color:var(--accent)}
 .authfoot{text-align:center;margin-top:22px;font-size:13.5px;color:var(--fg-sub)}
 .authfoot a{color:var(--accent);font-weight:700;cursor:pointer}
-.tk-top{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);padding:20px 28px 0;z-index:2}
-.tk-title{font-size:15px;font-weight:800;letter-spacing:-.01em}.tk-title span{font-weight:500;color:var(--fg-mut);font-size:12.5px}
+/* 뷰 상단 타이틀 — 언더바 없이 제대로 된 타이틀. 컴포넌트·토큰·모듈 일관 */
+.tk-top,.mod-top{position:sticky;top:0;background:var(--bg);padding:24px 28px 16px;z-index:2}
+.tk-title{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;font-size:22px;font-weight:800;letter-spacing:-.02em}
+.tk-title span{font-weight:500;color:var(--fg-mut);font-size:13px;letter-spacing:0}
 .tk-tabs{display:flex;gap:2px;margin-top:16px;overflow-x:auto}
 .tk-tabs button{font-size:13px;font-weight:700;color:var(--fg-sub);padding:9px 14px;border-radius:8px 8px 0 0;white-space:nowrap;border-bottom:2px solid transparent}
 .tk-tabs button:hover{color:var(--fg)}
 .tk-tabs button.on{color:var(--accent);border-bottom-color:var(--accent)}
-.tk-panel{padding:26px 28px 40px}
+.tk-panel{padding:6px 28px 40px}
 .tk-note{font-size:12.5px;color:var(--fg-sub);background:var(--bg-sunken);border-radius:10px;padding:11px 14px;margin-bottom:22px;line-height:1.55}
 .tk-note b{color:var(--fg)}
 .tk-grp{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--fg-mut);margin:26px 0 12px}.tk-grp:first-child{margin-top:0}
@@ -702,7 +704,7 @@ html[data-view="compare"] .board3{display:block}
 
   <!-- ============ 우: 인스펙터(컨트롤) ============ -->
   <aside class="inspector">
-    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.25</p></div></div>
+    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.26</p></div></div>
     <div class="grp" id="brandGrp"><span class="gl">Brand <em>교체 지점</em></span><div class="brands" id="brands">
       <button class="brandbtn on" data-b="deepblue"><span class="bdot" style="background:#1245BA"></span><span class="bn">Deep Blue</span><span class="bhex">#1245BA</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
       <button class="brandbtn" data-b="emerald"><span class="bdot" style="background:#098A68"></span><span class="bn">Emerald</span><span class="bhex">#098A68</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
