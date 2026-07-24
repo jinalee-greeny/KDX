@@ -61,10 +61,21 @@ html[data-device="tablet"] .frame{max-width:768px}
 .mod-stage{margin-inline:auto;transition:width .3s ease}
 html[data-device="mobile"] .mod-stage{width:390px}
 html[data-device="tablet"] .mod-stage{width:768px}
-#cmpPanel{overflow-x:auto}
-.cmp-stage{margin-inline:auto;transition:width .3s ease}
-html[data-device="mobile"] .cmp-stage{width:390px}
-html[data-device="tablet"] .cmp-stage{width:768px}
+/* 컴포넌트 자체는 전 해상도 고정 — 리사이즈하지 않음. 반응형은 Responsive 탭에서 별도 정리 */
+.rsp{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:8px;max-width:820px}
+.rsp-row{display:grid;grid-template-columns:132px repeat(3,1fr);border-top:1px solid var(--line)}
+.rsp-row:first-child{border-top:none}
+.rsp-head{background:var(--bg-sunken)}
+.rsp-lab{padding:12px 14px;font-size:11.5px;font-weight:700;color:var(--fg-sub);display:flex;flex-direction:column;justify-content:center;gap:2px;background:var(--bg-sunken)}
+.rsp-lab span{font-weight:500;font-size:9.5px;color:var(--fg-mut)}
+.rsp-hc{padding:10px 14px;border-left:1px solid var(--line);font-size:11px;font-weight:800;color:var(--fg-sub);display:flex;flex-direction:column;gap:2px}
+.rsp-hc span{font-weight:500;font-size:9.5px;color:var(--fg-mut)}
+.rsp-cell{padding:12px 14px;border-left:1px solid var(--line);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:6px;min-height:56px}
+.rsp-t{color:var(--fg);letter-spacing:-.02em;line-height:1}
+.rsp-v{font-size:10.5px;color:var(--fg-mut);font-weight:600}
+.rsp-v.big{font-size:15px;color:var(--fg);font-weight:700}
+.rsp-fixed{font-size:12.5px;color:var(--fg-sub);line-height:1.65;background:var(--bg-sunken);border-radius:10px;padding:13px 15px;max-width:820px}
+.rsp-fixed b{color:var(--fg)}
 html[data-view="compare"] #frame{display:none}
 
 /* ===== 리사이저 ===== */
@@ -531,6 +542,7 @@ html[data-view="compare"] .board3{display:block}
         <button class="nav-item" data-view="components" data-tab="selection">Selection</button>
         <button class="nav-item" data-view="components" data-tab="feedback">Feedback</button>
         <button class="nav-item" data-view="components" data-tab="icon">Icon</button>
+        <button class="nav-item" data-view="components" data-tab="responsive">Responsive</button>
       </div>
       <div class="nav-group">
         <div class="nav-gl">모듈 <span style="font-weight:600;text-transform:none;letter-spacing:0;color:var(--fg-mut)">· 범용 섹션</span></div>
@@ -673,7 +685,7 @@ html[data-view="compare"] .board3{display:block}
 
   <!-- ============ 우: 인스펙터(컨트롤) ============ -->
   <aside class="inspector">
-    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.22</p></div></div>
+    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.23</p></div></div>
     <div class="grp" id="brandGrp"><span class="gl">Brand <em>교체 지점</em></span><div class="brands" id="brands">
       <button class="brandbtn on" data-b="deepblue"><span class="bdot" style="background:#1245BA"></span><span class="bn">Deep Blue</span><span class="bhex">#1245BA</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
       <button class="brandbtn" data-b="emerald"><span class="bdot" style="background:#098A68"></span><span class="bn">Emerald</span><span class="bhex">#098A68</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
@@ -748,7 +760,7 @@ function route(view,tab){
   document.querySelectorAll('#nav .nav-item').forEach(x=>x.classList.toggle('on',x.dataset.view===view && (!x.dataset.tab||x.dataset.tab===tab)));
   const cmp=view==='compare',tok=view==='tokens',comp=view==='components',mod=view==='modules',auth=view==='auth',home=view==='interactive';
   document.getElementById('presetCtl').style.display=(home||comp||mod||auth)?'':'none';  // 노브: 홈+컴포넌트+모듈+인증
-  document.getElementById('deviceGrp').style.display=(home||auth||comp||mod)?'':'none';  // 디바이스: 홈·인증 + 컴포넌트·모듈(반응형 확인)
+  document.getElementById('deviceGrp').style.display=(home||auth||mod)?'':'none';  // 디바이스: 홈·인증·모듈(실제 리플로우). 컴포넌트는 고정→Responsive 탭에서 별도 정리
   document.getElementById('brandGrp').style.display=cmp?'none':'';                  // 브랜드 토글: 비교 뷰에선 숨김
   document.getElementById('modNote').style.display=mod?'':'none';
   document.getElementById('compareNote').style.display=cmp?'':'none';
@@ -851,7 +863,7 @@ document.getElementById('tkTabs').addEventListener('click',e=>{const b=e.target.
 const _setBrand=setBrand;setBrand=function(b){_setBrand(b);if(html.getAttribute('data-view')==='tokens')renderTokenTab(curTab);};
 
 /* ================= COMPONENTS VIEW (정식 컴포넌트 문서) ================= */
-const CMP_TABS=[['buttons','Buttons'],['forms','Forms'],['selection','Selection'],['feedback','Feedback'],['icon','Icon']];
+const CMP_TABS=[['buttons','Buttons'],['forms','Forms'],['selection','Selection'],['feedback','Feedback'],['icon','Icon'],['responsive','Responsive']];
 const ICON_MAP=[['검색 인풋','icon-action-search'],['금액·원화 인풋','icon-finance-won'],['Select · 드롭다운','icon-nav-down'],['외부·새 탭 링크','icon-action-external'],['페이지네이션 이전/다음','icon-nav-left · icon-nav-right'],['성공 알림·체크','icon-status-success'],['경고·오류 알림','icon-status-alert'],['상승/하락 배지','icon-trend-up · icon-trend-down'],['자산 카테고리 칩·카드','icon-cat-*']];
 const ICON_SZ=[['xs',12],['s',16],['m',20],['l',24],['xl',32]];
 let curCmpTab='buttons';
@@ -903,6 +915,17 @@ function renderCmpTab(tab){curCmpTab=tab;
       +ICON_MAP.map(([slot,ic])=>{const first=ic.split(' ')[0].replace('icon-cat-*','icon-cat-realestate');return `<tr><td>${slot}</td><td>${ic}</td><td><svg class="i" style="width:16px;height:16px;color:var(--accent)"><use href="#${first}"/></svg></td></tr>`;}).join('')+'</table>';
     h+='<div class="cmp-sub">적용 예</div><div class="crow"><div class="fld" style="width:250px"><div class="inp"><svg class="i"><use href="#icon-action-search"/></svg><span class="ph">상품 검색</span></div></div><div class="fld" style="width:180px"><div class="inp"><span>부동산</span><svg class="i" style="margin-left:auto"><use href="#icon-nav-down"/></svg></div></div></div>';
     h+='<div class="cmp-note">크기=<b>size/icon</b>(12·16·20·24·32) · 색=<b>currentColor</b> 상속 · 매핑된 슬롯엔 기본 아이콘 자동 적용 · 소스/교체=<b>토큰 뷰 → Icons</b></div></div>';
+  } else if(tab==='responsive'){
+    h+='<div class="cmp-sec"><div class="cmp-h"><h3>Responsive</h3><span class="anat">Web 컬렉션 · mobile 0 / tablet 768 / desktop 1024</span></div><div class="cmp-desc">버튼·인풋·칩 등 <b>컴포넌트 자체는 전 해상도 고정</b>입니다(디바이스로 크기가 바뀌지 않음). 디바이스에 따라 실제로 바뀌는 건 <b>display 타입 스케일</b>과 <b>레이아웃 토큰</b> 뿐 — 아래에서 3단계를 나란히 비교하세요.</div>';
+    const RSP_HEAD='<div class="rsp-row rsp-head"><div class="rsp-lab"></div><div class="rsp-hc">Mobile<span>0–767</span></div><div class="rsp-hc">Tablet<span>768–1023</span></div><div class="rsp-hc">Desktop<span>1024+</span></div></div>';
+    h+='<div class="cmp-sub">display 타입 · 초대형 타이틀만 반응형</div>';
+    h+='<div class="rsp">'+RSP_HEAD+[['display/xl',36,52,72],['display/l',30,40,56],['display/m',26,32,44]].map(([n,a,b,c])=>
+      `<div class="rsp-row"><div class="rsp-lab">${n}</div>`+[a,b,c].map(px=>`<div class="rsp-cell"><span class="rsp-t" style="font-size:${px}px;font-weight:800">Ag</span><span class="rsp-v">${px}px</span></div>`).join('')+`</div>`).join('')+'</div>';
+    h+='<div class="cmp-sub">레이아웃 토큰 · 미디어쿼리 자동 전환</div>';
+    h+='<div class="rsp">'+RSP_HEAD+[['container/max','100%','720','1200'],['container/pad','20px','32px','40px'],['grid/columns','4열','8열','12열'],['grid/gutter','16px','20px','24px'],['space/section','64px','96px','120px'],['space/block','40px','56px','72px']].map(([n,a,b,c])=>
+      `<div class="rsp-row"><div class="rsp-lab">${n}</div>`+[a,b,c].map(v=>`<div class="rsp-cell"><span class="rsp-v big">${v}</span></div>`).join('')+`</div>`).join('')+'</div>';
+    h+='<div class="cmp-sub">전 해상도 고정</div><div class="rsp-fixed">버튼 · 인풋/필드 · 셀렉트 · 체크박스/라디오/토글 · 칩 · 배지 · 알림 · 아이콘은 <b>디바이스와 무관하게 고정</b>입니다. 크기 변형이 필요하면 디바이스가 아니라 <b>Size 노브(S·M·L)</b>로 조절합니다 — <b>size/control</b> 38·46·54, <b>size/icon</b> 20·22·26.</div>';
+    h+='<div class="cmp-note">반응형 소스=<b>Web 컬렉션</b>(mobile·tablet·desktop 3모드) · display만 반응형, body류 텍스트·컴포넌트는 전 해상도 고정 · 실제 리플로우는 <b>모듈·페이지 뷰 + Device 토글</b>에서 확인</div></div>';
   }
   P.innerHTML=`<div class="cmp-stage">${h}</div>`;
 }
