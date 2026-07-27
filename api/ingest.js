@@ -94,8 +94,9 @@ async function fetchAssets(html, base) {
 
 async function ingestUrl(url) {
   const html = await (await fetch(url, { headers: { 'User-Agent': UA } })).text();
-  const counts = {}, fonts = new Set(), declared = [];
-  collectHex(html, counts); collectFonts(html, fonts);
+  // HTML(실제 렌더 콘텐츠)과 CSS 번들(라이브러리 상태색 노이즈 포함)을 분리 집계
+  const htmlCounts = {}, cssCounts = {}, fonts = new Set(), declared = [];
+  collectHex(html, htmlCounts); collectFonts(html, fonts);
   // 링크된 스타일시트 최대 6개
   let allCss = html;
   const links = [...html.matchAll(/<link[^>]+rel=["']stylesheet["'][^>]*>/gi)]
@@ -104,11 +105,17 @@ async function ingestUrl(url) {
     try {
       const css = await (await fetch(new URL(href, url).href, { headers: { 'User-Agent': UA } })).text();
       allCss += '\n' + css;
-      collectHex(css, counts); collectFonts(css, fonts);
+      collectHex(css, cssCounts); collectFonts(css, fonts);
     } catch (_) { /* 개별 실패 무시 */ }
   }));
   collectDeclared(html, allCss, declared);
   const assets = await fetchAssets(html, url);
+  // 병합: html 출처 수를 별도 보존(클라이언트가 '실사용 색' 가중에 사용)
+  const counts = {};
+  for (const [h, n] of Object.entries(htmlCounts)) counts[h] = { count: n, html: n };
+  for (const [h, n] of Object.entries(cssCounts)) {
+    if (counts[h]) counts[h].count += n; else counts[h] = { count: n, html: 0 };
+  }
   return { counts, fonts, declared, shape: shapeFromCss(allCss), assets };
 }
 
@@ -162,8 +169,9 @@ module.exports = async (req, res) => {
     } else {
       return res.status(400).json({ error: 'url 또는 figma 파라미터가 필요합니다.' });
     }
-    const colors = Object.entries(out.counts).sort((a, b) => b[1] - a[1]).slice(0, 12)
-      .map(([hex, count]) => ({ hex, count }));
+    const colors = Object.entries(out.counts)
+      .map(([hex, v]) => typeof v === 'number' ? { hex, count: v, html: 0 } : { hex, count: v.count, html: v.html })
+      .sort((a, b) => (b.html * 10 + b.count) - (a.html * 10 + a.count)).slice(0, 12);
     res.status(200).json({ colors, fonts: [...out.fonts].slice(0, 6), declared: (out.declared || []).slice(0, 6), shape: out.shape || null, assets: out.assets || [], source: figma ? 'figma' : 'url' });
   } catch (e) {
     res.status(500).json({ error: String(e.message || e).slice(0, 200) });
