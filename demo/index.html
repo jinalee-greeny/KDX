@@ -98,6 +98,7 @@ svg.i{display:block;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linec
 .ig-sw i{width:44px;height:32px;border-radius:7px;display:block;border:1px solid var(--line-2)}
 .ig-sw span{font-size:9px;color:var(--fg-sub);font-weight:600}
 .ig-sw .aa{font-size:8px;color:var(--fg-mut)}
+.ig-sw .pri{font-style:normal;font-size:7.5px;font-weight:800;letter-spacing:.05em;color:var(--accent);background:var(--accent-subtle);border-radius:99px;padding:2px 7px;margin-bottom:1px}
 .ig-fonts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
 .ig-fonts span{font-size:11.5px;font-weight:600;color:var(--fg-sub);border:1px solid var(--line-2);border-radius:99px;padding:5px 12px}
 .app{display:flex;height:calc(100vh - 54px);overflow:hidden}
@@ -618,7 +619,7 @@ html[data-view="compare"] .board3{display:block}
     <button data-area="tokens">파운데이션</button>
   </nav>
   <button class="gconnect" id="igOpen"><svg class="i"><use href="#icon-action-external"/></svg>브랜드 연결</button>
-  <span class="gver">토큰 기반 · v0.31</span>
+  <span class="gver">토큰 기반 · v0.32</span>
 </header>
 <div class="app">
 
@@ -836,11 +837,11 @@ html[data-view="compare"] .board3{display:block}
     </div>
     <div class="ig-status" id="igStatus" hidden></div>
     <div class="ig-result" id="igResult" hidden>
-      <div class="ig-rl">검출된 컬러 · <b>시드를 선택하세요</b></div>
+      <div class="ig-rl">분석 결과 · <b>Primary 자동 적용됨</b> — 다른 후보를 클릭하면 즉시 교체</div>
       <div class="ig-sws" id="igSws"></div>
       <div class="ig-rl" id="igFontsLab" hidden>검출된 폰트</div>
       <div class="ig-fonts" id="igFonts" hidden></div>
-      <button class="btn btn-primary" id="igApply" style="width:100%;margin-top:14px">시드로 적용</button>
+      <button class="btn btn-primary" id="igApply" style="width:100%;margin-top:14px">완료</button>
     </div>
   </div>
 </div>
@@ -1264,25 +1265,31 @@ document.getElementById('igTabs').addEventListener('click',e=>{const b=e.target.
   document.querySelectorAll('#igTabs button').forEach(x=>x.classList.toggle('on',x===b));
   document.querySelectorAll('.ig-pane').forEach(p=>p.hidden=p.dataset.p!==b.dataset.t);});
 function igMsg(t,err){igStatus.hidden=false;igStatus.textContent=t;igStatus.classList.toggle('err',!!err);}
+/* Primary 판별 스코어: 빈도(√ 감쇠) × 채도 × 명도 적합도(브랜드 컬러 대역 l≈45 선호) */
+function igScore(c){const[h,s,l]=rgbToHsl(...hexToRgb(c.hex));
+  const fit=Math.max(.05,1-Math.abs(l-45)/55);
+  return Math.sqrt(c.count||1)*Math.pow(s/100,1.2)*fit;}
+function igApplySel(i){
+  igSel=i;
+  document.getElementById('cbHex').value=igCands[i].hex;
+  applyCustomBrand(igCands[i].hex,currentFont());
+  document.querySelectorAll('.ig-sw').forEach((x,xi)=>x.classList.toggle('on',+x.dataset.i===i));
+}
 function igShow(colors,fonts){
-  igCands=colors.slice(0,12);igSel=0;
+  igCands=colors.slice(0,12);
   igStatus.hidden=igCands.length>0;
   if(!igCands.length){igMsg('컬러를 찾지 못했습니다. 다른 소스를 시도해 보세요.',true);igResult.hidden=true;return;}
+  igCands.sort((a,b)=>igScore(b)-igScore(a));           // 분석: Primary 판별
   igResult.hidden=false;
   document.getElementById('igSws').innerHTML=igCands.map((c,i)=>{const cr=contrastWhite(c.hex);
-    return `<button class="ig-sw${i===0?' on':''}" data-i="${i}"><i style="background:${c.hex}"></i><span>${c.hex.toUpperCase()}</span><span class="aa">${cr>=4.5?'AA ✓':'대비 '+cr.toFixed(1)}</span></button>`;}).join('');
+    return `<button class="ig-sw${i===0?' on':''}" data-i="${i}">${i===0?'<em class="pri">PRIMARY</em>':''}<i style="background:${c.hex}"></i><span>${c.hex.toUpperCase()}</span><span class="aa">${cr>=4.5?'AA ✓':'대비 '+cr.toFixed(1)}</span></button>`;}).join('');
   const fl=document.getElementById('igFontsLab'),ff=document.getElementById('igFonts');
   if(fonts&&fonts.length){fl.hidden=ff.hidden=false;ff.innerHTML=fonts.slice(0,6).map(f=>`<span>${f}</span>`).join('');}
   else{fl.hidden=ff.hidden=true;}
+  igApplySel(0);                                        // Primary 즉시 적용
 }
-document.getElementById('igSws')?.addEventListener('click',e=>{const b=e.target.closest('.ig-sw');if(!b)return;
-  igSel=+b.dataset.i;document.querySelectorAll('.ig-sw').forEach(x=>x.classList.toggle('on',x===b));});
-document.getElementById('igApply').addEventListener('click',()=>{
-  if(!igCands.length)return;
-  document.getElementById('cbHex').value=igCands[igSel].hex;
-  document.getElementById('cbGen').click();
-  igOv.hidden=true;
-});
+document.getElementById('igSws')?.addEventListener('click',e=>{const b=e.target.closest('.ig-sw');if(!b)return;igApplySel(+b.dataset.i);});
+document.getElementById('igApply').addEventListener('click',()=>{igOv.hidden=true;});
 /* 텍스트·CSS → hex 추출 */
 function extractHex(text){
   const counts={};
