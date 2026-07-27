@@ -29,6 +29,45 @@ function collectBrandSignals(text, counts) {
   for (const m of text.matchAll(re)) collectHex((m[1] + ' ').repeat(30), counts);
 }
 
+// 형태 통계: border-radius·padding 중앙값 → 곡률·간격 모드 추정
+function shapeFromCss(text) {
+  const nums = re => [...text.matchAll(re)].map(m => parseFloat(m[1])).filter(v => v >= 0 && v <= 48);
+  const med = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
+  const rads = nums(/border-radius\s*:\s*([\d.]+)px/gi);
+  const pads = nums(/padding(?:-top|-bottom|-left|-right)?\s*:\s*([\d.]+)px/gi);
+  const rm = med(rads), pm = med(pads);
+  return {
+    radius: rads.length >= 3 ? (rm < 6 ? 'sharp' : rm <= 14 ? 'default' : 'rounded') : null,
+    radiusMedian: rm,
+    density: pads.length >= 5 ? (pm >= 18 ? 'comfortable' : pm <= 9 ? 'compact' : 'default') : null,
+    padMedian: pm
+  };
+}
+
+// 브랜드 에셋 우선: apple-touch-icon > og:image > favicon 을 base64로 반환 (클라이언트가 주요색 추출)
+async function fetchAssets(html, base) {
+  const abs = h => { try { return new URL(h, base).href; } catch (_) { return null; } };
+  const attr = (tag, name) => (tag && tag.match(new RegExp(name + '=["\']([^"\']+)["\']', 'i')) || [])[1];
+  const touch = attr((html.match(/<link[^>]+apple-touch-icon[^>]*>/i) || [])[0], 'href');
+  const og = (html.match(/property=["']og:image["'][^>]*content=["']([^"']+)["']/i) || html.match(/content=["']([^"']+)["'][^>]*property=["']og:image["']/i) || [])[1];
+  const icon = attr((html.match(/<link[^>]+rel=["'](?:shortcut )?icon["'][^>]*>/i) || [])[0], 'href');
+  const out = [];
+  for (const [href, label] of [[touch, 'apple-touch-icon'], [og, 'og:image'], [icon, 'icon'], ['/favicon.ico', 'favicon']]) {
+    if (out.length >= 2) break;
+    const full = href && abs(href); if (!full) continue;
+    try {
+      const r = await fetch(full, { headers: { 'User-Agent': UA } });
+      if (!r.ok) continue;
+      const ct = r.headers.get('content-type') || '';
+      if (!/image\//.test(ct) && !/\.(png|jpe?g|webp|gif|ico|svg)/i.test(full)) continue;
+      const buf = Buffer.from(await r.arrayBuffer());
+      if (buf.length < 100 || buf.length > 400000) continue;
+      out.push({ label, type: /image\//.test(ct) ? ct.split(';')[0] : 'image/png', b64: buf.toString('base64') });
+    } catch (_) { /* 개별 실패 무시 */ }
+  }
+  return out;
+}
+
 async function ingestUrl(url) {
   const html = await (await fetch(url, { headers: { 'User-Agent': UA } })).text();
   const counts = {}, fonts = new Set();
@@ -38,15 +77,18 @@ async function ingestUrl(url) {
              || html.match(/content=["'](#[0-9a-fA-F]{3,6})["'][^>]*name=["']theme-color["']/i);
   if (theme) collectHex((theme[1] + ' ').repeat(60), counts);
   // 링크된 스타일시트 최대 6개
+  let allCss = html;
   const links = [...html.matchAll(/<link[^>]+rel=["']stylesheet["'][^>]*>/gi)]
     .map(m => (m[0].match(/href=["']([^"']+)["']/) || [])[1]).filter(Boolean).slice(0, 6);
   await Promise.all(links.map(async href => {
     try {
       const css = await (await fetch(new URL(href, url).href, { headers: { 'User-Agent': UA } })).text();
+      allCss += '\n' + css;
       collectHex(css, counts); collectFonts(css, fonts); collectBrandSignals(css, counts);
     } catch (_) { /* 개별 실패 무시 */ }
   }));
-  return { counts, fonts };
+  const assets = await fetchAssets(html, url);
+  return { counts, fonts, shape: shapeFromCss(allCss), assets };
 }
 
 async function ingestFigma(input, token) {
@@ -54,7 +96,7 @@ async function ingestFigma(input, token) {
   const r = await fetch(`https://api.figma.com/v1/files/${key}?depth=4`, { headers: { 'X-Figma-Token': token } });
   if (!r.ok) throw new Error('Figma API ' + r.status + (r.status === 403 ? ' — 토큰 권한 확인' : ''));
   const doc = await r.json();
-  const counts = {}, fonts = new Set();
+  const counts = {}, fonts = new Set(), radii = [], spacings = [];
   (function walk(node) {
     if (!node) return;
     for (const f of node.fills || []) {
@@ -69,9 +111,19 @@ async function ingestFigma(input, token) {
       }
     }
     if (node.style && node.style.fontFamily) fonts.add(node.style.fontFamily);
+    if (typeof node.cornerRadius === 'number' && node.cornerRadius >= 0 && node.cornerRadius <= 48) radii.push(node.cornerRadius);
+    if (typeof node.itemSpacing === 'number' && node.itemSpacing > 0 && node.itemSpacing <= 48) spacings.push(node.itemSpacing);
     (node.children || []).forEach(walk);
   })(doc.document);
-  return { counts, fonts };
+  const med = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
+  const rm = med(radii), sm = med(spacings);
+  const shape = {
+    radius: radii.length >= 3 ? (rm < 6 ? 'sharp' : rm <= 14 ? 'default' : 'rounded') : null,
+    radiusMedian: rm,
+    density: spacings.length >= 5 ? (sm >= 18 ? 'comfortable' : sm <= 9 ? 'compact' : 'default') : null,
+    padMedian: sm
+  };
+  return { counts, fonts, shape, assets: [] };
 }
 
 module.exports = async (req, res) => {
@@ -91,7 +143,7 @@ module.exports = async (req, res) => {
     }
     const colors = Object.entries(out.counts).sort((a, b) => b[1] - a[1]).slice(0, 12)
       .map(([hex, count]) => ({ hex, count }));
-    res.status(200).json({ colors, fonts: [...out.fonts].slice(0, 6), source: figma ? 'figma' : 'url' });
+    res.status(200).json({ colors, fonts: [...out.fonts].slice(0, 6), shape: out.shape || null, assets: out.assets || [], source: figma ? 'figma' : 'url' });
   } catch (e) {
     res.status(500).json({ error: String(e.message || e).slice(0, 200) });
   }

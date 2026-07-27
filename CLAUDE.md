@@ -84,6 +84,7 @@ Scale(원시)  →  Brand(교체 지점)  →  Semantic(의미)  →  Radius(곡
 2. **램프 생성·적용 (데모 내장)**: 데모 인스펙터 Brand 그룹의 **커스텀 패널**에 시드 hex 입력, 폰트는 내장 목록(Pretendard·웹폰트 온디맨드·시스템 서체) 또는 **파일 업로드(OTF·TTF·WOFF, FontFace API)**로 선택 → HSL 기반으로 05~70 램프 자동 생성(수제 램프의 명도 곡선 근사: 05·10·20 라이트 / 40 비비드 / 55·60·70 다크) → `[data-brand="custom"]`로 주입, 4번째 브랜드로 전체 캐스케이드. p50의 흰 텍스트 대비(AA 4.5) 자동 검사. 비교 매트릭스에도 4번째 열로 합류.
 - 코드 반영 시: 생성된 램프를 `tokens.css`의 `[data-brand]` 블록과 Brand 컬렉션 값으로 옮기면 된다(구조 동일). 램프 생성 로직은 데모의 `genRamp()` 참조.
 - **제품 내장(1단계)**: 데모 GNB의 **'브랜드 연결'** 모달. 파일(이미지→채도 가중 주요색, 폰트→FontFace 등록)·텍스트(hex/font-family 추출)는 클라이언트에서 즉시 동작. URL·Figma 탭은 `api/ingest.js`(Vercel 서버리스)가 해석 — URL은 HTML+링크된 CSS에서 컬러·폰트 수집(theme-color 가중), Figma는 REST API로 채움색 수집(**환경변수 FIGMA_TOKEN 필요**). 추출 후보 중 시드 선택→커스텀 브랜드 파이프라인으로 연결.
+- **분석 원칙(v0.34)**: ①**브랜드 에셋 최우선** — 서버가 apple-touch-icon·og:image·favicon을 수집(b64)하면 클라이언트가 주요색을 추출해 CSS 통계보다 강하게 가중(로고가 브랜드의 진실). ②Primary 스코어 = 빈도(√)×채도×명도 적합도×흰 텍스트 대비 적합도×에셋 가중. ③**형태 분석** — border-radius·padding 중앙값(Figma는 cornerRadius·itemSpacing)으로 곡률(sharp/default/rounded)·간격(compact/default/comfortable) 모드를 추정해 프리셋 노브에 자동 적용.
 
 ## 아이콘 시스템 (교체 지점)
 아이콘은 브랜드처럼 **한 곳에서 통째 교체**하는 스왑 레이어다.
