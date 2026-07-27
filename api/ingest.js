@@ -53,18 +53,29 @@ function collectDeclared(html, css, list) {
   list.sort((a, b) => (a.source === 'theme-color' ? -1 : b.source === 'theme-color' ? 1 : 0) || b.count - a.count);
 }
 
-// 형태 통계: border-radius·padding 중앙값 → 곡률·간격 모드 추정
+// 형태 통계: 사용 빈도 기반 — 모드 버킷별 등장 횟수를 집계해 다수 버킷 채택 (중앙값 아님)
+// 동률이면 버킷 내 최빈값의 빈도가 높은 쪽. 근거로 최빈값·버킷 점유율 반환.
+function pickMode(vals, buckets, minN) {
+  if (vals.length < minN) return null;
+  const scored = buckets.map(([name, test]) => {
+    const inB = vals.filter(test);
+    const freq = {}; inB.forEach(v => freq[v] = (freq[v] || 0) + 1);
+    const top = Object.entries(freq).sort((a, b) => b[1] - a[1])[0] || [null, 0];
+    return { name, cnt: inB.length, top: top[0] != null ? +top[0] : null, topFreq: top[1] };
+  }).sort((a, b) => b.cnt - a.cnt || b.topFreq - a.topFreq);
+  const best = scored[0];
+  if (!best.cnt) return null;
+  return { mode: best.name, top: best.top, pct: Math.round(best.cnt / vals.length * 100) };
+}
+const RAD_BUCKETS = [['sharp', v => v < 6], ['default', v => v >= 6 && v <= 14], ['rounded', v => v > 14]];
+const PAD_BUCKETS = [['compact', v => v <= 9], ['default', v => v > 9 && v < 18], ['comfortable', v => v >= 18]];
 function shapeFromCss(text) {
   const nums = re => [...text.matchAll(re)].map(m => parseFloat(m[1])).filter(v => v >= 0 && v <= 48);
-  const med = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
-  const rads = nums(/border-radius\s*:\s*([\d.]+)px/gi);
-  const pads = nums(/padding(?:-top|-bottom|-left|-right)?\s*:\s*([\d.]+)px/gi);
-  const rm = med(rads), pm = med(pads);
+  const r = pickMode(nums(/border-radius\s*:\s*([\d.]+)px/gi), RAD_BUCKETS, 3);
+  const p = pickMode(nums(/padding(?:-top|-bottom|-left|-right)?\s*:\s*([\d.]+)px/gi), PAD_BUCKETS, 5);
   return {
-    radius: rads.length >= 3 ? (rm < 6 ? 'sharp' : rm <= 14 ? 'default' : 'rounded') : null,
-    radiusMedian: rm,
-    density: pads.length >= 5 ? (pm >= 18 ? 'comfortable' : pm <= 9 ? 'compact' : 'default') : null,
-    padMedian: pm
+    radius: r ? r.mode : null, radiusTop: r ? r.top : null, radiusPct: r ? r.pct : null,
+    density: p ? p.mode : null, padTop: p ? p.top : null, padPct: p ? p.pct : null
   };
 }
 
@@ -143,13 +154,10 @@ async function ingestFigma(input, token) {
     if (typeof node.itemSpacing === 'number' && node.itemSpacing > 0 && node.itemSpacing <= 48) spacings.push(node.itemSpacing);
     (node.children || []).forEach(walk);
   })(doc.document);
-  const med = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
-  const rm = med(radii), sm = med(spacings);
+  const rB = pickMode(radii, RAD_BUCKETS, 3), pB = pickMode(spacings, PAD_BUCKETS, 5);
   const shape = {
-    radius: radii.length >= 3 ? (rm < 6 ? 'sharp' : rm <= 14 ? 'default' : 'rounded') : null,
-    radiusMedian: rm,
-    density: spacings.length >= 5 ? (sm >= 18 ? 'comfortable' : sm <= 9 ? 'compact' : 'default') : null,
-    padMedian: sm
+    radius: rB ? rB.mode : null, radiusTop: rB ? rB.top : null, radiusPct: rB ? rB.pct : null,
+    density: pB ? pB.mode : null, padTop: pB ? pB.top : null, padPct: pB ? pB.pct : null
   };
   return { counts, fonts, declared: [], shape, assets: [] };
 }

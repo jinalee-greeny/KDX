@@ -620,7 +620,7 @@ html[data-view="compare"] .board3{display:block}
     <button data-area="tokens">파운데이션</button>
   </nav>
   <button class="gconnect" id="igOpen"><svg class="i"><use href="#icon-action-external"/></svg>브랜드 연결</button>
-  <span class="gver">토큰 기반 · v0.39</span>
+  <span class="gver">토큰 기반 · v0.40</span>
 </header>
 <div class="app">
 
@@ -1332,8 +1332,8 @@ function igShow(colors,fonts,shape,basis){
   igApplySel(0);                                        // Primary 즉시 적용
   /* 형태 분석 → 프리셋 노브 자동 적용 */
   const sh=document.getElementById('igShape'),msg=[];
-  if(shape&&shape.radius){igSetKnob('data-radius',shape.radius);msg.push(`곡률 <b>${shape.radius}</b>${shape.radiusMedian!=null?` (r 중앙값 ${shape.radiusMedian}px)`:''}`);}
-  if(shape&&shape.density){igSetKnob('data-density',shape.density);msg.push(`간격 <b>${shape.density}</b>${shape.padMedian!=null?` (pad 중앙값 ${shape.padMedian}px)`:''}`);}
+  if(shape&&shape.radius){igSetKnob('data-radius',shape.radius);msg.push(`곡률 <b>${shape.radius}</b>${shape.radiusTop!=null?` (최빈 ${shape.radiusTop}px · 점유 ${shape.radiusPct}%)`:''}`);}
+  if(shape&&shape.density){igSetKnob('data-density',shape.density);msg.push(`간격 <b>${shape.density}</b>${shape.padTop!=null?` (최빈 ${shape.padTop}px · 점유 ${shape.padPct}%)`:''}`);}
   if(msg.length){sh.hidden=false;sh.innerHTML='형태 분석 · '+msg.join(' · ')+' — 프리셋 노브에 적용됨';}
   else sh.hidden=true;
 }
@@ -1404,14 +1404,24 @@ function imgDominant(img){
   return Object.entries(counts).sort((a,b)=>b[1]*chroma(b[0])**2-a[1]*chroma(a[0])**2).slice(0,8)
     .map(([k,count])=>({hex:rgbToHex(...k.split(',').map(Number)),count,share:opaque?count/opaque:0}));
 }
-/* CSS·텍스트에서 형태(곡률·간격) 통계 추정 */
+/* CSS·텍스트에서 형태(곡률·간격) 추정 — 사용 빈도 기반: 모드 버킷별 등장 횟수 집계, 다수 버킷 채택 */
+function pickMode(vals,buckets,minN){
+  if(vals.length<minN)return null;
+  const scored=buckets.map(([name,test])=>{
+    const inB=vals.filter(test),freq={};inB.forEach(v=>freq[v]=(freq[v]||0)+1);
+    const top=Object.entries(freq).sort((a,b)=>b[1]-a[1])[0]||[null,0];
+    return{name,cnt:inB.length,top:top[0]!=null?+top[0]:null,topFreq:top[1]};
+  }).sort((a,b)=>b.cnt-a.cnt||b.topFreq-a.topFreq);
+  return scored[0].cnt?{mode:scored[0].name,top:scored[0].top,pct:Math.round(scored[0].cnt/vals.length*100)}:null;
+}
+const RAD_BUCKETS=[['sharp',v=>v<6],['default',v=>v>=6&&v<=14],['rounded',v=>v>14]];
+const PAD_BUCKETS=[['compact',v=>v<=9],['default',v=>v>9&&v<18],['comfortable',v=>v>=18]];
 function extractShape(text){
   const nums=re=>[...text.matchAll(re)].map(m=>parseFloat(m[1])).filter(v=>v>=0&&v<=48);
-  const med=a=>{if(!a.length)return null;const s=[...a].sort((x,y)=>x-y);return s[Math.floor(s.length/2)];};
-  const rads=nums(/border-radius\s*:\s*([\d.]+)px/gi),pads=nums(/padding(?:-top|-bottom|-left|-right)?\s*:\s*([\d.]+)px/gi);
-  const rm=med(rads),pm=med(pads);
-  return{radius:rads.length>=3?(rm<6?'sharp':rm<=14?'default':'rounded'):null,radiusMedian:rm,
-         density:pads.length>=5?(pm>=18?'comfortable':pm<=9?'compact':'default'):null,padMedian:pm};
+  const r=pickMode(nums(/border-radius\s*:\s*([\d.]+)px/gi),RAD_BUCKETS,3);
+  const p=pickMode(nums(/padding(?:-top|-bottom|-left|-right)?\s*:\s*([\d.]+)px/gi),PAD_BUCKETS,5);
+  return{radius:r?r.mode:null,radiusTop:r?r.top:null,radiusPct:r?r.pct:null,
+         density:p?p.mode:null,padTop:p?p.top:null,padPct:p?p.pct:null};
 }
 /* URL·Figma → /api/ingest (배포 환경에서 동작) */
 async function igRemote(params,label){
