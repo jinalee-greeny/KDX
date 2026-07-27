@@ -179,6 +179,15 @@ html[data-view="compare"] #frame{display:none}
 .brandbtn .bdot{width:20px;height:20px;border-radius:6px;flex:none}
 .brandbtn .bn{font-size:13px;font-weight:700} .brandbtn .bhex{font-size:10.5px;color:var(--fg-mut);font-family:'Pretendard Variable',system-ui,sans-serif}
 .brandbtn .bck{margin-left:auto;width:17px;height:17px;border-radius:50%;border:1.5px solid var(--line-2);display:grid;place-items:center;color:transparent}
+/* 커스텀 브랜드 인제스트 패널 */
+.cbrand{display:flex;gap:6px;margin-top:9px}
+.cbrand input{flex:1;min-width:0;height:34px;border:1px solid var(--line-2);border-radius:8px;padding:0 10px;font-size:11.5px;font-family:inherit;color:var(--fg);background:var(--bg)}
+.cbrand input::placeholder{color:var(--fg-mut)}
+.cbrand input:focus{outline:none;border-color:var(--accent);box-shadow:var(--focus-ring)}
+.cbrand button{flex:none;height:34px;padding:0 13px;border-radius:8px;background:var(--fg);color:#fff;font-size:12px;font-weight:700;transition:.15s}
+.cbrand button:hover{background:#2b3038}
+.cbnote{font-size:10.5px;color:var(--fg-mut);line-height:1.5;margin-top:7px;padding:0 2px}
+.cbnote.warn{color:var(--st-warning)}
 .brandbtn .bck svg{width:11px;height:11px}
 .brandbtn.on .bck{background:var(--fg);border-color:var(--fg);color:#fff}
 .readout{background:var(--bg-sunken);border:1px solid var(--line);border-radius:11px;padding:11px 12px;display:flex;flex-direction:column;gap:6px}
@@ -509,6 +518,8 @@ html[data-view="compare"] .board3{display:block}
 .cmpx-ramp{display:flex}
 .cmpx-ramp i{width:20px;height:26px;display:block}
 .cmpx-ramp i:first-child{border-radius:5px 0 0 5px}.cmpx-ramp i:last-child{border-radius:0 5px 5px 0}
+.cmpx.has-custom{min-width:860px}
+.cmpx.has-custom .cmpx-row{grid-template-columns:130px repeat(4,1fr)}
 </style>
 </head>
 <body>
@@ -704,12 +715,16 @@ html[data-view="compare"] .board3{display:block}
 
   <!-- ============ 우: 인스펙터(컨트롤) ============ -->
   <aside class="inspector">
-    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.27</p></div></div>
+    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.28</p></div></div>
     <div class="grp" id="brandGrp"><span class="gl">Brand <em>교체 지점</em></span><div class="brands" id="brands">
       <button class="brandbtn on" data-b="deepblue"><span class="bdot" style="background:#1245BA"></span><span class="bn">Deep Blue</span><span class="bhex">#1245BA</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
       <button class="brandbtn" data-b="emerald"><span class="bdot" style="background:#098A68"></span><span class="bn">Emerald</span><span class="bhex">#098A68</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
       <button class="brandbtn" data-b="violet"><span class="bdot" style="background:#5B14B8"></span><span class="bn">Violet</span><span class="bhex">#5B14B8</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
-    </div></div>
+      <button class="brandbtn" data-b="custom" id="cbBtn" style="display:none"><span class="bdot" style="background:#888"></span><span class="bn">Custom</span><span class="bhex">—</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
+    </div>
+    <div class="cbrand"><input id="cbHex" placeholder="#0FA3B1 — 시드 컬러" spellcheck="false"><input id="cbFont" placeholder="폰트 (선택)" spellcheck="false"><button id="cbGen">적용</button></div>
+    <p class="cbnote" id="cbNote">시드 컬러 하나로 05~70 램프를 자동 생성해 4번째 브랜드로 적용합니다.</p>
+    </div>
     <div class="grp" id="deviceGrp"><span class="gl">Device</span><div class="seg" id="devSeg"><button data-d="mobile">모바일</button><button data-d="tablet">태블릿</button><button data-d="desktop" class="on">데스크톱</button></div></div>
     <div id="presetCtl">
       <div class="grp"><span class="gl">곡률 <em>Radius</em></span><div class="seg sm" data-attr="data-radius"><button data-val="sharp">Sharp</button><button data-val="default" class="on">Default</button><button data-val="rounded">Rounded</button></div></div>
@@ -766,12 +781,14 @@ const CMPX_ROWS=[
   ['CTA 밴드','accent 면', `<div style="background:var(--accent);color:#fff;border-radius:var(--r-m);padding:12px 14px;width:100%;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:space-between;gap:8px">지금 시작하기<span style="background:#fff;color:var(--accent);border-radius:6px;padding:3px 9px;font-size:11px">CTA</span></div>`],
   ['Hero 강조 · 진행 바','', `<div style="width:100%"><div style="font-weight:800;font-size:16px;letter-spacing:-.01em">piece by <span style="color:var(--accent)">piece.</span></div><div style="height:7px;border-radius:99px;background:var(--accent-subtle);margin-top:9px;overflow:hidden"><div style="height:100%;width:72%;background:var(--accent)"></div></div></div>`],
 ];
+function allBrands(){return customBrand?[...BRANDS,['custom','Custom',customBrand.seed]]:BRANDS;}
 function buildBoard(){
+  const BR=allBrands();
   const head=`<div class="cmpx-row"><div class="cmpx-lab" style="background:var(--bg)">비교 항목</div>`+
-    BRANDS.map(([b,name,c])=>`<div class="cmpx-bhead" data-brand="${b}"><span class="cdot" style="background:${c}"></span>${name}<span class="hex">${c}</span></div>`).join('')+`</div>`;
+    BR.map(([b,name,c])=>`<div class="cmpx-bhead" data-brand="${b}"><span class="cdot" style="background:${c}"></span>${name}<span class="hex">${c.toUpperCase()}</span></div>`).join('')+`</div>`;
   const rows=CMPX_ROWS.map(([lab,sub,cell])=>`<div class="cmpx-row"><div class="cmpx-lab">${lab}${sub?`<span>${sub}</span>`:''}</div>`+
-    BRANDS.map(([b])=>`<div class="cmpx-cell" data-brand="${b}">${cell}</div>`).join('')+`</div>`).join('');
-  board3.innerHTML=`<div class="cmpx" data-radius="default" data-density="default" data-border="default" data-size="m">${head}${rows}</div>`;
+    BR.map(([b])=>`<div class="cmpx-cell" data-brand="${b}">${cell}</div>`).join('')+`</div>`).join('');
+  board3.innerHTML=`<div class="cmpx${BR.length>3?' has-custom':''}" data-radius="default" data-density="default" data-border="default" data-size="m">${head}${rows}</div>`;
 }
 /* 라우팅: 좌측 탐색(nav) → 뷰/탭 전환 + 인스펙터 역할 정리 */
 function route(view,tab){
@@ -1051,6 +1068,44 @@ authEl.addEventListener('click',e=>{const g=e.target.closest('[data-goto]');if(!
   const to=g.dataset.goto;
   if(to==='interactive'){route('interactive');}else{route('auth',to);}
 });
+
+/* ================= 커스텀 브랜드 (시드 → 램프 자동 생성 · 인제스트 지점) ================= */
+let customBrand=null;
+function hexToRgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h,16);return[n>>16&255,n>>8&255,n&255];}
+function rgbToHex(r,g,b){return'#'+[r,g,b].map(v=>Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,'0')).join('');}
+function rgbToHsl(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let h,s,l=(mx+mn)/2;if(mx===mn){h=s=0;}else{const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);h=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4;h/=6;}return[h*360,s*100,l*100];}
+function hslToRgb(h,s,l){h/=360;s/=100;l/=100;if(s===0){const v=l*255;return[v,v,v];}const q=l<.5?l*(1+s):l+s-l*s,p=2*l-q,f=t=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;};return[f(h+1/3)*255,f(h)*255,f(h-1/3)*255];}
+function contrastWhite(hex){const f=v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);};const[r,g,b]=hexToRgb(hex);return 1.05/(.2126*f(r)+.7152*f(g)+.0722*f(b)+.05);}
+/* 기존 수제 램프(Deep Blue 등)의 명도 곡선을 근사: 05·10·20 라이트 / 40 비비드 / 55·60·70 다크 */
+function genRamp(seed){
+  const[h,s,l]=rgbToHsl(...hexToRgb(seed));
+  const mk=(ll,ss)=>rgbToHex(...hslToRgb(h,Math.max(0,Math.min(100,ss)),Math.max(0,Math.min(98,ll))));
+  return{'05':mk(96,Math.min(s,40)),'10':mk(89,Math.min(s,55)),'20':mk(76,Math.min(s,62)),
+    '40':mk(Math.min(l+14,64),Math.min(s+12,95)),'50':seed,
+    '55':mk(l*.86,s),'60':mk(l*.72,s),'70':mk(l*.52,Math.min(s+5,100))};
+}
+function applyCustomBrand(seed,font){
+  seed=seed.toLowerCase();
+  const ramp=genRamp(seed);customBrand={seed,ramp,font:font||''};
+  let st=document.getElementById('customBrandStyle');
+  if(!st){st=document.createElement('style');st.id='customBrandStyle';document.head.appendChild(st);}
+  const fd=(font?`"${font.replace(/"/g,'')}",`:'')+`"Pretendard Variable",system-ui,sans-serif`;
+  st.textContent=`[data-brand="custom"]{`+Object.entries(ramp).map(([k,v])=>`--brand-p${k}:${v}`).join(';')+`;--brand-font:${fd}}`;
+  const btn=document.getElementById('cbBtn');
+  btn.style.display='flex';btn.querySelector('.bdot').style.background=seed;btn.querySelector('.bhex').textContent=seed.toUpperCase();
+  const cr=contrastWhite(seed),note=document.getElementById('cbNote');
+  note.textContent=`p50 흰 텍스트 대비 ${cr.toFixed(2)} · `+(cr>=4.5?'AA 통과':'AA 미달 — 더 어두운 시드를 권장합니다');
+  note.classList.toggle('warn',cr<4.5);
+  setBrand('custom');
+  if(html.getAttribute('data-view')==='compare')buildBoard();
+}
+document.getElementById('cbGen').addEventListener('click',()=>{
+  const raw=document.getElementById('cbHex').value.trim().replace('#','');
+  const note=document.getElementById('cbNote');
+  if(!/^[0-9a-fA-F]{6}$/.test(raw)){note.textContent='시드는 6자리 hex로 입력하세요. 예: #0FA3B1';note.classList.add('warn');return;}
+  applyCustomBrand('#'+raw,document.getElementById('cbFont').value.trim());
+});
+document.getElementById('cbHex').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('cbGen').click();});
 
 /* 초기 라우트 */
 route('interactive');
