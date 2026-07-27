@@ -23,21 +23,27 @@ function collectFonts(text, set) {
   }
 }
 
+// 브랜드 시그널: --primary/--brand/--accent 등 변수명·클래스명에 물린 hex는 강하게 가중
+function collectBrandSignals(text, counts) {
+  const re = /(?:--|\$)?[\w-]*(?:primary|brand|accent|point|key-?color|main-?color)[\w-]*\s*:\s*(#[0-9a-fA-F]{3,6})\b/gi;
+  for (const m of text.matchAll(re)) collectHex((m[1] + ' ').repeat(30), counts);
+}
+
 async function ingestUrl(url) {
   const html = await (await fetch(url, { headers: { 'User-Agent': UA } })).text();
   const counts = {}, fonts = new Set();
-  collectHex(html, counts); collectFonts(html, fonts);
-  // theme-color 메타는 가중치 부여
+  collectHex(html, counts); collectFonts(html, fonts); collectBrandSignals(html, counts);
+  // theme-color 메타는 최우선 시그널 — 강하게 가중
   const theme = html.match(/name=["']theme-color["'][^>]*content=["'](#[0-9a-fA-F]{3,6})["']/i)
              || html.match(/content=["'](#[0-9a-fA-F]{3,6})["'][^>]*name=["']theme-color["']/i);
-  if (theme) collectHex(theme[1].repeat(20), counts);
+  if (theme) collectHex((theme[1] + ' ').repeat(60), counts);
   // 링크된 스타일시트 최대 6개
   const links = [...html.matchAll(/<link[^>]+rel=["']stylesheet["'][^>]*>/gi)]
     .map(m => (m[0].match(/href=["']([^"']+)["']/) || [])[1]).filter(Boolean).slice(0, 6);
   await Promise.all(links.map(async href => {
     try {
       const css = await (await fetch(new URL(href, url).href, { headers: { 'User-Agent': UA } })).text();
-      collectHex(css, counts); collectFonts(css, fonts);
+      collectHex(css, counts); collectFonts(css, fonts); collectBrandSignals(css, counts);
     } catch (_) { /* 개별 실패 무시 */ }
   }));
   return { counts, fonts };

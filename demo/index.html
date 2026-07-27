@@ -619,7 +619,7 @@ html[data-view="compare"] .board3{display:block}
     <button data-area="tokens">파운데이션</button>
   </nav>
   <button class="gconnect" id="igOpen"><svg class="i"><use href="#icon-action-external"/></svg>브랜드 연결</button>
-  <span class="gver">토큰 기반 · v0.32</span>
+  <span class="gver">토큰 기반 · v0.33</span>
 </header>
 <div class="app">
 
@@ -1265,10 +1265,13 @@ document.getElementById('igTabs').addEventListener('click',e=>{const b=e.target.
   document.querySelectorAll('#igTabs button').forEach(x=>x.classList.toggle('on',x===b));
   document.querySelectorAll('.ig-pane').forEach(p=>p.hidden=p.dataset.p!==b.dataset.t);});
 function igMsg(t,err){igStatus.hidden=false;igStatus.textContent=t;igStatus.classList.toggle('err',!!err);}
-/* Primary 판별 스코어: 빈도(√ 감쇠) × 채도 × 명도 적합도(브랜드 컬러 대역 l≈45 선호) */
+/* Primary 판별 스코어: 빈도(√ 감쇠) × 채도 × 명도 적합도 × 흰 텍스트 대비 적합도
+   — Primary는 CTA·버튼 색이므로 흰 글자를 얹을 수 있어야 함. 밝은 노랑·파스텔(대비<2)은 강하게 감점. */
 function igScore(c){const[h,s,l]=rgbToHsl(...hexToRgb(c.hex));
-  const fit=Math.max(.05,1-Math.abs(l-45)/55);
-  return Math.sqrt(c.count||1)*Math.pow(s/100,1.2)*fit;}
+  const fitL=Math.max(.05,1-Math.abs(l-45)/55);
+  const cr=contrastWhite(c.hex);
+  const fitC=Math.max(.04,Math.min(1,(cr-1)/2));
+  return Math.sqrt(c.count||1)*Math.pow(s/100,1.2)*fitL*fitC;}
 function igApplySel(i){
   igSel=i;
   document.getElementById('cbHex').value=igCands[i].hex;
