@@ -50,8 +50,29 @@ a{color:inherit;text-decoration:none}
 svg.i{display:block;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;width:1em;height:1em}
 
 /* ===== APP SHELL: [라이브러리][리사이저][캔버스][인스펙터] ===== */
-.app{display:flex;height:100vh;overflow:hidden}
-.canvas{flex:1;min-width:0;overflow-y:auto;background:var(--bg);padding:36px;display:flex;justify-content:center;align-items:flex-start}
+/* ===== GNB (전역 내비게이션) ===== */
+.gnb{height:54px;display:flex;align-items:center;gap:16px;padding:0 18px;border-bottom:1px solid var(--line-2);background:var(--bg)}
+.gnb .glogo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:13.5px;letter-spacing:-.01em;white-space:nowrap}
+.gnb .glogo .gmark{width:26px;height:26px;border-radius:7px;background:var(--accent);color:#fff;display:grid;place-items:center;flex:none}
+.gnb .glogo .gmark svg{width:15px;height:15px}
+.gnb-tabs{display:flex;gap:3px;margin-left:10px}
+.gnb-tabs button{font-size:13px;font-weight:600;color:var(--fg-sub);padding:8px 14px;border-radius:9px;transition:.14s;white-space:nowrap}
+.gnb-tabs button:hover{background:var(--bg-sunken);color:var(--fg)}
+.gnb-tabs button.on{background:var(--accent-subtle);color:var(--accent);font-weight:700}
+.gnb .gver{margin-left:auto;font-size:11px;color:var(--fg-mut);white-space:nowrap}
+.app{display:flex;height:calc(100vh - 54px);overflow:hidden}
+/* 좌측 탐색: 현재 영역의 그룹만 · 하위 항목 없는 영역(예시 화면·비교)에선 패널 숨김 */
+.nav-group{display:none}
+.nav-group.on{display:block}
+html[data-area="pages"] #nav,html[data-area="pages"] .resizer,
+html[data-area="compare"] #nav,html[data-area="compare"] .resizer{display:none}
+/* 예시 화면 상단 탭 */
+.pgtabs{display:none;width:100%;max-width:1080px;margin-bottom:16px;gap:3px;flex:none}
+html[data-view="interactive"] .pgtabs,html[data-view="auth"] .pgtabs{display:flex}
+.pgtabs button{font-size:13px;font-weight:600;color:var(--fg-sub);padding:8px 16px;border-radius:9px;transition:.14s}
+.pgtabs button:hover{background:var(--bg-sunken);color:var(--fg)}
+.pgtabs button.on{background:var(--accent-subtle);color:var(--accent);font-weight:700}
+.canvas{flex:1;min-width:0;overflow-y:auto;background:var(--bg);padding:28px 36px 36px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start}
 .canvas::-webkit-scrollbar{width:10px}.canvas::-webkit-scrollbar-thumb{background:#dfe2e7;border-radius:99px}
 /* 페이지 프리뷰: 무거운 카드 대신 얇은 프레임 라인만(디바이스 폭 표시용) */
 .frame{width:100%;max-width:1080px;background:var(--bg);border:1px solid var(--line-2);border-radius:12px;overflow:hidden;container-type:inline-size;container-name:page;transition:max-width .3s ease}
@@ -101,7 +122,7 @@ html[data-view="compare"] #frame{display:none}
 .library.collapsed + .resizer{display:none}
 
 /* ===== LIBRARY (좌 · 접기/펼치기/폭조절) ===== */
-.library{width:300px;flex:none;height:100vh;overflow-y:auto;background:var(--bg);border-right:1px solid var(--line-2);transition:background .2s}
+.library{width:300px;flex:none;height:calc(100vh - 54px);overflow-y:auto;background:var(--bg);border-right:1px solid var(--line-2);transition:background .2s}
 .library::-webkit-scrollbar{width:8px}.library::-webkit-scrollbar-thumb{background:#dfe2e7;border-radius:99px}
 .library.collapsed{width:48px!important;overflow:hidden}
 .lib-head{position:sticky;top:0;background:var(--bg);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:18px 16px 12px;border-bottom:1px solid var(--line);z-index:3}
@@ -158,13 +179,8 @@ html[data-view="compare"] #frame{display:none}
 .emeta span{font-size:11px;color:var(--fg-mut)}
 
 /* ===== INSPECTOR (우 · 컨트롤) ===== */
-.inspector{width:300px;flex:none;height:100vh;overflow-y:auto;background:var(--bg);border-left:1px solid var(--line-2);padding:20px 18px 40px}
+.inspector{width:300px;flex:none;height:calc(100vh - 54px);overflow-y:auto;background:var(--bg);border-left:1px solid var(--line-2);padding:20px 18px 40px}
 .inspector::-webkit-scrollbar{width:8px}.inspector::-webkit-scrollbar-thumb{background:#dfe2e7;border-radius:99px}
-.insp-head{display:flex;align-items:center;gap:10px;padding-bottom:16px;margin-bottom:4px;border-bottom:1px solid var(--line)}
-.insp-logo{width:26px;height:26px;border-radius:8px;background:var(--accent);display:grid;place-items:center;color:#fff;flex:none}
-.insp-logo svg{width:15px;height:15px}
-.insp-head h1{font-size:14px;font-weight:800;letter-spacing:-.01em}
-.insp-head p{font-size:11px;color:var(--fg-mut);margin-top:1px}
 .grp{padding:15px 0;border-bottom:1px solid var(--line)}.grp:last-of-type{border-bottom:none}
 .grp>.gl{display:block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-mut);margin-bottom:9px}
 .grp>.gl em{font-style:normal;color:#b7bbc2;margin-left:4px;font-weight:600}
@@ -552,20 +568,24 @@ html[data-view="compare"] .board3{display:block}
 <symbol id="icon-status-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></symbol>
 </defs></svg>
 
+<header class="gnb">
+  <div class="glogo"><span class="gmark"><svg class="i"><use href="#icon-brand-logo"/></svg></span>KDX 디자인 시스템</div>
+  <nav class="gnb-tabs" id="gnbTabs">
+    <button data-area="pages" class="on">예시 화면</button>
+    <button data-area="compare">브랜드 비교</button>
+    <button data-area="components">컴포넌트</button>
+    <button data-area="modules">모듈</button>
+    <button data-area="tokens">파운데이션</button>
+  </nav>
+  <span class="gver">토큰 기반 · v0.30</span>
+</header>
 <div class="app">
 
-  <!-- ============ 좌: 컴포넌트 라이브러리 ============ -->
+  <!-- ============ 좌: 컨텍스트 탐색 (현재 영역의 하위 항목) ============ -->
   <aside class="library" id="nav">
     <div class="lib-head"><span class="lt">탐색 <em>Navigator</em></span><button class="iconbtn" id="libClose" title="접기"><svg class="i"><use href="#icon-nav-left"/></svg></button></div>
     <div class="lib-body nav-body">
-      <div class="nav-group">
-        <div class="nav-gl">페이지</div>
-        <button class="nav-item on" data-view="interactive">홈</button>
-        <button class="nav-item" data-view="auth" data-tab="login">로그인</button>
-        <button class="nav-item" data-view="auth" data-tab="signup">회원가입</button>
-        <button class="nav-item" data-view="compare">브랜드 비교</button>
-      </div>
-      <div class="nav-group">
+      <div class="nav-group" data-area="components">
         <div class="nav-gl">컴포넌트</div>
         <button class="nav-item" data-view="components" data-tab="buttons">Buttons</button>
         <button class="nav-item" data-view="components" data-tab="forms">Forms</button>
@@ -574,7 +594,7 @@ html[data-view="compare"] .board3{display:block}
         <button class="nav-item" data-view="components" data-tab="icon">Icon</button>
         <button class="nav-item" data-view="components" data-tab="responsive">Responsive</button>
       </div>
-      <div class="nav-group">
+      <div class="nav-group" data-area="modules">
         <div class="nav-gl">모듈 <span style="font-weight:600;text-transform:none;letter-spacing:0;color:var(--fg-mut)">· 범용 섹션</span></div>
         <button class="nav-item" data-view="modules" data-tab="header">헤더 · GNB</button>
         <button class="nav-item" data-view="modules" data-tab="hero">Hero</button>
@@ -587,7 +607,7 @@ html[data-view="compare"] .board3{display:block}
         <button class="nav-item" data-view="modules" data-tab="logowall">로고월</button>
         <button class="nav-item" data-view="modules" data-tab="faq">FAQ</button>
       </div>
-      <div class="nav-group">
+      <div class="nav-group" data-area="tokens">
         <div class="nav-gl">파운데이션 · 토큰</div>
         <button class="nav-item" data-view="tokens" data-tab="scale">Scale</button>
         <button class="nav-item" data-view="tokens" data-tab="brand">Brand</button>
@@ -606,6 +626,11 @@ html[data-view="compare"] .board3{display:block}
 
   <!-- ============ 중: 캔버스(프리뷰) ============ -->
   <main class="canvas" id="canvas">
+    <div class="pgtabs" id="pgTabs">
+      <button data-view="interactive" class="on">홈</button>
+      <button data-view="auth" data-tab="login">로그인</button>
+      <button data-view="auth" data-tab="signup">회원가입</button>
+    </div>
     <div class="frame" id="frame" data-layout="grid" data-radius="default" data-density="default" data-border="default" data-size="m">
       <div class="page" id="pageTpl">
         <div class="inner">
@@ -715,8 +740,7 @@ html[data-view="compare"] .board3{display:block}
 
   <!-- ============ 우: 인스펙터(컨트롤) ============ -->
   <aside class="inspector">
-    <div class="insp-head"><span class="insp-logo"><svg class="i"><use href="#icon-brand-logo"/></svg></span><div><h1>KDX 디자인 시스템</h1><p>토큰 기반 · v0.29</p></div></div>
-    <div class="grp" id="brandGrp"><span class="gl">Brand <em>교체 지점</em></span><div class="brands" id="brands">
+    <div class="grp" id="brandGrp" style="padding-top:6px"><span class="gl">Brand <em>교체 지점</em></span><div class="brands" id="brands">
       <button class="brandbtn on" data-b="deepblue"><span class="bdot" style="background:#1245BA"></span><span class="bn">Deep Blue</span><span class="bhex">#1245BA</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
       <button class="brandbtn" data-b="emerald"><span class="bdot" style="background:#098A68"></span><span class="bn">Emerald</span><span class="bhex">#098A68</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
       <button class="brandbtn" data-b="violet"><span class="bdot" style="background:#5B14B8"></span><span class="bn">Violet</span><span class="bhex">#5B14B8</span><span class="bck"><svg class="i"><use href="#icon-status-success"/></svg></span></button>
@@ -798,9 +822,15 @@ function buildBoard(){
     BR.map(([b])=>`<div class="cmpx-cell" data-brand="${b}">${cell}</div>`).join('')+`</div>`).join('');
   board3.innerHTML=`<div class="cmpx${BR.length>3?' has-custom':''}" data-radius="default" data-density="default" data-border="default" data-size="m">${head}${rows}</div>`;
 }
-/* 라우팅: 좌측 탐색(nav) → 뷰/탭 전환 + 인스펙터 역할 정리 */
+/* 라우팅: GNB(영역) → 좌측 탐색(하위 항목) → 뷰/탭 + 인스펙터 역할 정리 */
+const AREA_OF={interactive:'pages',auth:'pages',compare:'compare',components:'components',modules:'modules',tokens:'tokens'};
+const AREA_DEFAULT={pages:['interactive'],compare:['compare'],components:['components','buttons'],modules:['modules','header'],tokens:['tokens','scale']};
 function route(view,tab){
   html.setAttribute('data-view',view);
+  const area=AREA_OF[view];html.setAttribute('data-area',area);
+  document.querySelectorAll('#gnbTabs button').forEach(x=>x.classList.toggle('on',x.dataset.area===area));
+  document.querySelectorAll('#nav .nav-group').forEach(g=>g.classList.toggle('on',g.dataset.area===area));
+  document.querySelectorAll('#pgTabs button').forEach(x=>x.classList.toggle('on',x.dataset.view===view && (!x.dataset.tab||x.dataset.tab===(tab||'login'))));
   document.querySelectorAll('#nav .nav-item').forEach(x=>x.classList.toggle('on',x.dataset.view===view && (!x.dataset.tab||x.dataset.tab===tab)));
   const cmp=view==='compare',tok=view==='tokens',comp=view==='components',mod=view==='modules',auth=view==='auth',home=view==='interactive';
   document.getElementById('presetCtl').style.display=(home||comp||mod||auth)?'':'none';  // 노브: 홈+컴포넌트+모듈+인증
@@ -816,6 +846,8 @@ function route(view,tab){
   if(auth)renderAuth(tab||curAuthTab);
 }
 document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('.nav-item');if(!b)return;route(b.dataset.view,b.dataset.tab);});
+document.getElementById('gnbTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;route(...AREA_DEFAULT[b.dataset.area]);});
+document.getElementById('pgTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;route(b.dataset.view,b.dataset.tab);});
 
 /* ================= TOKENS VIEW (Figma 컬렉션 브라우저) ================= */
 const SCALE_STR="color/gray/00|#000000;color/gray/05|#0e0f10;color/gray/10|#1b1c1d;color/gray/20|#2f3032;color/gray/30|#46474a;color/gray/40|#5d5e61;color/gray/50|#76777a;color/gray/60|#909194;color/gray/70|#abacaf;color/gray/80|#c7c8cb;color/gray/90|#e3e4e6;color/gray/94|#edeef0;color/gray/96|#f3f4f6;color/gray/100|#ffffff;color/blue/05|#000e2b;color/blue/10|#001a47;color/blue/20|#002f6e;color/blue/30|#00439a;color/blue/40|#0058c6;color/blue/50|#1772ed;color/blue/60|#6f91ff;color/blue/70|#a2b9ff;color/blue/80|#cbd9ff;color/blue/90|#ebf0ff;color/red/05|#2d0001;color/red/10|#410002;color/red/20|#690005;color/red/30|#93000b;color/red/40|#b7211f;color/red/50|#db3c35;color/red/55|#ec483f;color/red/58|#f75046;color/red/60|#fe554b;color/red/70|#ff897d;color/red/80|#ffb4ab;color/red/90|#ffdad6;color/orange/05|#220a00;color/orange/10|#331200;color/orange/20|#532200;color/orange/30|#763300;color/orange/40|#9b4500;color/orange/50|#bf5a0e;color/orange/60|#df7329;color/orange/70|#ff8d44;color/orange/80|#ffb68d;color/orange/90|#ffdbc9;color/green/05|#07140c;color/green/10|#012111;color/green/20|#003820;color/green/30|#1b5135;color/green/40|#1a6b45;color/green/50|#078955;color/green/60|#00a667;color/green/70|#3ac280;color/green/80|#71db9f;color/green/90|#baefcb;color/purple/05|#19003e;color/purple/10|#260059;color/purple/20|#40008c;color/purple/30|#5823ab;color/purple/40|#7141c4;color/purple/50|#8b5cdf;color/purple/60|#a577fb;color/purple/70|#bd99ff;color/purple/80|#d4bbff;color/purple/90|#ebdcff;color/alpha/black/05|#0000000d;color/alpha/black/10|#0000001a;color/alpha/black/15|#00000026;color/alpha/black/20|#00000033;color/alpha/black/30|#0000004d;color/alpha/black/40|#00000066;color/alpha/black/50|#00000080;color/alpha/black/60|#00000099;color/alpha/white/30|#ffffff4d;color/alpha/white/50|#ffffff80;color/alpha/white/70|#ffffffb2;color/alpha/red/10|#ec483f1a;color/alpha/red/20|#ec483f33;color/alpha/green/10|#0789551a;color/alpha/blue/20|#3880f433;color/alpha/gray/05|#0e0f100d;color/alpha/orange/10|#bf5a0e1a";
