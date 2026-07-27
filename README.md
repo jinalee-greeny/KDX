@@ -1,6 +1,6 @@
-# Prism — KDX Design System
+# Freesm — KDX Design System
 
-KDX 기업 홈페이지 디자인 시스템 워크벤치 **Prism**. 시드 하나가 램프·토큰·컴포넌트·모듈 전체로 분광됩니다.
+KDX 기업 홈페이지 디자인 시스템 워크벤치 **Freesm**(Free + 프리즘 발음 — 브랜드로부터 자유롭게, 시드 하나가 시스템 전체로 분광).
 토큰 · 인터랙티브 데모 · 브랜드 인제스트 · 스펙 · Figma 빌드 스크립트.
 
 **데모**: https://jinalee-greeny.github.io/KDX/demo/ · (GitHub Pages 활성화 후)
