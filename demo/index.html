@@ -621,7 +621,7 @@ html[data-view="compare"] .board3{display:block}
     <button data-area="tokens">파운데이션</button>
   </nav>
   <button class="gconnect" id="igOpen"><svg class="i"><use href="#icon-action-external"/></svg>브랜드 연결</button>
-  <span class="gver">토큰 기반 · v0.36</span>
+  <span class="gver">토큰 기반 · v0.37</span>
 </header>
 <div class="app">
 
@@ -839,7 +839,7 @@ html[data-view="compare"] .board3{display:block}
     </div>
     <div class="ig-status" id="igStatus" hidden></div>
     <div class="ig-result" id="igResult" hidden>
-      <div class="ig-rl">분석 결과 · <b>Primary 자동 적용됨</b> — 다른 후보를 클릭하면 즉시 교체</div>
+      <div class="ig-rl" id="igResultLab">분석 결과</div>
       <div class="ig-sws" id="igSws"></div>
       <div class="ig-shape" id="igShape" hidden></div>
       <div class="ig-rl" id="igFontsLab" hidden>검출된 폰트</div>
@@ -1274,7 +1274,39 @@ function igScore(c){const[h,s,l]=rgbToHsl(...hexToRgb(c.hex));
   const fitL=Math.max(.05,1-Math.abs(l-45)/55);
   const cr=contrastWhite(c.hex);
   const fitC=Math.max(.04,Math.min(1,(cr-1)/2));
-  return Math.sqrt(c.count||1)*Math.pow(s/100,1.2)*fitL*fitC*(c.asset?8:1);}  /* 브랜드 에셋(로고·아이콘) 출신은 최우선 */
+  return Math.sqrt(c.count||1)*Math.pow(s/100,1.2)*fitL*fitC;}
+/* ===== Primary 판별: 혼합 스코어가 아닌 명시적 우선순위 계층 =====
+   1순위 선언(theme-color·--primary류 변수) > 2순위 로고 마크(favicon·앱아이콘, 유채색 비율 충족 시)
+   > 3순위 CSS 사용 통계(igScore). 각 후보에 출처 라벨, 판별 근거를 UI에 명시. */
+function validHexC(h){if(!h)return null;h=h.toLowerCase();
+  if(/^#[0-9a-f]{3}$/.test(h))h='#'+h[1]+h[1]+h[2]+h[2]+h[3]+h[3];
+  if(!/^#[0-9a-f]{6}$/.test(h))return null;
+  const[r,g,b]=hexToRgb(h),mx=Math.max(r,g,b),mn=Math.min(r,g,b);
+  return(mx-mn<24||mx<35||mn>238)?null:h;}
+function parseDeclared(text){
+  const list=[],seen=new Map();
+  const add=(hex,source)=>{const h=validHexC(hex);if(!h)return;
+    const ex=seen.get(h);if(ex)ex.count++;else{const d={hex:h,count:1,source,src:'declared'};seen.set(h,d);list.push(d);}};
+  const th=text.match(/name=["']theme-color["'][^>]*content=["'](#[0-9a-fA-F]{3,6})["']/i);
+  if(th)add(th[1],'theme-color');
+  for(const m of text.matchAll(/(?:--|\$)[\w-]*(?:primary|brand|accent|point|key-?color|main-?color)[\w-]*\s*:\s*(#[0-9a-fA-F]{3,6})\b/gi))add(m[1],'brand-var');
+  list.sort((a,b)=>(a.source==='theme-color'?-1:b.source==='theme-color'?1:0)||b.count-a.count);
+  return list;}
+const IG_SRC_LAB={declared:'선언','asset':'로고',css:'CSS',img:'이미지'};
+function igResolve({declared=[],assetCands=[],cssCands=[],assetBasis='로고·앱 아이콘 주요색'}){
+  declared=declared.map(d=>({...d,src:'declared'}));
+  assetCands=assetCands.map(a=>({...a,src:a.src||'asset'}));
+  cssCands=cssCands.map(c=>({...c,src:'css'})).sort((a,b)=>igScore(b)-igScore(a));
+  const assetOk=assetCands.length&&(assetCands[0].share==null||assetCands[0].share>=.02); // 유채색 비율 미달=흑백 로고 → 통과
+  let primary,basis;
+  if(declared.length){primary=declared[0];basis=`사이트가 선언한 브랜드 색 (${declared[0].source})`;}
+  else if(assetOk){primary=assetCands[0];basis=assetBasis;}
+  else if(cssCands.length){primary=cssCands[0];basis='CSS 사용 통계 (빈도×채도×명도×대비) — 선언·로고 시그널 없음';}
+  else return{cands:[],basis:''};
+  const rest=[...declared,...assetCands,...cssCands].filter(c=>c!==primary);
+  const seen=new Set([primary.hex]),cands=[primary];
+  rest.forEach(c=>{if(!seen.has(c.hex)){seen.add(c.hex);cands.push(c);}});
+  return{cands:cands.slice(0,12),basis};}
 function igApplySel(i){
   igSel=i;
   document.getElementById('cbHex').value=igCands[i].hex;
@@ -1282,16 +1314,16 @@ function igApplySel(i){
   document.querySelectorAll('.ig-sw').forEach((x,xi)=>x.classList.toggle('on',+x.dataset.i===i));
 }
 function igSetKnob(attr,val){const b=document.querySelector(`#presetCtl .seg[data-attr="${attr}"] button[data-val="${val}"]`);if(b)b.click();}
-function igShow(colors,fonts,shape){
-  igCands=colors.slice(0,16);
+function igShow(colors,fonts,shape,basis){
+  igCands=colors.slice(0,12);                            // igResolve가 이미 계층 순서로 정렬
   igStatus.hidden=igCands.length>0;
   if(!igCands.length){igMsg('컬러를 찾지 못했습니다. 다른 소스를 시도해 보세요.',true);igResult.hidden=true;return;}
-  igCands.sort((a,b)=>igScore(b)-igScore(a));           // 분석: 에셋 우선 + Primary 판별
-  igCands=igCands.slice(0,12);
   igResult.hidden=false;
+  document.getElementById('igResultLab').innerHTML=`분석 결과 · <b>Primary 자동 적용</b>${basis?` — 판별 근거: ${basis}`:''}`;
   document.getElementById('igSws').innerHTML=igCands.map((c,i)=>{const cr=contrastWhite(c.hex);
-    const badge=i===0?'<em class="pri">PRIMARY</em>':(c.asset?'<em class="pri ast">에셋</em>':'');
-    return `<button class="ig-sw${i===0?' on':''}" data-i="${i}">${badge}<i style="background:${c.hex}"></i><span>${c.hex.toUpperCase()}</span><span class="aa">${c.asset&&i===0?'에셋 · ':''}${cr>=4.5?'AA ✓':'대비 '+cr.toFixed(1)}</span></button>`;}).join('');
+    const lab=IG_SRC_LAB[c.src];
+    const badge=i===0?'<em class="pri">PRIMARY</em>':(c.src&&c.src!=='css'?`<em class="pri ast">${lab}</em>`:'');
+    return `<button class="ig-sw${i===0?' on':''}" data-i="${i}">${badge}<i style="background:${c.hex}"></i><span>${c.hex.toUpperCase()}</span><span class="aa">${cr>=4.5?'AA ✓':'대비 '+cr.toFixed(1)}</span></button>`;}).join('');
   const fl=document.getElementById('igFontsLab'),ff=document.getElementById('igFonts');
   if(fonts&&fonts.length){fl.hidden=ff.hidden=false;ff.innerHTML=fonts.slice(0,6).map(f=>`<span>${f}</span>`).join('');}
   else{fl.hidden=ff.hidden=true;}
@@ -1319,7 +1351,8 @@ function extractHex(text){
 document.getElementById('igTextRun').addEventListener('click',()=>{
   const t=document.getElementById('igText').value;
   const fonts=[...new Set((t.match(/font-family\s*:\s*([^;}]+)/gi)||[]).map(m=>m.split(':')[1].split(',')[0].trim().replace(/["']/g,'')))];
-  igShow(extractHex(t),fonts,extractShape(t));
+  const rr=igResolve({declared:parseDeclared(t),cssCands:extractHex(t)});
+  igShow(rr.cands,fonts,extractShape(t),rr.basis);
 });
 /* 이미지 → 주요 컬러 · 폰트 파일 → 서체 등록 */
 const igDrop=document.getElementById('igDrop'),igFile=document.getElementById('igFile');
@@ -1346,7 +1379,9 @@ async function igHandleFile(f){
   if(!/^image\//.test(f.type)){igMsg('이미지 또는 폰트 파일만 지원합니다.',true);return;}
   igMsg('이미지 해석 중…');
   const img=new Image();
-  img.onload=()=>{igShow(imgDominant(img),null,null);URL.revokeObjectURL(img.src);};
+  img.onload=()=>{
+    const rr=igResolve({assetCands:imgDominant(img).map(c=>({...c,src:'img'})),assetBasis:'업로드 이미지 주요색 (채도 가중)'});
+    igShow(rr.cands,null,null,rr.basis);URL.revokeObjectURL(img.src);};
   img.onerror=()=>igMsg('이미지를 읽지 못했습니다.',true);
   img.src=URL.createObjectURL(f);
 }
@@ -1355,9 +1390,9 @@ function imgDominant(img){
   const cv=document.createElement('canvas'),cx=cv.getContext('2d');
   const w=cv.width=64,h=cv.height=Math.max(1,Math.round(64*(img.height||64)/(img.width||64)));
   cx.drawImage(img,0,0,w,h);
-  const d=cx.getImageData(0,0,w,h).data,counts={};
+  const d=cx.getImageData(0,0,w,h).data,counts={};let opaque=0;
   for(let i=0;i<d.length;i+=4){
-    if(d[i+3]<200)continue;
+    if(d[i+3]<200)continue;opaque++;
     const r=d[i],g=d[i+1],b=d[i+2],mx=Math.max(r,g,b),mn=Math.min(r,g,b);
     if(mx-mn<28||mx<40||mn>235)continue;   // 무채색·배경 제외
     const key=[r,g,b].map(v=>Math.round(v/24)*24).join(',');
@@ -1365,7 +1400,7 @@ function imgDominant(img){
   }
   const chroma=k=>{const[r,g,b]=k.split(',').map(Number);return Math.max(r,g,b)-Math.min(r,g,b);};
   return Object.entries(counts).sort((a,b)=>b[1]*chroma(b[0])**2-a[1]*chroma(a[0])**2).slice(0,8)
-    .map(([k,count])=>({hex:rgbToHex(...k.split(',').map(Number)),count}));
+    .map(([k,count])=>({hex:rgbToHex(...k.split(',').map(Number)),count,share:opaque?count/opaque:0}));
 }
 /* CSS·텍스트에서 형태(곡률·간격) 통계 추정 */
 function extractShape(text){
@@ -1383,22 +1418,21 @@ async function igRemote(params,label){
     const r=await fetch('/api/ingest?'+params);
     if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.error||('HTTP '+r.status));}
     const j=await r.json();
-    let cands=(j.colors||[]).map(c=>({hex:c.hex.toLowerCase(),count:c.count||1}));
-    /* 브랜드 에셋(로고·앱아이콘) 먼저: 주요색을 추출해 최우선 후보로 병합 */
+    const cssCands=(j.colors||[]).map(c=>({hex:c.hex.toLowerCase(),count:c.count||1}));
+    /* 2순위: 로고 마크(favicon·앱아이콘) 주요색 추출 */
+    let assetCands=[];
     if(j.assets&&j.assets.length){
-      igMsg('브랜드 에셋 해석 중…');
-      const assetCands=[];
+      igMsg('로고 마크 해석 중…');
       await Promise.all(j.assets.map(a=>new Promise(res=>{
         const img=new Image();
-        img.onload=()=>{try{imgDominant(img).forEach(c=>assetCands.push({...c,asset:true}));}catch(_){ }res();};
+        img.onload=()=>{try{assetCands.push(...imgDominant(img));}catch(_){ }res();};
         img.onerror=res;
         img.src=`data:${a.type};base64,${a.b64}`;
       })));
-      const map=new Map(cands.map(c=>[c.hex,c]));
-      assetCands.forEach(c=>{const ex=map.get(c.hex);
-        if(ex){ex.asset=true;ex.count+=c.count;}else{map.set(c.hex,c);cands.push(c);}});
+      assetCands.sort((a,b)=>(b.share||0)-(a.share||0));
     }
-    igShow(cands,j.fonts||[],j.shape||null);
+    const rr=igResolve({declared:j.declared||[],assetCands,cssCands});
+    igShow(rr.cands,j.fonts||[],j.shape||null,rr.basis);
   }catch(err){
     const local=location.protocol==='file:';
     igMsg(local

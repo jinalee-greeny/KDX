@@ -23,10 +23,34 @@ function collectFonts(text, set) {
   }
 }
 
-// 브랜드 시그널: --primary/--brand/--accent 등 변수명·클래스명에 물린 hex는 강하게 가중
-function collectBrandSignals(text, counts) {
-  const re = /(?:--|\$)?[\w-]*(?:primary|brand|accent|point|key-?color|main-?color)[\w-]*\s*:\s*(#[0-9a-fA-F]{3,6})\b/gi;
-  for (const m of text.matchAll(re)) collectHex((m[1] + ' ').repeat(30), counts);
+// 1순위 시그널 — 사이트가 '선언한' 브랜드 색: theme-color 메타 + --primary/--brand 계열 변수
+function validHex(h) {
+  if (!h) return null;
+  h = h.toLowerCase();
+  if (h.length === 4) h = '#' + h[1] + h[1] + h[2] + h[2] + h[3] + h[3];
+  if (!/^#[0-9a-f]{6}$/.test(h)) return null;
+  const n = parseInt(h.slice(1), 16), r = n >> 16 & 255, g = n >> 8 & 255, b = n & 255;
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+  if (mx - mn < 24 || mx < 35 || mn > 238) return null; // 무채색·극단값은 선언이라도 브랜드색 아님
+  return h;
+}
+function collectDeclared(html, css, list) {
+  const seen = new Map(list.map(d => [d.hex, d]));
+  const add = (hex, source) => {
+    const h = validHex(hex); if (!h) return;
+    const ex = seen.get(h);
+    if (ex) ex.count++;
+    else { const d = { hex: h, count: 1, source }; seen.set(h, d); list.push(d); }
+  };
+  const theme = html.match(/name=["']theme-color["'][^>]*content=["'](#[0-9a-fA-F]{3,6})["']/i)
+             || html.match(/content=["'](#[0-9a-fA-F]{3,6})["'][^>]*name=["']theme-color["']/i);
+  if (theme) add(theme[1], 'theme-color');
+  const tile = html.match(/name=["']msapplication-TileColor["'][^>]*content=["'](#[0-9a-fA-F]{3,6})["']/i);
+  if (tile) add(tile[1], 'tile-color');
+  const re = /(?:--|\$)[\w-]*(?:primary|brand|accent|point|key-?color|main-?color)[\w-]*\s*:\s*(#[0-9a-fA-F]{3,6})\b/gi;
+  for (const m of (html + '\n' + css).matchAll(re)) add(m[1], 'brand-var');
+  // theme-color > tile > brand-var(빈도순)
+  list.sort((a, b) => (a.source === 'theme-color' ? -1 : b.source === 'theme-color' ? 1 : 0) || b.count - a.count);
 }
 
 // 형태 통계: border-radius·padding 중앙값 → 곡률·간격 모드 추정
@@ -44,15 +68,15 @@ function shapeFromCss(text) {
   };
 }
 
-// 브랜드 에셋 우선: apple-touch-icon > og:image > favicon 을 base64로 반환 (클라이언트가 주요색 추출)
+// 2순위 시그널 — 로고 마크만: apple-touch-icon > icon > favicon.
+// og:image는 콘텐츠 이미지(블로그 썸네일·사진)라 브랜드 마크가 아님 → 제외.
 async function fetchAssets(html, base) {
   const abs = h => { try { return new URL(h, base).href; } catch (_) { return null; } };
   const attr = (tag, name) => (tag && tag.match(new RegExp(name + '=["\']([^"\']+)["\']', 'i')) || [])[1];
   const touch = attr((html.match(/<link[^>]+apple-touch-icon[^>]*>/i) || [])[0], 'href');
-  const og = (html.match(/property=["']og:image["'][^>]*content=["']([^"']+)["']/i) || html.match(/content=["']([^"']+)["'][^>]*property=["']og:image["']/i) || [])[1];
   const icon = attr((html.match(/<link[^>]+rel=["'](?:shortcut )?icon["'][^>]*>/i) || [])[0], 'href');
   const out = [];
-  for (const [href, label] of [[touch, 'apple-touch-icon'], [og, 'og:image'], [icon, 'icon'], ['/favicon.ico', 'favicon']]) {
+  for (const [href, label] of [[touch, 'apple-touch-icon'], [icon, 'icon'], ['/favicon.ico', 'favicon']]) {
     if (out.length >= 2) break;
     const full = href && abs(href); if (!full) continue;
     try {
@@ -70,12 +94,8 @@ async function fetchAssets(html, base) {
 
 async function ingestUrl(url) {
   const html = await (await fetch(url, { headers: { 'User-Agent': UA } })).text();
-  const counts = {}, fonts = new Set();
-  collectHex(html, counts); collectFonts(html, fonts); collectBrandSignals(html, counts);
-  // theme-color 메타는 최우선 시그널 — 강하게 가중
-  const theme = html.match(/name=["']theme-color["'][^>]*content=["'](#[0-9a-fA-F]{3,6})["']/i)
-             || html.match(/content=["'](#[0-9a-fA-F]{3,6})["'][^>]*name=["']theme-color["']/i);
-  if (theme) collectHex((theme[1] + ' ').repeat(60), counts);
+  const counts = {}, fonts = new Set(), declared = [];
+  collectHex(html, counts); collectFonts(html, fonts);
   // 링크된 스타일시트 최대 6개
   let allCss = html;
   const links = [...html.matchAll(/<link[^>]+rel=["']stylesheet["'][^>]*>/gi)]
@@ -84,11 +104,12 @@ async function ingestUrl(url) {
     try {
       const css = await (await fetch(new URL(href, url).href, { headers: { 'User-Agent': UA } })).text();
       allCss += '\n' + css;
-      collectHex(css, counts); collectFonts(css, fonts); collectBrandSignals(css, counts);
+      collectHex(css, counts); collectFonts(css, fonts);
     } catch (_) { /* 개별 실패 무시 */ }
   }));
+  collectDeclared(html, allCss, declared);
   const assets = await fetchAssets(html, url);
-  return { counts, fonts, shape: shapeFromCss(allCss), assets };
+  return { counts, fonts, declared, shape: shapeFromCss(allCss), assets };
 }
 
 async function ingestFigma(input, token) {
@@ -123,7 +144,7 @@ async function ingestFigma(input, token) {
     density: spacings.length >= 5 ? (sm >= 18 ? 'comfortable' : sm <= 9 ? 'compact' : 'default') : null,
     padMedian: sm
   };
-  return { counts, fonts, shape, assets: [] };
+  return { counts, fonts, declared: [], shape, assets: [] };
 }
 
 module.exports = async (req, res) => {
@@ -143,7 +164,7 @@ module.exports = async (req, res) => {
     }
     const colors = Object.entries(out.counts).sort((a, b) => b[1] - a[1]).slice(0, 12)
       .map(([hex, count]) => ({ hex, count }));
-    res.status(200).json({ colors, fonts: [...out.fonts].slice(0, 6), shape: out.shape || null, assets: out.assets || [], source: figma ? 'figma' : 'url' });
+    res.status(200).json({ colors, fonts: [...out.fonts].slice(0, 6), declared: (out.declared || []).slice(0, 6), shape: out.shape || null, assets: out.assets || [], source: figma ? 'figma' : 'url' });
   } catch (e) {
     res.status(500).json({ error: String(e.message || e).slice(0, 200) });
   }
