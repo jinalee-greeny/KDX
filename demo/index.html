@@ -59,7 +59,47 @@ svg.i{display:block;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linec
 .gnb-tabs button{font-size:13px;font-weight:600;color:var(--fg-sub);padding:8px 14px;border-radius:9px;transition:.14s;white-space:nowrap}
 .gnb-tabs button:hover{background:var(--bg-sunken);color:var(--fg)}
 .gnb-tabs button.on{background:var(--accent-subtle);color:var(--accent);font-weight:700}
-.gnb .gver{margin-left:auto;font-size:11px;color:var(--fg-mut);white-space:nowrap}
+.gnb .gconnect{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--accent);border:1px solid var(--accent-line);border-radius:9px;padding:7px 13px;transition:.15s;white-space:nowrap}
+.gnb .gconnect:hover{background:var(--accent-subtle)}
+.gnb .gconnect svg{width:14px;height:14px}
+.gnb .gver{font-size:11px;color:var(--fg-mut);white-space:nowrap}
+/* ===== 브랜드 연결 모달 ===== */
+.ig-ov{position:fixed;inset:0;background:rgba(14,17,22,.42);display:flex;align-items:flex-start;justify-content:center;padding:9vh 20px 20px;z-index:50}
+.ig-ov[hidden]{display:none}
+.ig{width:100%;max-width:540px;background:var(--bg);border-radius:16px;box-shadow:var(--elev-4);padding:24px 24px 22px;max-height:82vh;overflow-y:auto}
+.ig-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.ig-head h2{font-size:18px;font-weight:800;letter-spacing:-.01em}
+.ig-head p{font-size:12.5px;color:var(--fg-sub);margin-top:4px;line-height:1.5}
+.ig-tabs{display:flex;gap:3px;margin:16px 0 14px;border:1px solid var(--line-2);border-radius:10px;padding:2px}
+.ig-tabs button{flex:1;font-size:12.5px;font-weight:600;color:var(--fg-sub);padding:7px 4px;border-radius:7px;transition:.14s}
+.ig-tabs button.on{background:var(--accent-subtle);color:var(--accent);font-weight:700}
+.ig-row{display:flex;gap:8px}
+.ig-pane input,.ig-pane textarea{width:100%;border:1px solid var(--line-2);border-radius:9px;padding:10px 12px;font-size:12.5px;font-family:inherit;color:var(--fg);background:var(--bg)}
+.ig-pane input{height:40px}
+.ig-pane input:focus,.ig-pane textarea:focus{outline:none;border-color:var(--accent);box-shadow:var(--focus-ring)}
+.ig-pane textarea{height:96px;resize:vertical;margin-top:10px;line-height:1.5}
+.ig-run{flex:none;height:40px;padding:0 16px;border-radius:9px;background:var(--fg);color:#fff;font-size:12.5px;font-weight:700;transition:.15s;margin-top:0}
+.ig-run:hover{background:#2b3038}
+.ig-pane[data-p="file"] .ig-run{height:38px;margin-top:10px}
+.ig-hint{font-size:11px;color:var(--fg-mut);line-height:1.6;margin-top:10px}
+.ig-hint b{color:var(--fg-sub)}
+.ig-drop{border:1.5px dashed var(--line-2);border-radius:11px;padding:22px 16px;text-align:center;font-size:12.5px;font-weight:600;color:var(--fg-sub);cursor:pointer;transition:.15s;line-height:1.7}
+.ig-drop span{font-weight:500;font-size:11px;color:var(--fg-mut)}
+.ig-drop:hover,.ig-drop.over{border-color:var(--accent);background:var(--accent-subtle)}
+.ig-status{margin-top:14px;font-size:12px;color:var(--fg-sub);background:var(--bg-sunken);border-radius:9px;padding:11px 13px;line-height:1.6}
+.ig-status.err{color:var(--st-critical);background:var(--st-critical-bg)}
+.ig-result{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+.ig-rl{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--fg-mut);margin-bottom:9px}
+.ig-rl b{color:var(--fg-sub)}
+.ig-sws{display:flex;flex-wrap:wrap;gap:8px}
+.ig-sw{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px;border:1.5px solid transparent;border-radius:10px;cursor:pointer;transition:.13s}
+.ig-sw:hover{background:var(--bg-sunken)}
+.ig-sw.on{border-color:var(--accent);background:var(--accent-subtle)}
+.ig-sw i{width:44px;height:32px;border-radius:7px;display:block;border:1px solid var(--line-2)}
+.ig-sw span{font-size:9px;color:var(--fg-sub);font-weight:600}
+.ig-sw .aa{font-size:8px;color:var(--fg-mut)}
+.ig-fonts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.ig-fonts span{font-size:11.5px;font-weight:600;color:var(--fg-sub);border:1px solid var(--line-2);border-radius:99px;padding:5px 12px}
 .app{display:flex;height:calc(100vh - 54px);overflow:hidden}
 /* 좌측 탐색: 현재 영역의 그룹만 · 하위 항목 없는 영역(예시 화면·비교)에선 패널 숨김 */
 .nav-group{display:none}
@@ -577,7 +617,8 @@ html[data-view="compare"] .board3{display:block}
     <button data-area="modules">모듈</button>
     <button data-area="tokens">파운데이션</button>
   </nav>
-  <span class="gver">토큰 기반 · v0.30</span>
+  <button class="gconnect" id="igOpen"><svg class="i"><use href="#icon-action-external"/></svg>브랜드 연결</button>
+  <span class="gver">토큰 기반 · v0.31</span>
 </header>
 <div class="app">
 
@@ -769,6 +810,39 @@ html[data-view="compare"] .board3{display:block}
     <div id="compareNote" class="grp" style="display:none"><span class="gl">비교 모드</span><p class="hintnote">브랜드를 바꿀 때 <b>실제로 달라지는 것</b>만 3열로 나란히 봅니다 — primary 램프, accent 계열 토큰, 그리고 브랜드에 민감한 컴포넌트(버튼·포커스·칩·CTA·히어로 강조). 레이아웃·본문 등 <b>브랜드 무관</b> 요소는 생략했습니다.</p></div>
     <div id="tokNote" class="grp" style="display:none"><span class="gl">토큰 뷰</span><p class="hintnote">Figma로 내보낸 변수 컬렉션입니다. 위 <b>Brand</b>를 바꾸면 Semantic의 accent·link 토큰 값이 실시간 반영됩니다. Radius는 3개 모드를 함께 표기합니다.</p></div>
   </aside>
+</div>
+
+<!-- ============ 브랜드 연결 모달 (인제스트) ============ -->
+<div class="ig-ov" id="igOv" hidden>
+  <div class="ig" role="dialog" aria-label="브랜드 연결">
+    <div class="ig-head">
+      <div><h2>브랜드 연결</h2><p>소스를 해석해 시드 컬러·폰트를 추출하고, 커스텀 브랜드로 적용합니다.</p></div>
+      <button class="iconbtn" id="igClose" title="닫기" style="font-size:15px;font-weight:600">✕</button>
+    </div>
+    <div class="ig-tabs" id="igTabs"><button data-t="url" class="on">URL</button><button data-t="figma">Figma</button><button data-t="file">파일 · 텍스트</button></div>
+    <div class="ig-pane" data-p="url">
+      <div class="ig-row"><input id="igUrl" placeholder="https://brand-site.com" spellcheck="false"><button class="ig-run" id="igUrlRun">해석</button></div>
+      <p class="ig-hint">배포 환경의 <b>/api/ingest</b> 함수가 사이트 CSS에서 컬러·폰트를 추출합니다. 로컬 파일로 열었을 땐 <b>파일·텍스트</b> 탭을 사용하세요.</p>
+    </div>
+    <div class="ig-pane" data-p="figma" hidden>
+      <div class="ig-row"><input id="igFigma" placeholder="Figma 파일 링크 또는 file key" spellcheck="false"><button class="ig-run" id="igFigmaRun">해석</button></div>
+      <p class="ig-hint"><b>/api/ingest</b>가 Figma API로 파일의 채움색을 수집합니다. Vercel 환경변수 <b>FIGMA_TOKEN</b> 설정 필요.</p>
+    </div>
+    <div class="ig-pane" data-p="file" hidden>
+      <div class="ig-drop" id="igDrop">이미지(로고·시안)나 폰트 파일을 드롭 또는 클릭<br><span>이미지 → 주요 컬러 추출 · 폰트(OTF·TTF·WOFF) → 브랜드 서체 등록</span></div>
+      <input type="file" id="igFile" accept="image/*,.otf,.ttf,.woff,.woff2" hidden>
+      <textarea id="igText" placeholder="또는 브랜드 가이드 텍스트·CSS를 붙여넣기 — hex 코드를 추출합니다" spellcheck="false"></textarea>
+      <button class="ig-run" id="igTextRun" style="width:100%">텍스트에서 추출</button>
+    </div>
+    <div class="ig-status" id="igStatus" hidden></div>
+    <div class="ig-result" id="igResult" hidden>
+      <div class="ig-rl">검출된 컬러 · <b>시드를 선택하세요</b></div>
+      <div class="ig-sws" id="igSws"></div>
+      <div class="ig-rl" id="igFontsLab" hidden>검출된 폰트</div>
+      <div class="ig-fonts" id="igFonts" hidden></div>
+      <button class="btn btn-primary" id="igApply" style="width:100%;margin-top:14px">시드로 적용</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1178,6 +1252,123 @@ document.getElementById('cbFontFile').addEventListener('change',async e=>{
     else{note.textContent=`폰트 "${f.name}" 로드 완료 — 시드 컬러 입력 후 적용하세요.`;note.classList.remove('warn');}
   }catch(err){note.textContent='폰트 파일을 읽지 못했습니다. OTF·TTF·WOFF 형식인지 확인하세요.';note.classList.add('warn');cbSel.value=cbSel.dataset.prev||'';}
   e.target.value='';
+});
+
+/* ================= 브랜드 연결 모달 (인제스트 UI) ================= */
+const igOv=document.getElementById('igOv'),igStatus=document.getElementById('igStatus'),igResult=document.getElementById('igResult');
+let igCands=[],igSel=0;
+document.getElementById('igOpen').addEventListener('click',()=>{igOv.hidden=false;});
+document.getElementById('igClose').addEventListener('click',()=>{igOv.hidden=true;});
+igOv.addEventListener('click',e=>{if(e.target===igOv)igOv.hidden=true;});
+document.getElementById('igTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  document.querySelectorAll('#igTabs button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.ig-pane').forEach(p=>p.hidden=p.dataset.p!==b.dataset.t);});
+function igMsg(t,err){igStatus.hidden=false;igStatus.textContent=t;igStatus.classList.toggle('err',!!err);}
+function igShow(colors,fonts){
+  igCands=colors.slice(0,12);igSel=0;
+  igStatus.hidden=igCands.length>0;
+  if(!igCands.length){igMsg('컬러를 찾지 못했습니다. 다른 소스를 시도해 보세요.',true);igResult.hidden=true;return;}
+  igResult.hidden=false;
+  document.getElementById('igSws').innerHTML=igCands.map((c,i)=>{const cr=contrastWhite(c.hex);
+    return `<button class="ig-sw${i===0?' on':''}" data-i="${i}"><i style="background:${c.hex}"></i><span>${c.hex.toUpperCase()}</span><span class="aa">${cr>=4.5?'AA ✓':'대비 '+cr.toFixed(1)}</span></button>`;}).join('');
+  const fl=document.getElementById('igFontsLab'),ff=document.getElementById('igFonts');
+  if(fonts&&fonts.length){fl.hidden=ff.hidden=false;ff.innerHTML=fonts.slice(0,6).map(f=>`<span>${f}</span>`).join('');}
+  else{fl.hidden=ff.hidden=true;}
+}
+document.getElementById('igSws')?.addEventListener('click',e=>{const b=e.target.closest('.ig-sw');if(!b)return;
+  igSel=+b.dataset.i;document.querySelectorAll('.ig-sw').forEach(x=>x.classList.toggle('on',x===b));});
+document.getElementById('igApply').addEventListener('click',()=>{
+  if(!igCands.length)return;
+  document.getElementById('cbHex').value=igCands[igSel].hex;
+  document.getElementById('cbGen').click();
+  igOv.hidden=true;
+});
+/* 텍스트·CSS → hex 추출 */
+function extractHex(text){
+  const counts={};
+  (text.match(/#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b/g)||[]).forEach(h=>{
+    if(h.length===4)h='#'+h[1]+h[1]+h[2]+h[2]+h[3]+h[3];
+    h=h.toLowerCase();
+    const[r,g,b]=hexToRgb(h);const mx=Math.max(r,g,b),mn=Math.min(r,g,b);
+    if(mx-mn<24||mx<35||mn>238)return;   // 무채색·극단값 제외
+    counts[h]=(counts[h]||0)+1;});
+  return Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([hex,count])=>({hex,count}));
+}
+document.getElementById('igTextRun').addEventListener('click',()=>{
+  const t=document.getElementById('igText').value;
+  const fonts=[...new Set((t.match(/font-family\s*:\s*([^;}]+)/gi)||[]).map(m=>m.split(':')[1].split(',')[0].trim().replace(/["']/g,'')))];
+  igShow(extractHex(t),fonts);
+});
+/* 이미지 → 주요 컬러 · 폰트 파일 → 서체 등록 */
+const igDrop=document.getElementById('igDrop'),igFile=document.getElementById('igFile');
+igDrop.addEventListener('click',()=>igFile.click());
+igDrop.addEventListener('dragover',e=>{e.preventDefault();igDrop.classList.add('over');});
+igDrop.addEventListener('dragleave',()=>igDrop.classList.remove('over'));
+igDrop.addEventListener('drop',e=>{e.preventDefault();igDrop.classList.remove('over');if(e.dataTransfer.files[0])igHandleFile(e.dataTransfer.files[0]);});
+igFile.addEventListener('change',e=>{if(e.target.files[0])igHandleFile(e.target.files[0]);e.target.value='';});
+async function igHandleFile(f){
+  if(/\.(otf|ttf|woff2?)$/i.test(f.name)){
+    try{
+      const face=new FontFace('KDX Custom Font',await f.arrayBuffer());
+      await face.load();
+      if(uploadedFace)document.fonts.delete(uploadedFace);
+      uploadedFace=face;document.fonts.add(face);uploadedFontLabel=f.name;
+      let opt=cbSel.querySelector('option[value="__uploaded"]');
+      if(!opt){opt=document.createElement('option');opt.value='__uploaded';cbSel.insertBefore(opt,cbSel.querySelector('option[value="__upload"]'));}
+      opt.textContent='파일: '+f.name;cbSel.value='__uploaded';cbSel.dataset.prev='__uploaded';
+      if(customBrand)applyCustomBrand(customBrand.seed,'KDX Custom Font');
+      igMsg(`폰트 "${f.name}" 등록 완료 — 커스텀 브랜드의 서체로 적용됩니다.`);
+    }catch(err){igMsg('폰트 파일을 읽지 못했습니다. OTF·TTF·WOFF 형식인지 확인하세요.',true);}
+    return;
+  }
+  if(!/^image\//.test(f.type)){igMsg('이미지 또는 폰트 파일만 지원합니다.',true);return;}
+  igMsg('이미지 해석 중…');
+  const img=new Image();
+  img.onload=()=>{
+    const cv=document.createElement('canvas'),cx=cv.getContext('2d');
+    const w=cv.width=64,h=cv.height=Math.max(1,Math.round(64*img.height/img.width));
+    cx.drawImage(img,0,0,w,h);
+    const d=cx.getImageData(0,0,w,h).data,counts={};
+    for(let i=0;i<d.length;i+=4){
+      if(d[i+3]<200)continue;
+      const r=d[i],g=d[i+1],b=d[i+2],mx=Math.max(r,g,b),mn=Math.min(r,g,b);
+      if(mx-mn<28||mx<40||mn>235)continue;   // 무채색·배경 제외
+      const key=[r,g,b].map(v=>Math.round(v/24)*24).join(',');
+      counts[key]=(counts[key]||0)+1;
+    }
+    const chroma=k=>{const[r,g,b]=k.split(',').map(Number);return Math.max(r,g,b)-Math.min(r,g,b);};
+    const cands=Object.entries(counts).sort((a,b)=>b[1]*chroma(b[0])**2-a[1]*chroma(a[0])**2).slice(0,12)
+      .map(([k,count])=>({hex:rgbToHex(...k.split(',').map(Number)),count}));
+    igShow(cands,null);
+    URL.revokeObjectURL(img.src);
+  };
+  img.onerror=()=>igMsg('이미지를 읽지 못했습니다.',true);
+  img.src=URL.createObjectURL(f);
+}
+/* URL·Figma → /api/ingest (배포 환경에서 동작) */
+async function igRemote(params,label){
+  igMsg(label+' 해석 중…');igResult.hidden=true;
+  try{
+    const r=await fetch('/api/ingest?'+params);
+    if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.error||('HTTP '+r.status));}
+    const j=await r.json();
+    igShow((j.colors||[]).map(c=>({hex:c.hex.toLowerCase(),count:c.count||1})),j.fonts||[]);
+  }catch(err){
+    const local=location.protocol==='file:';
+    igMsg(local
+      ?'이 기능은 배포 환경(Vercel)에서 동작합니다 — 저장소의 api/ingest.js가 서버에서 소스를 해석합니다. 지금은 "파일·텍스트" 탭을 사용하세요.'
+      :'해석 실패: '+err.message+' — /api/ingest 배포 여부(또는 Figma는 FIGMA_TOKEN 환경변수)를 확인하세요.',true);
+  }
+}
+document.getElementById('igUrlRun').addEventListener('click',()=>{
+  const u=document.getElementById('igUrl').value.trim();
+  if(!/^https?:\/\//.test(u)){igMsg('http(s)로 시작하는 URL을 입력하세요.',true);return;}
+  igRemote('url='+encodeURIComponent(u),'사이트');
+});
+document.getElementById('igFigmaRun').addEventListener('click',()=>{
+  const v=document.getElementById('igFigma').value.trim();
+  if(!v){igMsg('Figma 파일 링크 또는 file key를 입력하세요.',true);return;}
+  igRemote('figma='+encodeURIComponent(v),'Figma');
 });
 
 /* 초기 라우트 */
