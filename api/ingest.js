@@ -1,7 +1,7 @@
 // KDX 브랜드 인제스트 — Vercel 서버리스 함수
 // GET /api/ingest?url=https://...   → 사이트 HTML+CSS에서 컬러·폰트 추출
 // GET /api/ingest?figma=<링크|key>  → Figma API로 파일 채움색 수집 (환경변수 FIGMA_TOKEN 필요)
-// 응답: { colors:[{hex,count}], fonts:[이름], source }
+// 응답: { colors:[{hex,count}], fonts:[이름], gradients:[css], source }
 
 // 실제 브라우저처럼 요청(봇 차단 회피) + 403/429 시 모바일 UA로 1회 재시도 + 8초 타임아웃
 const UA_DESKTOP = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
@@ -88,6 +88,21 @@ function pickMode(vals, buckets, minN) {
 }
 const RAD_BUCKETS = [['sharp', v => v < 6], ['default', v => v >= 6 && v <= 14], ['rounded', v => v > 14]];
 const PAD_BUCKETS = [['compact', v => v <= 9], ['default', v => v > 9 && v < 18], ['comfortable', v => v >= 18]];
+// 그라디언트 원문 수집 — 판별·정규화는 클라이언트(parseGradients)가 수행. 빈도순 상위만 전달.
+function collectGradients(text, counts) {
+  const re = /(?:repeating-)?(?:linear|radial|conic)-gradient\s*\(/gi;
+  let m, n = 0;
+  while ((m = re.exec(text)) && n < 400) {
+    const start = m.index; let d = 1, i = m.index + m[0].length;
+    while (i < text.length && d > 0) { const ch = text[i]; if (ch === '(') d++; else if (ch === ')') d--; i++; }
+    if (d === 0) {
+      const css = text.slice(start, i);
+      if (css.length < 400) { counts[css] = (counts[css] || 0) + 1; n++; }
+    }
+    re.lastIndex = i;
+  }
+}
+
 function shapeFromCss(text) {
   const nums = re => [...text.matchAll(re)].map(m => parseFloat(m[1])).filter(v => v >= 0 && v <= 48);
   const r = pickMode(nums(/border-radius\s*:\s*([\d.]+)px/gi), RAD_BUCKETS, 3);
@@ -143,7 +158,10 @@ async function ingestUrl(url) {
   for (const [h, n] of Object.entries(cssCounts)) {
     if (counts[h]) counts[h].count += n; else counts[h] = { count: n, html: 0 };
   }
-  return { counts, fonts, declared, shape: shapeFromCss(allCss), assets };
+  const gcounts = {}; collectGradients(allCss, gcounts);
+  const gradients = Object.entries(gcounts).sort((a, b) => b[1] - a[1]).slice(0, 6)
+    .flatMap(([css, n]) => Array(Math.min(n, 20)).fill(css));
+  return { counts, fonts, declared, shape: shapeFromCss(allCss), assets, gradients };
 }
 
 async function ingestFigma(input, token) {
@@ -175,7 +193,7 @@ async function ingestFigma(input, token) {
     radius: rB ? rB.mode : null, radiusTop: rB ? rB.top : null, radiusPct: rB ? rB.pct : null,
     density: pB ? pB.mode : null, padTop: pB ? pB.top : null, padPct: pB ? pB.pct : null
   };
-  return { counts, fonts, declared: [], shape, assets: [] };
+  return { counts, fonts, declared: [], shape, assets: [], gradients: [] };
 }
 
 module.exports = async (req, res) => {
@@ -196,7 +214,7 @@ module.exports = async (req, res) => {
     const colors = Object.entries(out.counts)
       .map(([hex, v]) => typeof v === 'number' ? { hex, count: v, html: 0 } : { hex, count: v.count, html: v.html })
       .sort((a, b) => (b.html * 10 + b.count) - (a.html * 10 + a.count)).slice(0, 12);
-    res.status(200).json({ colors, fonts: [...out.fonts].slice(0, 6), declared: (out.declared || []).slice(0, 6), shape: out.shape || null, assets: out.assets || [], source: figma ? 'figma' : 'url' });
+    res.status(200).json({ colors, fonts: [...out.fonts].slice(0, 6), declared: (out.declared || []).slice(0, 6), shape: out.shape || null, assets: out.assets || [], gradients: out.gradients || [], source: figma ? 'figma' : 'url' });
   } catch (e) {
     res.status(500).json({ error: String(e.message || e).slice(0, 200) });
   }
