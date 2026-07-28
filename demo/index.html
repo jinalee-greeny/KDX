@@ -81,6 +81,16 @@ svg.i{display:block;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linec
 .ig-pane[data-p="file"] .ig-run{height:38px;margin-top:10px}
 .ig-hint{font-size:11px;color:var(--fg-mut);line-height:1.6;margin-top:10px}
 .ig-hint b{color:var(--fg-sub)}
+.ig-gbtn{font-size:11.5px;font-weight:700;color:var(--fg-sub);border:1px solid var(--line-2);border-radius:8px;padding:5px 10px;white-space:nowrap;transition:.14s}
+.ig-gbtn:hover{color:var(--accent);border-color:var(--accent-line)}
+.ig-gbtn.on{color:var(--accent);border-color:var(--accent-line);background:var(--accent-subtle)}
+.ig-guide{border:1px solid var(--line-2);border-radius:12px;padding:14px 16px;margin:14px 0 2px;font-size:11.5px;line-height:1.65;color:var(--fg-sub)}
+.ig-guide[hidden]{display:none}
+.ig-guide h4{font-size:12px;font-weight:800;color:var(--fg);margin:12px 0 4px;display:flex;align-items:center;gap:6px}
+.ig-guide h4:first-child{margin-top:0}
+.ig-guide h4 em{font-style:normal;font-size:10px;font-weight:800;color:var(--accent);background:var(--accent-subtle);border-radius:5px;padding:2px 6px}
+.ig-guide b{color:var(--fg)}
+.ig-guide .gq{color:var(--fg-mut);font-size:10.5px}
 .ig-bmk{margin-top:12px;font-size:11.5px;color:var(--fg-sub);line-height:1.7;background:var(--accent-subtle);border-radius:10px;padding:11px 14px}
 .ig-bmk b{color:var(--fg)}
 .ig-bmk a{color:var(--accent);font-weight:800;border:1px dashed var(--accent-line);border-radius:8px;padding:3px 9px;cursor:grab;white-space:nowrap}
@@ -623,7 +633,7 @@ html[data-view="compare"] .board3{display:block}
     <button data-area="tokens">파운데이션</button>
   </nav>
   <button class="gconnect" id="igOpen"><svg class="i"><use href="#icon-action-external"/></svg>브랜드 연결</button>
-  <span class="gver">토큰 기반 · v0.41</span>
+  <span class="gver">토큰 기반 · v0.42</span>
 </header>
 <div class="app">
 
@@ -822,7 +832,25 @@ html[data-view="compare"] .board3{display:block}
   <div class="ig" role="dialog" aria-label="브랜드 연결">
     <div class="ig-head">
       <div><h2>브랜드 연결</h2><p>소스를 해석해 시드 컬러·폰트를 추출하고, 커스텀 브랜드로 적용합니다.</p></div>
-      <button class="iconbtn" id="igClose" title="닫기" style="font-size:15px;font-weight:600">✕</button>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="ig-gbtn" id="igGuideBtn" aria-expanded="false">분석 기준</button>
+        <button class="iconbtn" id="igClose" title="닫기" style="font-size:15px;font-weight:600">✕</button>
+      </div>
+    </div>
+    <div class="ig-guide" id="igGuide" hidden>
+      <h4><em>1</em>Primary 컬러 — 명시적 우선순위 계층</h4>
+      <b>① 선언</b> — 사이트가 스스로 선언한 브랜드 색이 있으면 <b>무조건 채택</b>. theme-color 메타, <b>--primary / --brand / --accent / point / key-color</b> 류 CSS 변수. <span class="gq">브랜드가 직접 말한 것이 가장 정확.</span><br>
+      <b>② 로고 마크</b> — favicon·apple-touch-icon의 지배색. og:image는 콘텐츠 이미지라 제외, 유채색 비율 2% 미만(흑백 로고)이면 통과.<br>
+      <b>③ 사용 통계 (폴백)</b> — 화면에 실제 등장한 색(HTML)을 CSS 번들 색보다 <b>×10 가중</b>. 빈도(√)×채도×명도 적합도×대비 적합도(소프트 — 네온·옐로 브랜드색을 결격시키지 않음)로 스코어링. <span class="gq">번들 CSS는 라이브러리 상태색까지 담긴 노이즈 창고라 실사용을 우선.</span><br>
+      결과에는 <b>판별 근거</b>와 후보별 출처 배지(선언·로고·CSS·이미지)를 항상 표기.
+      <h4><em>2</em>형태(곡률·간격) — 사용 빈도 기반</h4>
+      border-radius·padding <span class="gq">(Figma는 cornerRadius·itemSpacing)</span> 값을 버킷별로 집계해 <b>다수 버킷 채택</b>: 곡률 sharp&lt;6 · default 6–14 · rounded&gt;14, 간격 compact≤9 · default 10–17 · comfortable≥18. 중앙값이 아닌 최빈이라 리셋 0 같은 노이즈에 강함. 근거로 최빈값·점유율을 표기하고 프리셋 노브에 자동 적용.
+      <h4><em>3</em>폰트</h4>
+      검출 서체 후보를 나열하고 첫 후보를 브랜드 서체로 제안. 웹폰트(구글 폰트 등)는 즉시 로딩, OTF·TTF·WOFF 업로드 시 내장 등록.
+      <h4><em>4</em>램프 생성 · 접근성</h4>
+      Primary 시드에서 05~70 라이트→다크 램프를 자동 생성. 흰 텍스트 대비가 AA(4.5:1) 미달이면 적용 후 별도 경고 — 판별에서 결격시키지는 않음.
+      <h4><em>5</em>소스별 신뢰도</h4>
+      <b>북마클릿 실측(렌더된 화면) &gt; 서버 URL 수집 &gt; Figma API &gt; 이미지 단일 추출 &gt; 텍스트 hex.</b> 봇 차단·로그인·CSR 사이트는 북마클릿이 최종 기준.
     </div>
     <div class="ig-tabs" id="igTabs"><button data-t="url" class="on">URL</button><button data-t="figma">Figma</button><button data-t="file">파일 · 텍스트</button></div>
     <div class="ig-pane" data-p="url">
@@ -1266,6 +1294,8 @@ const igOv=document.getElementById('igOv'),igStatus=document.getElementById('igS
 let igCands=[],igSel=0;
 document.getElementById('igOpen').addEventListener('click',()=>{igOv.hidden=false;});
 document.getElementById('igClose').addEventListener('click',()=>{igOv.hidden=true;});
+const igGuideBtn=document.getElementById('igGuideBtn'),igGuide=document.getElementById('igGuide');
+igGuideBtn.addEventListener('click',()=>{const open=igGuide.hidden;igGuide.hidden=!open;igGuideBtn.classList.toggle('on',open);igGuideBtn.setAttribute('aria-expanded',String(open));});
 igOv.addEventListener('click',e=>{if(e.target===igOv)igOv.hidden=true;});
 document.getElementById('igTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   document.querySelectorAll('#igTabs button').forEach(x=>x.classList.toggle('on',x===b));
