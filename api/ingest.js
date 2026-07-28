@@ -3,7 +3,26 @@
 // GET /api/ingest?figma=<링크|key>  → Figma API로 파일 채움색 수집 (환경변수 FIGMA_TOKEN 필요)
 // 응답: { colors:[{hex,count}], fonts:[이름], source }
 
-const UA = 'Mozilla/5.0 (compatible; KDX-BrandIngest/1.0)';
+// 실제 브라우저처럼 요청(봇 차단 회피) + 403/429 시 모바일 UA로 1회 재시도 + 8초 타임아웃
+const UA_DESKTOP = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
+const UA_MOBILE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
+const BASE_HDRS = {
+  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+  'Accept-Language': 'ko,en-US;q=0.9,en;q=0.8'
+};
+async function fget(url, as) {
+  const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 8000);
+  try {
+    let r = await fetch(url, { headers: { ...BASE_HDRS, 'User-Agent': UA_DESKTOP }, redirect: 'follow', signal: ctl.signal });
+    if (r.status === 403 || r.status === 429 || r.status === 503) {
+      r = await fetch(url, { headers: { ...BASE_HDRS, 'User-Agent': UA_MOBILE }, redirect: 'follow', signal: ctl.signal });
+    }
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return as === 'buf' ? { buf: Buffer.from(await r.arrayBuffer()), type: r.headers.get('content-type') || '' } : await r.text();
+  } catch (e) {
+    throw new Error((e.name === 'AbortError' ? '응답 시간 초과' : e.message) + ' — 봇 차단·로그인 사이트일 수 있습니다. URL 탭의 북마클릿을 사용해 보세요.');
+  } finally { clearTimeout(tm); }
+}
 
 function collectHex(text, counts) {
   for (let m of text.match(/#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b/g) || []) {
@@ -91,11 +110,8 @@ async function fetchAssets(html, base) {
     if (out.length >= 2) break;
     const full = href && abs(href); if (!full) continue;
     try {
-      const r = await fetch(full, { headers: { 'User-Agent': UA } });
-      if (!r.ok) continue;
-      const ct = r.headers.get('content-type') || '';
+      const { buf, type: ct } = await fget(full, 'buf');
       if (!/image\//.test(ct) && !/\.(png|jpe?g|webp|gif|ico|svg)/i.test(full)) continue;
-      const buf = Buffer.from(await r.arrayBuffer());
       if (buf.length < 100 || buf.length > 400000) continue;
       out.push({ label, type: /image\//.test(ct) ? ct.split(';')[0] : 'image/png', b64: buf.toString('base64') });
     } catch (_) { /* 개별 실패 무시 */ }
@@ -104,7 +120,7 @@ async function fetchAssets(html, base) {
 }
 
 async function ingestUrl(url) {
-  const html = await (await fetch(url, { headers: { 'User-Agent': UA } })).text();
+  const html = await fget(url);
   // HTML(실제 렌더 콘텐츠)과 CSS 번들(라이브러리 상태색 노이즈 포함)을 분리 집계
   const htmlCounts = {}, cssCounts = {}, fonts = new Set(), declared = [];
   collectHex(html, htmlCounts); collectFonts(html, fonts);
@@ -114,7 +130,7 @@ async function ingestUrl(url) {
     .map(m => (m[0].match(/href=["']([^"']+)["']/) || [])[1]).filter(Boolean).slice(0, 6);
   await Promise.all(links.map(async href => {
     try {
-      const css = await (await fetch(new URL(href, url).href, { headers: { 'User-Agent': UA } })).text();
+      const css = await fget(new URL(href, url).href);
       allCss += '\n' + css;
       collectHex(css, cssCounts); collectFonts(css, fonts);
     } catch (_) { /* 개별 실패 무시 */ }
