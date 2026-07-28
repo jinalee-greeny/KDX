@@ -127,6 +127,8 @@ svg.i{display:block;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linec
 .ig-grad .gmeta b{color:var(--fg)}
 .ig-grad .gstops{display:flex;gap:4px;margin-left:auto;flex:none}
 .ig-grad .gstops i{width:14px;height:14px;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.ig-warn{margin:8px 0 0;padding:9px 11px;border:1px solid var(--warn-bd,#f0d08a);background:var(--warn-bg,#fff8e6);border-radius:8px;font-size:12px;line-height:1.6;color:#6b5320}
+.ig-warn b{color:#4a3810}
 .ig-grad .gnote{font-size:10.5px;color:var(--fg-mut);margin-top:6px;line-height:1.55}
 .ig-fonts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
 .ig-fonts span{font-size:11.5px;font-weight:600;color:var(--fg-sub);border:1px solid var(--line-2);border-radius:99px;padding:5px 12px}
@@ -655,7 +657,7 @@ html[data-view="compare"] .board3{display:block}
     <button data-area="tokens">파운데이션</button>
   </nav>
   <button class="gconnect" id="igOpen"><svg class="i"><use href="#icon-action-external"/></svg>브랜드 연결</button>
-  <span class="gver">토큰 기반 · v0.44</span>
+  <span class="gver">토큰 기반 · v0.45</span>
 </header>
 <div class="app">
 
@@ -881,7 +883,9 @@ html[data-view="compare"] .board3{display:block}
       수집 경로는 <b>CSS <code>*-gradient()</code> · SVG <code>&lt;linearGradient&gt;</code>(로고 마크 안의 그라디언트) · 텍스트 나열</b> 순. 마지막은 CSS·SVG가 없을 때만 쓰며 <span class="gq">'그라디언트' 키워드가 있으면 2색, 없으면 3색 이상 나열</span>일 때 인정합니다.<br>
       적용 범위는 <b>면(CTA 버튼 · 로고 마크 · 히어로 배경)에 한정</b>. 텍스트 · 보더 · 포커스는 <b>솔리드 Primary</b>를 그대로 씁니다 — 이 시드는 <b>흰 텍스트 대비 3:1을 통과한 정지점 중</b> 스코어 최고값으로 고릅니다 <span class="gq">(인스타그램이면 밝은 오렌지가 아니라 마젠타가 채택)</span>. 면은 화려하게, 위계는 안전하게. <span class="gq">방향·색상은 파싱된 값으로 재직렬화해 원문을 그대로 주입하지 않습니다.</span>
       <h4><em>6</em>소스별 신뢰도</h4>
-      <b>북마클릿 실측(렌더된 화면) &gt; 서버 URL 수집 &gt; Figma API &gt; 이미지 단일 추출 &gt; 텍스트 hex.</b> 봇 차단·로그인·CSR 사이트는 북마클릿이 최종 기준.
+      <b>북마클릿 실측(렌더된 화면) &gt; 서버 URL 수집 &gt; Figma API &gt; 이미지 단일 추출 &gt; 텍스트 hex &gt; 화면 캡처 추정.</b> 봇 차단·로그인·CSR 사이트는 북마클릿이 최종 기준.
+      화면 캡처(1400×900급 스크린샷)는 가장 약한 근거다 — 선언값·곡률·간격·서체가 픽셀에 남지 않고, 콘텐츠 사진이 화면 면적을 지배하면 브랜드 색이 통계적으로 묻힌다.
+      그래서 캡처는 상단 UI 구간만 잘라 안티에일리어싱 경계를 제외한 <b>내부 면적</b>으로 점수를 매기고, 결과에 <b>신뢰도(높음·보통·낮음)</b>를 붙여 그대로 노출한다.
     </div>
     <div class="ig-tabs" id="igTabs"><button data-t="url" class="on">URL</button><button data-t="figma">Figma</button><button data-t="file">파일 · 텍스트</button></div>
     <div class="ig-pane" data-p="url">
@@ -903,6 +907,7 @@ html[data-view="compare"] .board3{display:block}
     <div class="ig-result" id="igResult" hidden>
       <div class="ig-rl" id="igResultLab">분석 결과</div>
       <div class="ig-sws" id="igSws"></div>
+      <p class="ig-warn" id="igWarn" hidden></p>
       <div class="ig-grad" id="igGrad" hidden></div>
       <div class="ig-shape" id="igShape" hidden></div>
       <div class="ig-rl" id="igFontsLab" hidden>검출된 폰트</div>
@@ -1377,7 +1382,7 @@ function parseDeclared(text){
   for(const m of text.matchAll(/(?:--|\$)[\w-]*(?:primary|brand|accent|point|key-?color|main-?color)[\w-]*\s*:\s*(#[0-9a-fA-F]{3,6})\b/gi))add(m[1],'brand-var');
   list.sort((a,b)=>(a.source==='theme-color'?-1:b.source==='theme-color'?1:0)||b.count-a.count);
   return list;}
-const IG_SRC_LAB={declared:'선언','asset':'로고',css:'CSS',img:'이미지',grad:'그라디언트'};
+const IG_SRC_LAB={declared:'선언','asset':'로고',css:'CSS',img:'이미지',grad:'그라디언트',shot:'스크린샷'};
 function igResolve({declared=[],assetCands=[],cssCands=[],assetBasis='로고·앱 아이콘 주요색'}){
   declared=declared.map(d=>({...d,src:d.src||'declared'}));
   assetCands=assetCands.map(a=>({...a,src:a.src||'asset'}));
@@ -1401,6 +1406,7 @@ function igApplySel(i,grad){
 }
 function igSetKnob(attr,val){const b=document.querySelector(`#presetCtl .seg[data-attr="${attr}"] button[data-val="${val}"]`);if(b)b.click();}
 function igShow(colors,fonts,shape,basis,grad){
+  const shotConf=igShotConf;igShotConf=null;      // 화면 캡처 경로에서만 세팅되는 1회성 상태
   igGradSel=grad||null;
   igCands=colors.slice(0,12);                            // igResolve가 이미 계층 순서로 정렬
   igStatus.hidden=igCands.length>0;
@@ -1411,6 +1417,16 @@ function igShow(colors,fonts,shape,basis,grad){
     const lab=IG_SRC_LAB[c.src];
     const badge=i===0?'<em class="pri">PRIMARY</em>':(c.src&&c.src!=='css'?`<em class="pri ast">${lab}</em>`:'');
     return `<button class="ig-sw${i===0?' on':''}" data-i="${i}">${badge}<i style="background:${c.hex}"></i><span>${c.hex.toUpperCase()}</span><span class="aa">${cr>=4.5?'AA ✓':'대비 '+cr.toFixed(1)}</span></button>`;}).join('');
+  /* 화면 캡처는 근거 강도가 낮은 소스다 — 등급을 감추지 않고 그대로 알린다. */
+  const wn=document.getElementById('igWarn');
+  if(shotConf){
+    wn.hidden=false;
+    wn.innerHTML=shotConf==='high'
+      ?'<b>화면 캡처 기준 추정입니다.</b> 상단 UI 구간에서 한 색이 뚜렷하게 우세해 신뢰도는 <b>높음</b>이지만, 캡처에는 사이트가 선언한 값·곡률·간격·서체 정보가 없습니다. 정확도가 필요하면 URL 탭의 <b>🔖 Freesm 스캔</b> 북마클릿이나 로고 SVG 업로드를 쓰세요.'
+      :(shotConf==='mid'
+      ?'<b>화면 캡처 기준 추정 · 신뢰도 보통.</b> 브랜드 색으로 볼 만한 후보가 여럿입니다. 아래 스와치에서 직접 골라 확인해 주세요. 확실한 값이 필요하면 <b>🔖 Freesm 스캔</b> 북마클릿이나 로고 SVG 업로드를 권합니다.'
+      :'<b>화면 캡처 기준 추정 · 신뢰도 낮음.</b> 브랜드 색이 화면에서 차지하는 면적이 작거나 콘텐츠 사진이 화면을 지배해 자동 판별이 어렵습니다. 아래 후보는 참고용이며, <b>🔖 Freesm 스캔</b> 북마클릿(정확한 실측값) 또는 로고 SVG 업로드를 권합니다.');
+  }else wn.hidden=true;
   const fl=document.getElementById('igFontsLab'),ff=document.getElementById('igFonts');
   if(fonts&&fonts.length){fl.hidden=ff.hidden=false;ff.innerHTML=fonts.slice(0,6).map(f=>`<span>${f}</span>`).join('');}
   else{fl.hidden=ff.hidden=true;}
@@ -1420,7 +1436,7 @@ function igShow(colors,fonts,shape,basis,grad){
   if(igGradSel){const g=igGradSel;
     gp.hidden=false;
     gp.innerHTML=`<div class="gbar" style="background-image:${gradCss(g)}"></div>`+
-      `<div class="gmeta"><span>그라디언트 <b>${g.stops.length}색</b> · ${g.multi?`멀티 휴 <b>Δ${g.spread}°</b>`:'단색 계열'} · 출처 <b>${({css:'CSS',svg:'SVG 로고',text:'텍스트 나열'})[g.src]||'CSS'}</b> · <b>--brand-gradient</b> 토큰으로 승격</span>`+
+      `<div class="gmeta"><span>그라디언트 <b>${g.stops.length}색</b> · ${g.multi?`멀티 휴 <b>Δ${g.spread}°</b>`:'단색 계열'} · 출처 <b>${({css:'CSS',svg:'SVG 로고',text:'텍스트 나열',shot:'화면 캡처(추정)'})[g.src]||'CSS'}</b> · <b>--brand-gradient</b> 토큰으로 승격</span>`+
       `<span class="gstops">${g.stops.map(x=>`<i style="background:${x}" title="${x.toUpperCase()}"></i>`).join('')}</span></div>`+
       `<p class="gnote">면(CTA 버튼 · 로고 마크 · 히어로 배경)에만 적용합니다. 텍스트 · 보더 · 포커스는 대비 하한을 통과한 정지점에서 도출한 솔리드 Primary <b>${gradSeed(g).toUpperCase()}</b>를 유지해 대비와 상태 위계가 깨지지 않습니다.</p>`;
   }else gp.hidden=true;
@@ -1538,7 +1554,8 @@ function gradSeed(g){                               // 그라디언트 → 솔�
   return(ok.length?ok:g.chrom).slice().sort((a,b)=>igScore({hex:b,count:1})-igScore({hex:a,count:1}))[0]||g.stops[0];}
 function gradDec(g){                                // Primary 계층에 넣을 후보(선언 다음 순위)
   return g?[{hex:gradSeed(g),count:1,source:g.stops.length+'색 그라디언트',src:'grad'}]:[];}
-let igGradSel=null;                                 // 이번 분석에서 채택된 그라디언트
+let igGradSel=null,igShotConf=null;
+const SHOT_CONF={high:'높음',mid:'보통',low:'낮음'};                                 // 이번 분석에서 채택된 그라디언트
 document.getElementById('gradTg').addEventListener('click',()=>{
   const b=document.getElementById('gradTg'),on=!b.classList.contains('on');
   b.classList.toggle('on',on);b.setAttribute('aria-checked',String(on));b.textContent=on?'적용':'해제';
@@ -1621,8 +1638,18 @@ async function igHandleFile(f){
   igMsg('이미지 해석 중…');
   const img=new Image();
   img.onload=()=>{
-    const rr=igResolve({assetCands:imgDominant(img).map(c=>({...c,src:'img'})),assetBasis:'업로드 이미지 주요색 (채도 가중)'});
-    igShow(rr.cands,null,null,rr.basis);URL.revokeObjectURL(img.src);};
+    /* 로고·아이콘(작은 이미지)과 화면 캡처(큰 이미지)는 분석 방식이 다르다. */
+    const isShot=img.width>=700&&img.height>=400;
+    const sd=isShot?shotDominant(img):null;
+    if(sd&&sd.cands.length){
+      const rr=igResolve({assetCands:sd.cands.map(c=>({...c,src:'shot'})),
+        assetBasis:`화면 캡처 추정 — ${sd.region} 분석 · 신뢰도 ${SHOT_CONF[sd.conf]}`});
+      igShotConf=sd.conf;igShow(rr.cands,null,null,rr.basis,sd.grad||null);
+    }else{
+      const rr=igResolve({assetCands:imgDominant(img).map(c=>({...c,src:'img'})),assetBasis:'업로드 이미지 주요색 (채도 가중)'});
+      igShotConf=null;igShow(rr.cands,null,null,rr.basis);
+    }
+    URL.revokeObjectURL(img.src);};
   img.onerror=()=>igMsg('이미지를 읽지 못했습니다.',true);
   img.src=URL.createObjectURL(f);
 }
@@ -1642,6 +1669,78 @@ function imgDominant(img){
   const chroma=k=>{const[r,g,b]=k.split(',').map(Number);return Math.max(r,g,b)-Math.min(r,g,b);};
   return Object.entries(counts).sort((a,b)=>b[1]*chroma(b[0])**2-a[1]*chroma(a[0])**2).slice(0,8)
     .map(([k,count])=>({hex:rgbToHex(...k.split(',').map(Number)),count,share:opaque?count/opaque:0}));
+}
+/* 스크린샷 → 브랜드 색 추정.
+   전체 화면의 픽셀 빈도는 브랜드가 아니라 '콘텐츠 사진'을 고른다(실측: 히어로 사진의 주황이 1위).
+   해상도를 올려도 결과가 바뀌지 않는 구조적 한계라, 빈도 대신 두 가지 구조 신호를 쓴다.
+   ① 상단 UI 구간만 본다 — 위에서부터 '한 줄의 유채색 종류'가 급증하는 지점을 사진 시작으로 보고 그 위만 분석.
+      GNB에는 로고와 CTA가 모여 있고 사진이 없다.
+   ② 안티에일리어싱 테두리를 배제한다 — 경계 픽셀 비율이 높은 색(글자·아이콘의 흐린 가장자리)은 감점.
+   그리고 확신이 없으면 확신 없다고 말한다(신뢰도 등급). 스크린샷은 선언값·로고 파일보다 항상 약한 근거다. */
+function shotDominant(img){
+  const W=Math.min(240,img.width),H=Math.max(1,Math.round(W*img.height/img.width));
+  const cv=document.createElement('canvas'),cx=cv.getContext('2d');
+  cv.width=W;cv.height=H;cx.drawImage(img,0,0,W,H);
+  let d;try{d=cx.getImageData(0,0,W,H).data;}catch(e){return null;}
+  const Q=24,neutral=new Uint8Array(W*H),key=new Int32Array(W*H).fill(-1);
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+    const i=(y*W+x)*4,r=d[i],g=d[i+1],b=d[i+2],a=d[i+3];
+    const mx=Math.max(r,g,b),mn=Math.min(r,g,b);
+    if(a<200||mx-mn<28||mx<40||mn>235){neutral[y*W+x]=1;continue;}
+    key[y*W+x]=(Math.round(r/Q)*Q<<16)|(Math.round(g/Q)*Q<<8)|(Math.round(b/Q)*Q);}
+  let hEnd=0;const lim=Math.min(H,Math.max(8,Math.round(H*.5)));
+  for(let y=0;y<lim;y++){const st=new Set();
+    for(let x=0;x<W;x++){const k=key[y*W+x];if(k>=0)st.add(k);}
+    if(st.size>8)break;hEnd=y+1;}
+  if(hEnd>5)hEnd-=1;                       // 다운스케일로 섞인 경계 한 줄은 버린다
+  const region=(y0,y1)=>{
+    const stat=new Map();
+    for(let y=y0;y<y1;y++)for(let x=0;x<W;x++){
+      const k=key[y*W+x];if(k<0)continue;
+      let e=stat.get(k);if(!e){e={n:0,edge:0,sx:0,sy:0};stat.set(k,e);}
+      e.n++;e.sx+=x;e.sy+=y;
+      if((x>0&&neutral[y*W+x-1])||(x<W-1&&neutral[y*W+x+1])||
+         (y>0&&neutral[(y-1)*W+x])||(y<H-1&&neutral[(y+1)*W+x]))e.edge++;}
+    const tot=[...stat.values()].reduce((a,c)=>a+c.n,0)||1;
+    const list=[...stat.entries()].map(([k,e])=>{
+      const r=(k>>16)&255,g=(k>>8)&255,b=k&255,chroma=Math.max(r,g,b)-Math.min(r,g,b),edge=e.edge/e.n;
+      return{hex:rgbToHex(r,g,b),count:e.n,share:e.n/tot,chroma,edge,cx:e.sx/e.n,cy:e.sy/e.n,
+        score:e.n*Math.pow(chroma,2)*Math.max(.08,1-edge)};}).sort((a,b)=>b.score-a.score);
+    return{tot,list};};
+  let useHead=hEnd>=4,R=useHead?region(0,hEnd):region(0,H),fellBack=false;
+  if(useHead&&R.tot<24){R=region(0,H);useHead=false;fellBack=true;}   // 상단이 순수 흑백이면 전체로 후퇴
+  if(!R.list.length)return null;
+  const top=R.list[0],ratio=R.list[1]?top.score/R.list[1].score:99;
+  let conf='low';
+  if(!fellBack&&top.count>=30&&top.share>=.4)conf='high';
+  else if(!fellBack&&top.count>=12&&(top.share>=.2||ratio>=2))conf='mid';
+  return{cands:R.list.slice(0,8).map(c=>({hex:c.hex,count:c.count,share:c.share})),
+    conf,region:useHead?'상단 UI 구간':'화면 전체',hEnd,H,
+    grad:shotGrad(R.list,useHead)};
+}
+/* 스크린샷 속 그라디언트 로고(인스타그램류) 추정 — 상단 구간에 고채도 색이 여러 개
+   넓은 휴 간격으로 흩어져 있을 때만. 정지점 순서는 각 색 무게중심을 주축에 투영해 정한다.
+   추정 강도가 낮으므로 항상 저신뢰로 표시한다. */
+function shotGrad(list,useHead){
+  if(!useHead)return null;
+  const c=list.filter(x=>x.count>=3&&x.chroma>=60&&x.edge<.9).slice(0,5);
+  if(c.length<3)return null;
+  const hues=c.map(x=>rgbToHsl(...hexToRgb(x.hex))[0]);
+  let spread=0;
+  for(let i=0;i<hues.length;i++)for(let j=i+1;j<hues.length;j++){
+    let dd=Math.abs(hues[i]-hues[j]);if(dd>180)dd=360-dd;if(dd>spread)spread=dd;}
+  if(spread<60)return null;
+  const xs=c.map(x=>x.cx),ys=c.map(x=>x.cy);
+  const horiz=(Math.max(...xs)-Math.min(...xs))>=(Math.max(...ys)-Math.min(...ys));
+  const ord=c.slice().sort((a,b)=>horiz?a.cx-b.cx:a.cy-b.cy);
+  const map=new Map();
+  ord.forEach(x=>{if(!map.has(x.hex))map.set(x.hex,x);});
+  const stops=[...map.keys()];
+  if(stops.length<3)return null;
+  const g={type:'linear',dir:'135deg',stops,chrom:stops,spread:Math.round(spread),
+    multi:spread>=20,count:1,src:'shot'};
+  g.score=stops.length;
+  return g;
 }
 /* CSS·텍스트에서 형태(곡률·간격) 추정 — 사용 빈도 기반: 모드 버킷별 등장 횟수 집계, 다수 버킷 채택 */
 function pickMode(vals,buckets,minN){
