@@ -657,7 +657,7 @@ html[data-view="compare"] .board3{display:block}
     <button data-area="tokens">파운데이션</button>
   </nav>
   <button class="gconnect" id="igOpen"><svg class="i"><use href="#icon-action-external"/></svg>브랜드 연결</button>
-  <span class="gver">토큰 기반 · v0.46</span>
+  <span class="gver">토큰 기반 · v0.47</span>
 </header>
 <div class="app">
 
@@ -870,7 +870,8 @@ html[data-view="compare"] .board3{display:block}
       <h4><em>1</em>Primary 컬러 — 명시적 우선순위 계층</h4>
       <b>① 선언</b> — 사이트가 스스로 선언한 브랜드 색이 있으면 <b>무조건 채택</b>. theme-color 메타, <b>--primary / --brand / --accent / point / key-color</b> 류 CSS 변수. <span class="gq">브랜드가 직접 말한 것이 가장 정확.</span><br>
       <b>② 로고 마크</b> — favicon·apple-touch-icon의 지배색. og:image는 콘텐츠 이미지라 제외, 유채색 비율 2% 미만(흑백 로고)이면 통과.<br>
-      <b>③ 사용 통계 (폴백)</b> — 화면에 실제 등장한 색(HTML)을 CSS 번들 색보다 <b>×10 가중</b>. 빈도(√)×채도×명도 적합도×대비 적합도(소프트 — 네온·옐로 브랜드색을 결격시키지 않음)로 스코어링. <span class="gq">번들 CSS는 라이브러리 상태색까지 담긴 노이즈 창고라 실사용을 우선.</span><br>
+      <b>③ 브랜드 그라디언트 시드</b> — 아래 <em>5</em>의 채택 게이트를 통과한 그라디언트가 있을 때만, 그 대표 정지점이 후보가 됩니다. <span class="gq">선언값·로고 마크보다 앞설 수 없습니다 — 페이지 어딘가의 그라디언트는 로고보다 약한 증거입니다.</span><br>
+      <b>④ 사용 통계 (폴백)</b> — 화면에 실제 등장한 색(HTML)을 CSS 번들 색보다 <b>×10 가중</b>. 빈도(√)×채도×명도 적합도×대비 적합도(소프트 — 네온·옐로 브랜드색을 결격시키지 않음)로 스코어링. <span class="gq">번들 CSS는 라이브러리 상태색까지 담긴 노이즈 창고라 실사용을 우선.</span><br>
       결과에는 <b>판별 근거</b>와 후보별 출처 배지(선언·로고·CSS·이미지)를 항상 표기.
       <h4><em>2</em>형태(곡률·간격) — 사용 빈도 기반</h4>
       border-radius·padding <span class="gq">(Figma는 cornerRadius·itemSpacing)</span> 값을 버킷별로 집계해 <b>다수 버킷 채택</b>: 곡률 sharp&lt;6 · default 6–14 · rounded&gt;14, 간격 compact≤9 · default 10–17 · comfortable≥18. 중앙값이 아닌 최빈이라 리셋 0 같은 노이즈에 강함. 근거로 최빈값·점유율을 표기하고 프리셋 노브에 자동 적용.
@@ -878,14 +879,19 @@ html[data-view="compare"] .board3{display:block}
       검출 서체 후보를 나열하고 첫 후보를 브랜드 서체로 제안. 웹폰트(구글 폰트 등)는 즉시 로딩, OTF·TTF·WOFF 업로드 시 내장 등록.
       <h4><em>4</em>램프 생성 · 접근성</h4>
       Primary 시드에서 05~70 라이트→다크 램프를 자동 생성. 흰 텍스트 대비가 AA(4.5:1) 미달이면 적용 후 별도 경고 — 판별에서 결격시키지는 않음.
-      <h4><em>5</em>그라디언트 브랜드</h4>
-      인스타그램처럼 브랜드 색 자체가 그라디언트인 경우, 정지점이 <b>2개 이상 유채색</b>이면 브랜드 그라디언트로 인정하고 <b>--brand-gradient</b> 토큰으로 승격합니다 <span class="gq">(흰↔검 페이드·투명 오버레이는 제외)</span>. 빈도 × 유채 정지점 수 × 멀티 휴 가중으로 대표 그라디언트를 고릅니다.<br>
-      수집 경로는 <b>CSS <code>*-gradient()</code> · SVG <code>&lt;linearGradient&gt;</code>(로고 마크 안의 그라디언트) · 텍스트 나열</b> 순. 마지막은 CSS·SVG가 없을 때만 쓰며 <span class="gq">'그라디언트' 키워드가 있으면 2색, 없으면 3색 이상 나열</span>일 때 인정합니다.<br>
+      <h4><em>5</em>그라디언트 브랜드 — 기본값은 '없음'</h4>
+      <b>페이지에 그라디언트가 있다는 사실은 브랜드 그라디언트가 있다는 증거가 아닙니다.</b> 프로모션 배너·이벤트 띠·스켈레톤 로딩은 어느 사이트에나 있습니다. 그래서 기본값은 <b>승격하지 않음</b>이고, 아래 증거를 통과할 때만 <b>--brand-gradient</b>가 됩니다.<br>
+      <b>필요조건</b> — 정지점이 <b>2개 이상 유채색</b> <span class="gq">(흰↔검 페이드·투명 오버레이 제외)</span>.<br>
+      <b>① 맥락</b> — <code>--brand-*</code>·<code>--primary-*</code> 변수이거나 <code>.logo</code>·<code>.btn</code>·<code>.cta</code>·헤더 같은 브랜드 표면에 선언됐는가. <code>.promo</code>·<code>.event</code>·<code>.banner</code>·<code>.skeleton</code> 류는 <b>반대 증거</b>로 보고 즉시 기각합니다.<br>
+      <b>② 색 계열</b> — 선언값이나 로고 마크로 Primary가 이미 확정됐다면, 정지점 중 하나는 그 색과 <b>휴 40° 이내</b>여야 합니다. <span class="gq">초록 브랜드 사이트에서 핑크 그라디언트를 CTA에 얹는 사고를 막는 규칙입니다. Primary가 사용 통계·화면 캡처 추정이면 그 자체가 추정이라 잣대로 쓰지 않고, 대신 ①·③을 요구합니다.</span><br>
+      <b>③ 근거량</b> — 브랜드 표면 맥락이 있거나, <b>두 곳 이상에서 반복</b> 쓰이거나, <b>실제로 참조된</b> 로고 SVG 안에 있어야 합니다. <span class="gq">defs에 정의만 되고 아무 도형도 <code>url(#id)</code>로 쓰지 않는 그라디언트는 죽은 코드라 근거가 아닙니다.</span><br>
+      기각해도 <b>무엇을 찾았고 왜 안 썼는지</b>를 그대로 보여주고, 판단이 틀렸다면 <b>수동 적용</b> 버튼으로 사람이 뒤집습니다.<br>
+      수집 경로는 <b>CSS <code>*-gradient()</code> · SVG <code>&lt;linearGradient&gt;</code>(참조된 것만) · 텍스트 나열</b> 순. 마지막은 CSS·SVG가 없을 때만 쓰며 <span class="gq">'그라디언트' 키워드가 있으면 2색, 없으면 3색 이상 나열</span>일 때 인정합니다. <b>화면 캡처에서는 그라디언트를 추정하지 않습니다</b> <span class="gq">— 픽셀에는 색 사이가 보간인지 경계인지가 남지 않아, 컬러 아이콘 줄과 그라디언트를 구분할 방법이 없습니다.</span><br>
       적용 범위는 <b>면(CTA 버튼 · 로고 마크 · 히어로 배경)에 한정</b>. 텍스트 · 보더 · 포커스는 <b>솔리드 Primary</b>를 그대로 씁니다 — 이 시드는 <b>흰 텍스트 대비 3:1을 통과한 정지점 중</b> 스코어 최고값으로 고릅니다 <span class="gq">(인스타그램이면 밝은 오렌지가 아니라 마젠타가 채택)</span>. 면은 화려하게, 위계는 안전하게. <span class="gq">방향·색상은 파싱된 값으로 재직렬화해 원문을 그대로 주입하지 않습니다.</span>
       <h4><em>6</em>소스별 신뢰도</h4>
       <b>북마클릿 실측(렌더된 화면) &gt; 서버 URL 수집 &gt; Figma API &gt; 이미지 단일 추출 &gt; 텍스트 hex &gt; 화면 캡처 추정.</b> 봇 차단·로그인·CSR 사이트는 북마클릿이 최종 기준.
       화면 캡처(1400×900급 스크린샷)는 가장 약한 근거다 — 선언값·곡률·간격·서체가 픽셀에 남지 않고, 콘텐츠 사진이 화면 면적을 지배하면 브랜드 색이 통계적으로 묻힌다.
-      그래서 캡처는 상단 UI 구간만 잘라 안티에일리어싱 경계를 제외한 <b>내부 면적</b>으로 점수를 매기고, 결과에 <b>신뢰도(높음·보통·낮음)</b>를 붙여 그대로 노출한다.
+      그래서 캡처는 상단 UI 구간만 잘라 안티에일리어싱 경계를 제외한 <b>내부 면적</b>으로 점수를 매기고, 결과에 <b>신뢰도(높음·보통·낮음)</b>를 붙여 그대로 노출한다. <b>신뢰도 낮음이면 자동 적용하지 않고</b> 후보만 제시한다 — 틀린 값을 화면에 얹어놓고 되돌리게 하는 쪽이 더 큰 비용이다.
     </div>
     <div class="ig-tabs" id="igTabs"><button data-t="url" class="on">URL</button><button data-t="figma">Figma</button><button data-t="file">파일 · 텍스트</button></div>
     <div class="ig-pane" data-p="url">
@@ -1383,22 +1389,27 @@ function parseDeclared(text){
   list.sort((a,b)=>(a.source==='theme-color'?-1:b.source==='theme-color'?1:0)||b.count-a.count);
   return list;}
 const IG_SRC_LAB={declared:'선언','asset':'로고',css:'CSS',img:'이미지',grad:'그라디언트',shot:'스크린샷'};
-function igResolve({declared=[],assetCands=[],cssCands=[],assetBasis='로고·앱 아이콘 주요색'}){
+/* 계층은 선언 > 로고 마크 > 그라디언트 시드 > 사용 통계 순이다.
+   그라디언트가 선언값·로고보다 앞설 수 없다 — 페이지 어딘가의 그라디언트는
+   '이 브랜드의 색이 무엇인가'에 대해 로고 마크보다 약한 증거다(네이버 핑크 사고의 절반이 이 순서 때문이었다). */
+function igResolve({declared=[],assetCands=[],gradCands=[],cssCands=[],assetBasis='로고·앱 아이콘 주요색'}){
   declared=declared.map(d=>({...d,src:d.src||'declared'}));
   assetCands=assetCands.map(a=>({...a,src:a.src||'asset'}));
+  gradCands=gradCands.map(g=>({...g,src:'grad'}));
   cssCands=cssCands.map(c=>({...c,src:'css'})).sort((a,b)=>igScore(b)-igScore(a));
   const assetOk=assetCands.length&&(assetCands[0].share==null||assetCands[0].share>=.02); // 유채색 비율 미달=흑백 로고 → 통과
   let primary,basis;
-  if(declared.length){primary=declared[0];
-    basis=declared[0].src==='grad'?`브랜드 그라디언트의 대표 정지점 (${declared[0].source})`:`사이트가 선언한 브랜드 색 (${declared[0].source})`;}
+  if(declared.length){primary=declared[0];basis=`사이트가 선언한 브랜드 색 (${declared[0].source})`;}
   else if(assetOk){primary=assetCands[0];basis=assetBasis;}
+  else if(gradCands.length){primary=gradCands[0];basis=`브랜드 그라디언트의 대표 정지점 (${gradCands[0].source})`;}
   else if(cssCands.length){primary=cssCands[0];basis='CSS 사용 통계 (빈도×채도×명도×대비) — 선언·로고 시그널 없음';}
   else return{cands:[],basis:''};
-  const rest=[...declared,...assetCands,...cssCands].filter(c=>c!==primary);
+  const rest=[...declared,...assetCands,...gradCands,...cssCands].filter(c=>c!==primary);
   const seen=new Set([primary.hex]),cands=[primary];
   rest.forEach(c=>{if(!seen.has(c.hex)){seen.add(c.hex);cands.push(c);}});
   return{cands:cands.slice(0,12),basis};}
 function igApplySel(i,grad){
+  if(grad===undefined)grad=igGradSel;               // 스와치를 바꿔도 채택된 그라디언트는 유지된다
   igSel=i;
   document.getElementById('cbHex').value=igCands[i].hex;
   applyCustomBrand(igCands[i].hex,currentFont(),grad);
@@ -1407,16 +1418,19 @@ function igApplySel(i,grad){
 function igSetKnob(attr,val){const b=document.querySelector(`#presetCtl .seg[data-attr="${attr}"] button[data-val="${val}"]`);if(b)b.click();}
 function igShow(colors,fonts,shape,basis,grad){
   const shotConf=igShotConf;igShotConf=null;      // 화면 캡처 경로에서만 세팅되는 1회성 상태
+  const rej=igGradRej;igGradRej=null;             // 게이트에서 기각된 그라디언트 내역(있으면 이유를 노출한다)
   igGradSel=grad||null;
   igCands=colors.slice(0,12);                            // igResolve가 이미 계층 순서로 정렬
   igStatus.hidden=igCands.length>0;
   if(!igCands.length){igMsg('컬러를 찾지 못했습니다. 다른 소스를 시도해 보세요.',true);igResult.hidden=true;return;}
   igResult.hidden=false;
-  document.getElementById('igResultLab').innerHTML=`분석 결과 · <b>Primary 자동 적용</b>${basis?` — 판별 근거: ${basis}`:''}`;
+  /* 신뢰도 '낮음'은 자동 적용하지 않는다 — 틀린 값을 화면에 얹어놓고 되돌리게 하는 쪽이 더 큰 비용이다. */
+  const autoApply=shotConf!=='low';
+  document.getElementById('igResultLab').innerHTML=`분석 결과 · <b>${autoApply?'Primary 자동 적용':'자동 적용 보류 — 스와치를 눌러 적용'}</b>${basis?` — 판별 근거: ${basis}`:''}`;
   document.getElementById('igSws').innerHTML=igCands.map((c,i)=>{const cr=contrastWhite(c.hex);
     const lab=IG_SRC_LAB[c.src];
-    const badge=i===0?'<em class="pri">PRIMARY</em>':(c.src&&c.src!=='css'?`<em class="pri ast">${lab}</em>`:'');
-    return `<button class="ig-sw${i===0?' on':''}" data-i="${i}">${badge}<i style="background:${c.hex}"></i><span>${c.hex.toUpperCase()}</span><span class="aa">${cr>=4.5?'AA ✓':'대비 '+cr.toFixed(1)}</span></button>`;}).join('');
+    const badge=i===0?`<em class="pri">${autoApply?'PRIMARY':'1순위'}</em>`:(c.src&&c.src!=='css'?`<em class="pri ast">${lab}</em>`:'');
+    return `<button class="ig-sw${i===0&&autoApply?' on':''}" data-i="${i}">${badge}<i style="background:${c.hex}"></i><span>${c.hex.toUpperCase()}</span><span class="aa">${cr>=4.5?'AA ✓':'대비 '+cr.toFixed(1)}</span></button>`;}).join('');
   /* 화면 캡처는 근거 강도가 낮은 소스다 — 등급을 감추지 않고 그대로 알린다. */
   const wn=document.getElementById('igWarn');
   if(shotConf){
@@ -1430,7 +1444,7 @@ function igShow(colors,fonts,shape,basis,grad){
   const fl=document.getElementById('igFontsLab'),ff=document.getElementById('igFonts');
   if(fonts&&fonts.length){fl.hidden=ff.hidden=false;ff.innerHTML=fonts.slice(0,6).map(f=>`<span>${f}</span>`).join('');}
   else{fl.hidden=ff.hidden=true;}
-  igApplySel(0,igGradSel);                              // Primary 즉시 적용(+그라디언트 토큰)
+  if(autoApply)igApplySel(0,igGradSel);                 // Primary 즉시 적용(+그라디언트 토큰)
   /* 그라디언트 분석 결과 */
   const gp=document.getElementById('igGrad');
   if(igGradSel){const g=igGradSel;
@@ -1439,7 +1453,16 @@ function igShow(colors,fonts,shape,basis,grad){
       `<div class="gmeta"><span>그라디언트 <b>${g.stops.length}색</b> · ${g.multi?`멀티 휴 <b>Δ${g.spread}°</b>`:'단색 계열'} · 출처 <b>${({css:'CSS',svg:'SVG 로고',text:'텍스트 나열',shot:'화면 캡처(추정)'})[g.src]||'CSS'}</b> · <b>--brand-gradient</b> 토큰으로 승격</span>`+
       `<span class="gstops">${g.stops.map(x=>`<i style="background:${x}" title="${x.toUpperCase()}"></i>`).join('')}</span></div>`+
       `<p class="gnote">면(CTA 버튼 · 로고 마크 · 히어로 배경)에만 적용합니다. 텍스트 · 보더 · 포커스는 대비 하한을 통과한 정지점에서 도출한 솔리드 Primary <b>${gradSeed(g).toUpperCase()}</b>를 유지해 대비와 상태 위계가 깨지지 않습니다.</p>`;
-  }else gp.hidden=true;
+  }else if(rej&&rej.list.length){
+    /* 기각도 결과다. 조용히 버리면 '왜 안 들어왔지'가 되고, 조용히 적용하면 네이버에 핑크가 들어온다.
+       무엇을 찾았고 왜 안 썼는지 보여주고, 판단이 틀렸다면 사람이 한 번의 클릭으로 뒤집게 한다. */
+    const g=rej.list[0];igGradCand=g;
+    gp.hidden=false;
+    gp.innerHTML=`<div class="gbar" style="background-image:${gradCss(g)};opacity:.5"></div>`+
+      `<div class="gmeta"><span>그라디언트 <b>${rej.list.length}개</b>를 찾았지만 브랜드 자산으로 <b>채택하지 않았습니다</b> — ${rej.why}</span></div>`+
+      `<p class="gnote">브랜드 그라디언트의 기본값은 <b>없음</b>입니다. 승격하려면 브랜드 표면(로고 · CTA · <code>--brand-*</code> 변수)에 선언됐거나, 여러 곳에서 반복 쓰이거나, Primary와 같은 색 계열이어야 합니다. 판단이 틀렸다면 아래에서 직접 적용하세요.</p>`+
+      `<button class="btn btn-ghost btn-sm" id="igGradForce" style="margin-top:8px">이 그라디언트를 그래도 적용</button>`;
+  }else{gp.hidden=true;gp.innerHTML='';igGradCand=null;}
   /* 형태 분석 → 프리셋 노브 자동 적용 */
   const sh=document.getElementById('igShape'),msg=[];
   if(shape&&shape.radius){igSetKnob('data-radius',shape.radius);msg.push(`곡률 <b>${shape.radius}</b>${shape.radiusTop!=null?` (최빈 ${shape.radiusTop}px · 점유 ${shape.radiusPct}%)`:''}`);}
@@ -1448,6 +1471,16 @@ function igShow(colors,fonts,shape,basis,grad){
   else sh.hidden=true;
 }
 document.getElementById('igSws')?.addEventListener('click',e=>{const b=e.target.closest('.ig-sw');if(!b)return;igApplySel(+b.dataset.i);});
+/* 기각된 그라디언트의 수동 승격 — 자동 판정을 사람이 뒤집는 통로 */
+document.getElementById('igGrad')?.addEventListener('click',e=>{
+  if(!e.target.closest('#igGradForce')||!igGradCand)return;
+  igGradSel=igGradCand;igGradCand=null;
+  igApplySel(igSel||0,igGradSel);
+  const g=igGradSel,gp=document.getElementById('igGrad');
+  gp.innerHTML=`<div class="gbar" style="background-image:${gradCss(g)}"></div>`+
+    `<div class="gmeta"><span>그라디언트 <b>${g.stops.length}색</b> · 수동 적용 — <b>--brand-gradient</b> 토큰으로 승격</span>`+
+    `<span class="gstops">${g.stops.map(x=>`<i style="background:${x}" title="${x.toUpperCase()}"></i>`).join('')}</span></div>`+
+    `<p class="gnote">자동 판별은 이 그라디언트를 브랜드 자산으로 보지 않았습니다. 사용자의 판단으로 적용했습니다.</p>`;});
 document.getElementById('igApply').addEventListener('click',()=>{igOv.hidden=true;});
 /* ===== 그라디언트 브랜드(인스타그램류) 지원 =====
    그라디언트는 면(CTA·로고 마크·히어로)에만 쓰는 별도 토큰 --brand-gradient 으로 승격하고,
@@ -1461,9 +1494,19 @@ function gradBodies(text){                          // 괄호 균형 스캔 — 
     const type=m[1].toLowerCase(),start=m.index+m[0].length;
     let d=1,i=start;
     while(i<text.length&&d>0){const ch=text[i];if(ch==='(')d++;else if(ch===')')d--;i++;}
-    if(d===0)out.push({type,body:text.slice(start,i-1)});
+    /* 앞쪽 맥락도 같이 들고 나온다 — 어떤 선택자·변수에 선언됐는지가 '브랜드 그라디언트인가'의 1차 증거다. */
+    if(d===0)out.push({type,body:text.slice(start,i-1),pre:text.slice(Math.max(0,m.index-200),m.index)});
     re.lastIndex=i;}
   return out;}
+/* 브랜드를 가리키는 선언 맥락인가 — 변수명(--brand-*·--primary-*)이거나 브랜드 표면 선택자(.logo·.btn·.cta·헤더)인가.
+   프로모션 배너(.promo·.event·.banner)·광고는 명시적으로 반대 증거로 본다. */
+const GRAD_CTX_POS=/--[\w-]*(brand|primary|accent|point|key|gradient|theme)[\w-]*\s*:|[.#][\w-]*(brand|logo|symbol|btn|button|cta|primary|hero|gnb|header|nav)[\w-]*|\[class[*^~|$]?=["']?[^"']*(brand|logo|primary)/i;
+const GRAD_CTX_NEG=/[.#][\w-]*(promo|promotion|event|banner|ad|ads|advert|sale|badge|ribbon|sticker|thumb|card|skeleton|shimmer|placeholder|toast|tooltip|chart|graph)[\w-]*/i;
+function gradCtx(pre){
+  if(!pre)return 0;
+  const tail=pre.slice(-200);
+  if(GRAD_CTX_NEG.test(tail))return -1;
+  return GRAD_CTX_POS.test(tail)?1:0;}
 function splitTop(s){                               // 최상위 콤마만 분리(rgb(...) 내부 보호)
   const out=[];let d=0,cur='';
   for(const ch of s){if(ch==='(')d++;else if(ch===')')d--;
@@ -1488,7 +1531,7 @@ function parseDir(tok,type){
   const d=t.match(/^(-?[\d.]+)deg$/);
   if(d){const v=((+d[1])%360+360)%360;return(Math.round(v*10)/10)+'deg';}
   return'';}
-function gradAdd(map,type,dir,stops,src){
+function gradAdd(map,type,dir,stops,src,ctx){
   if(stops.length<2||stops.length>8)return;
   const chrom=stops.map(c=>validHexC(c)).filter(Boolean);
   if(chrom.length<2)return;                         // 흰↔검 페이드·투명 오버레이는 브랜드 그라디언트가 아니다
@@ -1498,14 +1541,21 @@ function gradAdd(map,type,dir,stops,src){
     let d=Math.abs(hues[i]-hues[j]);if(d>180)d=360-d;if(d>spread)spread=d;}
   const key=type+'|'+dir+'|'+stops.join(',');
   const ex=map.get(key);
-  if(ex)ex.count++;
-  else map.set(key,{type,dir,stops,chrom,spread:Math.round(spread),multi:spread>=20,count:1,src:src||'css'});}
+  /* 같은 그라디언트가 여러 곳에 있으면 맥락 점수는 가장 강한 것을 남긴다(브랜드 표면 1곳 > 배너 3곳). */
+  if(ex){ex.count++;if((ctx||0)>ex.ctx)ex.ctx=ctx||0;}
+  else map.set(key,{type,dir,stops,chrom,spread:Math.round(spread),multi:spread>=20,count:1,src:src||'css',ctx:ctx||0});}
 /* SVG 로고의 <linearGradient>·<radialGradient> — 인스타그램류 마크는 그라디언트가 SVG 안에 있다 */
 function svgGradients(text,map){
+  /* defs에 정의만 되고 아무 도형도 쓰지 않는 그라디언트가 흔하다(아이콘 스프라이트·죽은 코드).
+     실제로 fill/stroke가 url(#id)로 참조하는 것만 인정한다. id가 없으면 참조될 수 없으므로 역시 제외. */
+  const used=new Set();
+  for(const u of text.matchAll(/url\(\s*['"]?#([\w:.-]+)/gi))used.add(u[1]);
   const re=/<(linearGradient|radialGradient)\b([^>]*)>([\s\S]{0,4000}?)<\/\1>/gi;
   let m,n=0;
   while((m=re.exec(text))&&n<60){
     n++;
+    const gid=(m[2].match(/\bid\s*=\s*["']([^"']+)["']/i)||[])[1];
+    if(!gid||!used.has(gid))continue;               // 참조되지 않는 정의는 브랜드 근거가 아니다
     const type=/radial/i.test(m[1])?'radial':'linear',attrs=m[2],stops=[];
     for(const sm of m[3].matchAll(/<stop\b([^>]*)>/gi)){
       const a=sm[1];
@@ -1520,7 +1570,8 @@ function svgGradients(text,map){
       const x1=num('x1'),y1=num('y1'),x2=num('x2'),y2=num('y2');
       if([x1,y1,x2,y2].every(v=>!isNaN(v))&&(x1!==x2||y1!==y2))
         dir=(Math.round(((Math.atan2(x2-x1,y1-y2)*180/Math.PI)+360)%360*10)/10)+'deg';}
-    gradAdd(map,type,dir,stops,'svg');}}
+    /* 로고 SVG의 참조된 그라디언트는 브랜드 표면 맥락으로 본다 — 마크 자체가 브랜드다. */
+    gradAdd(map,type,dir,stops,'svg',1);}}
 /* 브랜드 가이드 산문: '그라디언트 #A → #B → #C' 처럼 hex만 나열한 경우(CSS·SVG가 없을 때만) */
 function textGradients(text,map){
   text.split(/[\n\r]+|(?:[.。]\s)/).forEach(ln=>{
@@ -1537,13 +1588,48 @@ function parseGradients(text){
     parts.forEach((p,i)=>{
       if(i===0&&(dir||/^(to\s|-?[\d.]+deg|circle|ellipse|at\s|from\s|closest|farthest|in\s)/i.test(p)))return;
       const c=parseColorTok(p);if(c&&stops.indexOf(c)<0)stops.push(c);});
-    gradAdd(map,g.type,dir,stops,'css');});
+    gradAdd(map,g.type,dir,stops,'css',gradCtx(g.pre));});
   svgGradients(text,map);
   if(!map.size)textGradients(text,map);
   const list=[...map.values()];
-  /* 빈도 × 유채 정지점 수 × 멀티 휴 가중 — 다색 브랜드 그라디언트가 단색 셰이드 페이드보다 우선 */
-  list.forEach(g=>{g.score=Math.sqrt(g.count)*g.chrom.length*(g.multi?1.6:1);});
+  /* 빈도 × 유채 정지점 수 × 멀티 휴 가중 — 다색 브랜드 그라디언트가 단색 셰이드 페이드보다 우선.
+     맥락 가중은 여기서 순서만 손보고, 채택 여부는 gradAccept가 따로 판정한다. */
+  list.forEach(g=>{g.score=Math.sqrt(g.count)*g.chrom.length*(g.multi?1.6:1)*(g.ctx>0?1.8:(g.ctx<0?.4:1));});
   return list.sort((a,b)=>b.score-a.score);}
+/* ===== 그라디언트 채택 게이트 =====
+   페이지에 그라디언트가 있다는 사실은 '브랜드 그라디언트가 있다'의 증거가 아니다.
+   네이버(초록 브랜드)를 해석했을 때 프로모션 배너의 핑크 그라디언트가 CTA·로고로 새어 들어온 사고가 이 게이트의 이유다.
+   기본값은 '그라디언트 없음'이고, 아래 증거를 통과할 때만 --brand-gradient로 승격한다. */
+function hueDist(a,b){let d=Math.abs(a-b);return d>180?360-d:d;}
+const GRAD_STRONG_SRC={declared:1,asset:1,img:1};    // 선언값·로고 마크만 '휴 대조의 기준'이 될 만큼 단단하다
+function gradAccept(list,primary){
+  if(!list||!list.length)return{grad:null,rejected:0,why:''};
+  const hex=primary&&primary.hex||null;
+  /* 기준 Primary가 CSS 사용 통계·스크린샷 추정이면 그 자체가 추정이라 휴 대조의 잣대가 될 수 없다.
+     이때는 색 계열 대신 맥락·반복이라는 다른 증거를 요구한다. */
+  const pr=hex&&GRAD_STRONG_SRC[primary.src]?rgbToHsl(...hexToRgb(hex)):null;
+  const usePr=pr&&pr[1]>=18;                        // 무채색 브랜드(검정·회색)는 휴 비교가 의미 없다
+  let why='';
+  for(const g of list){
+    if(g.ctx<0){why=why||'프로모션·배너 영역에 선언된 그라디언트라 브랜드 자산으로 보지 않았습니다.';continue;}
+    /* ① 브랜드 정합성 — 단단한 Primary가 있다면 정지점 하나는 그 색과 같은 계열이어야 한다. */
+    if(usePr){
+      const near=g.chrom.some(c=>{const h=rgbToHsl(...hexToRgb(c));return h[1]>=18&&hueDist(h[0],pr[0])<=40;});
+      if(!near){why=why||`Primary(${hex.toUpperCase()})와 색 계열이 달라 브랜드 그라디언트로 보지 않았습니다.`;continue;}}
+    /* ② 근거량 — 브랜드 표면 맥락이 있거나, 여러 곳에서 반복 사용되거나, 참조된 로고 SVG 안에 있어야 한다. */
+    if(g.ctx<=0&&g.count<2&&g.src!=='svg'){
+      why=why||'한 곳에서만 쓰인 장식 그라디언트로 보여 채택하지 않았습니다.';continue;}
+    return{grad:g,rejected:list.length-1,why:''};
+  }
+  return{grad:null,rejected:list.length,why:why||'브랜드 그라디언트로 볼 근거가 부족했습니다.'};}
+/* 2패스 판정: ① 그라디언트를 빼고 Primary를 확정한다 ② 그 Primary를 잣대로 게이트를 통과한 것만 승격한다.
+   Primary를 그라디언트에서 뽑아놓고 그 그라디언트를 검증하면 순환이라 아무것도 걸러지지 않는다. */
+function igResolveGrad(base,list){
+  const r0=igResolve(base);
+  const a=gradAccept(list,r0.cands[0]||null);
+  igGradRej=a.grad?null:{why:a.why,list:list||[]};
+  if(!a.grad)return{...r0,grad:null};
+  return{...igResolve({...base,gradCands:gradDec(a.grad)}),grad:a.grad};}
 function gradCss(g){                                // 파싱된 hex + 화이트리스트 방향으로 재직렬화(주입 차단)
   const head=g.type==='linear'?(g.dir||'135deg')+', ':(g.type==='radial'?'circle, ':'');
   return g.type+'-gradient('+head+g.stops.join(', ')+')';}
@@ -1554,8 +1640,8 @@ function gradSeed(g){                               // 그라디언트 → 솔�
   return(ok.length?ok:g.chrom).slice().sort((a,b)=>igScore({hex:b,count:1})-igScore({hex:a,count:1}))[0]||g.stops[0];}
 function gradDec(g){                                // Primary 계층에 넣을 후보(선언 다음 순위)
   return g?[{hex:gradSeed(g),count:1,source:g.stops.length+'색 그라디언트',src:'grad'}]:[];}
-let igGradSel=null,igShotConf=null;
-const SHOT_CONF={high:'높음',mid:'보통',low:'낮음'};                                 // 이번 분석에서 채택된 그라디언트
+let igGradSel=null,igShotConf=null,igGradRej=null,igGradCand=null;   // 채택 / 스크린샷 신뢰도 / 기각 내역 / 수동 승격 대기
+const SHOT_CONF={high:'높음',mid:'보통',low:'낮음'};
 document.getElementById('gradTg').addEventListener('click',()=>{
   const b=document.getElementById('gradTg'),on=!b.classList.contains('on');
   b.classList.toggle('on',on);b.setAttribute('aria-checked',String(on));b.textContent=on?'적용':'해제';
@@ -1583,24 +1669,22 @@ document.getElementById('igTextRun').addEventListener('click',()=>{
         const usage=(o.colors||[]).map(c=>{const h=validHexC(c.hex);return h?{hex:h,count:c.count||1,html:c.count||1}:null;}).filter(Boolean);
         const gs=[];(o.grads||[]).forEach(x=>{const css=typeof x==='string'?x:(x&&x.css||'');
           for(let k=0;k<Math.min((x&&x.count)||1,20);k++)gs.push(css);});
-        const g0=parseGradients(gs.join(';'))[0]||null;
-        const rr=igResolve({declared:[...declared,...gradDec(g0)],cssCands:usage});
+        const rr=igResolveGrad({declared,cssCands:usage},parseGradients(gs.join(';')));
         const basis=rr.basis&&rr.basis.indexOf('CSS')===0?'북마클릿 실측 — 렌더된 화면의 실제 사용 색':rr.basis;
         const rB=pickMode((o.rads||[]).filter(v=>v>=0&&v<=48),RAD_BUCKETS,3),pB=pickMode((o.pads||[]).filter(v=>v>0&&v<=48),PAD_BUCKETS,5);
         const shape={radius:rB?rB.mode:null,radiusTop:rB?rB.top:null,radiusPct:rB?rB.pct:null,density:pB?pB.mode:null,padTop:pB?pB.top:null,padPct:pB?pB.pct:null};
-        igShow(rr.cands,o.fonts||[],shape,basis,g0);
-        if(o.grads===undefined)igMsg('이 결과는 구버전 북마클릿입니다 — 그라디언트·SVG 로고 수집을 쓰려면 URL 탭의 🔖 Freesm 스캔 링크를 북마크바에 다시 드래그해 주세요.');
+        igShow(rr.cands,o.fonts||[],shape,basis,rr.grad);
+        if(!(o.bv>=3))igMsg(`이 결과는 구버전 북마클릿(bv${o.bv||1})입니다 — 그라디언트가 어느 요소에 선언됐는지(브랜드 표면인지 배너인지)를 보내지 않아 판별이 보수적으로 동작합니다. URL 탭의 🔖 Freesm 스캔 링크를 북마크바에 다시 드래그해 주세요.`);
         return;
       }
     }catch(e){/* JSON 아니면 일반 텍스트로 처리 */}
   }
   const fonts=[...new Set((t.match(/font-family\s*:\s*([^;}]+)/gi)||[]).map(m=>m.split(':')[1].split(',')[0].trim().replace(/["']/g,'')))];
-  const g0=parseGradients(t)[0]||null;
-  const rr=igResolve({declared:[...parseDeclared(t),...gradDec(g0)],cssCands:extractHex(t)});
-  igShow(rr.cands,fonts,extractShape(t),rr.basis,g0);
+  const rr=igResolveGrad({declared:parseDeclared(t),cssCands:extractHex(t)},parseGradients(t));
+  igShow(rr.cands,fonts,extractShape(t),rr.basis,rr.grad);
 });
 /* Freesm 스캔 북마클릿 — 대상 사이트 안에서 실측(선언·렌더 색·곡률·간격·폰트) 후 JSON 클립보드 복사 */
-const BMK_CODE="(()=>{try{var cnt={},rad=[],pad=[],fon={},dec=[],gcn={};var bv=2;var push=function(c){var m=c&&c.match(/rgba?\\((\\d+), ?(\\d+), ?(\\d+)(?:, ?([\\d.]+))?/);if(!m)return;if(m[4]!==undefined&&+m[4]<.5)return;var r=+m[1],g=+m[2],b=+m[3],mx=Math.max(r,g,b),mn=Math.min(r,g,b);if(mx-mn<24||mx<35||mn>238)return;var h='#'+[r,g,b].map(function(v){return v.toString(16).padStart(2,'0')}).join('');cnt[h]=(cnt[h]||0)+1};document.querySelectorAll('*').forEach(function(el){var rc=el.getBoundingClientRect();if(!rc.width||!rc.height)return;var s=getComputedStyle(el);push(s.color);push(s.backgroundColor);push(s.borderTopColor);var bi=s.backgroundImage;if(bi&&bi.indexOf('gradient(')>0&&bi.length<400)gcn[bi]=(gcn[bi]||0)+1;var br=parseFloat(s.borderTopLeftRadius);if(br>0&&br<=48)rad.push(Math.round(br));var pt=parseFloat(s.paddingTop);if(pt>0&&pt<=48)pad.push(Math.round(pt));var f=(s.fontFamily||'').split(',')[0].replace(/[\\\"']/g,'').trim();if(f)fon[f]=(fon[f]||0)+1});document.querySelectorAll('linearGradient,radialGradient').forEach(function(g){try{var so=g.outerHTML;if(so&&so.length<800)gcn[so]=(gcn[so]||0)+1}catch(e){}});var th=document.querySelector('meta[name=theme-color]');if(th&&th.content&&th.content[0]=='#')dec.push({hex:th.content,source:'theme-color'});for(var i=0;i<document.styleSheets.length;i++){var rs;try{rs=document.styleSheets[i].cssRules}catch(e){continue}for(var j=0;j<(rs||[]).length;j++){var t=rs[j].cssText||'';var mm=t.match(/--[\\w-]*(primary|brand|accent|point|key-?color|main-?color)[\\w-]*: ?#[0-9a-fA-F]{3,8}/g)||[];for(var k=0;k<mm.length;k++){dec.push({hex:mm[k].match(/#[0-9a-fA-F]{3,8}/)[0],source:'brand-var'})}}}var out={v:1,bv:bv,tool:'freesm',url:location.href,declared:dec.slice(0,8),colors:Object.entries(cnt).sort(function(a,b){return b[1]-a[1]}).slice(0,15).map(function(e){return{hex:e[0],count:e[1]}}),grads:Object.entries(gcn).sort(function(a,b){return b[1]-a[1]}).slice(0,6).map(function(e){return{css:e[0],count:e[1]}}),rads:rad.slice(0,500),pads:pad.slice(0,500),fonts:Object.entries(fon).sort(function(a,b){return b[1]-a[1]}).slice(0,4).map(function(e){return e[0]})};var js=JSON.stringify(out);var ok=function(){var d=document.createElement('div');d.textContent='Freesm 스캔 복사 완료 — 브랜드 연결 모달에 붙여넣으세요';d.style.cssText='position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:2147483647;background:#14171c;color:#fff;padding:10px 18px;border-radius:10px;font:600 13px sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25)';document.body.appendChild(d);setTimeout(function(){d.remove()},2600)};navigator.clipboard.writeText(js).then(ok,function(){window.prompt('복사(Ctrl/Cmd+C) 후 Freesm에 붙여넣으세요:',js)})}catch(e){window.prompt('Freesm 스캔 오류: '+e)}})()";
+const BMK_CODE="(()=>{try{var cnt={},rad=[],pad=[],fon={},dec=[],gcn={};var bv=3;var push=function(c){var m=c&&c.match(/rgba?\\((\\d+), ?(\\d+), ?(\\d+)(?:, ?([\\d.]+))?/);if(!m)return;if(m[4]!==undefined&&+m[4]<.5)return;var r=+m[1],g=+m[2],b=+m[3],mx=Math.max(r,g,b),mn=Math.min(r,g,b);if(mx-mn<24||mx<35||mn>238)return;var h='#'+[r,g,b].map(function(v){return v.toString(16).padStart(2,'0')}).join('');cnt[h]=(cnt[h]||0)+1};document.querySelectorAll('*').forEach(function(el){var rc=el.getBoundingClientRect();if(!rc.width||!rc.height)return;var s=getComputedStyle(el);push(s.color);push(s.backgroundColor);push(s.borderTopColor);var bi=s.backgroundImage;if(bi&&bi.indexOf('gradient(')>0&&bi.length<400){var cn=(typeof el.className==='string'?el.className:'').trim().split(/\\s+/).slice(0,3).filter(Boolean).map(function(x){return '.'+x}).join('');var sel=(el.tagName.toLowerCase()+(el.id?'#'+el.id:'')+cn).slice(0,90);var kk=sel+'{background-image:'+bi+'}';gcn[kk]=(gcn[kk]||0)+1}var br=parseFloat(s.borderTopLeftRadius);if(br>0&&br<=48)rad.push(Math.round(br));var pt=parseFloat(s.paddingTop);if(pt>0&&pt<=48)pad.push(Math.round(pt));var f=(s.fontFamily||'').split(',')[0].replace(/[\\\"']/g,'').trim();if(f)fon[f]=(fon[f]||0)+1});var uid={};document.querySelectorAll('svg').forEach(function(s){try{var mm=(s.innerHTML||'').match(/url\\(\\s*[^)]*#[\\w:.-]+/g)||[];mm.forEach(function(u){uid[u.split('#').pop()]=1})}catch(e){}});document.querySelectorAll('linearGradient,radialGradient').forEach(function(g){try{var gi=g.id;if(!gi||!uid[gi])return;var so=g.outerHTML;if(so&&so.length<800){var kk=so+'<path fill=url(#'+gi+')>';gcn[kk]=(gcn[kk]||0)+1}}catch(e){}});var th=document.querySelector('meta[name=theme-color]');if(th&&th.content&&th.content[0]=='#')dec.push({hex:th.content,source:'theme-color'});for(var i=0;i<document.styleSheets.length;i++){var rs;try{rs=document.styleSheets[i].cssRules}catch(e){continue}for(var j=0;j<(rs||[]).length;j++){var t=rs[j].cssText||'';var mm=t.match(/--[\\w-]*(primary|brand|accent|point|key-?color|main-?color)[\\w-]*: ?#[0-9a-fA-F]{3,8}/g)||[];for(var k=0;k<mm.length;k++){dec.push({hex:mm[k].match(/#[0-9a-fA-F]{3,8}/)[0],source:'brand-var'})}}}var out={v:1,bv:bv,tool:'freesm',url:location.href,declared:dec.slice(0,8),colors:Object.entries(cnt).sort(function(a,b){return b[1]-a[1]}).slice(0,15).map(function(e){return{hex:e[0],count:e[1]}}),grads:Object.entries(gcn).sort(function(a,b){return b[1]-a[1]}).slice(0,6).map(function(e){return{css:e[0],count:e[1]}}),rads:rad.slice(0,500),pads:pad.slice(0,500),fonts:Object.entries(fon).sort(function(a,b){return b[1]-a[1]}).slice(0,4).map(function(e){return e[0]})};var js=JSON.stringify(out);var ok=function(){var d=document.createElement('div');d.textContent='Freesm 스캔 복사 완료 — 브랜드 연결 모달에 붙여넣으세요';d.style.cssText='position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:2147483647;background:#14171c;color:#fff;padding:10px 18px;border-radius:10px;font:600 13px sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25)';document.body.appendChild(d);setTimeout(function(){d.remove()},2600)};navigator.clipboard.writeText(js).then(ok,function(){window.prompt('복사(Ctrl/Cmd+C) 후 Freesm에 붙여넣으세요:',js)})}catch(e){window.prompt('Freesm 스캔 오류: '+e)}})()";
 document.getElementById('bmkLink').href='javascript:'+encodeURIComponent(BMK_CODE);
 /* 이미지 → 주요 컬러 · 폰트 파일 → 서체 등록 */
 const igDrop=document.getElementById('igDrop'),igFile=document.getElementById('igFile');
@@ -1628,10 +1712,9 @@ async function igHandleFile(f){
   if(/^image\/svg/.test(f.type)||/\.svg$/i.test(f.name)){
     igMsg('SVG 해석 중…');
     const t=await f.text();
-    const g0=parseGradients(t)[0]||null;
-    const rr=igResolve({declared:gradDec(g0),cssCands:extractHex(t)});
+    const rr=igResolveGrad({cssCands:extractHex(t)},parseGradients(t));
     if(!rr.cands.length){igMsg('SVG에서 색을 찾지 못했습니다.',true);return;}
-    igShow(rr.cands,null,null,g0?rr.basis:'SVG 원문의 채움색 사용 통계',g0);
+    igShow(rr.cands,null,null,rr.grad?rr.basis:'SVG 원문의 채움색 사용 통계',rr.grad);
     return;
   }
   if(!/^image\//.test(f.type)){igMsg('이미지 또는 폰트 파일만 지원합니다.',true);return;}
@@ -1644,10 +1727,10 @@ async function igHandleFile(f){
     if(sd&&sd.cands.length){
       const rr=igResolve({assetCands:sd.cands.map(c=>({...c,src:'shot'})),
         assetBasis:`화면 캡처 추정 — ${sd.region} 분석 · 신뢰도 ${SHOT_CONF[sd.conf]}`});
-      igShotConf=sd.conf;igShow(rr.cands,null,null,rr.basis,sd.grad||null);
+      igShotConf=sd.conf;igGradRej=null;igShow(rr.cands,null,null,rr.basis,null);
     }else{
       const rr=igResolve({assetCands:imgDominant(img).map(c=>({...c,src:'img'})),assetBasis:'업로드 이미지 주요색 (채도 가중)'});
-      igShotConf=null;igShow(rr.cands,null,null,rr.basis);
+      igShotConf=null;igGradRej=null;igShow(rr.cands,null,null,rr.basis);
     }
     URL.revokeObjectURL(img.src);};
   img.onerror=()=>igMsg('이미지를 읽지 못했습니다.',true);
@@ -1715,33 +1798,13 @@ function shotDominant(img){
   if(!fellBack&&top.count>=30&&top.share>=.4)conf='high';
   else if(!fellBack&&top.count>=12&&(top.share>=.2||ratio>=2))conf='mid';
   return{cands:R.list.slice(0,8).map(c=>({hex:c.hex,count:c.count,share:c.share})),
-    conf,region:useHead?'상단 UI 구간':'화면 전체',hEnd,H,
-    grad:shotGrad(R.list,useHead)};
+    conf,region:useHead?'상단 UI 구간':'화면 전체',hEnd,H};
 }
-/* 스크린샷 속 그라디언트 로고(인스타그램류) 추정 — 상단 구간에 고채도 색이 여러 개
-   넓은 휴 간격으로 흩어져 있을 때만. 정지점 순서는 각 색 무게중심을 주축에 투영해 정한다.
-   추정 강도가 낮으므로 항상 저신뢰로 표시한다. */
-function shotGrad(list,useHead){
-  if(!useHead)return null;
-  const c=list.filter(x=>x.count>=3&&x.chroma>=60&&x.edge<.9).slice(0,5);
-  if(c.length<3)return null;
-  const hues=c.map(x=>rgbToHsl(...hexToRgb(x.hex))[0]);
-  let spread=0;
-  for(let i=0;i<hues.length;i++)for(let j=i+1;j<hues.length;j++){
-    let dd=Math.abs(hues[i]-hues[j]);if(dd>180)dd=360-dd;if(dd>spread)spread=dd;}
-  if(spread<60)return null;
-  const xs=c.map(x=>x.cx),ys=c.map(x=>x.cy);
-  const horiz=(Math.max(...xs)-Math.min(...xs))>=(Math.max(...ys)-Math.min(...ys));
-  const ord=c.slice().sort((a,b)=>horiz?a.cx-b.cx:a.cy-b.cy);
-  const map=new Map();
-  ord.forEach(x=>{if(!map.has(x.hex))map.set(x.hex,x);});
-  const stops=[...map.keys()];
-  if(stops.length<3)return null;
-  const g={type:'linear',dir:'135deg',stops,chrom:stops,spread:Math.round(spread),
-    multi:spread>=20,count:1,src:'shot'};
-  g.score=stops.length;
-  return g;
-}
+/* v0.47에서 스크린샷 그라디언트 추정(shotGrad)을 걷어냈다.
+   '상단에 고채도 색이 여러 개 흩어져 있다'는 그라디언트의 증거가 아니다 —
+   컬러 아이콘 줄·태그 칩·썸네일 어느 것이든 같은 패턴을 만든다.
+   픽셀에는 색 사이가 보간인지 경계인지, 그것이 한 면인지가 남지 않는다.
+   그라디언트는 선언 원문(CSS·SVG)이 있을 때만 판정한다. */
 /* CSS·텍스트에서 형태(곡률·간격) 추정 — 사용 빈도 기반: 모드 버킷별 등장 횟수 집계, 다수 버킷 채택 */
 function pickMode(vals,buckets,minN){
   if(vals.length<minN)return null;
@@ -1781,9 +1844,8 @@ async function igRemote(params,label){
       })));
       assetCands.sort((a,b)=>(b.share||0)-(a.share||0));
     }
-    const g0=parseGradients((j.gradients||[]).join(';'))[0]||null;
-    const rr=igResolve({declared:[...(j.declared||[]),...gradDec(g0)],assetCands,cssCands});
-    igShow(rr.cands,j.fonts||[],j.shape||null,rr.basis,g0);
+    const rr=igResolveGrad({declared:j.declared||[],assetCands,cssCands},parseGradients((j.gradients||[]).join(';')));
+    igShow(rr.cands,j.fonts||[],j.shape||null,rr.basis,rr.grad);
   }catch(err){
     const local=location.protocol==='file:';
     igMsg(local
