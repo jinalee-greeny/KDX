@@ -75,6 +75,17 @@ Scale(원시)  →  Brand(교체 지점)  →  Semantic(의미)  →  Radius(곡
 - 모든 모듈은 곡률·간격·보더·크기 노브와 Brand 스왑을 실시간 반영한다(반응형은 `@container page`).
 - 새 범용 모듈 추가 시: 데모 `M`(마크업)·`MOD_META`(문서)·`MOD_ORDER`·좌측 탐색 nav-item에 각각 등록. 신규 섹션 CSS는 토큰 var만 사용(하드코딩 px 금지).
 
+## 예시 화면 — 화면 조립기 (v0.49)
+데모의 **예시 화면** 영역(GNB `pages`)이 고정 샘플 3종(홈·로그인·회원가입)에서 **사용자가 직접 화면을 쌓아 보는 조립기**로 확장됐다. 모듈 레이어가 "섹션 하나를 문서로 본다"면, 여기는 "그 섹션들을 실제 화면 순서로 쌓아 본다"에 해당한다.
+- **셀(cell)이 단위다.** 화면은 `screens[{id,name,secs:[key,…]}]`(인메모리) 배열이고, 렌더는 `.page > .inner` 안에 `secs`를 순서대로 `<div class="cell">`로 감싸 붙인다. `.inner`는 좌우 패딩만 갖고 섹션 여백(`.foot`·`.ctaband`의 `margin-top:var(--sect)`)은 래퍼를 그대로 통과하므로, 셀 래핑이 기존 레이아웃을 바꾸지 않는다. 컨테이너 쿼리도 `.frame`의 named container `page`에 그대로 물린다.
+- **선택 가능한 섹션 26종** = 기존 모듈 `M` 10종 + 신규 `PSEC` 16종(`pagehead·filter·pager·pdetail·pspec·notice·terms·contact·pricing·evhero·events·coupon·mysum·holdings·empty·e404`). `SEC=Object.assign({},M,PSEC)`로 합치고 `SEC_META`(이름·설명), `SEC_GROUPS`(6개 그룹: 공통 / 목록·탐색 / 상세·정보 / 문서·폼 / 이벤트·프로모션 / 마이·상태)로 고르기 모달을 구성한다.
+- **화면 템플릿 11종**(`SCR_TPL`): 상품 목록 · 상품 상세 · 이벤트 · 약관·정책 · 공지사항 · 마이페이지 · 요금 안내 · 고객지원·문의 · 프로모션 랜딩 · 404 오류 · 빈 화면부터.
+- **빈 페이지를 만들지 않는다(설계 원칙).** 새 화면은 반드시 섹션이 채워진 상태로 열린다 — `SCR_TPL`의 모든 항목이 `secs.length>=1`이고, 가장 비어 있는 '빈 화면부터'도 `header+pagehead` 2셀로 시작한다. 사용자가 셀을 전부 지워도 백지 대신 `.cellzero` 안내("이 화면에는 아직 섹션이 없습니다" + `＋ 첫 섹션 추가`)가 자리를 지킨다. 두 조건 모두 `verify49.js`가 검사한다.
+- **편집 동선**: 셀에 마우스를 올리면 `.cellbar`(섹션 이름 · ↑ · ↓ · 복제 · 아래에 추가 · 삭제). 화면 상단 `#scrBar`에 `＋ 섹션 추가` · `화면 추가` · `이 화면 삭제`. 탭 스트립(`renderPgTabs`)은 기본 3종 + 사용자 화면(각각 ✕ 삭제) + `＋ 화면 추가`로 매 라우팅마다 다시 그린다. 마지막 화면을 지우면 홈으로 복귀한다.
+- **레이아웃 컨트롤의 자리**: 상품 리스트의 Grid·Carousel·List는 전역 노브가 아니므로(위 모듈 레이어 원칙) 화면에 `products` 섹션이 들어 있을 때만 `#scrBar`에 `[data-sb-lay]` 세그먼트로 나타난다. 곡률·간격·보더·크기·디바이스·Brand는 기존 노브가 `screenEl`에도 그대로 전파된다.
+- **주의**: 데모 스크립트에는 브랜드 인제스트 쪽에 `function pickMode(...)`가 이미 있다. 화면 고르기 상태 변수는 `pickKind`를 쓴다(같은 이름을 쓰면 `Identifier already declared`로 스크립트 전체가 죽는다).
+- 새 섹션 추가 시: `PSEC`(마크업) · `SEC_META`(이름·설명) · `SEC_GROUPS`(어느 그룹인지) 세 곳에 등록하고, 필요하면 `SCR_TPL`에 템플릿을 추가한다. CSS는 토큰 var만 사용.
+
 ## 추천 다음 작업 (NEXT)
 1. 기초 컴포넌트를 토큰 바인딩으로: **Button**(primary/secondary/ghost · S/M/L · hover/press/disabled) → **Input/Field** → **Card** → **Chip/Badge**. (데모에 정식화 완료)
 2. 모듈을 실제 홈페이지 코드로: 위 모듈 레이어를 컴포넌트 단위로 마크업/구현하고, 페이지는 모듈을 조립해 구성. 배치 변형은 모듈 속성으로.
