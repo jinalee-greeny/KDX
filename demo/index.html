@@ -118,10 +118,38 @@ svg.i{display:block;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linec
 .ig-sw .aa{font-size:8px;color:var(--fg-mut)}
 .ig-sw .pri{font-style:normal;font-size:7.5px;font-weight:800;letter-spacing:.05em;color:var(--accent);background:var(--accent-subtle);border-radius:99px;padding:2px 7px;margin-bottom:1px}
 .ig-sw .pri.ast{color:var(--fg-sub);background:var(--bg-sunken)}
-.ig-shape{margin:12px 0 4px;font-size:11.5px;color:var(--fg-sub);background:var(--bg-sunken);border-radius:9px;padding:10px 13px;line-height:1.6}
+.ig-sec{margin-top:16px}
+.ig-shape{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:11.5px;color:var(--fg-sub);background:var(--bg-sunken);border-radius:9px;padding:10px 13px;line-height:1.6}
 .ig-shape b{color:var(--accent)}
-.ig-grad{margin:12px 0 0;border:1px solid var(--line-2);border-radius:10px;padding:11px 13px}
+.ig-knob{display:flex;align-items:center;gap:7px}
+.ig-knob>span:first-child{font-weight:700;color:var(--fg-sub)}
+.ig-knob .seg2{display:flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden;background:var(--bg)}
+.ig-knob .seg2 button{font-size:11px;font-weight:600;padding:5px 10px;color:var(--fg-sub);cursor:pointer;transition:.12s}
+.ig-knob .seg2 button:hover{background:var(--bg-sunken)}
+.ig-knob .seg2 button.on{background:var(--accent-subtle);color:var(--accent);font-weight:800}
+.ig-knob em{font-style:normal;color:var(--fg-mut);font-size:10.5px}
+/* 그라디언트: 찾은 것을 전부 나열하고 사람이 고른다 — 자동 판정은 뱃지로만 알린다 */
+.ig-grad{margin:0;display:flex;flex-direction:column;gap:7px}
 .ig-grad[hidden]{display:none}
+.grow{display:flex;align-items:center;gap:11px;border:1.5px solid var(--line-2);border-radius:10px;padding:9px 11px;cursor:pointer;transition:.13s}
+.grow:hover{background:var(--bg-sunken)}
+.grow.on{border-color:var(--accent);background:var(--accent-subtle)}
+.grow .gbar{width:92px;height:34px;border-radius:7px;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.09)}
+.grow .gbar.none{background:repeating-linear-gradient(45deg,var(--bg-sunken) 0 6px,var(--bg) 6px 12px)}
+.grow .gi{min-width:0;flex:1;font-size:11px;color:var(--fg-sub);line-height:1.6}
+.grow .gi b{color:var(--fg)}
+.grow .gv{font-style:normal;font-size:9px;font-weight:800;letter-spacing:.04em;border-radius:99px;padding:2px 7px;margin-right:6px;white-space:nowrap}
+.grow .gv.ok{color:var(--accent);background:var(--accent-subtle)}
+.grow.on .gv.ok{background:var(--bg)}
+.grow .gv.no{color:var(--fg-mut);background:var(--bg-sunken)}
+.grow .gwhy{display:block;color:var(--fg-mut);font-size:10.5px;margin-top:1px}
+.grow .gsel{display:inline-flex;gap:3px;vertical-align:middle;margin-left:6px}
+.grow .gsel i{width:12px;height:12px;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.grow .gact{flex:none}
+.grow .gact button{font-size:11px;font-weight:700;padding:6px 12px;border:1px solid var(--line-2);border-radius:8px;color:var(--fg-sub);background:var(--bg);cursor:pointer;transition:.12s}
+.grow.on .gact button{border-color:var(--accent-line,var(--accent));color:var(--accent)}
+.ig-empty{font-size:11.5px;color:var(--fg-mut);background:var(--bg-sunken);border-radius:9px;padding:10px 13px;line-height:1.6}
+.ig-empty code{font-size:10.5px}
 .ig-grad .gbar{height:26px;border-radius:7px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
 .ig-grad .gmeta{display:flex;align-items:center;gap:8px;margin-top:9px;font-size:11px;color:var(--fg-sub);line-height:1.55}
 .ig-grad .gmeta b{color:var(--fg)}
@@ -131,7 +159,10 @@ svg.i{display:block;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linec
 .ig-warn b{color:#4a3810}
 .ig-grad .gnote{font-size:10.5px;color:var(--fg-mut);margin-top:6px;line-height:1.55}
 .ig-fonts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
-.ig-fonts span{font-size:11.5px;font-weight:600;color:var(--fg-sub);border:1px solid var(--line-2);border-radius:99px;padding:5px 12px}
+.ig-fonts span,.ig-fonts button{font-size:11.5px;font-weight:600;color:var(--fg-sub);border:1.5px solid var(--line-2);border-radius:99px;padding:5px 12px;background:var(--bg)}
+.ig-fonts button{cursor:pointer;transition:.13s}
+.ig-fonts button:hover{background:var(--bg-sunken)}
+.ig-fonts button.on{border-color:var(--accent);background:var(--accent-subtle);color:var(--accent);font-weight:800}
 .app{display:flex;height:calc(100vh - 54px);overflow:hidden}
 /* 좌측 탐색: 현재 영역의 그룹만 · 하위 항목 없는 영역(예시 화면·비교)에선 패널 숨김 */
 .nav-group{display:none}
@@ -657,7 +688,7 @@ html[data-view="compare"] .board3{display:block}
     <button data-area="tokens">파운데이션</button>
   </nav>
   <button class="gconnect" id="igOpen"><svg class="i"><use href="#icon-action-external"/></svg>브랜드 연결</button>
-  <span class="gver">토큰 기반 · v0.47</span>
+  <span class="gver">토큰 기반 · v0.48</span>
 </header>
 <div class="app">
 
@@ -879,14 +910,14 @@ html[data-view="compare"] .board3{display:block}
       검출 서체 후보를 나열하고 첫 후보를 브랜드 서체로 제안. 웹폰트(구글 폰트 등)는 즉시 로딩, OTF·TTF·WOFF 업로드 시 내장 등록.
       <h4><em>4</em>램프 생성 · 접근성</h4>
       Primary 시드에서 05~70 라이트→다크 램프를 자동 생성. 흰 텍스트 대비가 AA(4.5:1) 미달이면 적용 후 별도 경고 — 판별에서 결격시키지는 않음.
-      <h4><em>5</em>그라디언트 브랜드 — 기본값은 '없음'</h4>
-      <b>페이지에 그라디언트가 있다는 사실은 브랜드 그라디언트가 있다는 증거가 아닙니다.</b> 프로모션 배너·이벤트 띠·스켈레톤 로딩은 어느 사이트에나 있습니다. 그래서 기본값은 <b>승격하지 않음</b>이고, 아래 증거를 통과할 때만 <b>--brand-gradient</b>가 됩니다.<br>
+      <h4><em>5</em>그라디언트 브랜드 — 전부 나열하고, 고르는 건 사람</h4>
+      <b>자동 판정은 정렬과 뱃지까지만 합니다.</b> 찾은 그라디언트는 <b>채택된 것도 기각된 것도 하나도 빠짐없이 목록에 나열</b>되고, 각 줄에 미리보기·정지점·출처·사용 횟수·맥락과 <b>브랜드 근거 있음 / 근거 부족</b> 뱃지, 그리고 기각이면 그 이유가 붙습니다. 어느 줄이든 <b>적용</b>을 누르면 그 자리에서 <code>--brand-gradient</code>가 되고, 맨 위 <b>그라디언트 없음</b> 줄로 언제든 되돌립니다. 아무것도 못 찾으면 <b>무엇을 인식 대상으로 보는지</b>를 그 자리에 적습니다.<br>
       <b>필요조건</b> — 정지점이 <b>2개 이상 유채색</b> <span class="gq">(흰↔검 페이드·투명 오버레이 제외)</span>.<br>
-      <b>① 맥락</b> — <code>--brand-*</code>·<code>--primary-*</code> 변수이거나 <code>.logo</code>·<code>.btn</code>·<code>.cta</code>·헤더 같은 브랜드 표면에 선언됐는가. <code>.promo</code>·<code>.event</code>·<code>.banner</code>·<code>.skeleton</code> 류는 <b>반대 증거</b>로 보고 즉시 기각합니다.<br>
-      <b>② 색 계열</b> — 선언값이나 로고 마크로 Primary가 이미 확정됐다면, 정지점 중 하나는 그 색과 <b>휴 40° 이내</b>여야 합니다. <span class="gq">초록 브랜드 사이트에서 핑크 그라디언트를 CTA에 얹는 사고를 막는 규칙입니다. Primary가 사용 통계·화면 캡처 추정이면 그 자체가 추정이라 잣대로 쓰지 않고, 대신 ①·③을 요구합니다.</span><br>
-      <b>③ 근거량</b> — 브랜드 표면 맥락이 있거나, <b>두 곳 이상에서 반복</b> 쓰이거나, <b>실제로 참조된</b> 로고 SVG 안에 있어야 합니다. <span class="gq">defs에 정의만 되고 아무 도형도 <code>url(#id)</code>로 쓰지 않는 그라디언트는 죽은 코드라 근거가 아닙니다.</span><br>
-      기각해도 <b>무엇을 찾았고 왜 안 썼는지</b>를 그대로 보여주고, 판단이 틀렸다면 <b>수동 적용</b> 버튼으로 사람이 뒤집습니다.<br>
-      수집 경로는 <b>CSS <code>*-gradient()</code> · SVG <code>&lt;linearGradient&gt;</code>(참조된 것만) · 텍스트 나열</b> 순. 마지막은 CSS·SVG가 없을 때만 쓰며 <span class="gq">'그라디언트' 키워드가 있으면 2색, 없으면 3색 이상 나열</span>일 때 인정합니다. <b>화면 캡처에서는 그라디언트를 추정하지 않습니다</b> <span class="gq">— 픽셀에는 색 사이가 보간인지 경계인지가 남지 않아, 컬러 아이콘 줄과 그라디언트를 구분할 방법이 없습니다.</span><br>
+      <b>① 맥락</b> — <code>--brand-*</code>·<code>--primary-*</code> 변수 선언이면 그 자체로 브랜드 근거. <code>.logo</code>·<code>.btn</code>·<code>.cta</code>·헤더 같은 브랜드 표면도 근거로 봅니다. 반대 증거는 <b>'브랜드가 아닌 게 확실한 것'만</b> — <code>.promo</code>·<code>.event</code>·<code>.coupon</code>·<code>.skeleton</code>·<code>.tooltip</code>·<code>.chart</code> 류. <span class="gq">v0.47은 여기에 광고(ad)를 넣었다가 <code>.header</code>·<code>.gradient</code>·<code>.shadow</code>가 전부 걸려 정상 그라디언트를 통째로 기각했습니다. <code>.card</code>·<code>.banner</code>·<code>.thumb</code>은 브랜드 면일 때가 더 많아 중립으로 내렸습니다.</span><br>
+      <b>② 색 계열</b> — 선언값이나 로고 마크로 Primary가 이미 확정됐다면, 정지점 중 하나는 그 색과 <b>휴 50° 이내</b>여야 합니다. <span class="gq">초록 브랜드 사이트에서 핑크 그라디언트를 CTA에 얹는 사고를 막는 규칙입니다. 멀티 휴 브랜드 그라디언트는 정지점이 넓게 벌어져 40°는 너무 좁았습니다. Primary가 사용 통계·화면 캡처 추정이면 그 자체가 추정이라 잣대로 쓰지 않고, 대신 ①·③을 요구합니다.</span><br>
+      <b>③ 근거량</b> — 브랜드 표면 맥락이 있거나, <b>Primary와 같은 계열</b>이거나, <b>두 곳 이상에서 반복</b> 쓰이거나, <b>실제로 참조된</b> 로고 SVG 안에 있어야 합니다. <span class="gq">defs에 정의만 되고 아무 도형도 <code>url(#id)</code>로 쓰지 않는 그라디언트는 죽은 코드라 근거가 아닙니다.</span><br>
+      <b>Primary를 직접 고르면 그라디언트는 자동 해제</b>됩니다 — 그라디언트가 CTA·로고 마크·히어로를 덮고 있으면 스와치를 바꿔도 화면이 안 바뀐 것처럼 보이기 때문입니다. <span class="gq">고른 색이 그 그라디언트의 시드와 같으면 유지하고, 해제됐을 땐 목록 머리말에 그 사실을 적어 다시 켤 수 있게 합니다.</span><br>
+      수집 경로는 <b>CSS <code>*-gradient()</code> · SVG <code>&lt;linearGradient&gt;</code>(참조된 것만) · 텍스트 나열</b> 순. 마지막은 <b>그라디언트 문법이 아예 없는 텍스트</b>에서만 쓰며 <span class="gq">'그라디언트' 키워드가 있으면 2색, 없으면 3색 이상 나열</span>일 때 인정합니다. <span class="gq">참조되지 않아 이미 걸러낸 SVG 정의의 stop-color를 산문 폴백이 다시 주워 담지 않도록 하는 장치입니다.</span> <b>화면 캡처에서는 그라디언트를 추정하지 않습니다</b> <span class="gq">— 픽셀에는 색 사이가 보간인지 경계인지가 남지 않아, 컬러 아이콘 줄과 그라디언트를 구분할 방법이 없습니다.</span><br>
       적용 범위는 <b>면(CTA 버튼 · 로고 마크 · 히어로 배경)에 한정</b>. 텍스트 · 보더 · 포커스는 <b>솔리드 Primary</b>를 그대로 씁니다 — 이 시드는 <b>흰 텍스트 대비 3:1을 통과한 정지점 중</b> 스코어 최고값으로 고릅니다 <span class="gq">(인스타그램이면 밝은 오렌지가 아니라 마젠타가 채택)</span>. 면은 화려하게, 위계는 안전하게. <span class="gq">방향·색상은 파싱된 값으로 재직렬화해 원문을 그대로 주입하지 않습니다.</span>
       <h4><em>6</em>소스별 신뢰도</h4>
       <b>북마클릿 실측(렌더된 화면) &gt; 서버 URL 수집 &gt; Figma API &gt; 이미지 단일 추출 &gt; 텍스트 hex &gt; 화면 캡처 추정.</b> 봇 차단·로그인·CSR 사이트는 북마클릿이 최종 기준.
@@ -914,9 +945,11 @@ html[data-view="compare"] .board3{display:block}
       <div class="ig-rl" id="igResultLab">분석 결과</div>
       <div class="ig-sws" id="igSws"></div>
       <p class="ig-warn" id="igWarn" hidden></p>
+      <div class="ig-rl ig-sec" id="igGradLab" hidden>그라디언트</div>
       <div class="ig-grad" id="igGrad" hidden></div>
+      <div class="ig-rl ig-sec" id="igShapeLab" hidden>형태 · 곡률과 간격</div>
       <div class="ig-shape" id="igShape" hidden></div>
-      <div class="ig-rl" id="igFontsLab" hidden>검출된 폰트</div>
+      <div class="ig-rl ig-sec" id="igFontsLab" hidden>검출된 폰트</div>
       <div class="ig-fonts" id="igFonts" hidden></div>
       <button class="btn btn-primary" id="igApply" style="width:100%;margin-top:14px">완료</button>
     </div>
@@ -1408,25 +1441,104 @@ function igResolve({declared=[],assetCands=[],gradCands=[],cssCands=[],assetBasi
   const seen=new Set([primary.hex]),cands=[primary];
   rest.forEach(c=>{if(!seen.has(c.hex)){seen.add(c.hex);cands.push(c);}});
   return{cands:cands.slice(0,12),basis};}
-function igApplySel(i,grad){
-  if(grad===undefined)grad=igGradSel;               // 스와치를 바꿔도 채택된 그라디언트는 유지된다
+function igApplySel(i,grad,userPick){
+  if(!igCands[i])return;
+  if(grad===undefined){
+    grad=igGradSel;
+    /* 사람이 스와치를 직접 눌러 Primary를 바꿨는데 그라디언트가 그대로면 CTA·로고·히어로 면이 덮여
+       "골랐는데 화면이 안 바뀐다"가 된다(사용자 신고). 고른 색이 그 그라디언트의 시드가 아니라면 자동 해제하고,
+       무슨 일이 있었는지 그라디언트 목록 머리말에 적어 되돌릴 수 있게 한다. */
+    if(userPick&&grad&&normHex(igCands[i].hex)!==normHex(gradSeed(grad))){
+      grad=null;igGradSel=null;igGradDropped=true;}
+    else if(userPick)igGradDropped=false;
+  }
   igSel=i;
   document.getElementById('cbHex').value=igCands[i].hex;
   applyCustomBrand(igCands[i].hex,currentFont(),grad);
-  document.querySelectorAll('.ig-sw').forEach((x,xi)=>x.classList.toggle('on',+x.dataset.i===i));
+  document.querySelectorAll('.ig-sw').forEach(x=>x.classList.toggle('on',+x.dataset.i===i));
 }
+function igEsc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);}
+const GRAD_SRC_LAB={css:'CSS',svg:'SVG 로고',text:'텍스트 나열',shot:'화면 캡처'};
+const GRAD_CTX_LAB={'1':'브랜드 표면','0':'맥락 없음','-1':'비브랜드 영역'};
+/* 그라디언트: 찾은 것을 전부 나열한다. 자동 판정은 뱃지와 이유로만 알리고, 적용/해제는 사람이 누른다. */
+function renderGrads(){
+  const lab=document.getElementById('igGradLab'),gp=document.getElementById('igGrad');
+  lab.hidden=gp.hidden=false;
+  if(!igGradMarks.length){
+    lab.innerHTML='그라디언트 · <b>발견 0개</b>';
+    gp.innerHTML=`<div class="ig-empty">이 소스에서 그라디언트를 찾지 못했습니다 — 솔리드 Primary만 적용합니다. 인식 대상은 CSS <code>linear·radial·conic-gradient</code>, 도형이 <code>url(#id)</code>로 실제 참조하는 SVG <code>&lt;linearGradient&gt;</code>, 그리고 "그라디언트 #A → #B → #C" 형태의 텍스트입니다.</div>`;
+    return;}
+  const okN=igGradMarks.filter(m=>m.ok).length;
+  lab.innerHTML=`그라디언트 · <b>발견 ${igGradMarks.length}개</b> · 브랜드 근거 있음 <b>${okN}개</b> · 적용은 한 번에 하나`
+    +(igGradDropped?` — <b>Primary를 직접 고르셔서 해제했습니다</b>`:'');
+  const rows=[`<div class="grow${igGradSel?'':' on'}" data-g="none"><div class="gbar none"></div>`+
+    `<div class="gi"><b>그라디언트 없음</b><span class="gwhy">솔리드 Primary만 사용합니다 — 기본값</span></div>`+
+    `<div class="gact"><button type="button" data-g="none">${igGradSel?'이걸로':'사용 중'}</button></div></div>`];
+  igGradMarks.forEach((m,i)=>{
+    const g=m.g,on=gradSame(igGradSel,g);
+    rows.push(`<div class="grow${on?' on':''}" data-i="${i}">`+
+      `<div class="gbar" style="background-image:${gradCss(g)}${on?'':';opacity:.6'}"></div>`+
+      `<div class="gi"><em class="gv ${m.ok?'ok':'no'}">${m.ok?'브랜드 근거 있음':'근거 부족'}</em>`+
+      `<b>${g.stops.length}색</b> · ${g.multi?`멀티 휴 Δ${g.spread}°`:'단색 계열'} · ${GRAD_SRC_LAB[g.src]||'CSS'} · ${g.count}곳 · ${GRAD_CTX_LAB[String(g.ctx)]}`+
+      `<span class="gsel">${g.stops.map(x=>`<i style="background:${x}" title="${igEsc(x.toUpperCase())}"></i>`).join('')}</span>`+
+      `<span class="gwhy">${m.ok?`솔리드 시드 ${gradSeed(g).toUpperCase()} · 면(CTA · 로고 마크 · 히어로)에만 적용`:igEsc(m.why)}</span></div>`+
+      `<div class="gact"><button type="button" data-i="${i}">${on?'해제':'적용'}</button></div></div>`);});
+  gp.innerHTML=rows.join('');
+}
+document.getElementById('igGrad')?.addEventListener('click',e=>{
+  const row=e.target.closest('.grow');if(!row)return;
+  if(row.dataset.g==='none'){if(!igGradSel)return;igGradSel=null;igGradDropped=false;}
+  else{
+    const m=igGradMarks[+row.dataset.i];if(!m)return;
+    igGradSel=gradSame(igGradSel,m.g)?null:m.g;igGradDropped=false;}
+  igApplySel(igSel||0,igGradSel);
+  renderGrads();});
+/* 폰트: 검출만 하고 끝내면 '분석했다'로 끝난다 — 눌러서 바로 적용되게 한다 */
+function renderFonts(fonts){
+  const fl=document.getElementById('igFontsLab'),ff=document.getElementById('igFonts');
+  const list=(fonts||[]).filter(Boolean).slice(0,8);
+  if(!list.length){fl.hidden=ff.hidden=true;return;}
+  fl.hidden=ff.hidden=false;
+  fl.innerHTML=`검출된 폰트 · <b>${list.length}개</b> — 눌러서 적용`;
+  const cur=currentFont();
+  ff.innerHTML=list.map(f=>`<button type="button" data-f="${igEsc(f)}" class="${f===cur?'on':''}">${igEsc(f)}</button>`).join('');
+}
+document.getElementById('igFonts')?.addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  const name=b.dataset.f,sel=document.getElementById('cbFontSel');
+  if(![...sel.options].some(o=>o.value===name)){
+    const o=document.createElement('option');o.value=name;o.textContent=name+' · 검출됨';sel.insertBefore(o,sel.firstChild);}
+  sel.value=name;sel.dataset.prev=name;
+  if(igCands[igSel])applyCustomBrand(igCands[igSel].hex,name);
+  document.querySelectorAll('#igFonts button').forEach(x=>x.classList.toggle('on',x===b));});
+/* 형태: 분석값을 자동 적용하되, 그 자리에서 다른 값으로 바꿀 수 있게 세그먼트로 노출한다 */
+const IG_RAD_LAB={sharp:'각지게',default:'기본',rounded:'둥글게'},IG_DENS_LAB={compact:'좁게',default:'기본',comfortable:'넓게'};
+function renderShape(){
+  const sh=document.getElementById('igShape'),lb=document.getElementById('igShapeLab');
+  sh.hidden=lb.hidden=false;
+  const d=igShapeDet||{};
+  /* 현재값은 프리셋 노브(#presetCtl)가 진실이다 — 그쪽 세그먼트의 on 버튼을 그대로 읽는다 */
+  const cur=a=>document.querySelector(`#presetCtl .seg[data-attr="${a}"] button.on`)?.dataset.val;
+  const seg=(name,attr,labs,det,extra)=>`<div class="ig-knob"><span>${name}</span><span class="seg2">`+
+    Object.keys(labs).map(k=>`<button type="button" data-attr="${attr}" data-val="${k}" class="${cur(attr)===k?'on':''}">${labs[k]}</button>`).join('')+
+    `</span><em>${det?`분석값 ${labs[det]}${extra||''}`:'분석값 없음'}</em></div>`;
+  sh.innerHTML=seg('곡률','data-radius',IG_RAD_LAB,d.radius,d.radiusTop!=null?` · 최빈 ${d.radiusTop}px(${d.radiusPct}%)`:'')
+    +seg('간격','data-density',IG_DENS_LAB,d.density,d.padTop!=null?` · 최빈 ${d.padTop}px(${d.padPct}%)`:'');
+}
+document.getElementById('igShape')?.addEventListener('click',e=>{
+  const b=e.target.closest('button[data-attr]');if(!b)return;
+  igSetKnob(b.dataset.attr,b.dataset.val);renderShape();});
 function igSetKnob(attr,val){const b=document.querySelector(`#presetCtl .seg[data-attr="${attr}"] button[data-val="${val}"]`);if(b)b.click();}
 function igShow(colors,fonts,shape,basis,grad){
   const shotConf=igShotConf;igShotConf=null;      // 화면 캡처 경로에서만 세팅되는 1회성 상태
-  const rej=igGradRej;igGradRej=null;             // 게이트에서 기각된 그라디언트 내역(있으면 이유를 노출한다)
-  igGradSel=grad||null;
+  igGradSel=grad||null;igGradDropped=false;
   igCands=colors.slice(0,12);                            // igResolve가 이미 계층 순서로 정렬
   igStatus.hidden=igCands.length>0;
   if(!igCands.length){igMsg('컬러를 찾지 못했습니다. 다른 소스를 시도해 보세요.',true);igResult.hidden=true;return;}
   igResult.hidden=false;
   /* 신뢰도 '낮음'은 자동 적용하지 않는다 — 틀린 값을 화면에 얹어놓고 되돌리게 하는 쪽이 더 큰 비용이다. */
   const autoApply=shotConf!=='low';
-  document.getElementById('igResultLab').innerHTML=`분석 결과 · <b>${autoApply?'Primary 자동 적용':'자동 적용 보류 — 스와치를 눌러 적용'}</b>${basis?` — 판별 근거: ${basis}`:''}`;
+  document.getElementById('igResultLab').innerHTML=`Primary 후보 · <b>${igCands.length}개</b> — ${autoApply?'1순위 자동 적용':'자동 적용 보류'} · <b>눌러서 바꾸기</b>${basis?` · 판별 근거: ${basis}`:''}`;
   document.getElementById('igSws').innerHTML=igCands.map((c,i)=>{const cr=contrastWhite(c.hex);
     const lab=IG_SRC_LAB[c.src];
     const badge=i===0?`<em class="pri">${autoApply?'PRIMARY':'1순위'}</em>`:(c.src&&c.src!=='css'?`<em class="pri ast">${lab}</em>`:'');
@@ -1441,46 +1553,18 @@ function igShow(colors,fonts,shape,basis,grad){
       ?'<b>화면 캡처 기준 추정 · 신뢰도 보통.</b> 브랜드 색으로 볼 만한 후보가 여럿입니다. 아래 스와치에서 직접 골라 확인해 주세요. 확실한 값이 필요하면 <b>🔖 Freesm 스캔</b> 북마클릿이나 로고 SVG 업로드를 권합니다.'
       :'<b>화면 캡처 기준 추정 · 신뢰도 낮음.</b> 브랜드 색이 화면에서 차지하는 면적이 작거나 콘텐츠 사진이 화면을 지배해 자동 판별이 어렵습니다. 아래 후보는 참고용이며, <b>🔖 Freesm 스캔</b> 북마클릿(정확한 실측값) 또는 로고 SVG 업로드를 권합니다.');
   }else wn.hidden=true;
-  const fl=document.getElementById('igFontsLab'),ff=document.getElementById('igFonts');
-  if(fonts&&fonts.length){fl.hidden=ff.hidden=false;ff.innerHTML=fonts.slice(0,6).map(f=>`<span>${f}</span>`).join('');}
-  else{fl.hidden=ff.hidden=true;}
   if(autoApply)igApplySel(0,igGradSel);                 // Primary 즉시 적용(+그라디언트 토큰)
-  /* 그라디언트 분석 결과 */
-  const gp=document.getElementById('igGrad');
-  if(igGradSel){const g=igGradSel;
-    gp.hidden=false;
-    gp.innerHTML=`<div class="gbar" style="background-image:${gradCss(g)}"></div>`+
-      `<div class="gmeta"><span>그라디언트 <b>${g.stops.length}색</b> · ${g.multi?`멀티 휴 <b>Δ${g.spread}°</b>`:'단색 계열'} · 출처 <b>${({css:'CSS',svg:'SVG 로고',text:'텍스트 나열',shot:'화면 캡처(추정)'})[g.src]||'CSS'}</b> · <b>--brand-gradient</b> 토큰으로 승격</span>`+
-      `<span class="gstops">${g.stops.map(x=>`<i style="background:${x}" title="${x.toUpperCase()}"></i>`).join('')}</span></div>`+
-      `<p class="gnote">면(CTA 버튼 · 로고 마크 · 히어로 배경)에만 적용합니다. 텍스트 · 보더 · 포커스는 대비 하한을 통과한 정지점에서 도출한 솔리드 Primary <b>${gradSeed(g).toUpperCase()}</b>를 유지해 대비와 상태 위계가 깨지지 않습니다.</p>`;
-  }else if(rej&&rej.list.length){
-    /* 기각도 결과다. 조용히 버리면 '왜 안 들어왔지'가 되고, 조용히 적용하면 네이버에 핑크가 들어온다.
-       무엇을 찾았고 왜 안 썼는지 보여주고, 판단이 틀렸다면 사람이 한 번의 클릭으로 뒤집게 한다. */
-    const g=rej.list[0];igGradCand=g;
-    gp.hidden=false;
-    gp.innerHTML=`<div class="gbar" style="background-image:${gradCss(g)};opacity:.5"></div>`+
-      `<div class="gmeta"><span>그라디언트 <b>${rej.list.length}개</b>를 찾았지만 브랜드 자산으로 <b>채택하지 않았습니다</b> — ${rej.why}</span></div>`+
-      `<p class="gnote">브랜드 그라디언트의 기본값은 <b>없음</b>입니다. 승격하려면 브랜드 표면(로고 · CTA · <code>--brand-*</code> 변수)에 선언됐거나, 여러 곳에서 반복 쓰이거나, Primary와 같은 색 계열이어야 합니다. 판단이 틀렸다면 아래에서 직접 적용하세요.</p>`+
-      `<button class="btn btn-ghost btn-sm" id="igGradForce" style="margin-top:8px">이 그라디언트를 그래도 적용</button>`;
-  }else{gp.hidden=true;gp.innerHTML='';igGradCand=null;}
-  /* 형태 분석 → 프리셋 노브 자동 적용 */
-  const sh=document.getElementById('igShape'),msg=[];
-  if(shape&&shape.radius){igSetKnob('data-radius',shape.radius);msg.push(`곡률 <b>${shape.radius}</b>${shape.radiusTop!=null?` (최빈 ${shape.radiusTop}px · 점유 ${shape.radiusPct}%)`:''}`);}
-  if(shape&&shape.density){igSetKnob('data-density',shape.density);msg.push(`간격 <b>${shape.density}</b>${shape.padTop!=null?` (최빈 ${shape.padTop}px · 점유 ${shape.padPct}%)`:''}`);}
-  if(msg.length){sh.hidden=false;sh.innerHTML='형태 분석 · '+msg.join(' · ')+' — 프리셋 노브에 적용됨';}
-  else sh.hidden=true;
+  /* 형태 분석 → 프리셋 노브 자동 적용 후, 바꿀 수 있는 세그먼트로 노출 */
+  igShapeDet=shape||null;
+  if(shape&&shape.radius)igSetKnob('data-radius',shape.radius);
+  if(shape&&shape.density)igSetKnob('data-density',shape.density);
+  renderGrads();
+  renderShape();
+  renderFonts(fonts);
 }
-document.getElementById('igSws')?.addEventListener('click',e=>{const b=e.target.closest('.ig-sw');if(!b)return;igApplySel(+b.dataset.i);});
-/* 기각된 그라디언트의 수동 승격 — 자동 판정을 사람이 뒤집는 통로 */
-document.getElementById('igGrad')?.addEventListener('click',e=>{
-  if(!e.target.closest('#igGradForce')||!igGradCand)return;
-  igGradSel=igGradCand;igGradCand=null;
-  igApplySel(igSel||0,igGradSel);
-  const g=igGradSel,gp=document.getElementById('igGrad');
-  gp.innerHTML=`<div class="gbar" style="background-image:${gradCss(g)}"></div>`+
-    `<div class="gmeta"><span>그라디언트 <b>${g.stops.length}색</b> · 수동 적용 — <b>--brand-gradient</b> 토큰으로 승격</span>`+
-    `<span class="gstops">${g.stops.map(x=>`<i style="background:${x}" title="${x.toUpperCase()}"></i>`).join('')}</span></div>`+
-    `<p class="gnote">자동 판별은 이 그라디언트를 브랜드 자산으로 보지 않았습니다. 사용자의 판단으로 적용했습니다.</p>`;});
+document.getElementById('igSws')?.addEventListener('click',e=>{
+  const b=e.target.closest('.ig-sw');if(!b)return;
+  igApplySel(+b.dataset.i,undefined,true);renderGrads();});
 document.getElementById('igApply').addEventListener('click',()=>{igOv.hidden=true;});
 /* ===== 그라디언트 브랜드(인스타그램류) 지원 =====
    그라디언트는 면(CTA·로고 마크·히어로)에만 쓰는 별도 토큰 --brand-gradient 으로 승격하고,
@@ -1500,11 +1584,20 @@ function gradBodies(text){                          // 괄호 균형 스캔 — 
   return out;}
 /* 브랜드를 가리키는 선언 맥락인가 — 변수명(--brand-*·--primary-*)이거나 브랜드 표면 선택자(.logo·.btn·.cta·헤더)인가.
    프로모션 배너(.promo·.event·.banner)·광고는 명시적으로 반대 증거로 본다. */
-const GRAD_CTX_POS=/--[\w-]*(brand|primary|accent|point|key|gradient|theme)[\w-]*\s*:|[.#][\w-]*(brand|logo|symbol|btn|button|cta|primary|hero|gnb|header|nav)[\w-]*|\[class[*^~|$]?=["']?[^"']*(brand|logo|primary)/i;
-const GRAD_CTX_NEG=/[.#][\w-]*(promo|promotion|event|banner|ad|ads|advert|sale|badge|ribbon|sticker|thumb|card|skeleton|shimmer|placeholder|toast|tooltip|chart|graph)[\w-]*/i;
+const GRAD_CTX_VAR=/--[\w-]*(brand|primary|accent|point|key|gradient|theme)[\w-]*\s*:/i;
+const GRAD_CTX_POS=/[.#][\w-]*(brand|logo|symbol|mark|emblem|btn|button|cta|primary|hero|visual|gnb|header|nav|masthead|topbar)[\w-]*|\[class[*^~|$]?=["']?[^"']*(brand|logo|primary)/i;
+/* 반대 증거는 '이건 확실히 브랜드가 아니다'인 것만 남긴다.
+   v0.47의 NEG에는 ad·card·thumb·banner·badge가 들어 있었는데, ad 하나가 header·gradient·shadow·download를
+   전부 -1로 만들어 정상 브랜드 그라디언트를 통째로 기각시켰다(사용자 신고 "그라디언트를 못 읽는다"의 주범).
+   card·thumb·banner·badge는 브랜드 표면일 때가 더 많아 중립(0)으로 내렸다. */
+const GRAD_CTX_NEG=/[.#][\w-]*(promo|promotion|event|advert|adsense|sale|coupon|skeleton|shimmer|placeholder|toast|tooltip|chart|graph|ribbon|sticker)[\w-]*/i;
 function gradCtx(pre){
   if(!pre)return 0;
-  const tail=pre.slice(-200);
+  /* 직전 규칙의 꼬리를 내 맥락으로 착각하지 않도록 마지막 '}' · '>' 뒤만 본다 */
+  let tail=pre.slice(-260);
+  const cut=Math.max(tail.lastIndexOf('}'),tail.lastIndexOf('>'));
+  if(cut>=0)tail=tail.slice(cut+1);
+  if(GRAD_CTX_VAR.test(tail))return 1;               // --brand-gradient: 선언은 그 자체가 브랜드 근거
   if(GRAD_CTX_NEG.test(tail))return -1;
   return GRAD_CTX_POS.test(tail)?1:0;}
 function splitTop(s){                               // 최상위 콤마만 분리(rgb(...) 내부 보호)
@@ -1590,10 +1683,12 @@ function parseGradients(text){
       const c=parseColorTok(p);if(c&&stops.indexOf(c)<0)stops.push(c);});
     gradAdd(map,g.type,dir,stops,'css',gradCtx(g.pre));});
   svgGradients(text,map);
-  if(!map.size)textGradients(text,map);
+  /* 산문 폴백은 '그라디언트 문법이 아예 없는 텍스트'에서만 쓴다.
+     참조되지 않아 이미 걸러낸 SVG <linearGradient>의 stop-color를 이 폴백이 주워 담으면 걸러낸 의미가 없다. */
+  if(!map.size&&!/<(linear|radial)Gradient\b/i.test(text)&&!/-gradient\s*\(/i.test(text))textGradients(text,map);
   const list=[...map.values()];
   /* 빈도 × 유채 정지점 수 × 멀티 휴 가중 — 다색 브랜드 그라디언트가 단색 셰이드 페이드보다 우선.
-     맥락 가중은 여기서 순서만 손보고, 채택 여부는 gradAccept가 따로 판정한다. */
+     맥락 가중은 여기서 순서만 손보고, 채택 판정은 gradVerdicts가 항목별로 따로 붙인다. */
   list.forEach(g=>{g.score=Math.sqrt(g.count)*g.chrom.length*(g.multi?1.6:1)*(g.ctx>0?1.8:(g.ctx<0?.4:1));});
   return list.sort((a,b)=>b.score-a.score);}
 /* ===== 그라디언트 채택 게이트 =====
@@ -1602,37 +1697,44 @@ function parseGradients(text){
    기본값은 '그라디언트 없음'이고, 아래 증거를 통과할 때만 --brand-gradient로 승격한다. */
 function hueDist(a,b){let d=Math.abs(a-b);return d>180?360-d:d;}
 const GRAD_STRONG_SRC={declared:1,asset:1,img:1};    // 선언값·로고 마크만 '휴 대조의 기준'이 될 만큼 단단하다
-function gradAccept(list,primary){
-  if(!list||!list.length)return{grad:null,rejected:0,why:''};
+const GRAD_HUE_TOL=50;                               // 멀티 휴 브랜드 그라디언트는 정지점이 넓게 벌어진다(40°는 너무 좁았다)
+/* 채택 여부를 하나만 고르고 나머지를 버리지 않는다 — 찾은 전부에 판정을 붙여 돌려준다.
+   화면은 이 배열을 그대로 나열하고, 최종 선택은 사람이 한다. */
+function gradVerdicts(list,primary){
+  const out=[];
+  if(!list||!list.length)return out;
   const hex=primary&&primary.hex||null;
-  /* 기준 Primary가 CSS 사용 통계·스크린샷 추정이면 그 자체가 추정이라 휴 대조의 잣대가 될 수 없다.
-     이때는 색 계열 대신 맥락·반복이라는 다른 증거를 요구한다. */
+  /* 기준 Primary가 CSS 사용 통계·스크린샷 추정이면 그 자체가 추정이라 휴 대조의 잣대가 될 수 없다. */
   const pr=hex&&GRAD_STRONG_SRC[primary.src]?rgbToHsl(...hexToRgb(hex)):null;
   const usePr=pr&&pr[1]>=18;                        // 무채색 브랜드(검정·회색)는 휴 비교가 의미 없다
-  let why='';
   for(const g of list){
-    if(g.ctx<0){why=why||'프로모션·배너 영역에 선언된 그라디언트라 브랜드 자산으로 보지 않았습니다.';continue;}
-    /* ① 브랜드 정합성 — 단단한 Primary가 있다면 정지점 하나는 그 색과 같은 계열이어야 한다. */
-    if(usePr){
-      const near=g.chrom.some(c=>{const h=rgbToHsl(...hexToRgb(c));return h[1]>=18&&hueDist(h[0],pr[0])<=40;});
-      if(!near){why=why||`Primary(${hex.toUpperCase()})와 색 계열이 달라 브랜드 그라디언트로 보지 않았습니다.`;continue;}}
-    /* ② 근거량 — 브랜드 표면 맥락이 있거나, 여러 곳에서 반복 사용되거나, 참조된 로고 SVG 안에 있어야 한다. */
-    if(g.ctx<=0&&g.count<2&&g.src!=='svg'){
-      why=why||'한 곳에서만 쓰인 장식 그라디언트로 보여 채택하지 않았습니다.';continue;}
-    return{grad:g,rejected:list.length-1,why:''};
-  }
-  return{grad:null,rejected:list.length,why:why||'브랜드 그라디언트로 볼 근거가 부족했습니다.'};}
-/* 2패스 판정: ① 그라디언트를 빼고 Primary를 확정한다 ② 그 Primary를 잣대로 게이트를 통과한 것만 승격한다.
+    let ok=true,why='',hueOk=false;
+    if(g.ctx<0){ok=false;why='프로모션·이벤트 등 비브랜드 영역에 선언됨';}
+    else{
+      /* ① 브랜드 정합성 — 단단한 Primary가 있다면 정지점 하나는 그 색과 같은 계열이어야 한다. */
+      if(usePr){
+        hueOk=g.chrom.some(c=>{const h=rgbToHsl(...hexToRgb(c));return h[1]>=18&&hueDist(h[0],pr[0])<=GRAD_HUE_TOL;});
+        if(!hueOk){ok=false;why=`Primary ${hex.toUpperCase()}와 색 계열이 다름`;}}
+      /* ② 근거량 — 브랜드 표면 맥락 · 반복 사용 · 참조된 로고 SVG · Primary 색 계열 일치 중 하나는 있어야 한다.
+         v0.47은 ①을 통과해도 ②를 따로 요구해서, 브랜드 색과 같은 계열의 1회성 히어로 그라디언트를 기각했다. */
+      if(ok&&g.ctx<=0&&g.count<2&&g.src!=='svg'&&!hueOk){
+        ok=false;why='브랜드 표면 맥락 없이 한 곳에서만 사용됨';}}
+    out.push({g,ok,why});}
+  return out;}
+/* 2패스 판정: ① 그라디언트를 빼고 Primary를 확정한다 ② 그 Primary를 잣대로 판정한 것 중 첫 통과분만 자동 승격한다.
    Primary를 그라디언트에서 뽑아놓고 그 그라디언트를 검증하면 순환이라 아무것도 걸러지지 않는다. */
 function igResolveGrad(base,list){
   const r0=igResolve(base);
-  const a=gradAccept(list,r0.cands[0]||null);
-  igGradRej=a.grad?null:{why:a.why,list:list||[]};
-  if(!a.grad)return{...r0,grad:null};
-  return{...igResolve({...base,gradCands:gradDec(a.grad)}),grad:a.grad};}
+  const marks=gradVerdicts(list,r0.cands[0]||null);
+  igGradMarks=marks;
+  const hit=marks.find(m=>m.ok);
+  if(!hit)return{...r0,grad:null};
+  return{...igResolve({...base,gradCands:gradDec(hit.g)}),grad:hit.g};}
 function gradCss(g){                                // 파싱된 hex + 화이트리스트 방향으로 재직렬화(주입 차단)
   const head=g.type==='linear'?(g.dir||'135deg')+', ':(g.type==='radial'?'circle, ':'');
   return g.type+'-gradient('+head+g.stops.join(', ')+')';}
+function gradKey(g){return g?g.type+'|'+g.dir+'|'+g.stops.join(','):'';}
+function gradSame(a,b){return!!a&&!!b&&gradKey(a)===gradKey(b);}
 function gradSeed(g){                               // 그라디언트 → 솔리드 Primary
   /* 이 시드는 텍스트·보더·포커스가 얹히는 색이므로 대비 하한(3:1)을 통과한 정지점을 먼저 본다.
      통과분이 없을 때만 전체 정지점에서 스코어 최고값을 쓴다(파스텔 전용 그라디언트 폴백). */
@@ -1640,7 +1742,7 @@ function gradSeed(g){                               // 그라디언트 → 솔�
   return(ok.length?ok:g.chrom).slice().sort((a,b)=>igScore({hex:b,count:1})-igScore({hex:a,count:1}))[0]||g.stops[0];}
 function gradDec(g){                                // Primary 계층에 넣을 후보(선언 다음 순위)
   return g?[{hex:gradSeed(g),count:1,source:g.stops.length+'색 그라디언트',src:'grad'}]:[];}
-let igGradSel=null,igShotConf=null,igGradRej=null,igGradCand=null;   // 채택 / 스크린샷 신뢰도 / 기각 내역 / 수동 승격 대기
+let igGradSel=null,igShotConf=null,igGradMarks=[],igGradDropped=false,igShapeDet=null;  // 적용 중 / 캡처 신뢰도 / 전체 판정 / 자동 해제 여부 / 형태 분석값
 const SHOT_CONF={high:'높음',mid:'보통',low:'낮음'};
 document.getElementById('gradTg').addEventListener('click',()=>{
   const b=document.getElementById('gradTg'),on=!b.classList.contains('on');
@@ -1727,10 +1829,10 @@ async function igHandleFile(f){
     if(sd&&sd.cands.length){
       const rr=igResolve({assetCands:sd.cands.map(c=>({...c,src:'shot'})),
         assetBasis:`화면 캡처 추정 — ${sd.region} 분석 · 신뢰도 ${SHOT_CONF[sd.conf]}`});
-      igShotConf=sd.conf;igGradRej=null;igShow(rr.cands,null,null,rr.basis,null);
+      igShotConf=sd.conf;igGradMarks=[];igShow(rr.cands,null,null,rr.basis,null);
     }else{
       const rr=igResolve({assetCands:imgDominant(img).map(c=>({...c,src:'img'})),assetBasis:'업로드 이미지 주요색 (채도 가중)'});
-      igShotConf=null;igGradRej=null;igShow(rr.cands,null,null,rr.basis);
+      igShotConf=null;igGradMarks=[];igShow(rr.cands,null,null,rr.basis);
     }
     URL.revokeObjectURL(img.src);};
   img.onerror=()=>igMsg('이미지를 읽지 못했습니다.',true);
