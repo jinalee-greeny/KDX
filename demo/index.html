@@ -655,7 +655,7 @@ html[data-view="compare"] .board3{display:block}
     <button data-area="tokens">파운데이션</button>
   </nav>
   <button class="gconnect" id="igOpen"><svg class="i"><use href="#icon-action-external"/></svg>브랜드 연결</button>
-  <span class="gver">토큰 기반 · v0.43</span>
+  <span class="gver">토큰 기반 · v0.44</span>
 </header>
 <div class="app">
 
@@ -878,6 +878,7 @@ html[data-view="compare"] .board3{display:block}
       Primary 시드에서 05~70 라이트→다크 램프를 자동 생성. 흰 텍스트 대비가 AA(4.5:1) 미달이면 적용 후 별도 경고 — 판별에서 결격시키지는 않음.
       <h4><em>5</em>그라디언트 브랜드</h4>
       인스타그램처럼 브랜드 색 자체가 그라디언트인 경우, 정지점이 <b>2개 이상 유채색</b>이면 브랜드 그라디언트로 인정하고 <b>--brand-gradient</b> 토큰으로 승격합니다 <span class="gq">(흰↔검 페이드·투명 오버레이는 제외)</span>. 빈도 × 유채 정지점 수 × 멀티 휴 가중으로 대표 그라디언트를 고릅니다.<br>
+      수집 경로는 <b>CSS <code>*-gradient()</code> · SVG <code>&lt;linearGradient&gt;</code>(로고 마크 안의 그라디언트) · 텍스트 나열</b> 순. 마지막은 CSS·SVG가 없을 때만 쓰며 <span class="gq">'그라디언트' 키워드가 있으면 2색, 없으면 3색 이상 나열</span>일 때 인정합니다.<br>
       적용 범위는 <b>면(CTA 버튼 · 로고 마크 · 히어로 배경)에 한정</b>. 텍스트 · 보더 · 포커스는 <b>솔리드 Primary</b>를 그대로 씁니다 — 이 시드는 <b>흰 텍스트 대비 3:1을 통과한 정지점 중</b> 스코어 최고값으로 고릅니다 <span class="gq">(인스타그램이면 밝은 오렌지가 아니라 마젠타가 채택)</span>. 면은 화려하게, 위계는 안전하게. <span class="gq">방향·색상은 파싱된 값으로 재직렬화해 원문을 그대로 주입하지 않습니다.</span>
       <h4><em>6</em>소스별 신뢰도</h4>
       <b>북마클릿 실측(렌더된 화면) &gt; 서버 URL 수집 &gt; Figma API &gt; 이미지 단일 추출 &gt; 텍스트 hex.</b> 봇 차단·로그인·CSR 사이트는 북마클릿이 최종 기준.
@@ -893,9 +894,9 @@ html[data-view="compare"] .board3{display:block}
       <p class="ig-hint"><b>/api/ingest</b>가 Figma API로 파일의 채움색을 수집합니다. Vercel 환경변수 <b>FIGMA_TOKEN</b> 설정 필요.</p>
     </div>
     <div class="ig-pane" data-p="file" hidden>
-      <div class="ig-drop" id="igDrop">이미지(로고·시안)나 폰트 파일을 드롭 또는 클릭<br><span>이미지 → 주요 컬러 추출 · 폰트(OTF·TTF·WOFF) → 브랜드 서체 등록</span></div>
-      <input type="file" id="igFile" accept="image/*,.otf,.ttf,.woff,.woff2" hidden>
-      <textarea id="igText" placeholder="브랜드 가이드 텍스트·CSS 붙여넣기(hex 추출) · Freesm 스캔 북마클릿 결과(JSON)는 자동 인식" spellcheck="false"></textarea>
+      <div class="ig-drop" id="igDrop">로고·시안 이미지(SVG 포함)나 폰트 파일을 드롭 또는 클릭<br><span>SVG → 그라디언트·채움색 원문 분석 · 비트맵 → 주요 컬러 추출 · 폰트(OTF·TTF·WOFF) → 서체 등록</span></div>
+      <input type="file" id="igFile" accept="image/*,.svg,.otf,.ttf,.woff,.woff2" hidden>
+      <textarea id="igText" placeholder="브랜드 가이드 텍스트·CSS·SVG 붙여넣기 (hex·그라디언트 추출) · Freesm 스캔 북마클릿 결과(JSON)는 자동 인식" spellcheck="false"></textarea>
       <button class="ig-run" id="igTextRun" style="width:100%">텍스트에서 추출</button>
     </div>
     <div class="ig-status" id="igStatus" hidden></div>
@@ -917,7 +918,13 @@ const RAD={sharp:{m:4,l:6},default:{m:12,l:16},rounded:{m:20,l:24}}, DENS={compa
       BORD={hairline:1,default:1,strong:1.5}, SIZE={s:{ctrl:38,icon:20},m:{ctrl:46,icon:22},l:{ctrl:54,icon:26}};
 const KNOBS=[['data-layout','grid'],['data-radius','default'],['data-density','default'],['data-border','default'],['data-size','m']];
 
-function setBrand(b){html.setAttribute('data-brand',b);document.querySelectorAll('#brands .brandbtn').forEach(x=>x.classList.toggle('on',x.dataset.b===b));}
+function setBrand(b){html.setAttribute('data-brand',b);
+  /* 그라디언트는 커스텀 브랜드가 실제로 수집한 값에만 존재한다. 다른 브랜드로 넘어가면 면 적용을 끈다
+     (안 끄면 그 브랜드의 램프에서 자동 생성된 기본 그라디언트가 CTA·로고에 새어 나온다). */
+  const gtg=document.getElementById('gradTg');
+  if(b==='custom'&&customBrand&&customBrand.gradient&&gtg&&gtg.classList.contains('on'))html.setAttribute('data-gradient','on');
+  else html.removeAttribute('data-gradient');
+  document.querySelectorAll('#brands .brandbtn').forEach(x=>x.classList.toggle('on',x.dataset.b===b));}
 document.getElementById('brands').addEventListener('click',e=>{const b=e.target.closest('.brandbtn');if(b)setBrand(b.dataset.b);});
 document.getElementById('devSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;html.setAttribute('data-device',b.dataset.d);b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));});
 
@@ -1413,7 +1420,7 @@ function igShow(colors,fonts,shape,basis,grad){
   if(igGradSel){const g=igGradSel;
     gp.hidden=false;
     gp.innerHTML=`<div class="gbar" style="background-image:${gradCss(g)}"></div>`+
-      `<div class="gmeta"><span>그라디언트 <b>${g.stops.length}색</b> · ${g.multi?`멀티 휴 <b>Δ${g.spread}°</b>`:'단색 계열'} · <b>--brand-gradient</b> 토큰으로 승격</span>`+
+      `<div class="gmeta"><span>그라디언트 <b>${g.stops.length}색</b> · ${g.multi?`멀티 휴 <b>Δ${g.spread}°</b>`:'단색 계열'} · 출처 <b>${({css:'CSS',svg:'SVG 로고',text:'텍스트 나열'})[g.src]||'CSS'}</b> · <b>--brand-gradient</b> 토큰으로 승격</span>`+
       `<span class="gstops">${g.stops.map(x=>`<i style="background:${x}" title="${x.toUpperCase()}"></i>`).join('')}</span></div>`+
       `<p class="gnote">면(CTA 버튼 · 로고 마크 · 히어로 배경)에만 적용합니다. 텍스트 · 보더 · 포커스는 대비 하한을 통과한 정지점에서 도출한 솔리드 Primary <b>${gradSeed(g).toUpperCase()}</b>를 유지해 대비와 상태 위계가 깨지지 않습니다.</p>`;
   }else gp.hidden=true;
@@ -1446,14 +1453,17 @@ function splitTop(s){                               // 최상위 콤마만 분�
   for(const ch of s){if(ch==='(')d++;else if(ch===')')d--;
     if(ch===','&&d===0){out.push(cur.trim());cur='';}else cur+=ch;}
   if(cur.trim())out.push(cur.trim());return out;}
-function parseColorTok(t){                          // #abc·#aabbcc·rgb()·rgba() → 6자리 hex, 알파<.5는 제외
+const CSS_NAMED={black:'#000000',white:'#ffffff',red:'#ff0000',orange:'#ffa500',yellow:'#ffff00',gold:'#ffd700',green:'#008000',lime:'#00ff00',teal:'#008080',cyan:'#00ffff',aqua:'#00ffff',blue:'#0000ff',navy:'#000080',purple:'#800080',violet:'#ee82ee',magenta:'#ff00ff',fuchsia:'#ff00ff',pink:'#ffc0cb',hotpink:'#ff69b4',crimson:'#dc143c',tomato:'#ff6347',coral:'#ff7f50',salmon:'#fa8072',indigo:'#4b0082',turquoise:'#40e0d0',skyblue:'#87ceeb',royalblue:'#4169e1',dodgerblue:'#1e90ff',steelblue:'#4682b4',seagreen:'#2e8b57',olive:'#808000',brown:'#a52a2a',maroon:'#800000',silver:'#c0c0c0',gray:'#808080',grey:'#808080'};
+function parseColorTok(t){                          // #abc·#aabbcc·rgb()·rgba()·색 이름 → 6자리 hex, 알파<.5는 제외
   if(!t)return null;
   const h=t.match(/#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b/);
   if(h)return normHex(h[0]);
   const r=t.match(/rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)(?:[\s,/]+([\d.]+%?))?/i);
-  if(!r)return null;
-  if(r[4]!=null){const a=r[4].indexOf('%')>0?parseFloat(r[4])/100:parseFloat(r[4]);if(!(a>=.5))return null;}
-  return rgbToHex(+r[1],+r[2],+r[3]);}
+  if(r){
+    if(r[4]!=null){const a=r[4].indexOf('%')>0?parseFloat(r[4])/100:parseFloat(r[4]);if(!(a>=.5))return null;}
+    return rgbToHex(+r[1],+r[2],+r[3]);}
+  const nm=t.trim().toLowerCase().match(/^([a-z]+)\b/);
+  return nm&&CSS_NAMED[nm[1]]||null;}
 /* 방향은 화이트리스트 통과분만 사용 — 원문 문자열을 그대로 CSS에 주입하지 않는다 */
 function parseDir(tok,type){
   if(type!=='linear'||!tok)return'';
@@ -1462,6 +1472,47 @@ function parseDir(tok,type){
   const d=t.match(/^(-?[\d.]+)deg$/);
   if(d){const v=((+d[1])%360+360)%360;return(Math.round(v*10)/10)+'deg';}
   return'';}
+function gradAdd(map,type,dir,stops,src){
+  if(stops.length<2||stops.length>8)return;
+  const chrom=stops.map(c=>validHexC(c)).filter(Boolean);
+  if(chrom.length<2)return;                         // 흰↔검 페이드·투명 오버레이는 브랜드 그라디언트가 아니다
+  const hues=chrom.map(c=>rgbToHsl(...hexToRgb(c))[0]);
+  let spread=0;
+  for(let i=0;i<hues.length;i++)for(let j=i+1;j<hues.length;j++){
+    let d=Math.abs(hues[i]-hues[j]);if(d>180)d=360-d;if(d>spread)spread=d;}
+  const key=type+'|'+dir+'|'+stops.join(',');
+  const ex=map.get(key);
+  if(ex)ex.count++;
+  else map.set(key,{type,dir,stops,chrom,spread:Math.round(spread),multi:spread>=20,count:1,src:src||'css'});}
+/* SVG 로고의 <linearGradient>·<radialGradient> — 인스타그램류 마크는 그라디언트가 SVG 안에 있다 */
+function svgGradients(text,map){
+  const re=/<(linearGradient|radialGradient)\b([^>]*)>([\s\S]{0,4000}?)<\/\1>/gi;
+  let m,n=0;
+  while((m=re.exec(text))&&n<60){
+    n++;
+    const type=/radial/i.test(m[1])?'radial':'linear',attrs=m[2],stops=[];
+    for(const sm of m[3].matchAll(/<stop\b([^>]*)>/gi)){
+      const a=sm[1];
+      const op=(a.match(/stop-opacity\s*[:=]\s*["']?\s*([\d.]+)/i)||[])[1];
+      if(op!=null&&+op<.5)continue;
+      const c=(a.match(/stop-color\s*[:=]\s*["']?\s*(#[0-9a-fA-F]{3,8}|rgba?\([^)]*\)|[a-zA-Z]+)/i)||[])[1];
+      const h=parseColorTok(c);
+      if(h&&stops.indexOf(h)<0)stops.push(h);}
+    const num=k=>parseFloat((attrs.match(new RegExp(k+'\\s*=\\s*["\']?(-?[\\d.]+)','i'))||[])[1]);
+    let dir='';
+    if(type==='linear'){
+      const x1=num('x1'),y1=num('y1'),x2=num('x2'),y2=num('y2');
+      if([x1,y1,x2,y2].every(v=>!isNaN(v))&&(x1!==x2||y1!==y2))
+        dir=(Math.round(((Math.atan2(x2-x1,y1-y2)*180/Math.PI)+360)%360*10)/10)+'deg';}
+    gradAdd(map,type,dir,stops,'svg');}}
+/* 브랜드 가이드 산문: '그라디언트 #A → #B → #C' 처럼 hex만 나열한 경우(CSS·SVG가 없을 때만) */
+function textGradients(text,map){
+  text.split(/[\n\r]+|(?:[.。]\s)/).forEach(ln=>{
+    const kw=/그라\s?데?이?션|그라\s?디\s?언트|그래디언트|gradient/i.test(ln);
+    const uniq=[...new Set([...ln.matchAll(/#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b/g)].map(x=>normHex(x[0])).filter(Boolean))];
+    if(uniq.length<2||(!kw&&uniq.length<3))return;  // 키워드가 없으면 3색 이상 나열만 인정
+    const dm=ln.match(/(\d{1,3})\s*(?:deg|°|도)\b/);
+    gradAdd(map,'linear',dm?(((+dm[1])%360)+'deg'):'',uniq.slice(0,8),'text');});}
 function parseGradients(text){
   const map=new Map();
   gradBodies(text).forEach(g=>{
@@ -1470,17 +1521,9 @@ function parseGradients(text){
     parts.forEach((p,i)=>{
       if(i===0&&(dir||/^(to\s|-?[\d.]+deg|circle|ellipse|at\s|from\s|closest|farthest|in\s)/i.test(p)))return;
       const c=parseColorTok(p);if(c&&stops.indexOf(c)<0)stops.push(c);});
-    if(stops.length<2||stops.length>8)return;
-    const chrom=stops.map(c=>validHexC(c)).filter(Boolean);
-    if(chrom.length<2)return;                       // 흰↔검 페이드·투명 오버레이는 브랜드 그라디언트가 아니다
-    const hues=chrom.map(c=>rgbToHsl(...hexToRgb(c))[0]);
-    let spread=0;
-    for(let i=0;i<hues.length;i++)for(let j=i+1;j<hues.length;j++){
-      let d=Math.abs(hues[i]-hues[j]);if(d>180)d=360-d;if(d>spread)spread=d;}
-    const key=g.type+'|'+dir+'|'+stops.join(',');
-    const ex=map.get(key);
-    if(ex)ex.count++;
-    else map.set(key,{type:g.type,dir,stops,chrom,spread:Math.round(spread),multi:spread>=20,count:1});});
+    gradAdd(map,g.type,dir,stops,'css');});
+  svgGradients(text,map);
+  if(!map.size)textGradients(text,map);
   const list=[...map.values()];
   /* 빈도 × 유채 정지점 수 × 멀티 휴 가중 — 다색 브랜드 그라디언트가 단색 셰이드 페이드보다 우선 */
   list.forEach(g=>{g.score=Math.sqrt(g.count)*g.chrom.length*(g.multi?1.6:1);});
@@ -1528,7 +1571,9 @@ document.getElementById('igTextRun').addEventListener('click',()=>{
         const basis=rr.basis&&rr.basis.indexOf('CSS')===0?'북마클릿 실측 — 렌더된 화면의 실제 사용 색':rr.basis;
         const rB=pickMode((o.rads||[]).filter(v=>v>=0&&v<=48),RAD_BUCKETS,3),pB=pickMode((o.pads||[]).filter(v=>v>0&&v<=48),PAD_BUCKETS,5);
         const shape={radius:rB?rB.mode:null,radiusTop:rB?rB.top:null,radiusPct:rB?rB.pct:null,density:pB?pB.mode:null,padTop:pB?pB.top:null,padPct:pB?pB.pct:null};
-        igShow(rr.cands,o.fonts||[],shape,basis,g0);return;
+        igShow(rr.cands,o.fonts||[],shape,basis,g0);
+        if(o.grads===undefined)igMsg('이 결과는 구버전 북마클릿입니다 — 그라디언트·SVG 로고 수집을 쓰려면 URL 탭의 🔖 Freesm 스캔 링크를 북마크바에 다시 드래그해 주세요.');
+        return;
       }
     }catch(e){/* JSON 아니면 일반 텍스트로 처리 */}
   }
@@ -1538,7 +1583,7 @@ document.getElementById('igTextRun').addEventListener('click',()=>{
   igShow(rr.cands,fonts,extractShape(t),rr.basis,g0);
 });
 /* Freesm 스캔 북마클릿 — 대상 사이트 안에서 실측(선언·렌더 색·곡률·간격·폰트) 후 JSON 클립보드 복사 */
-const BMK_CODE="(()=>{try{var cnt={},rad=[],pad=[],fon={},dec=[],gcn={};var push=function(c){var m=c&&c.match(/rgba?\\((\\d+), ?(\\d+), ?(\\d+)(?:, ?([\\d.]+))?/);if(!m)return;if(m[4]!==undefined&&+m[4]<.5)return;var r=+m[1],g=+m[2],b=+m[3],mx=Math.max(r,g,b),mn=Math.min(r,g,b);if(mx-mn<24||mx<35||mn>238)return;var h='#'+[r,g,b].map(function(v){return v.toString(16).padStart(2,'0')}).join('');cnt[h]=(cnt[h]||0)+1};document.querySelectorAll('*').forEach(function(el){var rc=el.getBoundingClientRect();if(!rc.width||!rc.height)return;var s=getComputedStyle(el);push(s.color);push(s.backgroundColor);push(s.borderTopColor);var bi=s.backgroundImage;if(bi&&bi.indexOf('gradient(')>0&&bi.length<400)gcn[bi]=(gcn[bi]||0)+1;var br=parseFloat(s.borderTopLeftRadius);if(br>0&&br<=48)rad.push(Math.round(br));var pt=parseFloat(s.paddingTop);if(pt>0&&pt<=48)pad.push(Math.round(pt));var f=(s.fontFamily||'').split(',')[0].replace(/[\\\"']/g,'').trim();if(f)fon[f]=(fon[f]||0)+1});var th=document.querySelector('meta[name=theme-color]');if(th&&th.content&&th.content[0]=='#')dec.push({hex:th.content,source:'theme-color'});for(var i=0;i<document.styleSheets.length;i++){var rs;try{rs=document.styleSheets[i].cssRules}catch(e){continue}for(var j=0;j<(rs||[]).length;j++){var t=rs[j].cssText||'';var mm=t.match(/--[\\w-]*(primary|brand|accent|point|key-?color|main-?color)[\\w-]*: ?#[0-9a-fA-F]{3,8}/g)||[];for(var k=0;k<mm.length;k++){dec.push({hex:mm[k].match(/#[0-9a-fA-F]{3,8}/)[0],source:'brand-var'})}}}var out={v:1,tool:'freesm',url:location.href,declared:dec.slice(0,8),colors:Object.entries(cnt).sort(function(a,b){return b[1]-a[1]}).slice(0,15).map(function(e){return{hex:e[0],count:e[1]}}),grads:Object.entries(gcn).sort(function(a,b){return b[1]-a[1]}).slice(0,6).map(function(e){return{css:e[0],count:e[1]}}),rads:rad.slice(0,500),pads:pad.slice(0,500),fonts:Object.entries(fon).sort(function(a,b){return b[1]-a[1]}).slice(0,4).map(function(e){return e[0]})};var js=JSON.stringify(out);var ok=function(){var d=document.createElement('div');d.textContent='Freesm 스캔 복사 완료 — 브랜드 연결 모달에 붙여넣으세요';d.style.cssText='position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:2147483647;background:#14171c;color:#fff;padding:10px 18px;border-radius:10px;font:600 13px sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25)';document.body.appendChild(d);setTimeout(function(){d.remove()},2600)};navigator.clipboard.writeText(js).then(ok,function(){window.prompt('복사(Ctrl/Cmd+C) 후 Freesm에 붙여넣으세요:',js)})}catch(e){window.prompt('Freesm 스캔 오류: '+e)}})()";
+const BMK_CODE="(()=>{try{var cnt={},rad=[],pad=[],fon={},dec=[],gcn={};var bv=2;var push=function(c){var m=c&&c.match(/rgba?\\((\\d+), ?(\\d+), ?(\\d+)(?:, ?([\\d.]+))?/);if(!m)return;if(m[4]!==undefined&&+m[4]<.5)return;var r=+m[1],g=+m[2],b=+m[3],mx=Math.max(r,g,b),mn=Math.min(r,g,b);if(mx-mn<24||mx<35||mn>238)return;var h='#'+[r,g,b].map(function(v){return v.toString(16).padStart(2,'0')}).join('');cnt[h]=(cnt[h]||0)+1};document.querySelectorAll('*').forEach(function(el){var rc=el.getBoundingClientRect();if(!rc.width||!rc.height)return;var s=getComputedStyle(el);push(s.color);push(s.backgroundColor);push(s.borderTopColor);var bi=s.backgroundImage;if(bi&&bi.indexOf('gradient(')>0&&bi.length<400)gcn[bi]=(gcn[bi]||0)+1;var br=parseFloat(s.borderTopLeftRadius);if(br>0&&br<=48)rad.push(Math.round(br));var pt=parseFloat(s.paddingTop);if(pt>0&&pt<=48)pad.push(Math.round(pt));var f=(s.fontFamily||'').split(',')[0].replace(/[\\\"']/g,'').trim();if(f)fon[f]=(fon[f]||0)+1});document.querySelectorAll('linearGradient,radialGradient').forEach(function(g){try{var so=g.outerHTML;if(so&&so.length<800)gcn[so]=(gcn[so]||0)+1}catch(e){}});var th=document.querySelector('meta[name=theme-color]');if(th&&th.content&&th.content[0]=='#')dec.push({hex:th.content,source:'theme-color'});for(var i=0;i<document.styleSheets.length;i++){var rs;try{rs=document.styleSheets[i].cssRules}catch(e){continue}for(var j=0;j<(rs||[]).length;j++){var t=rs[j].cssText||'';var mm=t.match(/--[\\w-]*(primary|brand|accent|point|key-?color|main-?color)[\\w-]*: ?#[0-9a-fA-F]{3,8}/g)||[];for(var k=0;k<mm.length;k++){dec.push({hex:mm[k].match(/#[0-9a-fA-F]{3,8}/)[0],source:'brand-var'})}}}var out={v:1,bv:bv,tool:'freesm',url:location.href,declared:dec.slice(0,8),colors:Object.entries(cnt).sort(function(a,b){return b[1]-a[1]}).slice(0,15).map(function(e){return{hex:e[0],count:e[1]}}),grads:Object.entries(gcn).sort(function(a,b){return b[1]-a[1]}).slice(0,6).map(function(e){return{css:e[0],count:e[1]}}),rads:rad.slice(0,500),pads:pad.slice(0,500),fonts:Object.entries(fon).sort(function(a,b){return b[1]-a[1]}).slice(0,4).map(function(e){return e[0]})};var js=JSON.stringify(out);var ok=function(){var d=document.createElement('div');d.textContent='Freesm 스캔 복사 완료 — 브랜드 연결 모달에 붙여넣으세요';d.style.cssText='position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:2147483647;background:#14171c;color:#fff;padding:10px 18px;border-radius:10px;font:600 13px sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25)';document.body.appendChild(d);setTimeout(function(){d.remove()},2600)};navigator.clipboard.writeText(js).then(ok,function(){window.prompt('복사(Ctrl/Cmd+C) 후 Freesm에 붙여넣으세요:',js)})}catch(e){window.prompt('Freesm 스캔 오류: '+e)}})()";
 document.getElementById('bmkLink').href='javascript:'+encodeURIComponent(BMK_CODE);
 /* 이미지 → 주요 컬러 · 폰트 파일 → 서체 등록 */
 const igDrop=document.getElementById('igDrop'),igFile=document.getElementById('igFile');
@@ -1560,6 +1605,16 @@ async function igHandleFile(f){
       if(customBrand)applyCustomBrand(customBrand.seed,'Freesm Custom Font');
       igMsg(`폰트 "${f.name}" 등록 완료 — 커스텀 브랜드의 서체로 적용됩니다.`);
     }catch(err){igMsg('폰트 파일을 읽지 못했습니다. OTF·TTF·WOFF 형식인지 확인하세요.',true);}
+    return;
+  }
+  /* SVG는 캔버스 픽셀이 아니라 원문에서 그라디언트·색을 읽는 편이 정확하다 */
+  if(/^image\/svg/.test(f.type)||/\.svg$/i.test(f.name)){
+    igMsg('SVG 해석 중…');
+    const t=await f.text();
+    const g0=parseGradients(t)[0]||null;
+    const rr=igResolve({declared:gradDec(g0),cssCands:extractHex(t)});
+    if(!rr.cands.length){igMsg('SVG에서 색을 찾지 못했습니다.',true);return;}
+    igShow(rr.cands,null,null,g0?rr.basis:'SVG 원문의 채움색 사용 통계',g0);
     return;
   }
   if(!/^image\//.test(f.type)){igMsg('이미지 또는 폰트 파일만 지원합니다.',true);return;}

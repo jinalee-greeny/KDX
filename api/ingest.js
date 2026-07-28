@@ -103,6 +103,17 @@ function collectGradients(text, counts) {
   }
 }
 
+// SVG 로고 그라디언트(<linearGradient>/<radialGradient> defs) 원문 수집 —
+// 인스타그램류처럼 브랜드 그라디언트가 CSS가 아니라 로고 SVG에만 있는 경우를 위한 경로.
+function collectSvgGradients(text, counts) {
+  const re = /<(linear|radial)Gradient\b[\s\S]{0,4000}?<\/\1Gradient>/gi;
+  let m, n = 0;
+  while ((m = re.exec(text)) && n < 40) {
+    const src = m[0];
+    if (src.length < 4000 && /stop/i.test(src)) { counts[src] = (counts[src] || 0) + 1; n++; }
+  }
+}
+
 function shapeFromCss(text) {
   const nums = re => [...text.matchAll(re)].map(m => parseFloat(m[1])).filter(v => v >= 0 && v <= 48);
   const r = pickMode(nums(/border-radius\s*:\s*([\d.]+)px/gi), RAD_BUCKETS, 3);
@@ -161,6 +172,13 @@ async function ingestUrl(url) {
   const gcounts = {}; collectGradients(allCss, gcounts);
   const gradients = Object.entries(gcounts).sort((a, b) => b[1] - a[1]).slice(0, 6)
     .flatMap(([css, n]) => Array(Math.min(n, 20)).fill(css));
+  // SVG defs: 인라인 SVG + SVG 파비콘/로고. 원문 그대로 전달하고 판별은 클라이언트가 한다.
+  const scounts = {}; collectSvgGradients(html, scounts);
+  for (const a of assets) {
+    if (!/svg/i.test(a.type)) continue;
+    try { collectSvgGradients(Buffer.from(a.b64, 'base64').toString('utf8'), scounts); } catch (_) { /* 무시 */ }
+  }
+  gradients.push(...Object.keys(scounts).slice(0, 4));
   return { counts, fonts, declared, shape: shapeFromCss(allCss), assets, gradients };
 }
 
