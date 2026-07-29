@@ -206,6 +206,11 @@ html[data-view="interactive"] .pgtabs,html[data-view="auth"] .pgtabs{display:fle
 .pgtabs button.on{background:var(--accent-subtle);color:var(--accent);font-weight:700}
 .canvas{flex:1;min-width:0;overflow-y:auto;background:var(--bg);padding:28px 36px 36px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start}
 .canvas::-webkit-scrollbar{width:10px}.canvas::-webkit-scrollbar-thumb{background:#dfe2e7;border-radius:99px}
+/* 캔버스는 세로 flex라, 자식이 기본값(flex-shrink:1)이면 뷰포트 높이에 맞춰 눌린다.
+   프레임에는 overflow:hidden이 걸려 있어서 눌린 만큼 콘텐츠가 잘리고,
+   캔버스는 넘칠 게 없다고 판단해 스크롤도 만들지 않는다 — 화면이 통째로 갇힌다.
+   프리뷰는 내용만큼 커져야 하고, 넘치는 건 캔버스가 스크롤로 받는다. */
+.canvas>*{flex:none}
 /* 페이지 프리뷰: 무거운 카드 대신 얇은 프레임 라인만(디바이스 폭 표시용) */
 .frame{width:100%;max-width:1080px;background:var(--bg);border:1px solid var(--line-2);border-radius:12px;overflow:hidden;container-type:inline-size;container-name:page;transition:max-width .3s ease}
 html[data-device="mobile"] .frame{max-width:390px}
@@ -778,9 +783,18 @@ html[data-view="screen"] #frame{display:none}
 html[data-view="screen"] .screenframe{display:block}
 html[data-view="screen"] .pgtabs{display:flex}
 .pgtabs{flex-wrap:wrap;align-items:center}
-.pgtabs .pgt{display:inline-flex;align-items:center}
-.pgtabs .pgt .x{font-style:normal;display:inline-grid;place-items:center;width:18px;height:18px;margin-left:6px;margin-right:-4px;border-radius:99px;font-size:12px;color:var(--fg-mut)}
+/* 추가한 화면 탭 — 이름과 ✕가 한 알약 안에 있어야 '하나의 탭'으로 읽힌다.
+   배경·모서리는 바깥 .pgt가 지고, 안쪽 버튼은 투명해진다(기본 탭 스타일을 덮어씀). */
+.pgtabs .pgt{display:inline-flex;align-items:center;border-radius:9px;transition:.14s}
+.pgtabs .pgt:hover{background:var(--bg-sunken)}
+.pgtabs .pgt.on{background:var(--accent-subtle)}
+.pgtabs .pgt>button{padding-right:6px}
+.pgtabs .pgt>button:hover{background:none;color:var(--fg)}
+.pgtabs .pgt.on>button,.pgtabs .pgt.on>button:hover{background:none;color:var(--accent);font-weight:700}
+.pgtabs .pgt .x{font-style:normal;display:inline-grid;place-items:center;flex:none;width:17px;height:17px;margin-right:8px;border-radius:99px;font-size:11px;color:var(--fg-mut);cursor:pointer;transition:.14s}
 .pgtabs .pgt .x:hover{background:var(--line-2);color:var(--fg)}
+.pgtabs .pgt.on .x{color:var(--accent)}
+.pgtabs .pgt.on .x:hover{background:var(--accent-line);color:var(--accent)}
 .pgtabs .pgadd{margin-left:4px;color:var(--accent);font-weight:700;border:1.5px dashed var(--accent-line);border-radius:9px;padding:7px 13px}
 .pgtabs .pgadd:hover{background:var(--accent-subtle)}
 .scrbar{display:none;width:100%;max-width:1080px;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px;padding:9px 12px;border:1px solid var(--line-2);border-radius:10px;background:var(--bg-sunken)}
@@ -955,7 +969,7 @@ html[data-view="compare"] .board3{display:block}
     <button data-area="tokens">파운데이션</button>
   </nav>
   <button class="gconnect" id="igOpen"><svg class="i"><use href="#icon-action-external"/></svg>브랜드 연결</button>
-  <span class="gver">토큰 기반 · v0.53</span>
+  <span class="gver">토큰 기반 · v0.54</span>
 </header>
 <div class="app">
 
@@ -1690,6 +1704,8 @@ function renderPgTabs(){
   el.querySelectorAll('button').forEach(b=>b.classList.toggle('on',
     (b.dataset.view==='screen'&&b.dataset.tab===curScr&&html.getAttribute('data-view')==='screen')
     ||(b.dataset.view===html.getAttribute('data-view')&&b.dataset.view!=='screen'&&(!b.dataset.tab||b.dataset.tab===curAuthTab))));
+  /* 알약 배경은 바깥 껍데기가 지므로 활성 상태도 껍데기로 올린다 — 그래야 ✕까지 같이 칠해진다. */
+  el.querySelectorAll('.pgt').forEach(s=>s.classList.toggle('on',!!s.querySelector('button.on')));
 }
 function renderScreen(id){
   const s=screens.find(x=>x.id===id)||screens[0];
