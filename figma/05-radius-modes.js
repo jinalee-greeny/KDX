@@ -1,4 +1,4 @@
-// KDX — Radius collection with 3 modes (sharp / default / rounded).
+// Freesm — Radius collection with 3 modes (sharp / default / rounded).
 // Run in Figma (use_figma) AFTER 02-scale-dimension.js.
 // 곡률 스왑: Figma 변수는 곱셈이 안 되므로 배율 대신 '모드'로 곡률 성격을 교체.
 // 각 radius 스텝이 모드별로 서로 다른 dimension에 별칭된다.

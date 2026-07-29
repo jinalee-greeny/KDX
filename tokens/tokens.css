@@ -1,4 +1,4 @@
-/* KDX Design System — tokens.css (Claude Code handoff)
+/* Freesm Design System — tokens.css (Claude Code handoff)
    아키텍처: Scale(원시) → Brand(교체 지점) → Semantic(의미) → Radius(곡률 모드) → Web(반응형)
    ⚠ Brand 컬렉션만 교체하면 accent/link/focus/강조배경이 전체 캐스케이드됨. Primary는 임시 Deep Blue.
    ⚠ chart/status 등락색(up 빨강 / down 파랑)은 브랜드 무관 고정(한국 증시 관례). */

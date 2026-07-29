@@ -1,4 +1,4 @@
-// KDX — Semantic numeric tokens (spacing/size/border/comp) aliased to Scale/dimension.
+// Freesm — Semantic numeric tokens (spacing/size/border/comp) aliased to Scale/dimension.
 // Run in Figma (use_figma) AFTER 02-scale-dimension.js and 03-semantic-color.js.
 // 수치도 색과 동일하게 dimension 프리미티브에 별칭 → comp/pad·comp/gap은 다시 spacing에 별칭(2단).
 const colls=await figma.variables.getLocalVariableCollectionsAsync();

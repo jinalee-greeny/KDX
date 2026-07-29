@@ -1,6 +1,6 @@
 # 브랜드 연결 — 에이전트 판정 층 설계안 (v0.51 제안)
 
-> 대상: Freesm 데모(`KDX-brand-swap-demo.html`) + `api/ingest.js`
+> 대상: Freesm 데모(`demo/index.html`) + `api/ingest.js`
 > 상태: **설계안 · 미구현.** 승인 후 착수.
 > 한 줄 요약: 규칙 파이프라인을 그대로 두고, **근거가 약한 구간에서만** 에이전트를 심판으로 부른다. 에이전트는 색을 만들지 않고 **고르기만** 한다.
 
@@ -266,7 +266,7 @@ module.exports = async (req, res) => {
 | 파일 | 변경 |
 |---|---|
 | `api/judge.js` | 신규 — 엔드포인트 + 스키마 검증 |
-| `KDX-brand-swap-demo.html` | `igJudge()` 신규, `igShow()` 앞 게이트, `#igResultLab` 근거 문구, `AI` 뱃지, 규칙 복귀 토글, 분석 기준 패널에 판정 층 설명 추가 |
+| `demo/index.html` | `igJudge()` 신규, `igShow()` 앞 게이트, `#igResultLab` 근거 문구, `AI` 뱃지, 규칙 복귀 토글, 분석 기준 패널에 판정 층 설명 추가 |
 | `demo/index.html`, `reference/brand-swap-demo.html` | 동기화 |
 | `CLAUDE.md` | 브랜드 인제스트 절에 `v0.51 — 에이전트 판정 층` 추가 |
 | `verify51.js` | 신규 |

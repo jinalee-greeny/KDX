@@ -1,4 +1,4 @@
-KDX 아이콘 세트는 오픈소스 Lucide 아이콘(ISC License)을 기반으로 합니다.
+Freesm 아이콘 세트는 오픈소스 Lucide 아이콘(ISC License)을 기반으로 합니다.
 브랜드 확정 후 커스텀 아이콘으로 교체되기 전까지의 '우선 적용(placeholder)' 세트입니다.
 
 Source: https://lucide.dev  ·  https://github.com/lucide-icons/lucide

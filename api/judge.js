@@ -1,4 +1,4 @@
-// KDX 브랜드 판정 — Vercel 서버리스 함수 (v0.51 1단계: 텍스트 판정)
+// Freesm 브랜드 판정 — Vercel 서버리스 함수 (v0.51 1단계: 텍스트 판정)
 // POST /api/judge  body: { host, candidates:[{hex,src,count,source}], gradients:[{css,seed}], fonts:[], shape:{} }
 // 응답: { ok:true, verdict:{primary,gradient,radius,density,font,confidence,why} } | { ok:false, reason }
 // v0.57 — 화면 추천 모드 추가. POST body에 mode:'screens'가 오면

@@ -1,9 +1,9 @@
-# Freesm — KDX Design System
+# Freesm — 디자인 시스템 워크벤치
 
-KDX 기업 홈페이지 디자인 시스템 워크벤치 **Freesm**(Free + 프리즘 발음 — 브랜드로부터 자유롭게, 시드 하나가 시스템 전체로 분광).
+기업 홈페이지 디자인 시스템 워크벤치 **Freesm**(Free + 프리즘 발음 — 브랜드로부터 자유롭게, 시드 하나가 시스템 전체로 분광).
 토큰 · 인터랙티브 데모 · 브랜드 인제스트 · 스펙 · Figma 빌드 스크립트.
 
-**데모**: https://jinalee-greeny.github.io/KDX/demo/ · (GitHub Pages 활성화 후)
+**데모**: 배포된 Vercel 주소의 `/demo/` 경로.
 로컬에서는 `demo/index.html`을 브라우저로 열면 바로 확인됩니다.
 
 > 먼저 **`CLAUDE.md`** 를 읽으세요 — 아키텍처 · 불변 규칙 · 토큰 사용법 · 다음 작업.
@@ -17,7 +17,7 @@ KDX 기업 홈페이지 디자인 시스템 워크벤치 **Freesm**(Free + 프�
 
 ## 구조
 ```
-kdx-design-system/
+freesm/
 ├─ CLAUDE.md              작업 지침 (아키텍처·규칙·다음 작업) — 먼저 읽기
 ├─ README.md
 ├─ demo/index.html        인터랙티브 데모 (컴포넌트·프리뷰·토큰 뷰)

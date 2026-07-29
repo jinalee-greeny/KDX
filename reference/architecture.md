@@ -1,4 +1,4 @@
-# KDX 디자인 시스템 아키텍처 v0.4
+# Freesm 디자인 시스템 아키텍처 v0.4
 
 기반: `[KDX-pxd] Foundation`(ALTO) 승계 · 목표: **브랜드 미확정 상태로 개발 진행 → 에셋 도착 시 Brand 레이어 한 곳만 교체해 전체 반영**.
 Primary(임시): **Deep Blue `#1245BA`** · 웹 · 반응형 · 모바일 1st(3 breakpoint).

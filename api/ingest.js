@@ -1,4 +1,4 @@
-// KDX 브랜드 인제스트 — Vercel 서버리스 함수
+// Freesm 브랜드 인제스트 — Vercel 서버리스 함수
 // v0.53 — 스타일시트 수집 확장: rel="stylesheet" 외에 preload as=style · .css 확장자 · @import 한 겹
 // v0.55 — Figma 토큰을 요청 헤더(X-Figma-Token)로도 받는다. 서버 환경변수는 폴백.
 // v0.56 — Figma 수집 단위를 '노드 개수'에서 '보이는 면적'으로 바꾼다. 페이지별로 따로 받아
