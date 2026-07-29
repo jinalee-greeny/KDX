@@ -1,6 +1,9 @@
 // KDX 브랜드 인제스트 — Vercel 서버리스 함수
 // v0.53 — 스타일시트 수집 확장: rel="stylesheet" 외에 preload as=style · .css 확장자 · @import 한 겹
 // v0.55 — Figma 토큰을 요청 헤더(X-Figma-Token)로도 받는다. 서버 환경변수는 폴백.
+// v0.56 — Figma 수집 단위를 '노드 개수'에서 '보이는 면적'으로 바꾼다. 페이지별로 따로 받아
+//         depth 제한을 없애고, 숨긴 레이어·불투명도·부모자식 중복을 반영한다.
+//         응답에 unit('area'|'count')과 note(못 읽은 페이지 안내)를 함께 싣는다.
 // GET /api/ingest?url=https://...   → 사이트 HTML+CSS에서 컬러·폰트 추출
 // GET /api/ingest?figma=<링크|key>  → Figma API로 파일 채움색 수집
 //   토큰 출처: 요청 헤더 X-Figma-Token(사용자별) → 없으면 환경변수 FIGMA_TOKEN(배포자)
@@ -244,43 +247,101 @@ function cleanToken(t) {
   return /^[\x21-\x7e]+$/.test(s) ? s : '';
 }
 
+// 무엇을 고쳐야 하는지가 상태코드마다 다르다 — 숫자만 던지면 사용자가 할 수 있는 게 없다.
+function figHint(s) {
+  return s === 403 ? ' — 토큰 권한 확인(file_content:read 스코프, 그리고 이 파일에 접근 가능한 계정인지)'
+    : s === 404 ? ' — 파일을 찾을 수 없습니다. 링크가 맞는지, 그 토큰의 계정이 이 파일을 볼 수 있는지 확인하세요.'
+      : s === 429 ? ' — 요청이 몰렸습니다. 잠시 후 다시 시도하세요.' : '';
+}
+async function figGet(path, token, ms) {
+  const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), ms || 8000);
+  try {
+    const r = await fetch('https://api.figma.com/v1' + path, { headers: { 'X-Figma-Token': token }, signal: ctl.signal });
+    if (!r.ok) { const e = new Error('Figma API ' + r.status + figHint(r.status)); e.status = r.status; throw e; }
+    return await r.json();
+  } finally { clearTimeout(tm); }
+}
+
+// ── v0.56 · 면적 가중 수집
+// 이전 버전은 '색이 칠해진 노드가 몇 개인가'를 셌다. 그건 사람이 보는 것과 다른 단위다 —
+// 24×24 주석 뱃지 40개가 375×56 헤더 하나를 이긴다. 실측 결과 주석 빨강이 78.6%로 1위가 됐다
+// (같은 파일의 실제 면적 점유율은 4.5%). 그래서 단위를 절대좌표 면적으로 바꾼다.
+//   · 숨긴 노드와 그 하위 전체를 제외한다(작업 중 파킹해 둔 구버전 페이지가 표를 던지고 있었다)
+//   · 노드 불투명도와 채움 불투명도를 곱해 반영한다
+//   · '면 위에 같은 색 면을 덮은' 구조(타이틀바 > 타이틀 면)는 한 번만 센다 — 아니면 중첩 깊이가 곧 가중치가 된다
+function walkFigma(root, acc) {
+  (function walk(node, hidden, op, pHex, pArea) {
+    if (!node) return;
+    const h = hidden || node.visible === false;
+    const o = op * (typeof node.opacity === 'number' ? node.opacity : 1);
+    if (h || o <= .05) return;                                   // 숨김·거의 투명 → 하위까지 통째로 제외
+    const bb = node.absoluteBoundingBox;
+    const area = bb && bb.width > 0 && bb.height > 0 ? bb.width * bb.height : 0;
+    let myHex = null, myArea = 0;
+    if (area) for (const f of node.fills || []) {
+      if (f.type !== 'SOLID' || f.visible === false || !f.color) continue;
+      const fo = typeof f.opacity === 'number' ? f.opacity : 1;
+      if (fo <= .05) continue;
+      const to = v => Math.round(v * 255);
+      const [rr, gg, bl] = [to(f.color.r), to(f.color.g), to(f.color.b)];
+      const mx = Math.max(rr, gg, bl), mn = Math.min(rr, gg, bl);
+      if (mx - mn < 24 || mx < 35 || mn > 238) continue;          // 무채색·극단값 제외
+      const hex = '#' + [rr, gg, bl].map(v => v.toString(16).padStart(2, '0')).join('');
+      myHex = hex; myArea = area;
+      if (hex === pHex && pArea && Math.abs(area - pArea) / pArea < .02) continue;   // 부모와 같은 색·같은 자리
+      acc.areas[hex] = (acc.areas[hex] || 0) + area * o * fo;
+    }
+    if (node.style && node.style.fontFamily) acc.fonts.add(node.style.fontFamily);
+    if (typeof node.cornerRadius === 'number' && node.cornerRadius >= 0 && node.cornerRadius <= 48) acc.radii.push(node.cornerRadius);
+    if (typeof node.itemSpacing === 'number' && node.itemSpacing > 0 && node.itemSpacing <= 48) acc.spacings.push(node.itemSpacing);
+    const nHex = myHex || pHex, nArea = myHex ? myArea : pArea;
+    (node.children || []).forEach(k => walk(k, h, o, nHex, nArea));
+  })(root, false, 1, null, 0);
+}
+
+// 페이지를 하나씩 따로 받는다. 파일 하나를 통째로 받으면 응답이 너무 커져 depth로 잘라야 하는데,
+// 그 depth=4가 진짜 UI(컴포넌트 인스턴스 안쪽 5~7단)를 통째로 잘라내고 있었다.
+// 페이지 단위로 나누면 깊이 제한 없이 받을 수 있다. 대신 페이지 수·시간에 상한을 두고,
+// 상한에 걸려 못 본 페이지가 있으면 조용히 넘어가지 않고 응답에 적어 보낸다.
+const FIG_PAGE_CAP = 10, FIG_BUDGET_MS = 9000, FIG_PAGE_MS = 8000, FIG_MIN_SHARE = .001;
+
 async function ingestFigma(input, token) {
   const key = figmaKey(input);
   if (!key) throw new Error('Figma 파일 링크 또는 file key를 확인해 주세요.');
-  const r = await fetch(`https://api.figma.com/v1/files/${key}?depth=4`, { headers: { 'X-Figma-Token': token } });
-  if (!r.ok) {
-    // 무엇을 고쳐야 하는지가 상태코드마다 다르다 — 숫자만 던지면 사용자가 할 수 있는 게 없다.
-    const hint = r.status === 403 ? ' — 토큰 권한 확인(file_content:read 스코프, 그리고 이 파일에 접근 가능한 계정인지)'
-      : r.status === 404 ? ' — 파일을 찾을 수 없습니다. 링크가 맞는지, 그 토큰의 계정이 이 파일을 볼 수 있는지 확인하세요.'
-        : r.status === 429 ? ' — 요청이 몰렸습니다. 잠시 후 다시 시도하세요.' : '';
-    throw new Error('Figma API ' + r.status + hint);
+  const top = await figGet(`/files/${key}?depth=1`, token, FIG_PAGE_MS);
+  const pages = (((top || {}).document || {}).children || []).filter(p => p && p.visible !== false);
+  const acc = { areas: {}, fonts: new Set(), radii: [], spacings: [] };
+  const plan = pages.slice(0, FIG_PAGE_CAP);
+  const t0 = Date.now();
+  let scanned = 0, failed = 0, stopped = false;
+  for (const p of plan) {
+    if (Date.now() - t0 > FIG_BUDGET_MS) { stopped = true; break; }
+    let j;
+    try { j = await figGet(`/files/${key}/nodes?ids=${encodeURIComponent(p.id)}`, token, FIG_PAGE_MS); }
+    catch (e) { if (e.status === 403 || e.status === 429) throw e; failed++; continue; }
+    const doc = ((j.nodes || {})[p.id] || {}).document;
+    if (!doc) { failed++; continue; }
+    walkFigma(doc, acc);
+    scanned++;
   }
-  const doc = await r.json();
-  const counts = {}, fonts = new Set(), radii = [], spacings = [];
-  (function walk(node) {
-    if (!node) return;
-    for (const f of node.fills || []) {
-      if (f.type === 'SOLID' && f.visible !== false && f.color) {
-        const to = v => Math.round(v * 255);
-        const [rr, gg, bb] = [to(f.color.r), to(f.color.g), to(f.color.b)];
-        const mx = Math.max(rr, gg, bb), mn = Math.min(rr, gg, bb);
-        if (mx - mn >= 24 && mx >= 35 && mn <= 238) {
-          const hex = '#' + [rr, gg, bb].map(v => v.toString(16).padStart(2, '0')).join('');
-          counts[hex] = (counts[hex] || 0) + 1;
-        }
-      }
-    }
-    if (node.style && node.style.fontFamily) fonts.add(node.style.fontFamily);
-    if (typeof node.cornerRadius === 'number' && node.cornerRadius >= 0 && node.cornerRadius <= 48) radii.push(node.cornerRadius);
-    if (typeof node.itemSpacing === 'number' && node.itemSpacing > 0 && node.itemSpacing <= 48) spacings.push(node.itemSpacing);
-    (node.children || []).forEach(walk);
-  })(doc.document);
-  const rB = pickMode(radii, RAD_BUCKETS, 3), pB = pickMode(spacings, PAD_BUCKETS, 5);
+  if (!scanned && plan.length) throw new Error('Figma 파일은 열렸지만 페이지 내용을 가져오지 못했습니다. 파일이 매우 크거나 권한이 부족할 수 있습니다.');
+  // 면적 → 천분율. 화면 0.1% 미만은 브랜드색 후보가 아니다(주석 점·1px 선 부스러기).
+  const tot = Object.values(acc.areas).reduce((a, b) => a + b, 0) || 1;
+  const counts = {};
+  for (const [hex, a] of Object.entries(acc.areas)) {
+    if (a / tot < FIG_MIN_SHARE) continue;
+    counts[hex] = Math.max(1, Math.round(a / tot * 1000));
+  }
+  const rB = pickMode(acc.radii, RAD_BUCKETS, 3), pB = pickMode(acc.spacings, PAD_BUCKETS, 5);
   const shape = {
     radius: rB ? rB.mode : null, radiusTop: rB ? rB.top : null, radiusPct: rB ? rB.pct : null,
     density: pB ? pB.mode : null, padTop: pB ? pB.top : null, padPct: pB ? pB.pct : null
   };
-  return { counts, fonts, declared: [], shape, assets: [], gradients: [] };
+  const missed = pages.length - scanned;
+  const note = missed > 0
+    ? `페이지 ${pages.length}개 중 ${scanned}개만 읽었습니다${stopped ? ' (시간 상한)' : failed ? ' (일부 페이지 응답 실패)' : ' (페이지 상한 10개)'}`
+    : '';
+  return { counts, fonts: acc.fonts, declared: [], shape, assets: [], gradients: [], unit: 'area', note };
 }
 
 module.exports = async (req, res) => {
@@ -313,7 +374,7 @@ module.exports = async (req, res) => {
     const colors = Object.entries(out.counts)
       .map(([hex, v]) => typeof v === 'number' ? { hex, count: v, html: 0 } : { hex, count: v.count, html: v.html })
       .sort((a, b) => (b.html * 10 + b.count) - (a.html * 10 + a.count)).slice(0, 12);
-    res.status(200).json({ colors, fonts: [...out.fonts].slice(0, 6), declared: (out.declared || []).slice(0, 6), shape: out.shape || null, assets: out.assets || [], gradients: out.gradients || [], source: figma ? 'figma' : 'url' });
+    res.status(200).json({ colors, fonts: [...out.fonts].slice(0, 6), declared: (out.declared || []).slice(0, 6), shape: out.shape || null, assets: out.assets || [], gradients: out.gradients || [], source: figma ? 'figma' : 'url', unit: out.unit || 'count', note: out.note || '' });
   } catch (e) {
     res.status(500).json({ error: String(e.message || e).slice(0, 200) });
   }
