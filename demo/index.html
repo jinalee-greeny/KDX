@@ -539,7 +539,7 @@ html[data-view="components"] .components{display:block}
 .cmatrix .cell .btn{width:100%;max-width:112px}
 .crow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 /* inputs */
-/* 높이 = comp/pad/field-y ×2 + line-height (hug) → 46·48·52px. 폭은 fill + 48px 하한. */
+/* 높이 = comp/pad/field-y ×2 + line-height + bdr-width ×2 (hug, stroke 포함 실측) → 48·50·54px. 폭은 fill + 48px 하한. */
 .inp{width:100%;min-width:var(--touch-min);border:var(--bw-comp) solid var(--bc);border-radius:var(--r-s);padding:var(--pad-fld-y) var(--pad-fld-x);font-size:var(--fld-fs-m,16px);line-height:var(--fld-lh-m,24px);background:var(--bg);color:var(--fg);display:flex;align-items:center;gap:var(--gap-comp-s)}
 .inp-sm{font-size:var(--fld-fs-s);line-height:var(--fld-lh-s)}
 .inp-lg{font-size:var(--fld-fs-l);line-height:var(--fld-lh-l)}
@@ -602,6 +602,73 @@ html[data-view="tokens"] .tokens{display:block}
 .modules{display:none;width:100%;max-width:1080px}
 html[data-view="modules"] #frame,html[data-view="modules"] .board3{display:none}
 html[data-view="modules"] .modules{display:block}
+/* ===== 패턴 뷰(모듈 뷰 재사용) ===== */
+html[data-view="patterns"] #frame,html[data-view="patterns"] .board3{display:none}
+html[data-view="patterns"] .modules{display:block}
+/* ===== 스펙 뷰 (freesm-component-schema.json 브라우저) ===== */
+.spec{display:none;width:100%;max-width:1080px}
+html[data-view="spec"] #frame,html[data-view="spec"] .board3{display:none}
+html[data-view="spec"] .spec{display:block}
+.spec-panel{padding:6px 28px 48px}
+.sv-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:10px}
+.sv-head h3{font-size:21px;font-weight:800;letter-spacing:-.01em}
+.sv-tier{font-family:'Pretendard Variable',system-ui,sans-serif;font-size:11.5px;color:var(--fg-mut)}
+.sv-badges{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.st-chip{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border-radius:999px;font-family:'Pretendard Variable',system-ui,sans-serif;font-size:11px;font-weight:700;border:1px solid transparent}
+.st-chip .d{font-size:11px;line-height:1}
+.st-ok{background:rgba(0,166,103,.12);color:#0a6b45;border-color:rgba(0,166,103,.3)}
+.st-tk{background:var(--accent-subtle);color:var(--accent);border-color:var(--accent-line)}
+.st-cd{background:var(--bg-sunk);color:var(--fg-mut);border-color:var(--line)}
+.st-rv{background:rgba(191,90,14,.1);color:#9b4500;border-color:rgba(191,90,14,.28)}
+.sv-meta{margin-top:10px;font-size:13px;color:var(--fg-sub);line-height:1.65;max-width:78ch}
+.sv-meta code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:var(--bg-sunk);padding:1px 5px;border-radius:4px}
+.sv-link{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border-radius:8px;border:1px solid var(--accent-line);background:var(--accent-subtle);color:var(--accent);font-family:'Pretendard Variable',system-ui,sans-serif;font-size:12px;font-weight:700;cursor:pointer}
+.sv-link:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.sv-sec{margin-top:22px;border-top:1px solid var(--line);padding-top:14px}
+.sv-st{font-family:'Pretendard Variable',system-ui,sans-serif;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-mut);margin-bottom:9px}
+.sv-st .c{font-weight:600;letter-spacing:0;text-transform:none;color:var(--fg-mut);opacity:.8}
+.sv-grp{font-family:'Pretendard Variable',system-ui,sans-serif;font-size:11px;font-weight:800;color:var(--fg-sub);margin:12px 0 5px;padding-left:2px}
+.sv-row{display:flex;align-items:center;gap:9px;padding:5px 8px;border-radius:7px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;line-height:1.5}
+.sv-row:nth-child(odd){background:var(--bg-sunk)}
+.sv-k{flex:0 0 148px;color:var(--fg-mut);font-family:'Pretendard Variable',system-ui,sans-serif;font-size:11.5px;font-weight:700;word-break:break-all}
+.sv-v{display:flex;align-items:center;gap:7px;flex-wrap:wrap;min-width:0}
+.sv-v code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:var(--fg)}
+.sv-sw{width:14px;height:14px;border-radius:4px;border:1px solid var(--line);flex:0 0 auto;display:inline-block}
+.sv-ar{color:var(--fg-mut);opacity:.6}
+.sv-al{color:var(--fg-mut)}
+.sv-hx{color:var(--fg-sub);font-variant-numeric:tabular-nums}
+.sv-none{color:var(--fg-mut);opacity:.6;font-style:italic}
+.sv-note{margin:9px 0 2px;padding:9px 11px;border-radius:8px;background:var(--bg-sunk);border-left:2px solid var(--line);font-family:'Pretendard Variable',system-ui,sans-serif;font-size:12px;line-height:1.65;color:var(--fg-sub)}
+.sv-q{margin:0;padding-left:17px;font-family:'Pretendard Variable',system-ui,sans-serif;font-size:12.5px;line-height:1.7;color:var(--fg-sub)}
+.sv-chips{display:flex;gap:6px;flex-wrap:wrap}
+.sv-chip{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;border:1px solid var(--line);background:var(--bg);font-family:'Pretendard Variable',system-ui,sans-serif;font-size:11.5px;color:var(--fg-sub)}
+.sv-tbl{width:100%;border-collapse:collapse;font-family:'Pretendard Variable',system-ui,sans-serif;font-size:12px}
+.sv-tbl th,.sv-tbl td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.sv-tbl th{font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--fg-mut)}
+.sv-tbl td.nm{font-weight:700}
+.sv-tbl tr.clk{cursor:pointer}
+.sv-tbl tr.clk:hover td{background:var(--bg-sunk)}
+.sv-cnt{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 4px}
+.sv-cnt .cbox{flex:1 1 130px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg)}
+.sv-cnt .cbox b{display:block;font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+.sv-cnt .cbox span{font-family:'Pretendard Variable',system-ui,sans-serif;font-size:11px;color:var(--fg-mut)}
+/* 좌측 탐색 — 스펙 항목 상태 마커 */
+.nav-sub{font-family:'Pretendard Variable',system-ui,sans-serif;font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--fg-mut);opacity:.75;padding:10px 10px 4px}
+.nav-sub em{font-style:normal;font-weight:600;letter-spacing:0;text-transform:none;opacity:.85}
+.nav-item .sd{display:inline-block;width:12px;margin-right:5px;font-size:10px;line-height:1;opacity:.85}
+.nav-item .sd.ok{color:#00a667}.nav-item .sd.tk{color:var(--accent)}.nav-item .sd.cd{color:var(--fg-mut);opacity:.5}.nav-item .sd.rv{color:#bf5a0e}
+/* 파운데이션 — 계층 이동 스트립 + 별칭 체인 */
+.tk-layers{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:2px 0 14px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg-sunk)}
+.tk-layers .tkl{font-family:'Pretendard Variable',system-ui,sans-serif;font-size:11px;font-weight:700;color:var(--fg-mut);padding:3px 9px;border-radius:999px}
+.tk-layers .tkl.on{background:var(--accent);color:#fff}
+.tk-layers i{font-style:normal;color:var(--fg-mut);opacity:.45;font-size:11px}
+.tk-crow{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:7px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;flex-wrap:wrap}
+.tk-crow:nth-child(odd){background:var(--bg-sunk)}
+.tk-cn{flex:0 0 190px;color:var(--fg);font-weight:600}
+.tk-ca{color:var(--fg-mut)}
+.tk-cp{color:var(--fg-sub);font-weight:700;font-variant-numeric:tabular-nums}
+.tk-cx{color:var(--fg-mut);font-family:'Pretendard Variable',system-ui,sans-serif;font-size:11px;margin-left:4px}
+.tk-arr{color:var(--fg-mut);opacity:.5}
 .mod-panel{padding:6px 28px 40px}
 .mod-sec{margin-bottom:20px}
 .mod-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap}
@@ -1014,10 +1081,11 @@ html[data-view="compare"] .board3{display:block}
     <button data-area="compare">브랜드 비교</button>
     <button data-area="components">컴포넌트</button>
     <button data-area="modules">모듈</button>
+    <button data-area="patterns">패턴</button>
     <button data-area="tokens">파운데이션</button>
   </nav>
   <button class="gconnect" id="igOpen"><svg class="i"><use href="#icon-action-external"/></svg>브랜드 연결</button>
-  <span class="gver">토큰 기반 · v0.59</span>
+  <span class="gver">토큰 기반 · v0.60</span>
 </header>
 <div class="app">
 
@@ -1026,7 +1094,7 @@ html[data-view="compare"] .board3{display:block}
     <div class="lib-head"><span class="lt">탐색 <em>Navigator</em></span><button class="iconbtn" id="libClose" title="접기"><svg class="i"><use href="#icon-nav-left"/></svg></button></div>
     <div class="lib-body nav-body">
       <div class="nav-group" data-area="components">
-        <div class="nav-gl">컴포넌트</div>
+        <div class="nav-gl">컴포넌트 <span style="font-weight:600;text-transform:none;letter-spacing:0;color:var(--fg-mut)">· 구현</span></div>
         <button class="nav-item" data-view="components" data-tab="buttons">Buttons</button>
         <button class="nav-item" data-view="components" data-tab="forms">Forms</button>
         <button class="nav-item" data-view="components" data-tab="card">Card</button>
@@ -1036,30 +1104,36 @@ html[data-view="compare"] .board3{display:block}
         <button class="nav-item" data-view="components" data-tab="responsive">Responsive</button>
       </div>
       <div class="nav-group" data-area="modules">
-        <div class="nav-gl">모듈 <span style="font-weight:600;text-transform:none;letter-spacing:0;color:var(--fg-mut)">· 범용 섹션</span></div>
+        <div class="nav-gl">모듈 <span style="font-weight:600;text-transform:none;letter-spacing:0;color:var(--fg-mut)">· 구현</span></div>
         <button class="nav-item" data-view="modules" data-tab="header">헤더 · GNB</button>
-        <button class="nav-item" data-view="modules" data-tab="hero">Hero</button>
-        <button class="nav-item" data-view="modules" data-tab="stats">통계 밴드</button>
         <button class="nav-item" data-view="modules" data-tab="steps">이용 절차</button>
         <button class="nav-item" data-view="modules" data-tab="products">상품 리스트</button>
-        <button class="nav-item" data-view="modules" data-tab="features">특징 카드</button>
-        <button class="nav-item" data-view="modules" data-tab="cta">CTA 밴드</button>
         <button class="nav-item" data-view="modules" data-tab="footer">푸터</button>
-        <button class="nav-item" data-view="modules" data-tab="logowall">로고월</button>
-        <button class="nav-item" data-view="modules" data-tab="faq">FAQ</button>
+      </div>
+      <div class="nav-group" data-area="patterns">
+        <div class="nav-gl">패턴 <span style="font-weight:600;text-transform:none;letter-spacing:0;color:var(--fg-mut)">· 구현</span></div>
+        <button class="nav-item" data-view="patterns" data-tab="hero">Hero</button>
+        <button class="nav-item" data-view="patterns" data-tab="stats">통계 밴드</button>
+        <button class="nav-item" data-view="patterns" data-tab="features">특징 카드</button>
+        <button class="nav-item" data-view="patterns" data-tab="cta">CTA 밴드</button>
+        <button class="nav-item" data-view="patterns" data-tab="logowall">로고월</button>
+        <button class="nav-item" data-view="patterns" data-tab="faq">FAQ</button>
       </div>
       <div class="nav-group" data-area="tokens">
-        <div class="nav-gl">파운데이션 · 토큰</div>
-        <button class="nav-item" data-view="tokens" data-tab="scale">Scale</button>
-        <button class="nav-item" data-view="tokens" data-tab="brand">Brand</button>
-        <button class="nav-item" data-view="tokens" data-tab="semantic">Semantic</button>
+        <div class="nav-gl">파운데이션 <span style="font-weight:600;text-transform:none;letter-spacing:0;color:var(--fg-mut)">· 소비 계층</span></div>
+        <button class="nav-item" data-view="tokens" data-tab="scale">① 원시 Scale</button>
+        <button class="nav-item" data-view="tokens" data-tab="brand">② 브랜드 Brand</button>
+        <button class="nav-item" data-view="tokens" data-tab="semantic">③ 의미 Semantic · 색</button>
+        <button class="nav-item" data-view="tokens" data-tab="dimension">④ 치수 Dimension</button>
+        <button class="nav-item" data-view="tokens" data-tab="comp">⑤ 컴포넌트 comp/*</button>
+        <div class="nav-sub">모드 <em>계층과 직교</em></div>
         <button class="nav-item" data-view="tokens" data-tab="radius">Radius</button>
         <button class="nav-item" data-view="tokens" data-tab="web">Web</button>
+        <div class="nav-sub">스타일 · 에셋 <em>변수 아님</em></div>
         <button class="nav-item" data-view="tokens" data-tab="type">Type</button>
         <button class="nav-item" data-view="tokens" data-tab="icons">Icons</button>
         <button class="nav-item" data-view="tokens" data-tab="elevation">Elevation</button>
       </div>
-    </div>
     <div class="lib-expand"><button class="iconbtn" id="libOpen" title="펼치기"><svg class="i"><use href="#icon-nav-right"/></svg></button><span class="vlabel">탐색</span></div>
   </aside>
 
@@ -1163,7 +1237,7 @@ html[data-view="compare"] .board3{display:block}
     <!-- 토큰 뷰 (Figma 내보낸 컬렉션 브라우저) -->
     <div class="tokens" id="tokensView">
       <div class="tk-top">
-        <div class="tk-title">Figma 변수 컬렉션 <span>· 총 278 변수 / 5 컬렉션 + Type · Elevation</span></div>
+        <div class="tk-title">파운데이션 <span>· 소비 계층 ①원시 → ②브랜드 → ③의미 → ④치수 → ⑤컴포넌트 · 모드(Radius·Web) · 스타일·에셋</span></div>
         <div class="tk-tabs" id="tkTabs"></div>
       </div>
       <div class="tk-panel" id="tkPanel"></div>
@@ -1172,9 +1246,17 @@ html[data-view="compare"] .board3{display:block}
     <!-- 모듈 뷰 (범용 재사용 섹션) -->
     <div class="modules" id="modulesView" data-radius="default" data-density="default" data-border="default" data-size="m">
       <div class="mod-top">
-        <div class="tk-title">모듈 <span>· 컴포넌트로 조립한 재사용 섹션 · 페이지의 구성 단위</span></div>
+        <div class="tk-title" id="modTopTitle">모듈 <span>· 컴포넌트로 조립한 재사용 섹션 · 페이지의 구성 단위</span></div>
       </div>
       <div class="mod-panel" id="modPanel"></div>
+    </div>
+
+    <!-- 스펙 뷰 (freesm-component-schema.json 브라우저 · 아직 안 만든 항목의 자리) -->
+    <div class="spec" id="specView">
+      <div class="tk-top">
+        <div class="tk-title" id="specTopTitle">스펙 <span>· freesm-component-schema.json · 상태 · 토큰 바인딩 · 미결 질문</span></div>
+      </div>
+      <div class="spec-panel" id="specPanel"></div>
     </div>
   </main>
 
@@ -1210,10 +1292,10 @@ html[data-view="compare"] .board3{display:block}
       <div class="grp"><span class="gl">크기 <em>Size</em></span><div class="seg sm" data-attr="data-size"><button data-val="s">S</button><button data-val="m" class="on">M</button><button data-val="l">L</button></div></div>
       <div class="grp"><span class="gl">해석된 토큰 값</span><div class="readout" id="readout"></div></div>
     </div>
-    <div id="modNote" class="grp" style="display:none"><span class="gl">모듈 뷰</span><p class="hintnote">재사용 <b>범용 섹션(모듈)</b>입니다. 우측 노브(곡률·간격·보더·크기)와 Brand가 실시간 반영됩니다. <b>상품 리스트</b>는 모듈 안에서 Grid·Carousel·List 변형을 전환합니다.</p></div>
+    <div id="modNote" class="grp" style="display:none"><span class="gl">모듈 · 패턴</span><p class="hintnote"><b>모듈(B. Molecule)</b>은 컴포넌트를 조합한 반복 블록, <b>패턴(C. Pattern)</b>은 페이지·섹션 단위 구조입니다 — 스키마 티어에 맞춰 GNB에서 갈라 두었습니다. 우측 노브(곡률·간격·보더·크기)와 Brand가 실시간 반영됩니다. <b>상품 리스트</b>는 모듈 안에서 Grid·Carousel·List 변형을 전환합니다.</p></div>
     <div id="compareNote" class="grp" style="display:none"><span class="gl">비교 모드</span><p class="hintnote">브랜드를 바꿀 때 <b>실제로 달라지는 것</b>만 3열로 나란히 봅니다 — primary 램프, accent 계열 토큰, 그리고 브랜드에 민감한 컴포넌트(버튼·포커스·칩·CTA·히어로 강조). 레이아웃·본문 등 <b>브랜드 무관</b> 요소는 생략했습니다.</p></div>
     <div id="scrNote" class="grp" style="display:none"><span class="gl">예시 화면</span><p class="hintnote">템플릿을 고르면 <b>섹션이 채워진 화면</b>이 새 탭으로 열립니다. 섹션 위에 마우스를 올리면 <b>순서 변경 · 복제 · 삭제</b>, 아래 <b>＋ 섹션 추가</b>로 26종 섹션을 언제든 끼워 넣을 수 있습니다. 모든 셀에 Brand와 우측 노브가 실시간 반영됩니다.</p></div>
-    <div id="tokNote" class="grp" style="display:none"><span class="gl">토큰 뷰</span><p class="hintnote">Figma로 내보낸 변수 컬렉션입니다. 위 <b>Brand</b>를 바꾸면 Semantic의 accent·link 토큰 값이 실시간 반영됩니다. Radius는 3개 모드를 함께 표기합니다.</p></div>
+    <div id="tokNote" class="grp" style="display:none"><span class="gl">파운데이션</span><p class="hintnote">컬렉션이 아니라 <b>소비 순서</b>로 정리했습니다 — 각 층은 바로 앞 층만 참조하고, 건너뛰지 않습니다. 각 행의 <b>별칭 체인</b>이 어디서 온 값인지 끝까지 보여줍니다. <b>Radius·Web</b>은 계층에 얹히지 않고 <b>직교</b>하는 모드축, <b>Type·Icons·Elevation</b>은 변수가 아니라 스타일·에셋이라 계층 바깥입니다. 위 <b>Brand</b>를 바꾸면 ③ 의미와 ⑤ 컴포넌트의 accent 계열이 실시간 반영됩니다.</p></div>
   </aside>
 </div>
 
@@ -1353,15 +1435,17 @@ function buildBoard(){
   board3.innerHTML=`<div class="cmpx${BR.length>3?' has-custom':''}" data-radius="default" data-density="default" data-border="default" data-size="m">${head}${rows}</div>`;
 }
 /* 라우팅: GNB(영역) → 좌측 탐색(하위 항목) → 뷰/탭 + 인스펙터 역할 정리 */
-const AREA_OF={interactive:'pages',auth:'pages',screen:'pages',compare:'compare',components:'components',modules:'modules',tokens:'tokens'};
-const AREA_DEFAULT={pages:['interactive'],compare:['compare'],components:['components','buttons'],modules:['modules','header'],tokens:['tokens','scale']};
+const AREA_OF={interactive:'pages',auth:'pages',screen:'pages',compare:'compare',components:'components',modules:'modules',patterns:'patterns',tokens:'tokens'};
+const AREA_DEFAULT={pages:['interactive'],compare:['compare'],components:['components','buttons'],modules:['modules','header'],patterns:['patterns','hero'],tokens:['tokens','scale']};
 function route(view,tab){
   html.setAttribute('data-view',view);
-  const area=AREA_OF[view];html.setAttribute('data-area',area);
+  /* 스펙 뷰는 자체 영역이 없다 — 티어(cmp/mod/pat/gap)가 속한 GNB 영역을 빌려 쓴다. */
+  const area=(view==='spec')?((TIERS[String(tab||curSpec).split(':')[0]]||{area:'components'}).area):AREA_OF[view];
+  html.setAttribute('data-area',area);
   document.querySelectorAll('#gnbTabs button').forEach(x=>x.classList.toggle('on',x.dataset.area===area));
   document.querySelectorAll('#nav .nav-group').forEach(g=>g.classList.toggle('on',g.dataset.area===area));
   document.querySelectorAll('#nav .nav-item').forEach(x=>x.classList.toggle('on',x.dataset.view===view && (!x.dataset.tab||x.dataset.tab===tab)));
-  const cmp=view==='compare',tok=view==='tokens',comp=view==='components',mod=view==='modules',auth=view==='auth',home=view==='interactive',scr=view==='screen';
+  const cmp=view==='compare',tok=view==='tokens',comp=view==='components',mod=(view==='modules'||view==='patterns'),auth=view==='auth',home=view==='interactive',scr=view==='screen',spc=view==='spec';
   document.getElementById('presetCtl').style.display=(home||comp||mod||auth||scr)?'':'none';  // 노브: 홈+컴포넌트+모듈+인증
   document.getElementById('deviceGrp').style.display=(home||auth||mod||scr)?'':'none';  // 디바이스: 홈·인증·모듈(실제 리플로우). 컴포넌트는 고정→Responsive 탭에서 별도 정리
   document.getElementById('brandGrp').style.display=cmp?'none':'';                  // 브랜드 토글: 비교 뷰에선 숨김
@@ -1372,7 +1456,9 @@ function route(view,tab){
   if(cmp)buildBoard();
   if(tok)renderTokenTab(tab||curTab);
   if(comp)renderCmpTab(tab||curCmpTab);
-  if(mod)renderModTab(tab||curModTab);
+  if(view==='modules')renderModTab(tab||curModTab);
+  if(view==='patterns')renderModTab(tab||curPatTab);
+  if(spc)renderSpec(tab);
   if(auth)renderAuth(tab||curAuthTab);
   if(scr)renderScreen(tab||curScr);
   renderPgTabs();
@@ -1412,7 +1498,20 @@ function resolve(alias){if(alias.indexOf('color/primary/')===0)return brandHex(a
 function ramp(name,steps){return `<div class="tk-ramp"><div class="tk-rl">${name}</div><div class="tk-sws">`+steps.map(s=>{const h=SCALE['color/'+name.split('/').pop()+'/'+s]||SCALE['color/alpha/'+name.split('/').slice(-1)+'/'+s];return `<div class="tk-sw"><span class="c" style="background:${h}"></span><span class="n">${s}</span><span class="h">${h}</span></div>`;}).join('')+`</div></div>`;}
 function rampFor(prefix,steps){return `<div class="tk-ramp"><div class="tk-rl">${prefix}</div><div class="tk-sws">`+steps.map(s=>{const h=SCALE[prefix+'/'+s];return `<div class="tk-sw"><span class="c" style="background:${h}"></span><span class="n">${s}</span><span class="h">${h}</span></div>`;}).join('')+`</div></div>`;}
 
-const TABS=[['scale','Scale'],['brand','Brand'],['semantic','Semantic'],['radius','Radius'],['web','Web'],['type','Type'],['icons','Icons'],['elevation','Elevation']];
+/* 파운데이션 탭 — 값의 성격이 아니라 "누가 누구를 소비하는가"(별칭 방향)로 나눈다.
+   ① 원시 → ② 브랜드 → ③ 의미(색) → ④ 치수 → ⑤ 컴포넌트 → 모드 → 스타일·에셋.
+   이전에는 Semantic 탭 하나에 의미 색 + spacing/size/border + comp/* 가 전부 들어가 있어
+   "시멘틱과 스케일이 뒤섞인" 상태였다. 각 행에 별칭 체인을 끝까지 펼쳐 어디서 왔는지 보이게 한다. */
+const TABS=[['scale','① 원시'],['brand','② 브랜드'],['semantic','③ 의미 · 색'],['dimension','④ 치수'],['comp','⑤ 컴포넌트'],['radius','Radius 모드'],['web','Web 모드'],['type','Type'],['icons','Icons'],['elevation','Elevation']];
+const LAYER_STEPS=[['scale','① 원시'],['brand','② 브랜드'],['semantic','③ 의미'],['dimension','④ 치수'],['comp','⑤ 컴포넌트'],['mode','모드'],['style','스타일']];
+const LAYER_OF={scale:'scale',brand:'brand',semantic:'semantic',dimension:'dimension',comp:'comp',radius:'mode',web:'mode',type:'style',icons:'style',elevation:'style'};
+function layerStrip(tab){
+  const cur=LAYER_OF[tab];
+  return `<div class="tk-layers">`+LAYER_STEPS.map(([k,l])=>`<span class="tkl ${k===cur?'on':''}">${l}</span>`).join('<i>→</i>')+`</div>`;
+}
+function chainRow(name,als,val,extra){
+  return `<div class="tk-crow"><span class="tk-cn">${name}</span>`+als.map(a=>`<span class="tk-arr">→</span><span class="tk-ca">${a}</span>`).join('')+`<span class="tk-arr">→</span><span class="tk-cp">${val}</span>${extra?`<span class="tk-cx">${extra}</span>`:''}</div>`;
+}
 const ICON_REG=[
  ['icon-brand-logo','brand','로고 마크'],
  ['icon-action-search','action','검색'],['icon-action-external','action','외부·새 탭 이동'],
@@ -1427,43 +1526,64 @@ let curTab='scale';
 function stepsOf(prefix){return Object.keys(SCALE).filter(k=>k.indexOf(prefix+'/')===0).map(k=>k.split('/').pop());}
 function renderTokenTab(tab){curTab=tab;
   document.querySelectorAll('#tkTabs button').forEach(x=>x.classList.toggle('on',x.dataset.t===tab));
-  const P=document.getElementById('tkPanel');let h='';
+  const P=document.getElementById('tkPanel');let h=layerStrip(tab);
   if(tab==='scale'){
-    h+=`<div class="tk-note"><b>Scale</b> · 원시 원자, 브랜드 무관. 색 램프 + dimension(수의 유일 프리미티브). 총 130 변수.</div>`;
+    h+=`<div class="tk-note"><b>① 원시 Scale</b> · 아무 의미도 없는 원자. 브랜드와 무관하고, 어떤 토큰도 여기를 <b>건너뛰어</b> 참조하지 않는다. 색 램프 + dimension(수의 유일한 프리미티브). 총 130 변수.<br>화면에 직접 쓰지 않는다 — 반드시 ③ 의미나 ④ 치수를 거쳐 쓴다.</div>`;
     h+=`<div class="tk-grp">color · solid</div>`;
     ['gray','blue','red','orange','green','purple'].forEach(hue=>h+=rampFor('color/'+hue,stepsOf('color/'+hue)));
     h+=`<div class="tk-grp">color · alpha</div>`;
     ['black','white','gray','blue','red','green','orange'].forEach(a=>{const s=stepsOf('color/alpha/'+a);if(s.length)h+=rampFor('color/alpha/'+a,s);});
-    h+=`<div class="tk-grp">dimension <span class="c">px · spacing·size·border·radius가 여기에 별칭</span></div><div class="tk-pills">`+DIMS.map(d=>`<span class="tk-pill">${d}</span>`).join('')+`</div>`;
+    h+=`<div class="tk-grp">dimension <span class="c">px · ④ 치수(spacing·size·border·radius)가 전부 여기에 별칭</span></div><div class="tk-pills">`+DIMS.map(d=>`<span class="tk-pill">${d}</span>`).join('')+`</div>`;
   } else if(tab==='brand'){
-    h+=`<div class="tk-note">★ <b>Brand</b> · 교체 지점. 이 컬렉션만 바꾸면 accent·link·focus·강조배경이 전체 캐스케이드. 현재: <b>${getComputedStyle(html).getPropertyValue('--brand-font').split(',')[0].replace(/"/g,'')}</b>. 총 15 변수.</div>`;
-    h+=`<div class="tk-grp">color/primary <span class="c">(현재 브랜드 램프 · 위 Brand 토글로 스왑)</span></div>`;
+    h+=`<div class="tk-note">★ <b>② 브랜드 Brand</b> · 교체 지점. 원시와 의미 <b>사이</b>에 끼워 넣은 한 겹으로, 이 컬렉션만 바꾸면 accent·link·focus·강조배경이 전체 캐스케이드. 현재 서체: <b>${getComputedStyle(html).getPropertyValue('--brand-font').split(',')[0].replace(/"/g,'')}</b>. 총 15 변수.</div>`;
+    h+=`<div class="tk-grp">color/primary <span class="c">(현재 브랜드 램프 · 우측 Brand 토글로 스왑)</span></div>`;
     h+=`<div class="tk-ramp"><div class="tk-rl">color/primary</div><div class="tk-sws">`+['05','10','20','40','50','55','60','70'].map(s=>{const hx=brandHex(s);return `<div class="tk-sw"><span class="c" style="background:${hx}"></span><span class="n">${s}</span><span class="h">${hx}</span></div>`;}).join('')+`</div></div>`;
     h+=`<div class="tk-grp">brand/font · brand/asset</div><div class="tk-pills"><span class="tk-pill">brand/font/display · text → <b>${getComputedStyle(html).getPropertyValue('--brand-font').split(',')[0].replace(/"/g,'')}</b></span><span class="tk-pill">brand/asset/logo · icon-set · image-tone <b>placeholder</b></span></div>`;
   } else if(tab==='semantic'){
-    h+=`<div class="tk-note"><b>Semantic</b> · 의미 토큰. 전부 Scale/Brand에 <b>별칭</b>. 동일 값이어도 맥락 다르면 분리 유지(병합 금지). 색 71 + 수치 38 = 109 변수.</div>`;
+    h+=`<div class="tk-note"><b>③ 의미 Semantic · 색만</b> · 전부 ① 원시나 ② 브랜드에 <b>별칭</b>. 맥락(배경인지 글자인지 선인지)을 이름에 담는 층이라, 값이 같아도 맥락이 다르면 분리를 유지한다(병합 금지). <b>71 색</b>.<br>컴포넌트가 직접 쓰는 <code>comp/*</code>는 이 층이 아니라 <b>⑤ 컴포넌트</b> 탭으로 옮겼고, 수치는 <b>④ 치수</b> 탭에 있다.</div>`;
     let grp='';
-    const gname={bg:'배경·면',fg:'전경·텍스트',bdr:'보더',comp:'컴포넌트',status:'상태(폼)',chart:'시세·차트',static:'모드 불변'};
-    SEM.forEach(([n,a])=>{const g=n.split('/')[0];if(g!==grp){grp=g;h+=`<div class="tk-grp">${g} <span class="c">${gname[g]||''}</span></div>`;}
+    const gname={bg:'배경·면',fg:'전경·텍스트',bdr:'보더',status:'상태(폼)',chart:'시세·차트',static:'모드 불변'};
+    SEM.filter(([n])=>n.indexOf('comp/')!==0).forEach(([n,a])=>{const g=n.split('/')[0];if(g!==grp){grp=g;h+=`<div class="tk-grp">${g} <span class="c">${gname[g]||''}</span></div>`;}
       const br=a.indexOf('color/primary/')===0;const hx=resolve(a);
       h+=`<div class="tk-srow"><span class="tk-chip"><i style="background:${hx}"></i></span><span class="tk-tn">${n}</span><span class="tk-arr">→</span><span class="tk-ref ${br?'br':''}">${a}${br?' ★':''}</span><span class="tk-hex">${hx}</span></div>`;});
-    h+=`<div class="tk-grp">numeric · spacing <span class="c">→ dimension</span></div><div class="tk-pills">`+SPACING.map(([t,al,px])=>`<span class="tk-pill">spacing/${t} → <b>${px}</b></span>`).join('')+`</div>`;
-    h+=`<div class="tk-grp">numeric · size <span class="c">→ dimension</span></div><div class="tk-pills">`+TK_SIZE.map(([t,px])=>`<span class="tk-pill">size/${t} <b>${px}</b></span>`).join('')+`</div>`;
-    h+=`<div class="tk-grp">numeric · border / comp <span class="c">comp → spacing (2단)</span></div><div class="tk-pills">`+BORDER.map(([t,px])=>`<span class="tk-pill">border/${t} <b>${px}</b></span>`).join('')+CPAD.map(([t,al,px])=>`<span class="tk-pill">comp/pad/${t} → <b>${px}</b></span>`).join('')+CGAP.map(([t,al,px])=>`<span class="tk-pill">comp/gap/${t} → <b>${px}</b></span>`).join('')+`</div>`;
-    h+=`<div class="tk-grp">numeric · comp/bdr-width <span class="c">파운데이션 보강 · 신규</span></div><div class="tk-pills">`+CBW.map(([t,al,px])=>`<span class="tk-pill">${t} → <b>${px}</b></span>`).join('')+`</div>`;
-    h+=`<div class="tk-note" style="margin-top:12px">선 두께 토큰이 없어 컴포넌트마다 값이 흩어져 있었습니다(Button·Card 1 / Input 1.5). <b>comp/bdr-width/*</b>로 묶습니다. 다만 <b>comp/ring-width 3</b>은 dimension 스케일에 3이 없어(0·1·2·4·6…) 아직 별칭이 없습니다 — <b>dimension/3</b>을 추가하거나 링을 2 또는 4로 맞춰야 합니다.<br>색 쪽에도 어긋난 곳이 있습니다: <b>comp/bdr/default</b>는 alpha/black/60(#666666), <b>comp/bdr/subtle</b>은 alpha/black/20(#CCCCCC)이라 "default"가 "subtle"보다 <b>3배 무겁습니다</b> — 램프 배정이 뒤집혀 있어 재지정이 필요합니다. 또 <b>comp/fill/accent/secondary</b>(primary/40)는 <b>comp/bdr/focus-ring</b>과 같은 값이라, Secondary 버튼의 배경과 포커스 링이 같은 색으로 충돌합니다.</div>`;
+  } else if(tab==='dimension'){
+    h+=`<div class="tk-note"><b>④ 치수 Dimension</b> · 색이 아닌 수. 전부 ① 원시의 <code>dimension/*</code> 하나에 별칭되며, 브랜드를 타지 않는다. 아래는 별칭 체인을 끝까지 펼친 것 — <b>토큰 이름 → 별칭 → 실제 px</b>. <b>29 변수</b>.</div>`;
+    h+=`<div class="tk-grp">spacing <span class="c">간격 · 여백의 단일 사다리</span></div>`;
+    h+=SPACING.map(([t,al,px])=>chainRow('spacing/'+t,[al],px+'px')).join('');
+    h+=`<div class="tk-grp">size <span class="c">고정 지오메트리 · 아이콘·아바타·터치 하한</span></div>`;
+    h+=TK_SIZE.map(([t,px])=>chainRow('size/'+t,['dimension/'+px],px+'px',t.indexOf('control/')===0?'텍스트 없는 컨트롤 전용(체크박스·라디오·토글·아이콘 버튼)':t==='touch-target/min'?'하한선 — 시각 높이가 아니라 히트 영역으로 보장':'')).join('');
+    h+=`<div class="tk-grp">border <span class="c">선 두께 사다리</span></div>`;
+    h+=BORDER.map(([t,px])=>chainRow('border/'+t,['dimension/'+px],px+'px')).join('');
+    h+=`<div class="tk-grp">radius <span class="c">곡률 스텝 · 모드별 값은 Radius 탭</span></div>`;
+    h+=Object.entries(RADIUS).map(([k,v])=>chainRow('radius/'+k,['모드 3종'],v.map(x=>x>=999?'999':x).join(' · '),'sharp · default · rounded')).join('');
+    h+=`<div class="tk-note" style="margin-top:12px">텍스트가 들어가는 컴포넌트의 높이는 이제 <b>size/control</b>이 아니라 <b>comp/pad/*-y × 2 + line-height</b>로 hug 결정됩니다. <b>size/control</b> 32·40·48은 텍스트 없는 고정 지오메트리 컨트롤에만 남습니다.</div>`;
+  } else if(tab==='comp'){
+    h+=`<div class="tk-note"><b>⑤ 컴포넌트 comp/*</b> · 컴포넌트가 <b>실제로 소비하는 유일한 층</b>. 색은 ③ 의미를, 수치는 ④ 치수를 한 번 더 감싸 "이 컴포넌트의 이 자리"라는 이름을 붙인다. 버튼 스펙에 <code>color/blue/50</code>이 직접 나오면 안 되고, 항상 <code>comp/fill/accent/primary</code>여야 한다. <b>색 14 + 수치 12</b>.</div>`;
+    let grp='';
+    const cn={'comp/fill':'면 채우기','comp/bdr':'선','comp/state':'상호작용 상태'};
+    SEM.filter(([n])=>n.indexOf('comp/')===0).forEach(([n,a])=>{const g=n.split('/').slice(0,2).join('/');if(g!==grp){grp=g;h+=`<div class="tk-grp">${g} <span class="c">${cn[g]||''}</span></div>`;}
+      const br=a.indexOf('color/primary/')===0;const hx=resolve(a);
+      h+=`<div class="tk-srow"><span class="tk-chip"><i style="background:${hx}"></i></span><span class="tk-tn">${n}</span><span class="tk-arr">→</span><span class="tk-ref ${br?'br':''}">${a}${br?' ★':''}</span><span class="tk-hex">${hx}</span></div>`;});
+    h+=`<div class="tk-grp">comp/pad <span class="c">컴포넌트 안쪽 여백 · 2단 별칭</span></div>`;
+    h+=CPAD.map(([t,al,px])=>chainRow('comp/pad/'+t,[al,'dimension/'+px],px+'px')).join('');
+    h+=`<div class="tk-grp">comp/gap <span class="c">컴포넌트 내부 요소 간격</span></div>`;
+    h+=CGAP.map(([t,al,px])=>chainRow('comp/gap/'+t,[al,'dimension/'+px],px+'px')).join('');
+    h+=`<div class="tk-grp">comp/radius <span class="c">→ radius 스텝 → 모드</span></div>`;
+    h+=CRAD.map(([k,t])=>chainRow('comp/radius/'+k,['radius/'+t],RADIUS[t].map(x=>x>=999?'999':x).join(' · '),'sharp · default · rounded')).join('');
+    h+=`<div class="tk-grp">comp/bdr-width <span class="c">파운데이션 보강 · 신규</span></div>`;
+    h+=CBW.map(([t,al,px])=>chainRow(t,[al],px+'px',t==='comp/ring-width'?'별칭 없음 — dimension에 3이 없다':'')).join('');
+    h+=`<div class="tk-note" style="margin-top:12px"><b>SD-2</b> 선 두께 토큰이 없어 컴포넌트마다 값이 흩어져 있었습니다(Button·Card 1 / Input 1.5). <b>comp/bdr-width/*</b>로 묶습니다. 다만 <b>comp/ring-width 3</b>은 dimension 스케일에 3이 없어(0·1·2·4·6…) 아직 별칭이 없습니다 — <b>dimension/3</b>을 추가하거나 링을 2 또는 4로 맞춰야 합니다.<br><b>SD-3</b> <b>comp/bdr/default</b>는 alpha/black/60(#666666), <b>comp/bdr/subtle</b>은 alpha/black/20(#CCCCCC)이라 "default"가 "subtle"보다 <b>3배 무겁습니다</b> — 램프 배정이 뒤집혀 있어 재지정이 필요합니다.<br><b>SD-1</b> <b>comp/fill/accent/secondary</b>(primary/40)는 <b>comp/bdr/focus-ring</b>과 같은 값이라, Secondary 버튼의 배경과 포커스 링이 같은 색으로 충돌합니다.</div>`;
   } else if(tab==='radius'){
-    h+=`<div class="tk-note"><b>Radius</b> · 곡률. 배율이 아닌 <b>모드</b>(sharp/default/rounded)로 곡률 성격 교체. 각 스텝이 모드별 dimension에 별칭. 14 변수 · 3 모드.</div>`;
+    h+=`<div class="tk-note"><b>Radius 모드</b> · 배율이 아니라 <b>모드</b>(sharp/default/rounded)로 곡률 성격 자체를 교체. 계층에 얹히는 게 아니라 <b>직교</b>하는 축이라, ④ 치수의 radius 스텝이 모드별 dimension에 별칭된다. 14 변수 · 3 모드.<br>컴포넌트가 쓰는 <code>comp/radius/*</code>는 ⑤ 컴포넌트 탭에 있습니다.</div>`;
     h+=`<table class="tk-tbl"><tr><th>radius</th><th>sharp</th><th>default</th><th>rounded</th></tr>`+Object.entries(RADIUS).map(([k,v])=>`<tr><td>radius/${k}</td><td>${v[0]>=999?'999':v[0]}</td><td>${v[1]>=999?'999':v[1]}</td><td>${v[2]>=999?'999':v[2]}</td></tr>`).join('')+`</table>`;
-    h+=`<div class="tk-grp">comp/radius <span class="c">→ radius 별칭</span></div><div class="tk-pills">`+CRAD.map(([k,t])=>`<span class="tk-pill">comp/radius/${k} → <b>radius/${t}</b></span>`).join('')+`</div>`;
   } else if(tab==='web'){
-    h+=`<div class="tk-note"><b>Web</b> · 반응형. 모바일 1st · 3 모드. 초대형 타이틀만 반응형, 본문류는 전 해상도 고정. 10 변수.</div>`;
+    h+=`<div class="tk-note"><b>Web 모드</b> · 반응형. 모바일 1st · 3 모드. Radius와 마찬가지로 계층에 얹히지 않고 <b>직교</b>합니다. 초대형 타이틀만 반응형, 본문류는 전 해상도 고정. 10 변수.</div>`;
     h+=`<table class="tk-tbl"><tr><th></th><th>mobile</th><th>tablet</th><th>desktop</th></tr>`+WEBROWS.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')+`</table>`;
   } else if(tab==='type'){
-    h+=`<div class="tk-note"><b>Text Styles</b> · 서체는 <b>brand/font</b>(스왑됨), 사이즈·행간은 프리미티브 조합. 42 스타일 중 대표.</div>`;
+    h+=`<div class="tk-note"><b>Text Styles</b> · 변수가 아니라 <b>스타일</b>이라 계층 바깥에 둡니다. 서체는 <b>brand/font</b>(스왑됨), 사이즈·행간은 프리미티브 조합. 42 스타일 중 대표.</div>`;
     h+=TYPES.map(([n,sz,lh,w])=>`<div class="tk-type"><span class="lab">${n}<br><span>${sz}/${lh} · ${w}</span></span><span class="samp" style="font-family:var(--brand-font);font-size:${sz}px;line-height:${lh}px;font-weight:${w}">Own real assets 조각투자 Ag</span></div>`).join('');
   } else if(tab==='icons'){
-    h+=`<div class="tk-note">★ <b>Icon Set</b> · 교체 지점. 네이밍 <b>icon-{group}-{name}</b> · 현재 Lucide(ISC). 커스텀 아이콘 도착 시 같은 id의 &lt;symbol&gt; path만 갈아끼우면 전 화면 아이콘이 동시 스왑됩니다. <b>${ICON_REG.length}종</b>.</div>`;
+    h+=`<div class="tk-note">★ <b>Icon Set</b> · 교체 지점. 변수가 아니라 <b>에셋</b>이라 계층 바깥. 네이밍 <b>icon-{group}-{name}</b> · 현재 Lucide(ISC). 커스텀 아이콘 도착 시 같은 id의 &lt;symbol&gt; path만 갈아끼우면 전 화면 아이콘이 동시 스왑됩니다. <b>${ICON_REG.length}종</b>.</div>`;
     const gn={brand:'브랜드',action:'액션',nav:'내비게이션',status:'상태',trend:'시세',finance:'금융',feature:'특성',category:'카테고리(자산)'};
     let cur='';
     ICON_REG.forEach(([id,g,role])=>{
@@ -1472,7 +1592,7 @@ function renderTokenTab(tab){curTab=tab;
     });
     h+='</div>';
   } else if(tab==='elevation'){
-    h+=`<div class="tk-note"><b>Elevation</b> · 브랜드 무관 그림자 스케일. 표면 위계에 따라 rest→hover→overlay→modal. Card Raised는 <b>rest=shadow/1 · hover=shadow/2</b>로 두 칸을 함께 씁니다 — rest를 2에 고정하면 hover가 올라갈 자리가 없습니다. 스펙의 shadow/2 원시값(0 4px 4px rgba(0,0,0,.1))은 blur=offset·spread 0이라 가장자리가 딱딱하므로, 2겹으로 푼 여기 값으로 통일하는 걸 권장합니다.</div><div class="tk-elevs">`+ELEVS.map(([n,u])=>`<div class="tk-elev"><div class="b" style="box-shadow:var(--${n})"></div><div class="n">${n}</div><div class="u">${u}</div></div>`).join('')+`</div>`;
+    h+=`<div class="tk-note"><b>Elevation</b> · 스타일. 브랜드 무관 그림자 스케일, 표면 위계에 따라 rest→hover→overlay→modal. Card Raised는 <b>rest=shadow/1 · hover=shadow/2</b>로 두 칸을 함께 씁니다 — rest를 2에 고정하면 hover가 올라갈 자리가 없습니다. 스펙의 shadow/2 원시값(0 4px 4px rgba(0,0,0,.1))은 blur=offset·spread 0이라 가장자리가 딱딱하므로, 2겹으로 푼 여기 값으로 통일하는 걸 권장합니다.</div><div class="tk-elevs">`+ELEVS.map(([n,u])=>`<div class="tk-elev"><div class="b" style="box-shadow:var(--${n})"></div><div class="n">${n}</div><div class="u">${u}</div></div>`).join('')+`</div>`;
   }
   P.innerHTML=h;P.parentNode.querySelector('.tk-panel')&&(document.querySelector('.tokens').scrollTop=0);
 }
@@ -1573,7 +1693,7 @@ function renderCmpTab(tab){curCmpTab=tab;
     h+='<div class="rspx">'+[['Mobile','≤767','m',1],['Tablet','768–1023','t',2],['Desktop','1024+','d',3]].map(([lab,rng,cls,cols])=>
       `<div class="rspx-col"><div class="rspx-cap">${lab} <span>${rng}</span></div><div class="rspx-mock ${cls}"><div class="rspx-nav"><span class="d"></span><i></i><i></i><i></i></div><div class="rspx-hero"><b></b><s></s></div><div class="rspx-grid" style="grid-template-columns:repeat(${cols},1fr)">${Array.from({length:cols*2}).map(()=>'<div class="rspx-card"><u></u></div>').join('')}</div></div></div>`).join('')+'</div>';
     h+='<div class="cmp-note" style="margin-bottom:18px">같은 콘텐츠가 컨테이너 폭에 따라 <b>1 → 2 → 3열</b>로 갈라지고, 컨테이너 패딩·거터·섹션 간격이 함께 커집니다. 실제 화면 리플로우는 <b>모듈·페이지 뷰 + Device 토글</b>에서 확인하세요.</div>';
-    h+='<div class="cmp-sub">전 해상도 고정</div><div class="rsp-fixed">버튼 · 인풋/필드 · 셀렉트 · 체크박스/라디오/토글 · 칩 · 배지 · 알림 · 아이콘은 <b>디바이스와 무관하게 고정</b>입니다. 크기 변형이 필요하면 디바이스가 아니라 <b>Size 노브(S·M·L)</b>로 조절합니다 — 노브는 스펙의 size 축을 한 칸씩 밀어줍니다. 버튼·필드의 높이는 더 이상 고정값이 아니라 <b>comp/pad/*-y ×2 + line-height</b>로 hug 결정되고(버튼 40·44·46 / 필드 46·48·52), 터치 하한선 <b>size/touch-target/min 48</b>은 히트 영역으로 별도 보장합니다. <b>size/control</b> 38·46·54는 이제 텍스트가 없는 고정 지오메트리 컨트롤(체크박스·라디오·토글·아이콘 버튼)에만 남깁니다. <b>size/icon</b> 20·22·26.</div>';
+    h+='<div class="cmp-sub">전 해상도 고정</div><div class="rsp-fixed">버튼 · 인풋/필드 · 셀렉트 · 체크박스/라디오/토글 · 칩 · 배지 · 알림 · 아이콘은 <b>디바이스와 무관하게 고정</b>입니다. 크기 변형이 필요하면 디바이스가 아니라 <b>Size 노브(S·M·L)</b>로 조절합니다 — 노브는 스펙의 size 축을 한 칸씩 밀어줍니다. 버튼·필드의 높이는 더 이상 고정값이 아니라 <b>comp/pad/*-y ×2 + line-height</b>로 hug 결정되고(버튼 40·44·46 / 필드 48·50·54), 터치 하한선 <b>size/touch-target/min 48</b>은 히트 영역으로 별도 보장합니다. <b>size/control</b> 32·40·48은 이제 텍스트가 없는 고정 지오메트리 컨트롤(체크박스·라디오·토글·아이콘 버튼)에만 남깁니다. <b>size/icon</b> 16·20·24.</div>';
     h+='<div class="cmp-note">반응형 소스=<b>Web 컬렉션</b>(mobile·tablet·desktop 3모드) · display만 반응형, body류 텍스트·컴포넌트는 전 해상도 고정 · 실제 리플로우는 <b>모듈·페이지 뷰 + Device 토글</b>에서 확인</div></div>';
   }
   P.innerHTML=`<div class="cmp-stage">${h}</div>`;
@@ -1615,8 +1735,19 @@ const MOD_META={
   logowall:{t:'로고월',anat:'.logowall · ll · lrow · lg',desc:'제휴·수탁 파트너 신뢰 로고를 한 줄로 나열하는 범용 모듈. 실제 로고 도착 전까지 아이콘+워드마크 플레이스홀더입니다.',note:'로고=<b>fg/subtler</b> + opacity(무채색 처리) · 라벨=<b>fg/mut</b> · 반응형 wrap · 아이콘 교체=<b>Icons 교체 지점</b>'},
   faq:{t:'FAQ',anat:'.faq · fitem(fq · fa) · [.open]',desc:'자주 묻는 질문 아코디언. 문항 클릭 시 답변이 펼쳐지고 셰브론이 회전하는 범용 모듈입니다.',note:'구분선=<b>line</b> · 셰브론=<b>icon-nav-down</b>(회전) · 펼침 전이=<b>max-height 0.25s</b> · 질문=<b>fg</b> · 답변=<b>fg/subtle</b>'}
 };
-const MOD_ORDER=['header','hero','stats','steps','products','features','cta','footer','logowall','faq'];
-function renderModTab(tab){curModTab=tab;
+/* 스키마 티어에 맞춰 분리: B. Molecule = 모듈 / C. Pattern = 패턴.
+   이전에는 Hero·통계·특징·CTA·로고월·FAQ 여섯 개가 모듈 탭에 섞여 있었다. */
+const MOD_ORDER=['header','steps','products','footer'];
+const PAT_ORDER=['hero','stats','features','cta','logowall','faq'];
+let curPatTab='hero';
+const MOD_TITLE={
+  modules:'모듈 <span>· B. Molecule · 컴포넌트를 조합한 반복 재사용 블록</span>',
+  patterns:'패턴 <span>· C. Pattern · 페이지·섹션 단위, 도메인 특화 구조</span>'
+};
+function renderModTab(tab){
+  if(PAT_ORDER.indexOf(tab)>=0)curPatTab=tab;else curModTab=tab;
+  const _tt=document.getElementById('modTopTitle');
+  if(_tt)_tt.innerHTML=MOD_TITLE[html.getAttribute('data-view')]||MOD_TITLE.modules;
   const m=MOD_META[tab];const P=document.getElementById('modPanel');
   const varbar=tab==='products'
     ? `<div class="mod-varbar"><span class="vl">Layout · 모듈 변형</span><div class="seg sm" id="modLayoutSeg"><button data-val="grid" class="on">Grid</button><button data-val="carousel">Carousel</button><button data-val="list">List</button></div></div>`
@@ -2830,6 +2961,199 @@ document.getElementById('igFigmaRun').addEventListener('click',()=>{
 ['igFigma','igFigmaTok'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{
   if(e.key==='Enter'){e.preventDefault();document.getElementById('igFigmaRun').click();}
 }));
+
+
+/* ================= SPEC VIEW — freesm-component-schema.json 임베드 브라우저 =================
+   데모에 "리스트를 미리 뚫어" 두는 자리. 구현된 항목은 기존 컴포넌트·모듈·패턴 뷰가 실물을 보여주고,
+   아직 안 만든 항목은 빈 화면 대신 스펙 카드(상태·토큰 바인딩·variant 축·프로퍼티·미결 질문)를 보여준다.
+   → 네비게이터가 "있는 척"하지 않으면서도 전체 재고를 드러낸다. */
+const SCHEMA={"$schema":"Freesm 컴포넌트/모듈/패턴 구조화 스키마 v0.1 — 코드/에이전트가 읽는 정규화된 카탈로그","version":"0.5","sourceDocs":["Freesm-컴포넌트-모듈-패턴-유형화-v0.3","Freesm-컴포넌트-토큰바인딩-스펙-v0.1","Freesm-토큰-시스템화-v0.1","Freesm-Figma구축-재개지점"],"statusLegend":{"spec_confirmed":"토큰 바인딩·variant·프로퍼티까지 확정, 코드 구현 가능한 수준. `visuallyValidated: true`인 항목은 추가로 Figma 임시 렌더링(작업 후 삭제)까지 거침 — 이후로는 Figma에 직접 만들지 않는 방침이라 신규 항목은 렌더링 없이 토큰 근거만으로 확정","tokens_identified":"바인딩할 토큰은 특정됐으나 variant 매트릭스·프로퍼티 미확정","candidate_only":"리스트업 단계, 토큰 후보만 메모 수준으로 존재","review":"채택 여부 자체가 논의 대상(도메인 적합성 등)"},"resolvedDecisions":[{"topic":"텍스트 기반 컴포넌트(Button/Input)의 높이 결정 방식","decision":"고정 높이(size/control/*) 방식을 폐기하고 hug 방식 채택 — comp/pad/button-y·comp/pad/field-y로 상하 패딩을 주고, 텍스트 스타일의 line-height와 합쳐져 높이가 자연 결정됨. 폭도 기본은 hug(Button)/fill(Input)이되 size/touch-target/min으로 하한선을 둔다.","decidedBy":"user","affectedComponents":["Button","Input"],"followUp":"size/control/{s,m,l}은 텍스트가 없는 고정 지오메트리 컨트롤(Checkbox·Radio·Switch·Icon Button 등, A-2)에 재배정 검토 — Card 이후 A-2 스펙화 시 적용"},{"topic":"Card Raised의 그림자 레벨","decision":"rest = shadow/1, hover = shadow/2. 잠정 지정이던 shadow/2 단일 고정을 폐기.","decidedBy":"build-session","affectedComponents":["Card"],"followUp":"foundationGaps.Elevation의 명칭 통일 작업에서 shadow/1~4 원시값을 함께 재정의한다.","rationale":"Raised를 rest에서 이미 shadow/2에 고정하면 hover가 한 단계 올라갈 자리가 없다. 데모 elevation 사다리도 elev-1을 카드 rest, elev-2를 카드 hover 역할로 이미 쓰고 있다. 추가로 shadow/2의 원시값 0px 4px 4px rgba(0,0,0,0.1)은 blur가 offset과 같고 spread가 0이라 가장자리가 딱딱하다 — 2겹으로 푼 부드러운 값으로 통일 권장.","date":"2026-07-29"},{"topic":"Input Error 상태의 배경 틴트","decision":"배경 틴트(status/bg/critical)를 적용하지 않는다. 대신 fill은 유지한 채 바깥에 3px ring(status/bg/critical)을 둘러 색 이외의 신호를 준다. 같은 방식을 Focus에도 적용한다.","decidedBy":"build-session","affectedComponents":["Input"],"followUp":"ring 두께 토큰이 전제 — foundationGaps.BorderWidth 및 specDefects SD-2 해결 후 확정한다.","rationale":"Error 보더(#DB3C35) vs Default 보더(#666666)의 명도 대비는 1.29:1, focus-ring(#205CE9) vs Default 보더는 1.03:1 — 1px 보더 색만 바꾸는 방식은 흑백·색각이상에서 Focus도 Error도 식별되지 않는다. 그러나 fill 틴트는 (a) state 축 전체에서 comp/fill/field/*가 하나로 유지되는 불변식을 깨고 (b) 배경이 칠해진 필드는 disabled/readonly로 읽히며 (c) 다크 모드에서 틴트 가독성 유지가 가장 어렵다. ring은 fill을 건드리지 않고 두께라는 비색상 신호를 더한다.","date":"2026-07-29"}],"specDefects":[{"id":"SD-1","severity":"blocking","where":"Button.tokenBindings.style.Secondary","problem":"comp/fill/accent/secondary(#205CE9) 위에 fg/accent/primary(#1245BA)를 얹는 조합의 명도 대비가 1.46:1로 판독 불가. comp/fill/accent/secondary가 color/primary/40에 별칭돼 옅은 틴트가 아니라 채도 높은 파랑이 됐고, 같은 값이 comp/bdr/focus-ring에도 물려 있어 배경과 포커스 링이 충돌한다.","action":"comp/fill/accent/secondary를 옅은 틴트 램프(primary/05 계열)로 재지정하고 focus-ring과 값을 분리한다. 데모는 accent/subtle로 교정해 선구현했다."},{"id":"SD-2","severity":"blocking","where":"foundation","problem":"보더 두께 토큰 부재.","action":"comp/bdr-width/* 신설. foundationGaps.BorderWidth 참조."},{"id":"SD-3","severity":"high","where":"semantic tokens","problem":"comp/bdr/default는 alpha/black/60(#666666), comp/bdr/subtle은 alpha/black/20(#CCCCCC)이라 default가 subtle보다 3배 무겁다 — 램프 배정이 뒤집혔다.","action":"두 토큰의 별칭을 교체하거나 명칭을 실제 무게에 맞게 재배정한다."},{"id":"SD-4","severity":"high","where":"Button.layout / resolvedDecisions[0]","problem":"hug 전환 시 size/touch-target/min을 minWidth에만 걸어 세로축 하한이 사라졌다. Button 실측 높이는 40·44·46으로 세 사이즈 모두 48 미달.","action":"히트 영역을 시각 높이와 분리해 48을 보장하는 방식을 스펙에 명시하거나 minHeight를 별도로 건다. 데모는 ::after 오버레이 방식으로 선구현했다."},{"id":"SD-5","severity":"high","where":"Button.variantAxes.size / Input.variantAxes.size","problem":"같은 사이즈 이름에서 높이가 어긋난다 — Button 40·44·46 vs Input 48·50·54. Search Bar·Form Field 모듈에서 정렬이 깨진다. 또한 스펙이 hug 높이에 stroke를 포함하는지 명시하지 않아 보더 2px로 Input Small의 48 하한 통과 여부가 갈린다.","action":"사이즈별 comp/pad/*-y를 분리하거나 텍스트 스타일 쌍을 재지정한다. hug 높이의 stroke 포함 여부를 명시한다."},{"id":"SD-6","severity":"medium","where":"Button.variantAxes.state","problem":"comp/bdr/focus-ring 토큰이 있는데 Button state 축에 Focus가 없다 — Input에는 있고 Button에는 없는 비대칭.","action":"Button state 축에 Focus 추가 여부를 결정한다(추가 시 variantCount 24 → 36)."},{"id":"SD-7","severity":"low","where":"Button.tokenBindings.leadingIcon","problem":"size/icon/s를 참조하는데 previewTokenValues.numbers에 그 정의가 없다.","action":"previewTokenValues.numbers에 size/icon/s를 추가한다."},{"id":"SD-8","severity":"low","where":"preview artifact","problem":"letter-spacing 값 -0.2를 -0.2%로 출력(단위 불일치). Card 미리보기가 comp/gap/m(12) 대신 margin-bottom 4px 사용.","action":"미리보기 렌더러를 수정한다."},{"id":"SD-9","severity":"low","where":"Button.variantAxes.style","problem":"데모에는 Danger 스타일이 확장으로 존재하나 스키마 style 축에는 없다.","action":"Danger를 스펙에 편입할지 결정한다."}],"previewTokenValues":{"_note":"Figma 빌드 파일(yVG1cVrKpcwZ7lDfVS7RMr)에서 read-only로 실측한 값. Semantic=Light 모드, Radius=default 모드, Brand=현재 설정된 기본값(Deep Blue #1245BA 플레이스홀더) 기준 — 실제 브랜드 스왑 시 색상값만 교체되고 구조는 동일하게 유지됨. '미리보기' 탭에서 스펙이 실제로 어떻게 보이는지 확인하는 용도이며, 컴포넌트 스펙(tokenBindings)의 정규 소스는 아님 — 정규 소스는 각 컴포넌트의 tokenBindings/layout 필드.","colors":{"comp/fill/accent/primary":{"r":0.0706,"g":0.2706,"b":0.7294,"a":1},"comp/fill/accent/secondary":{"r":0.1255,"g":0.3608,"b":0.9137,"a":1},"comp/fill/neutral/primary":{"r":0.0549,"g":0.0588,"b":0.0627,"a":1},"comp/fill/neutral/ghost":{"r":1,"g":1,"b":1,"a":0},"comp/fill/neutral/disabled":{"r":0.8902,"g":0.8941,"b":0.902,"a":1},"comp/fill/field/default":{"r":1,"g":1,"b":1,"a":1},"comp/fill/field/disabled":{"r":0,"g":0,"b":0,"a":0.051},"fg/inverse/default":{"r":1,"g":1,"b":1,"a":1},"fg/accent/primary":{"r":0.0706,"g":0.2706,"b":0.7294,"a":1},"fg/default":{"r":0.0549,"g":0.0588,"b":0.0627,"a":1},"fg/disabled":{"r":0,"g":0,"b":0,"a":0.2},"fg/subtle":{"r":0,"g":0,"b":0,"a":0.6},"comp/bdr/default":{"r":0,"g":0,"b":0,"a":0.6},"comp/bdr/focus-ring":{"r":0.1255,"g":0.3608,"b":0.9137,"a":1},"comp/bdr/disabled":{"r":0,"g":0,"b":0,"a":0.051},"status/fg/critical":{"r":0.8588,"g":0.2353,"b":0.2078,"a":1},"bg/default":{"r":1,"g":1,"b":1,"a":1},"bg/ev/raised":{"r":1,"g":1,"b":1,"a":1},"comp/bdr/subtle":{"r":0,"g":0,"b":0,"a":0.2}},"numbers":{"comp/radius/button":12,"comp/radius/input":8,"comp/radius/card":16,"comp/pad/button-x":20,"comp/pad/button-y":12,"comp/pad/field-x":16,"comp/pad/field-y":12,"comp/pad/card":24,"comp/gap/s":8,"comp/gap/m":12,"size/touch-target/min":48},"shadows":{"shadow/2":"0px 4px 4px rgba(0,0,0,0.1)"},"textStyles":{"utility/standard/xs/500":{"fontFamily":"Pretendard Variable","fontStyle":"Medium","fontWeight":500,"fontSize":12,"lineHeight":16,"letterSpacing":-0.2},"utility/standard/s/500":{"fontFamily":"Pretendard Variable","fontStyle":"Medium","fontWeight":500,"fontSize":14,"lineHeight":20,"letterSpacing":-0.2},"utility/standard/m/500":{"fontFamily":"Pretendard Variable","fontStyle":"Medium","fontWeight":500,"fontSize":16,"lineHeight":22,"letterSpacing":-0.2},"body/s/400":{"fontFamily":"Pretendard Variable","fontStyle":"Regular","fontWeight":400,"fontSize":14,"lineHeight":22,"letterSpacing":-0.2},"body/m/400":{"fontFamily":"Pretendard Variable","fontStyle":"Regular","fontWeight":400,"fontSize":16,"lineHeight":24,"letterSpacing":-0.2},"body/l/400":{"fontFamily":"Pretendard Variable","fontStyle":"Regular","fontWeight":400,"fontSize":18,"lineHeight":28,"letterSpacing":-0.2}}},"components":{"_tier":"A. Atom — 토큰에 직접 바인딩되는 최소 단위","Button":{"status":"spec_confirmed","visuallyValidated":true,"priority":1,"seedEquivalent":["Action Button","Input Button"],"layout":{"autoLayout":"HORIZONTAL","widthSizing":"HUG","minWidth":"size/touch-target/min","heightSizing":"HUG","align":{"primary":"CENTER","counter":"CENTER"},"paddingX":"comp/pad/button-x","paddingY":"comp/pad/button-y","cornerRadius":"comp/radius/button","iconLabelGap":"comp/gap/s","note":"REVISED(사용자 결정): 고정 높이 방식 폐기 → hug(패딩+텍스트 라인하이트로 높이 결정) 채택. 폭은 hug + size/touch-target/min으로 하한선. size/control/* 은 더 이상 Button/Input에 쓰지 않고 Checkbox·Radio·Switch·Icon Button처럼 텍스트가 없는 고정 지오메트리 컨트롤 쪽으로 재배정 검토(A-2 스펙화 시 반영)"},"variantAxes":{"style":["Primary","Secondary","Neutral","Ghost"],"size":["Small","Medium","Large"],"state":["Default","Disabled"]},"variantCount":24,"tokenBindings":{"style":{"Primary":{"fill":"comp/fill/accent/primary","text":"fg/inverse/default","border":null},"Secondary":{"fill":"comp/fill/accent/secondary","text":"fg/accent/primary","border":null},"Neutral":{"fill":"comp/fill/neutral/primary","text":"fg/inverse/default","border":null},"Ghost":{"fill":"comp/fill/neutral/ghost","text":"fg/default","border":"comp/bdr/default"}},"size":{"Small":{"textStyle":"utility/standard/xs/500","note":"높이는 이 텍스트 스타일의 line-height + paddingY×2로 자연 결정(직접 바인딩 없음)"},"Medium":{"textStyle":"utility/standard/s/500","note":"동일 원리"},"Large":{"textStyle":"utility/standard/m/500","note":"동일 원리"}},"state":{"Disabled":{"fill":"comp/fill/neutral/disabled","text":"fg/disabled","border":null,"overrides":["style"]}}},"properties":[{"name":"label","type":"TEXT","default":"Button"},{"name":"disabled","type":"BOOLEAN","default":false,"mapsToState":"State=Disabled"},{"name":"leadingIcon","type":"BOOLEAN","default":false,"optional":true,"note":"size/icon/s + comp/gap/s"}],"validation":{"renderedCombo":"Style=Primary,Size=Medium,State=Default","measured":{"fill":"#1245BA","textColor":"#FFFFFF","height":"hug — 40·44·46 (Small·Medium·Large, 실측 2026-07-29)","cornerRadius":12},"note":"hug 전환 후 재측정 완료. Button은 세 사이즈 모두 size/touch-target/min(48)에 미달하므로 히트 영역을 별도로 겹쳐야 한다."},"openQuestions":[]},"Input":{"status":"spec_confirmed","visuallyValidated":false,"priority":1,"seedEquivalent":["Text Input & Textarea","Field"],"layout":{"autoLayout":"HORIZONTAL","widthSizing":"FILL (부모 폭에 맞춤)","minWidth":"size/touch-target/min","heightSizing":"HUG","align":{"primary":"CENTER","counter":"CENTER"},"paddingX":"comp/pad/field-x","paddingY":"comp/pad/field-y","cornerRadius":"comp/radius/input","note":"REVISED(사용자 결정): Button과 동일하게 hug 높이(패딩+텍스트 라인하이트) 채택, 폭은 FILL이되 size/touch-target/min으로 하한선 유지(좁은 컨테이너에서도 최소 사용성 보장)"},"variantAxes":{"size":["Small","Medium","Large"],"state":["Default","Focus","Error","Disabled"]},"variantCount":12,"tokenBindings":{"size":{"Small":{"textStyle":"body/s/400","note":"높이는 line-height + paddingY×2로 자연 결정"},"Medium":{"textStyle":"body/m/400","note":"동일 원리"},"Large":{"textStyle":"body/l/400","note":"동일 원리"}},"state":{"Default":{"fill":"comp/fill/field/default","border":"comp/bdr/default","text":"fg/default","placeholderText":"fg/subtle"},"Focus":{"fill":"comp/fill/field/default","border":"comp/bdr/focus-ring","text":"fg/default","placeholderText":"fg/subtle"},"Error":{"fill":"comp/fill/field/default","border":"status/fg/critical","text":"fg/default","placeholderText":"fg/subtle","note":"border가 comp/* 대신 status/* 직접 참조 — comp/bdr/error 토큰 부재로 인한 의도적 크로스 컬렉션 참조"},"Disabled":{"fill":"comp/fill/field/disabled","border":"comp/bdr/disabled","text":"fg/disabled","placeholderText":"fg/disabled"}}},"properties":[{"name":"placeholder","type":"TEXT","default":"Enter text"},{"name":"value","type":"TEXT","default":""},{"name":"disabled","type":"BOOLEAN","default":false,"mapsToState":"State=Disabled"},{"name":"error","type":"BOOLEAN","default":false,"mapsToState":"State=Error","note":"에러 메시지 텍스트 자체는 Input이 아니라 B tier의 Form Field 모듈이 담당"}],"openQuestions":[]},"Card":{"status":"spec_confirmed","visuallyValidated":false,"priority":1,"seedEquivalent":[],"layout":{"autoLayout":"VERTICAL","widthSizing":"FILL (부모 그리드/컬럼 폭에 맞춤)","heightSizing":"HUG","padding":"comp/pad/card","gap":"comp/gap/m","cornerRadius":"comp/radius/card","note":"Button/Input과 달리 컨테이너 컴포넌트라 min-width 정책 대상 아님 — 내부 콘텐츠(제목/본문/액션 등) 구성은 B tier 'Card Group/Grid' 모듈에서 정의"},"variantAxes":{"elevation":["Flat","Raised"]},"variantCount":2,"tokenBindings":{"elevation":{"Flat":{"fill":"bg/default","border":"comp/bdr/subtle","shadow":null},"Raised":{"fill":"bg/ev/raised","border":null,"shadow":"shadow/1","shadowHover":"shadow/2"}}},"properties":[{"name":"elevated","type":"BOOLEAN","default":true,"mapsToState":"elevation=Raised (false→Flat)"}],"note":"bg/default·bg/ev/raised은 Light 모드에서 값이 동일(#FFFFFF)함 — 두 토큰이 별개로 존재하는 이유는 다크 모드에서 값이 갈릴 것을 대비한 시맨틱 구분. Light에서는 border(Flat) vs shadow(Raised)로 구분됨. Card 자체는 SEED 활성 컴포넌트 목록에 없어 Freesm 자체 정의.","openQuestions":[]},"Chip":{"status":"tokens_identified","priority":1,"seedEquivalent":["Chip","Tag Group"],"tokenBindings":{"fill":"comp/fill/neutral/secondary","cornerRadius":"comp/radius/chip","text":"fg/default"},"variantAxes":{"state":["Default","Selected","Disabled"]},"properties":[{"name":"label","type":"TEXT","default":"Chip"},{"name":"removable","type":"BOOLEAN","default":false}]},"Modal shell":{"status":"tokens_identified","priority":1,"seedEquivalent":["Alert Dialog","Bottom Sheet"],"tokenBindings":{"overlay":"bg/variant/overlay","surface":"bg/ev/raised","cornerRadius":"comp/radius/modal"},"note":"모션 초안이 motion(wip) 페이지에 이미 존재(Modal, Overlay 노드) — 애니메이션 스펙은 별도 추출 필요","properties":[{"name":"title","type":"TEXT","default":"Modal title"},{"name":"dismissible","type":"BOOLEAN","default":true}]},"Pill":{"status":"tokens_identified","priority":1,"seedEquivalent":[],"tokenBindings":{"cornerRadius":"comp/radius/pill"},"openQuestions":["Pill과 Chip의 기능적 차이 미정의 — 형태(radius/full)만 다른 것인지 확인 필요"]},"Icon Button":{"status":"candidate_only","priority":2,"seedEquivalent":[]},"Checkbox":{"status":"candidate_only","priority":2,"seedEquivalent":["Checkbox"]},"Radio":{"status":"candidate_only","priority":2,"seedEquivalent":["Radio"]},"Switch":{"status":"candidate_only","priority":2,"seedEquivalent":["Switch"]},"Select / Dropdown trigger":{"status":"candidate_only","priority":2,"seedEquivalent":["Select Box"]},"Avatar":{"status":"candidate_only","priority":2,"seedEquivalent":["Avatar","Identity Placeholder"],"tokenBindings":{"size":"size/avatar/{s,m,l}"}},"Badge / Tag":{"status":"candidate_only","priority":2,"seedEquivalent":["Badge","Notification Badge"],"tokenBindings":{"colorSource":"status/fg/*, status/bg/*"}},"Tooltip":{"status":"candidate_only","priority":2,"seedEquivalent":["Help Bubble"]},"Link":{"status":"candidate_only","priority":2,"seedEquivalent":[],"tokenBindings":{"text":"fg/link/default","visited":"fg/link/visited"}},"Divider":{"status":"candidate_only","priority":2,"seedEquivalent":["Divider"],"tokenBindings":{"color":"bdr/subtle"}},"Progress bar / Spinner":{"status":"candidate_only","priority":2,"seedEquivalent":["Progress Circle"]},"Skeleton":{"status":"candidate_only","priority":2,"seedEquivalent":["Skeleton","Content Placeholder"],"note":"모션 초안 atom/shimmer·atom/bone 존재"},"Toast":{"status":"candidate_only","priority":2,"seedEquivalent":["Snackbar"],"openQuestions":["Toast vs Snackbar 용어 통합 여부 미결"]},"Segmented Control":{"status":"candidate_only","priority":2,"seedEquivalent":["Segmented Control"],"note":"v0.2에서 SEED 벤치마킹으로 신규 추가"},"Slider":{"status":"candidate_only","priority":2,"seedEquivalent":["Slider"],"note":"v0.2 신규 추가"},"Image Frame":{"status":"candidate_only","priority":2,"seedEquivalent":["Image Frame"],"note":"v0.2 신규 추가"},"Attachment Input":{"status":"candidate_only","priority":2,"seedEquivalent":["Attachment Input"],"note":"v0.2 신규 추가"}},"modules":{"_tier":"B. Molecule — 컴포넌트 조합, 반복 재사용 블록","Form Field":{"status":"candidate_only","composedOf":["Label","Input","Helper/Error text"],"tokenBindings":{"errorColor":"status/fg/critical"}},"Navigation Header":{"status":"candidate_only","seedEquivalent":["Top Navigation"],"tokenBindings":{"fill":"bg/ev/sticky"}},"Footer":{"status":"candidate_only","seedEquivalent":["Footer"],"tokenBindings":{"fill":"bg/alt"}},"Search Bar":{"status":"candidate_only","composedOf":["Input","Icon Button"]},"Tabs":{"status":"candidate_only","seedEquivalent":["Tabs"]},"Accordion":{"status":"candidate_only","seedEquivalent":["Accordion"]},"Breadcrumb":{"status":"candidate_only"},"Pagination":{"status":"candidate_only"},"Data Table Row":{"status":"candidate_only"},"Dropdown Menu / Popover":{"status":"candidate_only","seedEquivalent":["Menu","Menu Sheet"]},"Modal Dialog":{"status":"candidate_only","composedOf":["Modal shell","Header","Body","Footer/Action"]},"Notification / Toast Stack":{"status":"candidate_only","composedOf":["Toast"]},"Stepper / Progress Flow":{"status":"candidate_only"},"Card Group / Grid":{"status":"candidate_only","composedOf":["Card"]},"Callout":{"status":"candidate_only","note":"v0.2 신규 추가"},"Page Banner":{"status":"candidate_only","note":"v0.2 신규 추가"},"Result / Empty State Section":{"status":"candidate_only","note":"v0.2 신규 추가, C의 Empty/Loading/Error State와 통합 검토"},"Bottom Sheet / Bottom Navigation / Side Navigation / Side Panel":{"status":"review","reason":"모바일 앱 전용 UX — Freesm는 반응형 웹 1st라 우선순위 낮음"},"Contextual Floating Button / FAB":{"status":"review","reason":"홈페이지 톤에 맞는지 별도 논의 필요"}},"patterns":{"_tier":"C. Pattern — 페이지·섹션 단위, 도메인 특화 구조","Sticky Header":{"status":"candidate_only"},"Hero Section":{"status":"candidate_only","tokenBindings":{"typography":"web/display/xl","breakpoints":"Web collection (mobile/tablet/desktop)"}},"Feature Grid":{"status":"candidate_only","tokenBindings":{"columns":"grid/columns (4/8/12)"}},"Stats / Metrics Band":{"status":"candidate_only"},"Logo Wall / Partner Strip":{"status":"candidate_only"},"Testimonial / Quote":{"status":"candidate_only"},"FAQ Accordion Section":{"status":"candidate_only","composedOf":["Accordion"]},"CTA Banner":{"status":"candidate_only","tokenBindings":{"fill":"bg/alt 또는 bg/accent/subtle"}},"Content+Media Split Section":{"status":"candidate_only"},"Dark Section Band":{"status":"candidate_only","tokenBindings":{"fill":"bg/alt"}},"Empty / Loading / Error State":{"status":"candidate_only","seedEquivalent":["Result Section","Skeleton","Content Placeholder"]},"반응형 그리드 레이아웃":{"status":"candidate_only","tokenBindings":{"breakpoints":"mobile/tablet/desktop (Web collection)"}},"브랜드 컬러 스왑 메커니즘":{"status":"spec_confirmed","note":"Freesm-홈페이지-라이브러리-아키텍처-v0.1 문서에 이미 아키텍처 확정"}},"foundationGaps":{"_tier":"D. 컴포넌트 이전 단계 — SEED 벤치마킹으로 발견, 착수 여부 별도 논의","Inclusive Design":{"status":"review","note":"접근성 가이드라인 명문화 필요, 현재는 개별 토큰 주석 수준"},"International Design":{"status":"review","note":"다국어/RTL — 해외 대응 필요 여부에 따라 우선순위 결정"},"Voice and Tone / Writing":{"status":"review","note":"UX 라이팅 원칙 — Freesm 문서에 부재"},"Iconography":{"status":"review","note":"size/icon/* 토큰은 있으나 아이콘 세트·스타일 소스 미정"},"Elevation":{"status":"tokens_identified","note":"shadow/1~4·upper·right 토큰 보유, 명칭 통일만 검토 shadow/2 원시값(0px 4px 4px rgba(0,0,0,0.1))은 blur=offset·spread 0이라 가장자리가 딱딱하다 — 2겹 부드러운 값으로 통일 검토 필요."},"State":{"status":"tokens_identified","note":"comp/state/pressed 등 토큰 존재, 상태 전이 가이드 문서 부재"},"BorderWidth":{"status":"candidate_only","note":"보더 두께 토큰이 없어 컴포넌트마다 값이 흩어진다(미리보기가 Button·Card 1px, Input 1.5px로 임의 렌더). comp/bdr-width/default(1)·comp/bdr-width/strong(2) 신설 필요. ring 두께 3은 dimension 스케일에 3이 없어(0·1·2·4·6…) 별칭할 곳이 없다 — dimension/3 추가 또는 2·4로 조정 필요."}}};
+const TIERS={
+  cmp:{k:'components',area:'components',label:'컴포넌트',en:'Components'},
+  mod:{k:'modules',area:'modules',label:'모듈',en:'Modules'},
+  pat:{k:'patterns',area:'patterns',label:'패턴',en:'Patterns'},
+  gap:{k:'foundationGaps',area:'tokens',label:'미착수 파운데이션',en:'Foundation Gaps'}
+};
+const STAT={
+  spec_confirmed:{m:'●',l:'스펙 확정',c:'ok'},
+  tokens_identified:{m:'◐',l:'토큰 특정',c:'tk'},
+  candidate_only:{m:'○',l:'후보',c:'cd'},
+  review:{m:'◇',l:'검토',c:'rv'}
+};
+const STAT_ORDER=['spec_confirmed','tokens_identified','candidate_only','review'];
+/* 스펙 항목 → 데모에 이미 구현된 화면 */
+const DEMO_LINK={
+  'cmp:Button':['components','buttons','컴포넌트 · Buttons'],
+  'cmp:Input':['components','forms','컴포넌트 · Forms'],
+  'cmp:Card':['components','card','컴포넌트 · Card'],
+  'cmp:Chip':['components','feedback','컴포넌트 · Feedback'],
+  'cmp:Badge / Tag':['components','feedback','컴포넌트 · Feedback'],
+  'cmp:Toast':['components','feedback','컴포넌트 · Feedback'],
+  'cmp:Checkbox':['components','selection','컴포넌트 · Selection'],
+  'cmp:Radio':['components','selection','컴포넌트 · Selection'],
+  'cmp:Switch':['components','selection','컴포넌트 · Selection'],
+  'mod:Navigation Header':['modules','header','모듈 · 헤더 · GNB'],
+  'mod:Footer':['modules','footer','모듈 · 푸터'],
+  'mod:Card Group / Grid':['modules','products','모듈 · 상품 리스트'],
+  'mod:Stepper / Progress Flow':['modules','steps','모듈 · 이용 절차'],
+  'mod:Accordion':['patterns','faq','패턴 · FAQ'],
+  'mod:Form Field':['components','forms','컴포넌트 · Forms'],
+  'pat:Sticky Header':['modules','header','모듈 · 헤더 · GNB'],
+  'pat:Hero Section':['patterns','hero','패턴 · Hero'],
+  'pat:Feature Grid':['patterns','features','패턴 · 특징 카드'],
+  'pat:Stats / Metrics Band':['patterns','stats','패턴 · 통계 밴드'],
+  'pat:Logo Wall / Partner Strip':['patterns','logowall','패턴 · 로고월'],
+  'pat:FAQ Accordion Section':['patterns','faq','패턴 · FAQ'],
+  'pat:CTA Banner':['patterns','cta','패턴 · CTA 밴드'],
+  'pat:반응형 그리드 레이아웃':['components','responsive','컴포넌트 · Responsive'],
+  'pat:브랜드 컬러 스왑 메커니즘':['compare',null,'브랜드 비교']
+};
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+/* 토큰 이름 → 실제 값. 파운데이션 뷰의 데이터를 그대로 재사용해 스펙 카드에서도 값이 보이게 한다. */
+function tokVal(n){
+  if(!n||typeof n!=='string')return null;
+  const s=SEM.find(x=>x[0]===n); if(s)return{t:'c',al:s[1],hex:resolve(s[1])};
+  let m;
+  if(m=n.match(/^comp\/pad\/(.+)$/)){const r=CPAD.find(x=>x[0]===m[1]);if(r)return{t:'n',al:r[1],px:r[2]};}
+  if(m=n.match(/^comp\/gap\/(.+)$/)){const r=CGAP.find(x=>x[0]===m[1]);if(r)return{t:'n',al:r[1],px:r[2]};}
+  if(m=n.match(/^comp\/radius\/(.+)$/)){const r=CRAD.find(x=>x[0]===m[1]);if(r)return{t:'n',al:'radius/'+r[1],px:RADIUS[r[1]][1]};}
+  if(m=n.match(/^comp\/bdr-width\/.+$/)){const r=CBW.find(x=>x[0]===n);if(r)return{t:'n',al:r[1],px:r[2]};}
+  if(m=n.match(/^size\/(.+)$/)){const r=TK_SIZE.find(x=>x[0]===m[1]);if(r)return{t:'n',al:'dimension/'+r[1],px:r[1]};}
+  if(m=n.match(/^spacing\/(.+)$/)){const r=SPACING.find(x=>x[0]===m[1]);if(r)return{t:'n',al:r[1],px:r[2]};}
+  if(m=n.match(/^radius\/(.+)$/)){const r=RADIUS[m[1]];if(r)return{t:'n',al:'sharp·default·rounded',px:r.map(v=>v>=999?999:v).join(' · ')};}
+  if(m=n.match(/^border\/(.+)$/)){const r=BORDER.find(x=>x[0]===m[1]);if(r)return{t:'n',al:'dimension/'+r[1],px:r[1]};}
+  return null;
+}
+function svRow(k,v){
+  let out;
+  if(v===null||v===undefined)out='<span class="sv-none">null · 없음</span>';
+  else if(typeof v==='boolean')out=`<code>${v}</code>`;
+  else if(typeof v==='number')out=`<code>${v}</code>`;
+  else{
+    const tv=tokVal(v);
+    if(tv&&tv.t==='c')out=`<i class="sv-sw" style="background:${tv.hex}"></i><code>${esc(v)}</code><span class="sv-ar">→</span><span class="sv-al">${esc(tv.al)}</span><span class="sv-hx">${tv.hex}</span>`;
+    else if(tv&&tv.t==='n')out=`<code>${esc(v)}</code><span class="sv-ar">→</span><span class="sv-al">${esc(tv.al)}</span><span class="sv-hx">${tv.px}</span>`;
+    else out=`<code>${esc(v)}</code>`;
+  }
+  return `<div class="sv-row"><span class="sv-k">${esc(k)}</span><span class="sv-v">${out}</span></div>`;
+}
+function svBlock(o,depth){
+  let h='';
+  Object.entries(o).forEach(([k,v])=>{
+    if(k==='note'){h+=`<div class="sv-note">${esc(v)}</div>`;return;}
+    if(Array.isArray(v)){
+      h+=`<div class="sv-row"><span class="sv-k">${esc(k)}</span><span class="sv-v">${v.map(x=>typeof x==='object'?`<code>${esc(JSON.stringify(x))}</code>`:`<code>${esc(x)}</code>`).join('')}</span></div>`;
+      return;
+    }
+    if(v&&typeof v==='object'){h+=`<div class="sv-grp">${esc(k)}</div>`+svBlock(v,(depth||0)+1);return;}
+    h+=svRow(k,v);
+  });
+  return h;
+}
+function stChip(st){const s=STAT[st]||{m:'·',l:st,c:'cd'};return `<span class="st-chip st-${s.c}"><span class="d">${s.m}</span>${s.l}</span>`;}
+function demoBtn(key){
+  const d=DEMO_LINK[key];if(!d)return '';
+  return `<button class="sv-link" data-go="${d[0]}" data-gotab="${d[1]||''}">데모에서 보기 · ${esc(d[2])}</button>`;
+}
+
+function renderSpecCard(pfx,name){
+  const T=TIERS[pfx],it=SCHEMA[T.k][name];
+  if(!it)return `<div class="sv-meta">항목을 찾을 수 없습니다: ${esc(name)}</div>`;
+  const key=pfx+':'+name;
+  let h=`<div class="sv-head"><h3>${esc(name)}</h3><span class="sv-tier">${esc(T.en)} · ${esc(SCHEMA[T.k]._tier)}</span></div>`;
+  h+=`<div class="sv-badges">${stChip(it.status)}`;
+  if(it.visuallyValidated)h+=`<span class="sv-chip">Figma 임시 렌더 검증</span>`;
+  if(it.priority)h+=`<span class="sv-chip">우선순위 ${it.priority}</span>`;
+  if(it.variantCount)h+=`<span class="sv-chip">${it.variantCount} variant</span>`;
+  if(it.seedEquivalent)h+=`<span class="sv-chip">SEED 대응 · ${esc(it.seedEquivalent)}</span>`;
+  h+=demoBtn(key)+`</div>`;
+  h+=`<div class="sv-meta">${esc(STAT[it.status]?SCHEMA.statusLegend[it.status]:'')}</div>`;
+  if(it.reason)h+=`<div class="sv-note">채택 검토 사유 — ${esc(it.reason)}</div>`;
+  if(it.note)h+=`<div class="sv-note">${esc(it.note)}</div>`;
+  if(it.composedOf)h+=`<div class="sv-sec"><div class="sv-st">구성 요소 <span class="c">composedOf</span></div><div class="sv-chips">${it.composedOf.map(x=>`<span class="sv-chip">${esc(x)}</span>`).join('')}</div></div>`;
+  if(it.layout)h+=`<div class="sv-sec"><div class="sv-st">레이아웃 <span class="c">오토레이아웃 · 사이징</span></div>${svBlock(it.layout,0)}</div>`;
+  if(it.variantAxes){
+    h+=`<div class="sv-sec"><div class="sv-st">Variant 축 <span class="c">${it.variantCount?it.variantCount+' 조합':'조합 수 미확정'}</span></div>`;
+    Object.entries(it.variantAxes).forEach(([ax,vals])=>{h+=`<div class="sv-row"><span class="sv-k">${esc(ax)}</span><span class="sv-v">${vals.map(v=>`<span class="sv-chip">${esc(v)}</span>`).join('')}</span></div>`;});
+    h+=`</div>`;
+  }
+  if(it.tokenBindings)h+=`<div class="sv-sec"><div class="sv-st">토큰 바인딩 <span class="c">현재 브랜드 기준 실제 값</span></div>${svBlock(it.tokenBindings,0)}</div>`;
+  if(it.properties){
+    h+=`<div class="sv-sec"><div class="sv-st">프로퍼티</div><table class="sv-tbl"><tr><th>이름</th><th>타입</th><th>기본값</th><th>비고</th></tr>`;
+    it.properties.forEach(p=>{h+=`<tr><td class="nm">${esc(p.name)}</td><td>${esc(p.type||'')}</td><td>${p.default===undefined?'—':`<code>${esc(p.default)}</code>`}</td><td>${esc([p.note,p.mapsToState?'상태 매핑 '+p.mapsToState:'',p.optional?'선택':''].filter(Boolean).join(' · '))}</td></tr>`;});
+    h+=`</table></div>`;
+  }
+  if(it.validation){
+    h+=`<div class="sv-sec"><div class="sv-st">검증 <span class="c">${esc(it.validation.renderedCombo||'')}</span></div>`;
+    if(it.validation.measured)h+=svBlock(it.validation.measured,0);
+    if(it.validation.note)h+=`<div class="sv-note">${esc(it.validation.note)}</div>`;
+    h+=`</div>`;
+  }
+  if(it.openQuestions)h+=`<div class="sv-sec"><div class="sv-st">미결 질문</div><ul class="sv-q">${it.openQuestions.map(q=>`<li>${esc(q)}</li>`).join('')}</ul></div>`;
+  const df=(SCHEMA.specDefects||[]).filter(d=>(d.where||'').indexOf(name)===0);
+  if(df.length)h+=`<div class="sv-sec"><div class="sv-st">스펙 결함 <span class="c">specDefects</span></div>`+df.map(d=>`<div class="sv-note"><b>${esc(d.id)} · ${esc(d.severity)}</b> — ${esc(d.where)}<br>${esc(d.problem)}<br><b>조치</b> ${esc(d.action)}</div>`).join('')+`</div>`;
+  return h;
+}
+
+function renderSpecCatalog(pfx){
+  const T=TIERS[pfx],src=SCHEMA[T.k];
+  const names=Object.keys(src).filter(k=>k!=='_tier');
+  const cnt={};names.forEach(n=>cnt[src[n].status]=(cnt[src[n].status]||0)+1);
+  let h=`<div class="sv-head"><h3>${esc(T.label)} · 전체 목록</h3><span class="sv-tier">${esc(T.en)} · ${names.length}종</span></div>`;
+  h+=`<div class="sv-meta">${esc(src._tier)}</div>`;
+  h+=`<div class="sv-cnt">`+STAT_ORDER.map(s=>`<div class="cbox"><b>${cnt[s]||0}</b><span>${STAT[s].m} ${STAT[s].l}</span></div>`).join('')+`</div>`;
+  if(pfx==='mod'||pfx==='pat')h+=`<div class="sv-note">데모의 섹션 데모를 스펙의 티어에 맞춰 갈라 두었습니다 — 헤더·이용 절차·상품 리스트·푸터는 <b>모듈(B)</b>, Hero·통계 밴드·특징 카드·CTA 밴드·로고월·FAQ는 <b>패턴(C)</b>. 이전에는 여섯 개 패턴이 모듈 탭에 섞여 있어 스펙과 데모의 층위가 어긋나 있었습니다.</div>`;
+  if(pfx==='gap')h+=`<div class="sv-note">컴포넌트 이전 단계에서 비어 있는 파운데이션 영역입니다. SEED 벤치마킹에서 발견됐고, 착수 여부는 별도 논의 대상이라 컴포넌트 목록과 분리해 파운데이션 아래에 둡니다.</div>`;
+  h+=`<div class="sv-sec"><div class="sv-st">재고 <span class="c">클릭하면 스펙 카드로 이동</span></div><table class="sv-tbl"><tr><th>이름</th><th>상태</th><th>우선순위</th><th>SEED 대응</th><th>데모</th></tr>`;
+  STAT_ORDER.forEach(st=>{
+    names.filter(n=>src[n].status===st).forEach(n=>{
+      const d=DEMO_LINK[pfx+':'+n];
+      h+=`<tr class="clk" data-spec="${esc(pfx+':'+n)}"><td class="nm">${esc(n)}</td><td>${stChip(st)}</td><td>${src[n].priority||'—'}</td><td>${esc(src[n].seedEquivalent||'—')}</td><td>${d?esc(d[2]):'<span class="sv-none">미구현</span>'}</td></tr>`;
+    });
+  });
+  h+=`</table></div>`;
+  h+=`<div class="sv-sec"><div class="sv-st">상태 정의 <span class="c">statusLegend</span></div>`+STAT_ORDER.map(s=>`<div class="sv-row"><span class="sv-k">${STAT[s].m} ${STAT[s].l}</span><span class="sv-v" style="font-family:'Pretendard Variable',system-ui,sans-serif;font-size:12px;color:var(--fg-sub);line-height:1.6">${esc(SCHEMA.statusLegend[s])}</span></div>`).join('')+`</div>`;
+  if(pfx==='gap'){
+    h+=`<div class="sv-sec"><div class="sv-st">확정된 결정 <span class="c">resolvedDecisions</span></div>`+(SCHEMA.resolvedDecisions||[]).map(d=>`<div class="sv-note"><b>${esc(d.topic)}</b><br>${esc(d.decision)}<br><span style="opacity:.75">결정 주체 ${esc(d.decidedBy||'—')}${d.date?' · '+esc(d.date):''}${d.followUp?' · 후속 '+esc(d.followUp):''}</span></div>`).join('')+`</div>`;
+    h+=`<div class="sv-sec"><div class="sv-st">스펙 결함 <span class="c">specDefects · ${(SCHEMA.specDefects||[]).length}건</span></div>`+(SCHEMA.specDefects||[]).map(d=>`<div class="sv-note"><b>${esc(d.id)} · ${esc(d.severity)}</b> — ${esc(d.where)}<br>${esc(d.problem)}<br><b>조치</b> ${esc(d.action)}</div>`).join('')+`</div>`;
+  }
+  return h;
+}
+
+let curSpec='cmp:*';
+function renderSpec(tab){
+  if(tab)curSpec=tab;
+  const i=curSpec.indexOf(':'),pfx=curSpec.slice(0,i),name=curSpec.slice(i+1);
+  const P=document.getElementById('specPanel');
+  P.innerHTML=name==='*'?renderSpecCatalog(pfx):renderSpecCard(pfx,name);
+  const sc=document.querySelector('.spec');if(sc)sc.scrollTop=0;
+}
+document.getElementById('specPanel').addEventListener('click',e=>{
+  const r=e.target.closest('tr[data-spec]');
+  if(r){route('spec',r.dataset.spec);return;}
+  const g=e.target.closest('[data-go]');
+  if(g){route(g.dataset.go,g.dataset.gotab||undefined);}
+});
+/* 브랜드 스왑 시 스펙 카드의 색 값도 다시 계산 */
+const _setBrand2=setBrand;setBrand=function(b){_setBrand2(b);if(html.getAttribute('data-view')==='spec')renderSpec();};
+
+/* 좌측 탐색에 스펙 재고를 자동으로 뚫는다 — 구현 목록 아래에 티어별 전체 항목 + 상태 마커 */
+function buildSpecNav(){
+  Object.keys(TIERS).forEach(pfx=>{
+    const T=TIERS[pfx],src=SCHEMA[T.k];
+    const grp=document.querySelector('#nav .nav-group[data-area="'+T.area+'"]');
+    if(!grp)return;
+    const names=Object.keys(src).filter(k=>k!=='_tier');
+    let h='<div class="nav-sub">'+T.label+' · 스펙 <em>'+esc(src._tier.split('—')[0].trim())+' · '+names.length+'</em></div>';
+    h+='<button class="nav-item" data-view="spec" data-tab="'+pfx+':*">전체 목록</button>';
+    STAT_ORDER.forEach(st=>names.filter(n=>src[n].status===st).forEach(n=>{
+      const sm=STAT[st];
+      h+='<button class="nav-item" data-view="spec" data-tab="'+esc(pfx+':'+n)+'" title="'+sm.l+'"><span class="sd '+sm.c+'">'+sm.m+'</span>'+esc(n)+'</button>';
+    }));
+    grp.insertAdjacentHTML('beforeend',h);
+  });
+}
+buildSpecNav();
 
 /* 초기 라우트 */
 route('interactive');
