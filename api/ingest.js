@@ -1,4 +1,5 @@
 // KDX 브랜드 인제스트 — Vercel 서버리스 함수
+// v0.53 — 스타일시트 수집 확장: rel="stylesheet" 외에 preload as=style · .css 확장자 · @import 한 겹
 // GET /api/ingest?url=https://...   → 사이트 HTML+CSS에서 컬러·폰트 추출
 // GET /api/ingest?figma=<링크|key>  → Figma API로 파일 채움색 수집 (환경변수 FIGMA_TOKEN 필요)
 // 응답: { colors:[{hex,count}], fonts:[이름], gradients:[css], source }
@@ -10,8 +11,8 @@ const BASE_HDRS = {
   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
   'Accept-Language': 'ko,en-US;q=0.9,en;q=0.8'
 };
-async function fget(url, as) {
-  const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 8000);
+async function fget(url, as, ms) {
+  const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), ms || 8000);
   try {
     let r = await fetch(url, { headers: { ...BASE_HDRS, 'User-Agent': UA_DESKTOP }, redirect: 'follow', signal: ctl.signal });
     if (r.status === 403 || r.status === 429 || r.status === 503) {
@@ -145,22 +146,61 @@ async function fetchAssets(html, base) {
   return out;
 }
 
+// ── 스타일시트 링크 수집(v0.53에서 넓힘)
+// 예전에는 rel="stylesheet"만 봤다. 그런데 요즘 빌드 도구는 CSS를
+// <link rel="preload" as="style">로 먼저 걸어두고 JS가 나중에 rel을 stylesheet로 바꾼다.
+// 서버는 초기 HTML만 읽으므로 그 '나중'이 오지 않는다 — 그래서 preload와 .css 확장자도 함께 받는다.
+// 넓힌 만큼 요청 수가 늘어나므로 상한과 시간 예산으로 묶는다(서버리스 실행 시간).
+const CSS_CAP = 10, CSS_MS = 6000, IMP_CAP = 4, IMP_MS = 3500, IMP_DEADLINE = 5000;
+function collectStyleLinks(html, base, seen) {
+  const out = [];
+  for (const m of html.matchAll(/<link\b[^>]*>/gi)) {
+    const tag = m[0];
+    const href = (tag.match(/href\s*=\s*["']([^"']+)["']/i) || [])[1];
+    if (!href) continue;
+    const rel = ((tag.match(/\brel\s*=\s*["']([^"']*)["']/i) || [])[1] || '').toLowerCase();
+    const as = ((tag.match(/\bas\s*=\s*["']([^"']*)["']/i) || [])[1] || '').toLowerCase();
+    const isSheet = /(?:^|\s)stylesheet(?:\s|$)/.test(rel);
+    const isPre = as === 'style' && /(?:^|\s)(?:preload|prefetch|modulepreload)(?:\s|$)/.test(rel);
+    const isCssExt = /\.css(?:[?#]|$)/i.test(href);
+    if (!isSheet && !isPre && !isCssExt) continue;
+    let full; try { full = new URL(href, base).href; } catch (_) { continue; }
+    if (!/^https?:/i.test(full) || seen.has(full)) continue;   // data:·blob:은 받지 않는다
+    seen.add(full); out.push(full);
+    if (out.length >= CSS_CAP) break;
+  }
+  return out;
+}
+// @import는 한 겹만 따라간다. 컴포넌트 CSS를 인덱스 파일 하나로 묶는 구성이 흔해서,
+// 그 한 겹을 안 열면 실제 색이 든 파일에는 아예 닿지 못한다. 두 겹부터는 비용이 이득을 넘는다.
+function collectImports(css, base, seen) {
+  const out = [];
+  for (const m of css.matchAll(/@import\s+(?:url\(\s*)?["']?([^"')\s;]+)/gi)) {
+    let full; try { full = new URL(m[1], base).href; } catch (_) { continue; }
+    if (!/^https?:/i.test(full) || seen.has(full)) continue;
+    seen.add(full); out.push(full);
+    if (out.length >= IMP_CAP) break;
+  }
+  return out;
+}
+
 async function ingestUrl(url) {
   const html = await fget(url);
   // HTML(실제 렌더 콘텐츠)과 CSS 번들(라이브러리 상태색 노이즈 포함)을 분리 집계
   const htmlCounts = {}, cssCounts = {}, fonts = new Set(), declared = [];
   collectHex(html, htmlCounts); collectFonts(html, fonts);
-  // 링크된 스타일시트 최대 6개
+  // 링크된 스타일시트 — stylesheet · preload as=style · .css 확장자, 최대 CSS_CAP개. @import는 한 겹 더.
   let allCss = html;
-  const links = [...html.matchAll(/<link[^>]+rel=["']stylesheet["'][^>]*>/gi)]
-    .map(m => (m[0].match(/href=["']([^"']+)["']/) || [])[1]).filter(Boolean).slice(0, 6);
-  await Promise.all(links.map(async href => {
-    try {
-      const css = await fget(new URL(href, url).href);
-      allCss += '\n' + css;
-      collectHex(css, cssCounts); collectFonts(css, fonts);
-    } catch (_) { /* 개별 실패 무시 */ }
-  }));
+  const t0 = Date.now(), seen = new Set();
+  const take = async (u, ms, depth) => {
+    let css;
+    try { css = await fget(u, null, ms); } catch (_) { return; }   // 개별 실패 무시
+    allCss += '\n' + css;
+    collectHex(css, cssCounts); collectFonts(css, fonts);
+    if (depth <= 0 || Date.now() - t0 > IMP_DEADLINE) return;      // 남은 시간이 없으면 더 파고들지 않는다
+    await Promise.all(collectImports(css, u, seen).map(i => take(i, IMP_MS, depth - 1)));
+  };
+  await Promise.all(collectStyleLinks(html, url, seen).map(u => take(u, CSS_MS, 1)));
   collectDeclared(html, allCss, declared);
   const assets = await fetchAssets(html, url);
   // 병합: html 출처 수를 별도 보존(클라이언트가 '실사용 색' 가중에 사용)
