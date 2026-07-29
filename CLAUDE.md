@@ -75,7 +75,7 @@ Scale(원시)  →  Brand(교체 지점)  →  Semantic(의미)  →  Radius(곡
 - 모든 모듈은 곡률·간격·보더·크기 노브와 Brand 스왑을 실시간 반영한다(반응형은 `@container page`).
 - 새 범용 모듈 추가 시: 데모 `M`(마크업)·`MOD_META`(문서)·`MOD_ORDER`·좌측 탐색 nav-item에 각각 등록. 신규 섹션 CSS는 토큰 var만 사용(하드코딩 px 금지).
 
-## 예시 화면 — 화면 조립기 (v0.49)
+## 예시 화면 — 화면 조립기 (v0.50)
 데모의 **예시 화면** 영역(GNB `pages`)이 고정 샘플 3종(홈·로그인·회원가입)에서 **사용자가 직접 화면을 쌓아 보는 조립기**로 확장됐다. 모듈 레이어가 "섹션 하나를 문서로 본다"면, 여기는 "그 섹션들을 실제 화면 순서로 쌓아 본다"에 해당한다.
 - **셀(cell)이 단위다.** 화면은 `screens[{id,name,secs:[key,…]}]`(인메모리) 배열이고, 렌더는 `.page > .inner` 안에 `secs`를 순서대로 `<div class="cell">`로 감싸 붙인다. `.inner`는 좌우 패딩만 갖고 섹션 여백(`.foot`·`.ctaband`의 `margin-top:var(--sect)`)은 래퍼를 그대로 통과하므로, 셀 래핑이 기존 레이아웃을 바꾸지 않는다. 컨테이너 쿼리도 `.frame`의 named container `page`에 그대로 물린다.
 - **선택 가능한 섹션 26종** = 기존 모듈 `M` 10종 + 신규 `PSEC` 16종(`pagehead·filter·pager·pdetail·pspec·notice·terms·contact·pricing·evhero·events·coupon·mysum·holdings·empty·e404`). `SEC=Object.assign({},M,PSEC)`로 합치고 `SEC_META`(이름·설명), `SEC_GROUPS`(6개 그룹: 공통 / 목록·탐색 / 상세·정보 / 문서·폼 / 이벤트·프로모션 / 마이·상태)로 고르기 모달을 구성한다.
@@ -85,6 +85,15 @@ Scale(원시)  →  Brand(교체 지점)  →  Semantic(의미)  →  Radius(곡
 - **레이아웃 컨트롤의 자리**: 상품 리스트의 Grid·Carousel·List는 전역 노브가 아니므로(위 모듈 레이어 원칙) 화면에 `products` 섹션이 들어 있을 때만 `#scrBar`에 `[data-sb-lay]` 세그먼트로 나타난다. 곡률·간격·보더·크기·디바이스·Brand는 기존 노브가 `screenEl`에도 그대로 전파된다.
 - **주의**: 데모 스크립트에는 브랜드 인제스트 쪽에 `function pickMode(...)`가 이미 있다. 화면 고르기 상태 변수는 `pickKind`를 쓴다(같은 이름을 쓰면 `Identifier already declared`로 스크립트 전체가 죽는다).
 - 새 섹션 추가 시: `PSEC`(마크업) · `SEC_META`(이름·설명) · `SEC_GROUPS`(어느 그룹인지) 세 곳에 등록하고, 필요하면 `SCR_TPL`에 템플릿을 추가한다. CSS는 토큰 var만 사용.
+
+### v0.50 — 조립 화면 정리 (문맥·중복·간격)
+v0.49의 조립 화면은 "랜딩용으로 쓰던 섹션을 콘텐츠 페이지에 그대로 얹은" 상태여서, 화면마다 같은 제목이 나오거나 문구가 맞지 않는 문제가 있었다. 원인 계층별로 정리했다.
+- **섹션은 문자열이거나 함수다.** `SEC[key]`가 함수면 `SEC[key](ctx)`로 렌더한다. `ctx`는 그 화면의 문맥(`{crumb:[], title, desc}`)이고 `SCR_TPL[].ctx` → `screens[].ctx`로 따라온다(없으면 `DEF_CTX`). 현재 문맥 의존 셀은 `pagehead` 하나 — 그래서 약관·공지·고객지원·요금 화면이 더 이상 "전체 상품" 제목을 달지 않는다. 문맥이 필요한 섹션을 새로 만들 때도 같은 방식으로 함수로 쓰면 된다.
+- **제목 중복 자동 억제.** 화면에 `pagehead` 셀이 있으면, 그 아래의 `HEADSEC`(products·features·steps·events·coupon·pricing·contact) 셀에 `data-nohead`가 붙어 모듈이 들고 온 `.sec-head`/`.ctinfo`의 태그·H2만 CSS로 숨긴다. 설명 문단(`p`)은 살린다. **모듈 마크업(`M`)은 건드리지 않는다** — 모듈 탐색 뷰에서는 원래 제목이 그대로 보여야 하기 때문.
+- **문서형 화면 리듬.** `DOCSEC`(pagehead·pdetail·pspec·notice·terms·mysum·holdings·empty·e404) 중 하나라도 있으면 `.page[data-doc]`가 붙고, 섹션 간 여백이 랜딩 리듬의 약 0.5배로 좁아진다(`.foot`·`.ctaband` 포함). 랜딩 템플릿은 `data-doc`가 아니므로 기존 리듬 그대로다. 제목이 없는 `faq` 셀은 문서형에서만 "자주 묻는 질문" 헤딩을 CSS `::before`로 얻는다.
+- **셀 편집 바는 셀 경계선 위에 뜬다.** `.cellbar`가 `top:10px;right:10px`일 때 헤더의 로그인/시작하기 버튼을 정확히 덮었다. 지금은 셀 위쪽 경계에 걸치도록(`top:0;transform:translateY(-50%)`) 바꾸고, 첫 셀만 아래쪽 경계로 내린다. 회귀 검사는 편집 바 사각형과 셀 안 모든 button/a/input의 교차로 판정한다(verify50 [15]).
+- **반응형 잔결함**: 상품 상세 2열 분기점을 1040 → **900**으로 내려 데모 프레임 폭(≈1028px)에서도 2열이 되게 했고, 1열일 때 대표 이미지는 16:11 대신 2.55:1 배너 비율 + "대표 이미지" 플레이스홀더로 바뀐다(640px짜리 빈 회색 박스 제거). 약관 목차(`.toc`)는 1040 미만에서 사라지지 않고 칩 목록 카드로 접힌다. `.ptabs`는 스크롤바를 숨긴다.
+- 회귀: `verify50.js` [12]~[16] = 화면별 제목 문맥 · 제목 중복 0 · 가로 넘침 0(스크롤 컨테이너 제외) · 편집 바 겹침 0 · 26셀 전부 올린 화면 무결. 11 템플릿 × 3 디바이스로 돈다.
 
 ## 추천 다음 작업 (NEXT)
 1. 기초 컴포넌트를 토큰 바인딩으로: **Button**(primary/secondary/ghost · S/M/L · hover/press/disabled) → **Input/Field** → **Card** → **Chip/Badge**. (데모에 정식화 완료)
