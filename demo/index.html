@@ -22,6 +22,10 @@
   --st-success:#0e9f6e; --st-success-bg:#ecfdf5; --st-warning:#c2660a; --st-warning-bg:#fff7ed; --st-critical:#dc2626; --st-critical-bg:#fef2f2; --st-critical-strong:#b42318;
   /* 컴포넌트 상태 토큰 (브랜드 무관) */
   --comp-disabled-fill:#eef0f3; --comp-disabled-fg:#adb2ba; --comp-disabled-bdr:#e6e8ec; --comp-track:#d3d7dd;
+  /* 컴포넌트 지오메트리 (comp/pad·comp/gap·size/touch-target) — 고정 높이 size/control 폐기, hug 방식 */
+  --pad-btn-x:20px; --pad-btn-y:12px; --pad-fld-x:16px; --pad-fld-y:12px; --pad-card:24px;
+  --gap-comp-s:8px; --gap-comp-m:12px;
+  --touch-min:48px; --bw-comp:1px; --ring-w:3px;
 }
 /* ===== TIER 1 BRAND (교체 지점) ===== */
 [data-brand="deepblue"]{--brand-p05:#F2F5FA;--brand-p10:#D9E1F2;--brand-p20:#AFC0E9;--brand-p40:#205CE9;--brand-p50:#1245BA;--brand-p55:#103CA2;--brand-p60:#0E348B;--brand-p70:#0F2762;--brand-font:"Pretendard Variable",system-ui,sans-serif}
@@ -44,9 +48,20 @@
 [data-radius="rounded"]{--r-xs:8px;--r-s:12px;--r-m:20px;--r-l:24px;--r-2xl:32px}
 [data-density="compact"]{--dens:.84} [data-density="default"]{--dens:1} [data-density="comfortable"]{--dens:1.22}
 [data-border="hairline"]{--bw:1px;--bc:var(--line)} [data-border="default"]{--bw:1px;--bc:var(--line-2)} [data-border="strong"]{--bw:1.5px;--bc:#cfd3da}
-[data-size="s"]{--ctrl-h:38px;--ctrl-px:16px;--ctrl-fs:14px;--icon:20px}
-[data-size="m"]{--ctrl-h:46px;--ctrl-px:22px;--ctrl-fs:15px;--icon:22px}
-[data-size="l"]{--ctrl-h:54px;--ctrl-px:28px;--ctrl-fs:16px;--icon:26px}
+/* Size 노브 = 스펙의 size 축(Small·Medium·Large)을 한 칸씩 밀어주는 전역 다이얼.
+   높이는 더 이상 여기서 정하지 않는다 — 텍스트 line-height + comp/pad/*-y 로 hug 결정.
+   Button = utility/standard/{xs,s,m}/500 (12/16 · 14/20 · 16/22)
+   Input  = body/{s,m,l}/400            (14/22 · 16/24 · 18/28)
+   --ctrl-* 는 텍스트 없는 고정 지오메트리 컨트롤(체크박스·아이콘 버튼 등)용으로만 잔존 */
+[data-size="s"]{--ctrl-h:38px;--ctrl-px:16px;--ctrl-fs:14px;--icon:20px;
+  --btn-fs-s:12px;--btn-lh-s:16px;--btn-fs-m:12px;--btn-lh-m:16px;--btn-fs-l:14px;--btn-lh-l:20px;
+  --fld-fs-s:14px;--fld-lh-s:22px;--fld-fs-m:14px;--fld-lh-m:22px;--fld-fs-l:16px;--fld-lh-l:24px}
+[data-size="m"]{--ctrl-h:46px;--ctrl-px:22px;--ctrl-fs:15px;--icon:22px;
+  --btn-fs-s:12px;--btn-lh-s:16px;--btn-fs-m:14px;--btn-lh-m:20px;--btn-fs-l:16px;--btn-lh-l:22px;
+  --fld-fs-s:14px;--fld-lh-s:22px;--fld-fs-m:16px;--fld-lh-m:24px;--fld-fs-l:18px;--fld-lh-l:28px}
+[data-size="l"]{--ctrl-h:54px;--ctrl-px:28px;--ctrl-fs:16px;--icon:26px;
+  --btn-fs-s:14px;--btn-lh-s:20px;--btn-fs-m:16px;--btn-lh-m:22px;--btn-fs-l:16px;--btn-lh-l:22px;
+  --fld-fs-s:16px;--fld-lh-s:24px;--fld-fs-m:18px;--fld-lh-m:28px;--fld-fs-l:18px;--fld-lh-l:28px}
 
 /* ===== BASE ===== */
 *{box-sizing:border-box;margin:0;padding:0}
@@ -383,11 +398,20 @@ html[data-view="compare"] #frame{display:none}
 @container page (min-width:760px){.navlinks{display:flex}.navcta .login{display:inline-flex}}
 
 /* buttons */
-.btn{font-weight:600;font-size:var(--ctrl-fs,15px);min-height:var(--ctrl-h,46px);padding:0 var(--ctrl-px,22px);border-radius:var(--r-m);display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:.15s;white-space:nowrap}
+/* 높이 = comp/pad/button-y ×2 + line-height (hug). 시각 높이는 40·44·46px 이지만
+   ::after 로 48px(size/touch-target/min) 히트 영역을 겹쳐 터치 하한선을 별도 보장한다 —
+   버튼을 시각적으로 부풀리지 않으면서 터치 타깃을 맞추는 방식. */
+.btn{font-weight:500;font-size:var(--btn-fs-m,14px);line-height:var(--btn-lh-m,20px);padding:var(--pad-btn-y) var(--pad-btn-x);min-width:var(--touch-min);border-radius:var(--r-m);display:inline-flex;align-items:center;justify-content:center;gap:var(--gap-comp-s);transition:.15s;white-space:nowrap;position:relative}
+.btn::after{content:"";position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:var(--touch-min);border-radius:inherit}
 .btn svg{width:1.15em;height:1.15em}
 .btn-primary{background:var(--accent);color:var(--on-accent)}
 .btn-primary:hover,.btn-primary.is-hover{background:var(--accent-strong)}
 .btn-primary:active,.btn-primary.is-pressed{background:var(--accent-press)}
+/* Secondary — 스펙의 comp/fill/accent/secondary(#205CE9) + fg/accent/primary(#1245BA) 조합은
+   대비 1.46:1 로 판독 불가. 의도(옅은 accent 틴트)에 맞게 accent-subtle 로 교정해 구현. */
+.btn-secondary{background:var(--accent-subtle);color:var(--accent-strong)}
+.btn-secondary:hover,.btn-secondary.is-hover{background:var(--accent-line)}
+.btn-secondary:active,.btn-secondary.is-pressed{background:var(--accent-line);color:var(--accent-press)}
 .btn-neutral{background:var(--fg);color:#fff}
 .btn-neutral:hover,.btn-neutral.is-hover{background:#2b3038}
 .btn-neutral:active,.btn-neutral.is-pressed{background:#000}
@@ -400,8 +424,8 @@ html[data-view="compare"] #frame{display:none}
 .btn:focus-visible,.btn.is-focus{outline:none;box-shadow:var(--focus-ring)}
 .btn[disabled],.btn.is-disabled{background:var(--comp-disabled-fill);color:var(--comp-disabled-fg);border-color:transparent;pointer-events:none;box-shadow:none}
 .btn-ghost[disabled],.btn-ghost.is-disabled{background:transparent;color:var(--comp-disabled-fg);border-color:var(--comp-disabled-bdr)}
-.btn-sm{min-height:38px;padding:0 15px;font-size:13.5px}
-.btn-lg{min-height:calc(var(--ctrl-h) + 6px);padding:0 calc(var(--ctrl-px) + 6px);font-size:calc(var(--ctrl-fs) + 1px)}
+.btn-sm{font-size:var(--btn-fs-s);line-height:var(--btn-lh-s)}
+.btn-lg{font-size:var(--btn-fs-l);line-height:var(--btn-lh-l)}
 
 /* hero */
 .hero{padding-top:var(--sect);padding-bottom:var(--sect);display:grid;gap:40px}
@@ -471,7 +495,9 @@ html[data-view="compare"] #frame{display:none}
 /* features (why) */
 .cards{display:grid;gap:var(--gut)}
 @container page (min-width:760px){.cards{grid-template-columns:repeat(3,1fr)}}
-.fcard{border:var(--bw) solid var(--bc);border-radius:var(--r-l);padding:calc(28px*var(--dens));background:var(--bg);transition:.18s}
+/* 특징 카드 = Card atom(.card.card-flat) 위에 모듈 전용 장식만 얹는다.
+   면·보더·radius·padding 은 전부 atom 쪽 토큰을 그대로 쓴다 — 모듈이 컴포넌트를 소비하는 구조. */
+.fcard{padding:calc(var(--pad-card)*var(--dens));gap:0}
 .fcard:hover{box-shadow:var(--sh-2);transform:translateY(-2px)}
 .fcard .ic{width:calc(var(--icon) + 22px);height:calc(var(--icon) + 22px);border-radius:var(--r-s);background:var(--accent-subtle);color:var(--accent);display:grid;place-items:center;margin-bottom:18px}
 .fcard .ic svg{width:var(--icon);height:var(--icon)}
@@ -513,13 +539,29 @@ html[data-view="components"] .components{display:block}
 .cmatrix .cell .btn{width:100%;max-width:112px}
 .crow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 /* inputs */
-.inp{width:100%;min-height:var(--ctrl-h);border:var(--bw) solid var(--bc);border-radius:var(--r-s);padding:0 14px;font-size:14px;background:var(--bg);color:var(--fg);display:flex;align-items:center;gap:8px}
+/* 높이 = comp/pad/field-y ×2 + line-height (hug) → 46·48·52px. 폭은 fill + 48px 하한. */
+.inp{width:100%;min-width:var(--touch-min);border:var(--bw-comp) solid var(--bc);border-radius:var(--r-s);padding:var(--pad-fld-y) var(--pad-fld-x);font-size:var(--fld-fs-m,16px);line-height:var(--fld-lh-m,24px);background:var(--bg);color:var(--fg);display:flex;align-items:center;gap:var(--gap-comp-s)}
+.inp-sm{font-size:var(--fld-fs-s);line-height:var(--fld-lh-s)}
+.inp-lg{font-size:var(--fld-fs-l);line-height:var(--fld-lh-l)}
 .inp svg{width:16px;height:16px;color:var(--fg-mut);flex:none}
 .inp.is-hover{border-color:#c2c6cd}
+/* Focus·Error 는 보더 색만 바꾸면 명도 대비가 각각 1.03:1 / 1.29:1 로 흑백에서 구분 불가.
+   fill 은 그대로 두고 바깥에 ring 을 둘러 색 이외의 신호(두께)를 준다. */
 .inp.is-focus{border-color:var(--accent);box-shadow:var(--focus-ring)}
-.inp.is-error{border-color:var(--st-critical);box-shadow:0 0 0 3px var(--st-critical-bg)}
+.inp.is-error{border-color:var(--st-critical);box-shadow:0 0 0 var(--ring-w) var(--st-critical-bg)}
 .inp.is-disabled{background:var(--bg-sunken);color:var(--comp-disabled-fg);border-color:var(--comp-disabled-bdr)}
 .inp .ph{color:var(--fg-mut)}
+/* Card atom (A tier) — comp/pad/card · comp/gap/m · comp/radius/card
+   Light 모드에선 bg/default 와 bg/ev/raised 값이 같아 border(Flat) vs shadow(Raised)로만 갈린다. */
+.card{background:var(--bg);border-radius:var(--r-l);padding:var(--pad-card);display:flex;flex-direction:column;gap:var(--gap-comp-m);width:100%;transition:.18s}
+.card-flat{border:var(--bw-comp) solid var(--line-2)}
+.card-raised{border:var(--bw-comp) solid transparent;box-shadow:var(--sh-1)}
+.card-raised:hover{box-shadow:var(--sh-2)}
+.card .ct{font-size:16px;font-weight:700;line-height:22px}
+.card .cd{font-size:14px;line-height:22px;color:var(--fg-sub)}
+.cardrow{display:flex;flex-wrap:wrap;gap:20px}
+.cardrow>div{width:280px}
+.cardrow .clab{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--fg-mut);margin-bottom:9px}
 .flds{display:flex;flex-wrap:wrap;gap:18px}
 .fld{width:280px}
 .fld .fl{display:block;font-size:12.5px;font-weight:600;margin-bottom:7px}
@@ -975,7 +1017,7 @@ html[data-view="compare"] .board3{display:block}
     <button data-area="tokens">파운데이션</button>
   </nav>
   <button class="gconnect" id="igOpen"><svg class="i"><use href="#icon-action-external"/></svg>브랜드 연결</button>
-  <span class="gver">토큰 기반 · v0.58</span>
+  <span class="gver">토큰 기반 · v0.59</span>
 </header>
 <div class="app">
 
@@ -987,6 +1029,7 @@ html[data-view="compare"] .board3{display:block}
         <div class="nav-gl">컴포넌트</div>
         <button class="nav-item" data-view="components" data-tab="buttons">Buttons</button>
         <button class="nav-item" data-view="components" data-tab="forms">Forms</button>
+        <button class="nav-item" data-view="components" data-tab="card">Card</button>
         <button class="nav-item" data-view="components" data-tab="selection">Selection</button>
         <button class="nav-item" data-view="components" data-tab="feedback">Feedback</button>
         <button class="nav-item" data-view="components" data-tab="icon">Icon</button>
@@ -1084,9 +1127,9 @@ html[data-view="compare"] .board3{display:block}
           <section class="section">
             <div class="sec-head"><span class="tag">Why PIECE</span><h2 class="disp">Built on trust.</h2></div>
             <div class="cards">
-              <div class="fcard"><div class="ic"><svg class="i"><use href="#icon-feature-secure"/></svg></div><h3>검증된 안전 거래</h3><p>제도권 기반의 신뢰할 수 있는 거래 구조와 자산 보관으로 투자자를 보호합니다.</p></div>
-              <div class="fcard"><div class="ic"><svg class="i"><use href="#icon-feature-transparent"/></svg></div><h3>투명한 정보 공개</h3><p>상품별 실물 정보·시세·수익 지표를 실시간으로 투명하게 제공합니다.</p></div>
-              <div class="fcard"><div class="ic"><svg class="i"><use href="#icon-feature-fast"/></svg></div><h3>쉬운 시작</h3><p>소액부터 몇 번의 터치로. 복잡한 절차 없이 바로 첫 투자를 시작하세요.</p></div>
+              <div class="card card-flat fcard"><div class="ic"><svg class="i"><use href="#icon-feature-secure"/></svg></div><h3>검증된 안전 거래</h3><p>제도권 기반의 신뢰할 수 있는 거래 구조와 자산 보관으로 투자자를 보호합니다.</p></div>
+              <div class="card card-flat fcard"><div class="ic"><svg class="i"><use href="#icon-feature-transparent"/></svg></div><h3>투명한 정보 공개</h3><p>상품별 실물 정보·시세·수익 지표를 실시간으로 투명하게 제공합니다.</p></div>
+              <div class="card card-flat fcard"><div class="ic"><svg class="i"><use href="#icon-feature-fast"/></svg></div><h3>쉬운 시작</h3><p>소액부터 몇 번의 터치로. 복잡한 절차 없이 바로 첫 투자를 시작하세요.</p></div>
             </div>
           </section>
 
@@ -1253,7 +1296,9 @@ html[data-view="compare"] .board3{display:block}
 <script>
 const html=document.documentElement, frame=document.getElementById('frame'), navEl=document.getElementById('nav'), componentsEl=document.getElementById('componentsView'), modulesEl=document.getElementById('modulesView'), authEl=document.getElementById('authView'), screenEl=document.getElementById('screenView');
 const RAD={sharp:{m:4,l:6},default:{m:12,l:16},rounded:{m:20,l:24}}, DENS={compact:.84,default:1,comfortable:1.22},
-      BORD={hairline:1,default:1,strong:1.5}, SIZE={s:{ctrl:38,icon:20},m:{ctrl:46,icon:22},l:{ctrl:54,icon:26}};
+      BORD={hairline:1,default:1,strong:1.5}, SIZE={s:{ctrl:38,icon:20},m:{ctrl:46,icon:22},l:{ctrl:54,icon:26}},
+      /* Button·Input 은 고정 높이를 쓰지 않는다 — pad-y×2 + line-height 로 hug. 아래는 그 계산 결과(표시용) */
+      HUG={s:{btn:40,fld:48},m:{btn:44,fld:50},l:{btn:46,fld:54}};
 const KNOBS=[['data-layout','grid'],['data-radius','default'],['data-density','default'],['data-border','default'],['data-size','m']];
 
 function setBrand(b){html.setAttribute('data-brand',b);
@@ -1267,7 +1312,7 @@ document.getElementById('brands').addEventListener('click',e=>{const b=e.target.
 document.getElementById('devSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;html.setAttribute('data-device',b.dataset.d);b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));});
 
 function renderReadout(scope,el){const r=scope.getAttribute('data-radius'),d=DENS[scope.getAttribute('data-density')],bd=scope.getAttribute('data-border'),sz=scope.getAttribute('data-size');
-  el.innerHTML=[['comp/radius/button → radius/m',RAD[r].m+'px'],['comp/radius/card → radius/l',RAD[r].l+'px'],['spacing ×','×'+d],['border/'+bd,BORD[bd]+'px'],['size/control/'+sz,SIZE[sz].ctrl+'px'],['size/icon',SIZE[sz].icon+'px']]
+  el.innerHTML=[['comp/radius/button → radius/m',RAD[r].m+'px'],['comp/radius/card → radius/l',RAD[r].l+'px'],['spacing ×','×'+d],['border/'+bd,BORD[bd]+'px'],['button 높이 → hug',HUG[sz].btn+'px'],['field 높이 → hug',HUG[sz].fld+'px'],['size/touch-target/min','48px'],['size/icon',SIZE[sz].icon+'px']]
    .map(([k,v])=>`<div class="rr"><span class="rk">${k}</span><span class="rv">${v}</span></div>`).join('');}
 document.querySelectorAll('#presetCtl .seg').forEach(seg=>seg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const a=seg.dataset.attr;
   frame.setAttribute(a,b.dataset.val); screenEl.setAttribute(a,b.dataset.val); if(a!=='data-layout'){ componentsEl.setAttribute(a,b.dataset.val); modulesEl.setAttribute(a,b.dataset.val); authEl.setAttribute(a,b.dataset.val); }
@@ -1350,13 +1395,17 @@ const SEM=SEM_STR.split(';').map(x=>x.split('|'));
 const SPACING=[["0","dimension/0",0],["25","dimension/2",2],["50","dimension/4",4],["75","dimension/6",6],["100","dimension/8",8],["125","dimension/10",10],["150","dimension/12",12],["200","dimension/16",16],["250","dimension/20",20],["300","dimension/24",24],["400","dimension/32",32],["500","dimension/40",40],["600","dimension/48",48],["800","dimension/64",64]];
 const TK_SIZE=[["icon/xs",12],["icon/s",16],["icon/m",20],["icon/l",24],["icon/xl",32],["control/s",32],["control/m",40],["control/l",48],["avatar/s",24],["avatar/m",32],["avatar/l",48],["touch-target/min",48]];
 const BORDER=[["hairline",1],["default",1],["strong",2]];
+/* 파운데이션 보강 — 컴포넌트가 실제로 쓰는 선 두께. 스펙(freesm-component-schema.json)에는 아직 없어서
+   미리보기 아티팩트가 Button·Card 1px / Input 1.5px 로 임의로 그렸다. 여기서 명시적으로 세운다. */
+const CBW=[["comp/bdr-width/default","border/default",1],["comp/bdr-width/strong","border/strong",2],["comp/ring-width","(dimension 미존재)",3]];
 const CPAD=[["button-x","spacing/250",20],["button-y","spacing/150",12],["card","spacing/300",24],["field-x","spacing/200",16],["field-y","spacing/150",12]];
 const CGAP=[["xs","spacing/50",4],["s","spacing/100",8],["m","spacing/150",12],["l","spacing/250",20]];
 const RADIUS={'2xs':[0,2,4],'xs':[2,4,8],'s':[2,8,12],'m':[4,12,20],'l':[6,16,24],'xl':[8,20,28],'2xl':[12,24,32],'full':[999,999,999]};
 const CRAD=[["button","m"],["input","s"],["card","l"],["chip","full"],["modal","xl"],["pill","full"]];
 const WEBROWS=[["breakpoint (min)","0","768","1024"],["container/max","100%","720","1200"],["container/pad","20","32","40"],["grid/columns","4","8","12"],["grid/gutter","16","20","24"],["space/section","64","96","120"],["space/block","40","56","72"],["display/xl","36","52","72"],["display/l","30","40","56"],["display/m","26","32","44"]];
 const TYPES=[["display/2xl",40,48,800],["display/xl",32,40,800],["display/l",24,32,800],["heading/l",24,32,700],["heading/m",20,28,700],["heading/s",18,24,700],["body/l",18,28,400],["body/m",16,24,400],["body/s",14,22,400],["body/xs",12,18,400],["link/m",16,22,500],["number/tight/l",18,20,700],["utility/s",14,20,500]];
-const ELEVS=[["elev-1","카드 rest"],["elev-2","카드 hover"],["elev-3","드롭다운·팝오버"],["elev-4","모달·다이얼로그"],["elev-up","바텀시트·스티키"]];
+/* 스펙의 shadow/1~4 와 1:1 대응. 역할 라벨 = Card.elevation 축이 실제로 소비하는 자리 */
+const ELEVS=[["elev-1","shadow/1 · Card Raised rest"],["elev-2","shadow/2 · Card Raised hover"],["elev-3","shadow/3 · 드롭다운·팝오버"],["elev-4","shadow/4 · 모달·다이얼로그"],["elev-up","shadow/upper · 바텀시트·스티키"]];
 
 function brandHex(step){return getComputedStyle(html).getPropertyValue('--brand-p'+step).trim();}
 function resolve(alias){if(alias.indexOf('color/primary/')===0)return brandHex(alias.split('/').pop());return SCALE[alias]||'';}
@@ -1401,6 +1450,8 @@ function renderTokenTab(tab){curTab=tab;
     h+=`<div class="tk-grp">numeric · spacing <span class="c">→ dimension</span></div><div class="tk-pills">`+SPACING.map(([t,al,px])=>`<span class="tk-pill">spacing/${t} → <b>${px}</b></span>`).join('')+`</div>`;
     h+=`<div class="tk-grp">numeric · size <span class="c">→ dimension</span></div><div class="tk-pills">`+TK_SIZE.map(([t,px])=>`<span class="tk-pill">size/${t} <b>${px}</b></span>`).join('')+`</div>`;
     h+=`<div class="tk-grp">numeric · border / comp <span class="c">comp → spacing (2단)</span></div><div class="tk-pills">`+BORDER.map(([t,px])=>`<span class="tk-pill">border/${t} <b>${px}</b></span>`).join('')+CPAD.map(([t,al,px])=>`<span class="tk-pill">comp/pad/${t} → <b>${px}</b></span>`).join('')+CGAP.map(([t,al,px])=>`<span class="tk-pill">comp/gap/${t} → <b>${px}</b></span>`).join('')+`</div>`;
+    h+=`<div class="tk-grp">numeric · comp/bdr-width <span class="c">파운데이션 보강 · 신규</span></div><div class="tk-pills">`+CBW.map(([t,al,px])=>`<span class="tk-pill">${t} → <b>${px}</b></span>`).join('')+`</div>`;
+    h+=`<div class="tk-note" style="margin-top:12px">선 두께 토큰이 없어 컴포넌트마다 값이 흩어져 있었습니다(Button·Card 1 / Input 1.5). <b>comp/bdr-width/*</b>로 묶습니다. 다만 <b>comp/ring-width 3</b>은 dimension 스케일에 3이 없어(0·1·2·4·6…) 아직 별칭이 없습니다 — <b>dimension/3</b>을 추가하거나 링을 2 또는 4로 맞춰야 합니다.<br>색 쪽에도 어긋난 곳이 있습니다: <b>comp/bdr/default</b>는 alpha/black/60(#666666), <b>comp/bdr/subtle</b>은 alpha/black/20(#CCCCCC)이라 "default"가 "subtle"보다 <b>3배 무겁습니다</b> — 램프 배정이 뒤집혀 있어 재지정이 필요합니다. 또 <b>comp/fill/accent/secondary</b>(primary/40)는 <b>comp/bdr/focus-ring</b>과 같은 값이라, Secondary 버튼의 배경과 포커스 링이 같은 색으로 충돌합니다.</div>`;
   } else if(tab==='radius'){
     h+=`<div class="tk-note"><b>Radius</b> · 곡률. 배율이 아닌 <b>모드</b>(sharp/default/rounded)로 곡률 성격 교체. 각 스텝이 모드별 dimension에 별칭. 14 변수 · 3 모드.</div>`;
     h+=`<table class="tk-tbl"><tr><th>radius</th><th>sharp</th><th>default</th><th>rounded</th></tr>`+Object.entries(RADIUS).map(([k,v])=>`<tr><td>radius/${k}</td><td>${v[0]>=999?'999':v[0]}</td><td>${v[1]>=999?'999':v[1]}</td><td>${v[2]>=999?'999':v[2]}</td></tr>`).join('')+`</table>`;
@@ -1421,7 +1472,7 @@ function renderTokenTab(tab){curTab=tab;
     });
     h+='</div>';
   } else if(tab==='elevation'){
-    h+=`<div class="tk-note"><b>Elevation</b> · 브랜드 무관 그림자 스케일. 표면 위계에 따라 rest→hover→overlay→modal.</div><div class="tk-elevs">`+ELEVS.map(([n,u])=>`<div class="tk-elev"><div class="b" style="box-shadow:var(--${n})"></div><div class="n">${n}</div><div class="u">${u}</div></div>`).join('')+`</div>`;
+    h+=`<div class="tk-note"><b>Elevation</b> · 브랜드 무관 그림자 스케일. 표면 위계에 따라 rest→hover→overlay→modal. Card Raised는 <b>rest=shadow/1 · hover=shadow/2</b>로 두 칸을 함께 씁니다 — rest를 2에 고정하면 hover가 올라갈 자리가 없습니다. 스펙의 shadow/2 원시값(0 4px 4px rgba(0,0,0,.1))은 blur=offset·spread 0이라 가장자리가 딱딱하므로, 2겹으로 푼 여기 값으로 통일하는 걸 권장합니다.</div><div class="tk-elevs">`+ELEVS.map(([n,u])=>`<div class="tk-elev"><div class="b" style="box-shadow:var(--${n})"></div><div class="n">${n}</div><div class="u">${u}</div></div>`).join('')+`</div>`;
   }
   P.innerHTML=h;P.parentNode.querySelector('.tk-panel')&&(document.querySelector('.tokens').scrollTop=0);
 }
@@ -1431,32 +1482,58 @@ document.getElementById('tkTabs').addEventListener('click',e=>{const b=e.target.
 const _setBrand=setBrand;setBrand=function(b){_setBrand(b);if(html.getAttribute('data-view')==='tokens')renderTokenTab(curTab);};
 
 /* ================= COMPONENTS VIEW (정식 컴포넌트 문서) ================= */
-const CMP_TABS=[['buttons','Buttons'],['forms','Forms'],['selection','Selection'],['feedback','Feedback'],['icon','Icon'],['responsive','Responsive']];
+const CMP_TABS=[['buttons','Buttons'],['forms','Forms'],['card','Card'],['selection','Selection'],['feedback','Feedback'],['icon','Icon'],['responsive','Responsive']];
 const ICON_MAP=[['검색 인풋','icon-action-search'],['금액·원화 인풋','icon-finance-won'],['Select · 드롭다운','icon-nav-down'],['외부·새 탭 링크','icon-action-external'],['페이지네이션 이전/다음','icon-nav-left · icon-nav-right'],['성공 알림·체크','icon-status-success'],['경고·오류 알림','icon-status-alert'],['상승/하락 배지','icon-trend-up · icon-trend-down'],['자산 카테고리 칩·카드','icon-cat-*']];
 const ICON_SZ=[['xs',12],['s',16],['m',20],['l',24],['xl',32]];
 let curCmpTab='buttons';
-const BVAR=[['Primary','btn-primary'],['Neutral','btn-neutral'],['Ghost','btn-ghost'],['Danger','btn-danger']];
-const BST=[['','Default'],['is-hover','Hover'],['is-focus','Focus'],['is-pressed','Pressed'],['is-disabled','Disabled']];
+/* style 축 — 스펙(freesm-component-schema.json) Button.variantAxes.style 4종 + 데모 확장 1종 */
+const BVAR=[['Primary','btn-primary',''],['Secondary','btn-secondary','★'],['Neutral','btn-neutral',''],['Ghost','btn-ghost',''],['Danger','btn-danger','☆']];
+/* state 축 — 앞 2개만 Figma variant, 뒤 3개는 웹 전용 CSS 상호작용 상태 */
+const BST=[['','Default',1],['is-disabled','Disabled',1],['is-hover','Hover',0],['is-focus','Focus',0],['is-pressed','Pressed',0]];
+/* hug 높이 = comp/pad/*-y ×2 + line-height. 값은 Size 노브 m 기준 */
+const BSIZE=[['Small','btn-sm','utility/standard/xs/500','12/16',40],['Medium','','utility/standard/s/500','14/20',44],['Large','btn-lg','utility/standard/m/500','16/22',46]];
+/* Input 은 보더가 있어 실제 박스 높이 = pad-y×2 + line-height + bdr-width×2.
+   스펙은 hug 높이에 stroke 를 포함하는지 명시하지 않는다 — 아래 값은 stroke 포함 실측. */
+const ISIZE=[['Small','inp-sm','body/s/400','14/22',48],['Medium','','body/m/400','16/24',50],['Large','inp-lg','body/l/400','18/28',54]];
 function renderCmpTab(tab){curCmpTab=tab;
   document.querySelectorAll('#cmpTabs button').forEach(x=>x.classList.toggle('on',x.dataset.t===tab));
   const P=document.getElementById('cmpPanel');let h='';
   if(tab==='buttons'){
-    h+='<div class="cmp-sec"><div class="cmp-h"><h3>Button</h3><span class="anat">.btn · .btn-{primary|neutral|ghost|danger} · .btn-{sm|lg}</span></div><div class="cmp-desc">액션 위계 4종 × 상태 5종. 모든 상태가 토큰에 바인딩됩니다.</div>';
-    h+='<div class="mtx-wrap"><div class="cmatrix"><span></span>'+BST.map(([,l])=>`<span class="ch">${l}</span>`).join('');
-    BVAR.forEach(([lab,cls])=>{h+=`<span class="rh">${lab}</span>`+BST.map(([st])=>`<span class="cell"><button class="btn ${cls} ${st}">${lab}</button></span>`).join('');});
+    h+='<div class="cmp-sec"><div class="cmp-h"><h3>Button</h3><span class="anat">.btn · .btn-{primary|secondary|neutral|ghost|danger} · .btn-{sm|lg}</span></div><div class="cmp-desc">style 4종 × size 3종 × state 2종 = <b>24 variant</b>이 Figma 스펙 범위입니다. Hover·Focus·Pressed는 Figma variant가 아니라 <b>웹 전용 CSS 상호작용 상태</b>로 둡니다 — 아래 매트릭스에서 회색 헤더가 그 구간입니다.</div>';
+    h+='<div class="mtx-wrap"><div class="cmatrix" style="grid-template-columns:80px repeat('+BST.length+',minmax(84px,1fr))"><span></span>'+BST.map(([,l,spec])=>`<span class="ch"${spec?'':' style="opacity:.45"'}>${l}${spec?'':' ·css'}</span>`).join('');
+    BVAR.forEach(([lab,cls,mk])=>{h+=`<span class="rh">${lab}${mk?`<sup style="color:var(--fg-mut)">${mk}</sup>`:''}</span>`+BST.map(([st])=>`<span class="cell"><button class="btn ${cls} ${st}">${lab}</button></span>`).join('');});
     h+='</div></div>';
-    h+='<div class="cmp-sub">Sizes</div><div class="crow"><button class="btn btn-primary btn-sm">Small</button><button class="btn btn-primary">Medium</button><button class="btn btn-primary btn-lg">Large</button></div>';
-    h+='<div class="cmp-sub">With icon</div><div class="crow"><button class="btn btn-primary">시작하기 <svg class="i"><use href="#icon-action-external"/></svg></button><button class="btn btn-ghost"><svg class="i"><use href="#icon-action-search"/></svg> 검색</button></div>';
-    h+='<div class="cmp-note">fill=<b>comp/fill/accent/primary</b> · hover=<b>accent/strong</b> · pressed=<b>accent/press</b> · focus=<b>focus-ring</b> · disabled=<b>comp-disabled</b> · radius=<b>comp/radius/button→radius/m</b> · height=<b>size/control</b> · pad=<b>comp/pad/button</b></div></div>';
+    h+='<div class="cmp-note" style="margin:12px 0 0">★ <b>Secondary</b> — 스펙의 <b>comp/fill/accent/secondary</b>(#205CE9) + <b>fg/accent/primary</b>(#1245BA) 조합은 대비 <b>1.46:1</b>로 판독 불가. 의도(옅은 accent 틴트)에 맞게 <b>accent/subtle</b>로 교정해 구현했습니다 — 토큰 재지정 필요. &nbsp;☆ <b>Danger</b> — 데모에만 있는 확장으로, 스키마 style 축에 아직 없습니다.</div>';
+    h+='<div class="cmp-sub">Sizes · 높이는 hug (고정 높이 폐기)</div>';
+    h+='<div class="crow" style="align-items:flex-end;gap:18px">'+BSIZE.map(([lab,cls,ts,lh,hh])=>`<span style="display:flex;flex-direction:column;align-items:flex-start;gap:7px"><button class="btn btn-primary ${cls}">${lab}</button><span style="font-family:'Pretendard Variable',system-ui,sans-serif;font-size:10.5px;color:var(--fg-mut);line-height:1.5">${ts}<br>12×2 + ${lh.split('/')[1]} = <b style="color:var(--fg-sub)">${hh}px</b></span></span>`).join('')+'</div>';
+    h+='<div class="cmp-note" style="margin:12px 0 0">세 사이즈 모두 시각 높이가 <b>size/touch-target/min(48px)</b>에 못 미칩니다. 버튼을 부풀리는 대신 <b>::after로 48px 히트 영역만 겹쳐</b> 터치 하한선을 보장합니다 — 시각 크기와 터치 타깃을 분리하는 방식.</div>';
+    h+='<div class="cmp-sub">With icon</div><div class="crow"><button class="btn btn-primary">시작하기 <svg class="i"><use href="#icon-action-external"/></svg></button><button class="btn btn-ghost"><svg class="i"><use href="#icon-action-search"/></svg> 검색</button><button class="btn btn-secondary"><svg class="i"><use href="#icon-cat-asset"/></svg> 자산 보기</button></div>';
+    h+='<div class="cmp-note">fill=<b>comp/fill/accent/primary</b> · hover=<b>accent/strong</b> · pressed=<b>accent/press</b> · focus=<b>focus-ring</b> · disabled=<b>comp/fill/neutral/disabled + fg/disabled</b> · radius=<b>comp/radius/button→radius/m</b> · pad=<b>comp/pad/button-x 20 / -y 12</b> · gap=<b>comp/gap/s 8</b> · 높이=<b>hug</b>(pad-y×2 + line-height) · 하한=<b>size/touch-target/min 48</b></div></div>';
   } else if(tab==='forms'){
     const fld=(stt,cls,val,ph,helper,err)=>`<div class="fld"><span class="stt">${stt}</span><label class="fl">투자 금액${err?' <span class="req">*</span>':''}</label><div class="inp ${cls}"><svg class="i"><use href="#icon-finance-won"/></svg><span class="${val?'':'ph'}">${val||ph}</span></div>${err?`<div class="fe"><svg class="i"><use href="#icon-status-alert"/></svg>${err}</div>`:helper?`<div class="fh">${helper}</div>`:''}</div>`;
     h+='<div class="cmp-sec"><div class="cmp-h"><h3>Input / Field</h3><span class="anat">.inp · .is-{hover|focus|error|disabled}</span></div><div class="cmp-desc">라벨 · 필드 · 헬퍼/에러. 상태별 보더·포커스 링·배경이 토큰에 바인딩됩니다.</div><div class="flds">';
     h+=fld('Default','','','50,000','원 단위로 입력','');
+    h+=fld('Hover','is-hover','','50,000','원 단위로 입력','');
     h+=fld('Focus','is-focus','50,000','','원 단위로 입력','');
     h+=fld('Error','is-error','5,00','','','최소 10,000원 이상 입력하세요');
     h+=fld('Disabled','is-disabled','','비활성 필드','','');
-    h+='</div><div class="cmp-sub">Select</div><div class="fld"><div class="inp"><span>부동산</span><svg class="i" style="margin-left:auto"><use href="#icon-nav-down"/></svg></div></div>';
-    h+='<div class="cmp-note">border=<b>border/default→dimension/1</b> · focus=<b>focus-ring</b> · error=<b>status/critical</b> · disabled bg=<b>bg/sunken</b> · radius=<b>comp/radius/input→radius/s</b> · height=<b>size/control</b></div></div>';
+    h+='</div>';
+    h+='<div class="cmp-sub">Sizes · 높이는 hug (고정 높이 폐기)</div>';
+    h+='<div class="flds">'+ISIZE.map(([lab,cls,ts,lh,hh])=>`<div class="fld"><span class="stt">${lab}</span><div class="inp ${cls}"><svg class="i"><use href="#icon-finance-won"/></svg><span>50,000</span></div><div class="fh" style="line-height:1.5">${ts}<br>12×2 + ${lh.split('/')[1]} + 보더 2 = <b style="color:var(--fg-sub)">${hh}px</b></div></div>`).join('')+'</div>';
+    h+='<div class="cmp-note" style="margin:12px 0 0">Input과 Button은 같은 사이즈 이름에서 높이가 어긋납니다 — Button <b>40·44·46</b> vs Input <b>48·50·54</b>. 한 줄에 나란히 놓이는 <b>Search Bar·Form Field</b> 모듈에서 정렬이 깨지므로, 같은 rung의 <b>comp/pad/*-y</b>를 사이즈별로 분리하거나 텍스트 스타일 쌍을 재지정해야 합니다. 덧붙여 스펙은 hug 높이에 <b>stroke를 포함하는지</b> 적어두지 않았습니다 — 보더 2px 차이로 Input Small이 48px 하한을 넘느냐 마느냐가 갈리므로 명시가 필요합니다.</div>';
+    h+='<div class="cmp-sub">Select</div><div class="fld"><div class="inp"><span>부동산</span><svg class="i" style="margin-left:auto"><use href="#icon-nav-down"/></svg></div></div>';
+    h+='<div class="cmp-note">border=<b>comp/bdr/default</b> · focus=<b>comp/bdr/focus-ring</b> · error=<b>status/fg/critical</b> · disabled bg=<b>bg/sunken</b> · radius=<b>comp/radius/input→radius/s</b> · pad=<b>comp/pad/field-x 16 / -y 12</b> · gap=<b>comp/gap/s 8</b> · 폭=<b>fill</b>(하한 48) · 높이=<b>hug</b>(pad-y×2 + line-height)</div>';
+    h+='<div class="cmp-note" style="margin:10px 0 0">Focus·Error를 <b>보더 색만</b> 바꿔서 표시하면 default 보더 대비 각각 <b>1.03:1 · 1.29:1</b> — 흑백·색각이상에서 상태 변화가 보이지 않습니다. 그래서 fill은 건드리지 않고 바깥에 <b>3px ring</b>을 둘러 색 이외의 신호(두께)를 함께 줍니다. Error 배경 틴트(status/bg/critical)는 <b>권장하지 않습니다</b> — 필드 배경이 바뀌면 disabled/readonly로 읽히고, state 축 전체에서 <b>comp/fill/field/*</b>가 하나로 유지되는 불변식이 깨집니다.</div></div>';
+  } else if(tab==='card'){
+    h+='<div class="cmp-sec"><div class="cmp-h"><h3>Card</h3><span class="anat">.card · .card-{flat|raised}</span></div><div class="cmp-desc">elevation 축 2종(Flat·Raised). Light 모드에서는 <b>bg/default</b>와 <b>bg/ev/raised</b>가 둘 다 #FFFFFF라, 두 변형을 가르는 건 오직 <b>보더냐 그림자냐</b>입니다 — 면 색은 아무 역할도 하지 않습니다.</div>';
+    h+='<div class="cardrow">';
+    h+='<div><div class="clab">Flat</div><div class="card card-flat"><div class="ct">분기 리포트</div><div class="cd">보더로만 면을 구분합니다. 표 안이나 리스트처럼 카드가 반복될 때 씁니다.</div><div class="crow"><button class="btn btn-secondary btn-sm">열기</button></div></div></div>';
+    h+='<div><div class="clab">Raised · rest</div><div class="card card-raised"><div class="ct">분기 리포트</div><div class="cd">그림자로 떠 있음을 표현합니다. 마우스를 올리면 한 칸 더 올라갑니다.</div><div class="crow"><button class="btn btn-secondary btn-sm">열기</button></div></div></div>';
+    h+='<div><div class="clab">Raised · hover</div><div class="card card-raised" style="box-shadow:var(--sh-2)"><div class="ct">분기 리포트</div><div class="cd">rest → hover 로 한 단계 상승. 두 단계를 모두 쓰려면 rest가 사다리 아래쪽에 있어야 합니다.</div><div class="crow"><button class="btn btn-secondary btn-sm">열기</button></div></div></div>';
+    h+='</div>';
+    h+='<div class="cmp-note" style="margin:14px 0 0">스펙은 Raised를 <b>shadow/2</b>로 잠정 지정해 뒀지만, <b>shadow/1(rest) → shadow/2(hover)</b>를 권장합니다. 이 데모의 elevation 사다리는 이미 elev-1을 "카드 rest", elev-2를 "카드 hover" 역할로 쓰고 있고, rest를 2에 고정하면 hover가 올라갈 자리가 없어집니다. 덧붙여 <b>shadow/2</b>의 원시값 <code>0px 4px 4px rgba(0,0,0,.1)</code>은 blur가 offset과 같고 spread가 0이라 가장자리가 딱딱합니다 — 2겹으로 부드럽게 푸는 elev-2 쪽이 현재 데모의 표면 언어에 맞습니다. foundationGaps의 Elevation "명칭 통일" 항목에 같이 묶어 처리하는 게 좋겠습니다.</div>';
+    h+='<div class="cmp-note" style="margin:10px 0 0">fill=<b>bg/default</b>(Flat) · <b>bg/ev/raised</b>(Raised) · border=<b>comp/bdr/subtle</b>(Flat만) · radius=<b>comp/radius/card→radius/l</b> · pad=<b>comp/pad/card 24</b> · gap=<b>comp/gap/m 12</b> · 폭=<b>fill</b> · 높이=<b>hug</b></div>';
+    h+='<div class="cmp-note" style="margin:10px 0 0">보더 두께 토큰이 아직 없습니다. 미리보기 아티팩트가 Button·Card는 1px, Input은 1.5px로 <b>임의로</b> 그린 것도 이 때문입니다 — <b>comp/bdr-width/*</b>(1)와 ring 두께(3)를 파운데이션에 추가해야 합니다. 또한 <b>comp/bdr/default</b>는 black@60%(#666666), <b>comp/bdr/subtle</b>은 black@20%(#CCCCCC)라 "default"가 "subtle"보다 3배 무겁습니다 — 램프 배정이 뒤집혀 있습니다.</div></div>';
   } else if(tab==='selection'){
     h+='<div class="cmp-sec"><div class="cmp-h"><h3>Selection</h3><span class="anat">.chk · .rdo · .tgl</span></div><div class="cmp-desc">체크박스 · 라디오 · 토글. 선택 상태는 accent, 비활성은 disabled 토큰.</div>';
     h+='<div class="cmp-sub">Checkbox</div><div class="crow" style="gap:22px"><span class="opt"><span class="chk on"><svg class="i"><use href="#icon-status-success"/></svg></span>선택됨</span><span class="opt"><span class="chk"></span>미선택</span><span class="opt dis"><span class="chk dis"></span>비활성</span></div>';
@@ -1496,7 +1573,7 @@ function renderCmpTab(tab){curCmpTab=tab;
     h+='<div class="rspx">'+[['Mobile','≤767','m',1],['Tablet','768–1023','t',2],['Desktop','1024+','d',3]].map(([lab,rng,cls,cols])=>
       `<div class="rspx-col"><div class="rspx-cap">${lab} <span>${rng}</span></div><div class="rspx-mock ${cls}"><div class="rspx-nav"><span class="d"></span><i></i><i></i><i></i></div><div class="rspx-hero"><b></b><s></s></div><div class="rspx-grid" style="grid-template-columns:repeat(${cols},1fr)">${Array.from({length:cols*2}).map(()=>'<div class="rspx-card"><u></u></div>').join('')}</div></div></div>`).join('')+'</div>';
     h+='<div class="cmp-note" style="margin-bottom:18px">같은 콘텐츠가 컨테이너 폭에 따라 <b>1 → 2 → 3열</b>로 갈라지고, 컨테이너 패딩·거터·섹션 간격이 함께 커집니다. 실제 화면 리플로우는 <b>모듈·페이지 뷰 + Device 토글</b>에서 확인하세요.</div>';
-    h+='<div class="cmp-sub">전 해상도 고정</div><div class="rsp-fixed">버튼 · 인풋/필드 · 셀렉트 · 체크박스/라디오/토글 · 칩 · 배지 · 알림 · 아이콘은 <b>디바이스와 무관하게 고정</b>입니다. 크기 변형이 필요하면 디바이스가 아니라 <b>Size 노브(S·M·L)</b>로 조절합니다 — <b>size/control</b> 38·46·54, <b>size/icon</b> 20·22·26.</div>';
+    h+='<div class="cmp-sub">전 해상도 고정</div><div class="rsp-fixed">버튼 · 인풋/필드 · 셀렉트 · 체크박스/라디오/토글 · 칩 · 배지 · 알림 · 아이콘은 <b>디바이스와 무관하게 고정</b>입니다. 크기 변형이 필요하면 디바이스가 아니라 <b>Size 노브(S·M·L)</b>로 조절합니다 — 노브는 스펙의 size 축을 한 칸씩 밀어줍니다. 버튼·필드의 높이는 더 이상 고정값이 아니라 <b>comp/pad/*-y ×2 + line-height</b>로 hug 결정되고(버튼 40·44·46 / 필드 46·48·52), 터치 하한선 <b>size/touch-target/min 48</b>은 히트 영역으로 별도 보장합니다. <b>size/control</b> 38·46·54는 이제 텍스트가 없는 고정 지오메트리 컨트롤(체크박스·라디오·토글·아이콘 버튼)에만 남깁니다. <b>size/icon</b> 20·22·26.</div>';
     h+='<div class="cmp-note">반응형 소스=<b>Web 컬렉션</b>(mobile·tablet·desktop 3모드) · display만 반응형, body류 텍스트·컴포넌트는 전 해상도 고정 · 실제 리플로우는 <b>모듈·페이지 뷰 + Device 토글</b>에서 확인</div></div>';
   }
   P.innerHTML=`<div class="cmp-stage">${h}</div>`;
@@ -1520,7 +1597,7 @@ const M={
     <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#icon-cat-infra"/></svg></span></div><div class="pbody"><span class="pcat">인프라</span><h3 class="ptitle">친환경 태양광 발전</h3><div class="pmeta"><span class="pprice">₩20,000/조각</span><span class="pyield">목표 6.9%</span></div></div></article>
     <article class="pcard"><div class="pthumb"><span class="pic"><svg class="i"><use href="#icon-cat-luxury"/></svg></span></div><div class="pbody"><span class="pcat">명품</span><h3 class="ptitle">스위스 시계 컬렉션</h3><div class="pmeta"><span class="pprice">₩35,000/조각</span><span class="pyield">목표 5.8%</span></div></div></article>
   </div></section>`,
-  features:`<section class="section"><div class="sec-head"><span class="tag">Why PIECE</span><h2 class="disp">Built on trust.</h2></div><div class="cards"><div class="fcard"><div class="ic"><svg class="i"><use href="#icon-feature-secure"/></svg></div><h3>검증된 안전 거래</h3><p>제도권 기반의 신뢰할 수 있는 거래 구조와 자산 보관으로 투자자를 보호합니다.</p></div><div class="fcard"><div class="ic"><svg class="i"><use href="#icon-feature-transparent"/></svg></div><h3>투명한 정보 공개</h3><p>상품별 실물 정보·시세·수익 지표를 실시간으로 투명하게 제공합니다.</p></div><div class="fcard"><div class="ic"><svg class="i"><use href="#icon-feature-fast"/></svg></div><h3>쉬운 시작</h3><p>소액부터 몇 번의 터치로. 복잡한 절차 없이 바로 첫 투자를 시작하세요.</p></div></div></section>`,
+  features:`<section class="section"><div class="sec-head"><span class="tag">Why PIECE</span><h2 class="disp">Built on trust.</h2></div><div class="cards"><div class="card card-flat fcard"><div class="ic"><svg class="i"><use href="#icon-feature-secure"/></svg></div><h3>검증된 안전 거래</h3><p>제도권 기반의 신뢰할 수 있는 거래 구조와 자산 보관으로 투자자를 보호합니다.</p></div><div class="card card-flat fcard"><div class="ic"><svg class="i"><use href="#icon-feature-transparent"/></svg></div><h3>투명한 정보 공개</h3><p>상품별 실물 정보·시세·수익 지표를 실시간으로 투명하게 제공합니다.</p></div><div class="card card-flat fcard"><div class="ic"><svg class="i"><use href="#icon-feature-fast"/></svg></div><h3>쉬운 시작</h3><p>소액부터 몇 번의 터치로. 복잡한 절차 없이 바로 첫 투자를 시작하세요.</p></div></div></section>`,
   cta:`<section class="inner-cta"><div class="ctaband"><h2 class="disp">Start with your first piece.</h2><p>가입하고 PIECE의 검증된 조각투자 상품을 만나보세요.</p><button class="btn btn-lg">무료로 시작하기 <svg class="i"><use href="#icon-action-external"/></svg></button></div></section>`,
   footer:`<footer class="foot"><div><div class="logo"><span class="mark"><svg class="i"><use href="#icon-brand-logo"/></svg></span>PIECE</div><p style="margin-top:12px;line-height:1.6">모두를 위한 조각투자.<br>실물 자산 투자의 새로운 기준.</p></div><div><h4>서비스</h4><a>조각투자</a><a>상품 안내</a><a>수수료</a></div><div><h4>회사</h4><a>회사소개</a><a>뉴스룸</a><a>채용</a></div><div><h4>지원</h4><a>고객센터</a><a>공지사항</a><a>이용약관</a></div><div class="copyright">© 2026 PIECE. 브랜드 미확정 시스템 데모 (Primary: placeholder Deep Blue).</div></footer>`,
   logowall:`<section class="logowall"><div class="ll">제도권 파트너와 함께합니다</div><div class="lrow"><span class="lg"><svg class="i"><use href="#icon-feature-secure"/></svg>TRUSTBANK</span><span class="lg"><svg class="i"><use href="#icon-cat-realestate"/></svg>ESTATE Co.</span><span class="lg"><svg class="i"><use href="#icon-finance-won"/></svg>KOSDAQ</span><span class="lg"><svg class="i"><use href="#icon-feature-transparent"/></svg>OPENLEDGER</span><span class="lg"><svg class="i"><use href="#icon-cat-asset"/></svg>GOLDVAULT</span></div></section>`,
@@ -1532,7 +1609,7 @@ const MOD_META={
   stats:{t:'통계 밴드',anat:'.metrics · metric(mk · ml)',desc:'신뢰 지표를 나란히 보여주는 밴드. 3개 셀이 데스크톱에서 균등 그리드, 모바일에서 세로로 쌓입니다.',note:'상하 보더=<b>bdr/subtle</b> · 셀 구분선=<b>line</b> · 수치=<b>disp</b> · 라벨=<b>fg/subtle</b> · 그리드=<b>@container 640</b>'},
   steps:{t:'이용 절차',anat:'.section · sec-head · steps · step(snum · sic)',desc:'서비스 이용 흐름을 3단계로 안내. 번호·아이콘·제목·설명으로 이뤄진 스텝 카드 3-up입니다.',note:'번호=<b>fg/faint</b> · 아이콘칩=<b>accent-subtle</b> · 제목=<b>disp</b> · 간격 배율=<b>density 노브</b> · 3-up=<b>@container 760</b>'},
   products:{t:'상품 리스트',anat:'.plist[data-layout] · pcard(pthumb · pbody · pmeta)',desc:'조각투자 상품을 나열하는 핵심 모듈. 같은 카드 데이터를 레이아웃 변형(Grid·Carousel·List)으로 전환합니다 — 레이아웃은 이 모듈의 속성입니다.',note:'카드=<b>comp/radius/card→radius/l</b> · 보더=<b>border 노브</b> · 카테고리 아이콘 자동 매핑=<b>icon-cat-*</b> · 레이아웃=<b>data-layout</b>(모듈 변형) · Grid=<b>@container 640/1040</b>'},
-  features:{t:'특징 카드',anat:'.cards · fcard(ic · h3 · p)',desc:'서비스 강점을 아이콘 카드로 제시. hover 시 살짝 떠오르는 상승 인터랙션이 포함됩니다.',note:'카드=<b>radius/l</b> + <b>border</b> · hover=<b>elev-2</b> + translateY · 아이콘칩=<b>accent-subtle</b> · 아이콘=<b>icon-feature-*</b> · 3-up=<b>@container 760</b>'},
+  features:{t:'특징 카드',anat:'.cards · .card.card-flat.fcard(ic · h3 · p)',desc:'서비스 강점을 아이콘 카드로 제시. hover 시 살짝 떠오르는 상승 인터랙션이 포함됩니다.',note:'카드=<b>Card atom(.card.card-flat)</b> 재사용 — fill=<b>bg/default</b> · border=<b>comp/bdr/subtle</b> · radius=<b>comp/radius/card→radius/l</b> · pad=<b>comp/pad/card 24</b>×density · hover=<b>shadow/2</b> + translateY · 아이콘칩=<b>accent-subtle</b> · 아이콘=<b>icon-feature-*</b> · 3-up=<b>@container 760</b>'},
   cta:{t:'CTA 밴드',anat:'.inner-cta · ctaband',desc:'전환을 유도하는 강조 밴드. 브랜드 accent를 배경 면으로 크게 사용하는 유일한 섹션입니다.',note:'배경=<b>accent</b>(브랜드 스왑 반영) · 버튼=반전(<b>white</b> 위 <b>accent-strong</b>) · 곡률=<b>radius/2xl</b> · 텍스트=<b>static/white</b>'},
   footer:{t:'푸터',anat:'.foot · logo · h4 · a · copyright',desc:'전 페이지 하단 정보 영역. 로고+소개 + 링크 컬럼들로 구성되며 데스크톱에서 4열 그리드입니다.',note:'상단선=<b>line</b> · 제목=<b>fg/subtle</b> · 링크=<b>fg/mut→hover fg</b> · 4열=<b>@container 760</b> · 저작권=<b>fg/mut</b>'},
   logowall:{t:'로고월',anat:'.logowall · ll · lrow · lg',desc:'제휴·수탁 파트너 신뢰 로고를 한 줄로 나열하는 범용 모듈. 실제 로고 도착 전까지 아이콘+워드마크 플레이스홀더입니다.',note:'로고=<b>fg/subtler</b> + opacity(무채색 처리) · 라벨=<b>fg/mut</b> · 반응형 wrap · 아이콘 교체=<b>Icons 교체 지점</b>'},
