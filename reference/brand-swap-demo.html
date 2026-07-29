@@ -118,13 +118,35 @@ svg.i{display:block;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linec
 .ig-sw .aa{font-size:8px;color:var(--fg-mut)}
 .ig-sw .pri{font-style:normal;font-size:7.5px;font-weight:800;letter-spacing:.05em;color:var(--accent);background:var(--accent-subtle);border-radius:99px;padding:2px 7px;margin-bottom:1px}
 .ig-sw .pri.ast{color:var(--fg-sub);background:var(--bg-sunken)}
-.ig-jd{margin-top:11px;font-size:11.5px;color:var(--fg-sub);background:var(--accent-subtle);border-radius:9px;padding:9px 12px;line-height:1.6;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.ig-jd.wait{background:var(--bg-sunken);color:var(--fg-mut)}
-.ig-jd b{color:var(--accent)}
-.ig-jd em{font-style:normal;flex:1;min-width:190px}
-.ig-jd i{font-style:normal;color:var(--fg-mut)}
-.ig-jd button{font-size:10px;font-weight:700;border:1px solid var(--line-2);background:var(--bg);color:var(--fg-sub);border-radius:99px;padding:4px 11px;cursor:pointer;white-space:nowrap}
+.ig-sw .pri.rule{color:var(--fg-mut);background:transparent;border:1px dashed var(--line-2);padding:1px 6px}
+/* v0.52 · 판정 패널 — 에이전트가 개입했는지/안 했는지가 한눈에 보여야 한다.
+   상태는 셋뿐이다: 확인 중(wait) · 판정함(기본) · 부르지 않음(off). */
+.ig-jd{margin-top:12px;font-size:11.5px;color:var(--fg-sub);background:var(--accent-subtle);border:1px solid var(--accent);border-left-width:3px;border-radius:10px;padding:11px 13px;line-height:1.6}
+.ig-jd.wait{background:var(--bg-sunken);border-color:var(--line-2);color:var(--fg-mut)}
+.ig-jd.off{background:var(--bg-sunken);border-color:var(--line-2);border-left-color:var(--fg-mut);color:var(--fg-mut)}
+.ig-jd .jd-h{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800;color:var(--accent)}
+.ig-jd.wait .jd-h,.ig-jd.off .jd-h{color:var(--fg-sub)}
+.ig-jd .jd-ic{font-size:7.5px;font-weight:900;letter-spacing:.04em;line-height:1;padding:4px 5px;border-radius:5px;background:var(--accent);color:#fff;flex:none}
+.ig-jd.wait .jd-ic,.ig-jd.off .jd-ic{background:var(--fg-mut)}
+.ig-jd.wait .jd-ic{animation:jdPulse 1.1s ease-in-out infinite}
+@keyframes jdPulse{0%,100%{opacity:.4}50%{opacity:1}}
+.ig-jd .jd-cf{margin-left:auto;font-size:9px;font-weight:700;color:var(--fg-sub);background:var(--bg);border:1px solid var(--line-2);border-radius:99px;padding:2px 8px;white-space:nowrap}
+.ig-jd .jd-sw{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.ig-jd .jd-c{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:var(--fg-mut);background:var(--bg);border:1px solid var(--line-2);border-radius:99px;padding:3px 11px 3px 4px}
+.ig-jd .jd-c.on{color:var(--fg);border-color:var(--accent)}
+.ig-jd .jd-c i{width:17px;height:17px;border-radius:99px;display:block;border:1px solid rgba(0,0,0,.12);flex:none}
+.ig-jd .jd-c s{font-size:8.5px;font-weight:700;text-decoration:none;color:var(--fg-mut)}
+.ig-jd .jd-ar{color:var(--accent);font-weight:800;font-size:12px}
+.ig-jd .jd-w{margin:9px 0 0;font-size:11.5px;line-height:1.65;color:var(--fg-sub)}
+.ig-jd.off .jd-w,.ig-jd.wait .jd-w{color:var(--fg-mut)}
+.ig-jd .jd-f{display:flex;align-items:center;gap:9px;margin-top:10px;flex-wrap:wrap}
+.ig-jd .jd-f i{font-style:normal;font-size:9.5px;color:var(--fg-mut);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.ig-jd button{margin-left:auto;font-size:10px;font-weight:700;border:1px solid var(--line-2);background:var(--bg);color:var(--fg-sub);border-radius:99px;padding:4px 11px;cursor:pointer;white-space:nowrap}
 .ig-jd button:hover{border-color:var(--accent);color:var(--accent)}
+.ig-jd .jd-bar{margin-top:10px;height:3px;border-radius:99px;background:var(--line-2);overflow:hidden}
+.ig-jd .jd-bar span{display:block;width:34%;height:100%;border-radius:99px;background:var(--fg-sub);animation:jdSlide 1.3s ease-in-out infinite}
+@keyframes jdSlide{0%{transform:translateX(-110%)}100%{transform:translateX(340%)}}
+@media (prefers-reduced-motion:reduce){.ig-jd .jd-bar span,.ig-jd.wait .jd-ic{animation:none}}
 .ig-sec{margin-top:16px}
 .ig-shape{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:11.5px;color:var(--fg-sub);background:var(--bg-sunken);border-radius:9px;padding:10px 13px;line-height:1.6}
 .ig-shape b{color:var(--accent)}
@@ -933,7 +955,7 @@ html[data-view="compare"] .board3{display:block}
     <button data-area="tokens">파운데이션</button>
   </nav>
   <button class="gconnect" id="igOpen"><svg class="i"><use href="#icon-action-external"/></svg>브랜드 연결</button>
-  <span class="gver">토큰 기반 · v0.51</span>
+  <span class="gver">토큰 기반 · v0.52</span>
 </header>
 <div class="app">
 
@@ -1982,6 +2004,7 @@ function igShow(colors,fonts,shape,basis,grad){
   const shotConf=igShotConf;igShotConf=null;      // 화면 캡처 경로에서만 세팅되는 1회성 상태
   const jHost=igHost;igHost='';                  // 호스트도 1회성 — 다음 분석에 이전 사이트가 새지 않게
   const jOn=igJudgeOn;igJudgeOn=false;           // 이번 렌더가 에이전트 판정 결과인가
+  const jRule=igJudgeRuleHex;igJudgeRuleHex='';  // 에이전트가 밀어낸 규칙 1순위 — 스와치에 표시하고 비운다
   if(!igJudgeSkip)igJudgeState=null;             // 새 분석이면 이전 판정을 버린다(재렌더는 유지)
   igGradSel=grad||null;igGradDropped=false;
   igCands=colors.slice(0,12);                            // igResolve가 이미 계층 순서로 정렬
@@ -1993,7 +2016,9 @@ function igShow(colors,fonts,shape,basis,grad){
   document.getElementById('igResultLab').innerHTML=`Primary 후보 · <b>${igCands.length}개</b> — ${autoApply?'1순위 자동 적용':'자동 적용 보류'} · <b>눌러서 바꾸기</b>${basis?` · 판별 근거: ${basis}`:''}`;
   document.getElementById('igSws').innerHTML=igCands.map((c,i)=>{const cr=contrastWhite(c.hex);
     const lab=IG_SRC_LAB[c.src];
-    const badge=i===0?`<em class="pri">${jOn?'AI 판정':(autoApply?'PRIMARY':'1순위')}</em>`:(c.src&&c.src!=='css'?`<em class="pri ast">${lab}</em>`:'');
+    const badge=i===0?`<em class="pri">${jOn?'AI 판정':(autoApply?'PRIMARY':'1순위')}</em>`
+      :(jRule&&c.hex===jRule?'<em class="pri rule">규칙 1순위</em>'
+      :(c.src&&c.src!=='css'?`<em class="pri ast">${lab}</em>`:''));
     return `<button class="ig-sw${i===0&&autoApply?' on':''}" data-i="${i}">${badge}<i style="background:${c.hex}"></i><span>${c.hex.toUpperCase()}</span><span class="aa">${cr>=4.5?'AA ✓':'대비 '+cr.toFixed(1)}</span></button>`;}).join('');
   /* 화면 캡처는 근거 강도가 낮은 소스다 — 등급을 감추지 않고 그대로 알린다. */
   const wn=document.getElementById('igWarn');
@@ -2023,17 +2048,42 @@ function igShow(colors,fonts,shape,basis,grad){
    CSS 사용 통계·화면 캡처로 떨어진 경우, 즉 규칙이 가장 자주 틀린 자리에서만 자동 호출한다.
    에이전트는 새 색을 만들지 않는다. 이미 모은 후보 배열의 인덱스만 답하고, 서버가 그 인덱스를 검증한다.
    실패·지연·스키마 위반은 모두 무음 폴백 — 규칙 판정이 그대로 남는다. */
+/* 게이트는 '부른다/안 부른다'만이 아니라 '왜 그랬는지'까지 돌려준다.
+   개입 여부가 화면에 안 보이면 사람은 규칙이 한 일과 에이전트가 한 일을 구별할 수 없다. */
+const IG_JD_OFF={
+  declared:'사이트가 브랜드색을 직접 선언했습니다(theme-color·브랜드 변수). 이보다 강한 근거는 없어 에이전트를 부르지 않았습니다.',
+  asset:'로고 마크에서 브랜드색을 확정했습니다. 규칙 근거가 충분해 에이전트를 부르지 않았습니다.',
+  img:'업로드한 로고 이미지에서 브랜드색을 확정했습니다. 규칙 근거가 충분해 에이전트를 부르지 않았습니다.',
+  grad:'브랜드 그라디언트가 근거 게이트를 통과했습니다. 규칙 근거가 충분해 에이전트를 부르지 않았습니다.'};
 function igJudgeGate(){
-  if(igJudgeOff||igJudgeSkip)return false;
-  if(location.protocol==='file:'&&!igJudgeForce)return false;   // 로컬 파일에는 서버가 없다
-  if(igCands.length<2)return false;                             // 고를 게 하나뿐이면 판정할 것도 없다
+  if(igJudgeSkip)return{ok:false,head:'',why:''};                // 재렌더 — 패널을 건드리지 않는다
+  if(igJudgeOff)return{ok:false,head:'에이전트 판정 미사용',
+    why:'이 배포에 판정 키가 없어 규칙 판정만 사용합니다.'};
+  if(location.protocol==='file:'&&!igJudgeForce)return{ok:false,head:'에이전트 판정 미사용',
+    why:'로컬 파일로 열어 판정 서버에 닿지 않습니다. 배포본에서는 자동으로 호출됩니다.'};   // 로컬 파일에는 서버가 없다
+  if(igCands.length<2)return{ok:false,head:'규칙 판정으로 확정',
+    why:'후보가 하나뿐이라 고를 것이 없습니다.'};                // 고를 게 하나뿐이면 판정할 것도 없다
   const s=igCands[0].src||'css';
-  return s==='css'||s==='shot';                                 // 약한 근거일 때만
+  if(s==='css'||s==='shot')return{ok:true,head:'',why:''};       // 약한 근거일 때만
+  return{ok:false,head:'규칙 판정으로 확정',why:IG_JD_OFF[s]||'규칙 근거가 충분해 에이전트를 부르지 않았습니다.'};
+}
+function igJudgeCard(cls,head,body,meta){
+  const el=document.getElementById('igJudge');if(!el)return null;
+  el.hidden=false;el.className='ig-jd'+(cls?' '+cls:'');
+  el.innerHTML=`<div class="jd-h"><span class="jd-ic">AI</span><b>${head}</b>${meta||''}</div>`+(body||'');
+  return el;
 }
 function igJudgeAuto(args){
-  if(!igJudgeGate())return;
-  const el=document.getElementById('igJudge');
-  el.hidden=false;el.className='ig-jd wait';el.innerHTML='<em>브랜드 근거 확인 중…</em>';
+  const g=igJudgeGate();
+  const el=document.getElementById('igJudge');if(!el)return;
+  if(!g.ok){
+    if(!g.why){el.hidden=true;el.innerHTML='';return;}
+    igJudgeCard('off',g.head,`<p class="jd-w">${igEsc(g.why)}</p>`);
+    return;
+  }
+  igJudgeCard('wait','에이전트가 브랜드 근거를 확인하는 중',
+    '<div class="jd-bar"><span></span></div>'
+    +'<p class="jd-w">규칙은 어떤 색이 몇 번 쓰였는지까지만 셉니다. 그 색이 브랜드의 것인지를 지금 판단하고 있습니다.</p>');
   const ruleColors=igCands.slice();
   fetch('/api/judge',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({
     host:args.host||'',
@@ -2042,13 +2092,18 @@ function igJudgeAuto(args){
     fonts:(args.fonts||[]).slice(0,8),shape:args.shape||null})})
     .then(r=>r.json())
     .then(j=>{
-      if(!j||!j.ok){if(j&&j.reason==='judge-disabled')igJudgeOff=true;el.hidden=true;return;}
+      if(!j||!j.ok){
+        if(j&&j.reason==='judge-disabled'){igJudgeOff=true;
+          igJudgeCard('off','에이전트 판정 미사용','<p class="jd-w">이 배포에 판정 키가 없어 규칙 판정만 사용합니다.</p>');return;}
+        igJudgeCard('off','규칙 판정 유지','<p class="jd-w">에이전트 판정을 받지 못해 규칙 판정을 그대로 씁니다.</p>');return;}
       const v=j.verdict;
-      if(!v||!Number.isInteger(v.primary)||!ruleColors[v.primary]){el.hidden=true;return;}  // 서버가 걸렀어도 한 번 더
-      igJudgeState={v,ruleColors,args,on:false};
+      if(!v||!Number.isInteger(v.primary)||!ruleColors[v.primary]){   // 서버가 걸렀어도 한 번 더
+        igJudgeCard('off','규칙 판정 유지','<p class="jd-w">판정 형식이 맞지 않아 버렸습니다. 규칙 판정을 그대로 씁니다.</p>');return;}
+      igJudgeState={v,ruleColors,args,on:false,model:j.model||''};
       igJudgeApply(true);
     })
-    .catch(()=>{el.hidden=true;});               // 판정은 선택 층 — 실패하면 규칙 판정 그대로
+    /* 판정은 선택 층 — 실패해도 규칙 판정은 그대로다. 다만 조용히 사라지지는 않는다. */
+    .catch(()=>{igJudgeCard('off','규칙 판정 유지','<p class="jd-w">판정 서버에 닿지 못해 규칙 판정을 그대로 씁니다.</p>');});
 }
 /* on=true면 에이전트 순서로, false면 규칙 순서로 다시 그린다. 사람이 언제든 되돌릴 수 있어야 한다. */
 function igJudgeApply(on){
@@ -2061,18 +2116,33 @@ function igJudgeApply(on){
   /* 근거 문장은 아래 판정 패널이 이미 싣는다 — 머리말에는 무엇이 정했는지만 남긴다(같은 문장 두 번 금지). */
   const basis=reorder?'에이전트 판정 (근거는 아래)':a.basis;
   igJudgeSkip=true;igShotConf=a.shotConf||null;igJudgeOn=reorder;
+  igJudgeRuleHex=reorder&&v.primary!==0?st.ruleColors[0].hex:'';   // 규칙이 1순위로 뒀던 색을 그 자리에 남긴다
   try{igShow(colors,a.fonts,a.shape,basis,a.grad);}
   finally{igJudgeSkip=false;igJudgeOn=false;}
+}
+function jdChip(c,on,tag){
+  return `<span class="jd-c${on?' on':''}"><i style="background:${c.hex}"></i>${igEsc(c.hex.toUpperCase())}<s>${tag}</s></span>`;
 }
 function renderJudge(){
   const el=document.getElementById('igJudge'),st=igJudgeState;
   if(!el)return;
   if(!st){el.hidden=true;el.innerHTML='';return;}
-  const v=st.v,low=v.confidence==='low',pick=st.ruleColors[v.primary];
-  el.hidden=false;el.className='ig-jd';
-  const head=low?'에이전트 판정 · 신뢰도 낮음 — 적용하지 않음':(st.on?'에이전트 판정 적용':'규칙 판정 표시 중');
-  el.innerHTML=`<em><b>${head}</b> — ${igEsc(v.why||'')} <i>(${igEsc(pick?pick.hex.toUpperCase():'')} · 신뢰도 ${SHOT_CONF[v.confidence]||igEsc(v.confidence)})</i></em>`
-    +(low?'':`<button type="button" id="igJudgeTg">${st.on?'규칙 판정으로 보기':'에이전트 판정 보기'}</button>`);
+  const v=st.v,low=v.confidence==='low';
+  const rule=st.ruleColors[0],pick=st.ruleColors[v.primary],moved=v.primary!==0;
+  /* 머리말이 이 층의 전부다 — 에이전트가 무엇을 했는지 한 문장으로 말한다. */
+  const head=low?'신뢰도가 낮아 적용하지 않았습니다'
+    :(!moved?'에이전트가 규칙 판정에 동의했습니다'
+    :(st.on?'에이전트가 1순위를 바꿨습니다':'규칙 판정을 보는 중'));
+  /* 바뀐 색을 나란히 놓는다. 지금 화면에 적용된 쪽에 테두리가 간다. */
+  const swap=moved
+    ?`<div class="jd-sw">${jdChip(rule,low||!st.on,'규칙')}<span class="jd-ar">→</span>${jdChip(pick,!low&&st.on,low?'에이전트 제안':'에이전트')}</div>`
+    :`<div class="jd-sw">${jdChip(pick,true,'규칙·에이전트 일치')}</div>`;
+  igJudgeCard('',head,
+    swap+`<p class="jd-w">${igEsc(v.why||'')}</p>`
+    +`<div class="jd-f"><i>${igEsc(st.model||'agent')}</i>`
+    +(low?'':`<button type="button" id="igJudgeTg">${st.on?'규칙 판정으로 보기':'에이전트 판정 보기'}</button>`)
+    +'</div>',
+    `<span class="jd-cf">신뢰도 ${SHOT_CONF[v.confidence]||igEsc(v.confidence)}</span>`);
 }
 document.getElementById('igJudge')?.addEventListener('click',e=>{
   if(!e.target.closest('#igJudgeTg'))return;
@@ -2259,7 +2329,7 @@ function gradDec(g){                                // Primary 계층에 넣을 
   return g?[{hex:gradSeed(g),count:1,source:g.stops.length+'색 그라디언트',src:'grad'}]:[];}
 let igGradSel=null,igShotConf=null,igGradMarks=[],igGradDropped=false,igShapeDet=null;  // 적용 중 / 캡처 신뢰도 / 전체 판정 / 자동 해제 여부 / 형태 분석값
 /* v0.51 에이전트 판정 층 상태 — 영구 비활성(키 없는 배포) / 재렌더 재귀 가드 / 판정 배지 1회성 / 호스트 1회성 / 테스트 강제 */
-let igJudgeState=null,igJudgeSkip=false,igJudgeOff=false,igJudgeOn=false,igJudgeForce=false,igHost='';
+let igJudgeState=null,igJudgeSkip=false,igJudgeOff=false,igJudgeOn=false,igJudgeForce=false,igHost='',igJudgeRuleHex='';
 const SHOT_CONF={high:'높음',mid:'보통',low:'낮음'};
 document.getElementById('gradTg').addEventListener('click',()=>{
   const b=document.getElementById('gradTg'),on=!b.classList.contains('on');
