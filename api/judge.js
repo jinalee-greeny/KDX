@@ -1,6 +1,10 @@
 // KDX 브랜드 판정 — Vercel 서버리스 함수 (v0.51 1단계: 텍스트 판정)
 // POST /api/judge  body: { host, candidates:[{hex,src,count,source}], gradients:[{css,seed}], fonts:[], shape:{} }
 // 응답: { ok:true, verdict:{primary,gradient,radius,density,font,confidence,why} } | { ok:false, reason }
+// v0.57 — 화면 추천 모드 추가. POST body에 mode:'screens'가 오면
+//   body: { host, site:{title,desc,siteName,ogType,lang,types,nav}, templates:[{k,t,d}] }
+//   응답: { ok:true, plan:{kind,screens:[{tpl,title,desc,crumb}],confidence,why} }
+//   같은 계약 — 에이전트는 templates의 인덱스만 고르고, 서버가 범위·중복·상표문자열을 검증한다.
 //
 // 설계 원칙(설계문서 v0.51 §3):
 //  - 에이전트는 새 색을 만들지 않는다. 이미 수집된 후보 배열의 "인덱스"와 enum만 답한다.
@@ -86,7 +90,108 @@ function validate(v, b) {
   return out;
 }
 
+/* ── v0.57 · 화면 추천 모드 (mode:'screens')
+   같은 계약을 그대로 쓴다: 에이전트는 화면을 새로 만들지 않는다. 이미 있는 템플릿 목록의 인덱스만 고른다.
+   제목·설명만 문장으로 받는데, 그것도 서버가 길이를 자르고 브랜드명이 섞이면 통째로 버린다 —
+   데모 화면에 남의 상표 문자열을 심어두지 않기 위해서다(버리면 클라이언트가 템플릿 기본 문구를 쓴다). */
+const SCR_SYSTEM = `당신은 정보구조 분석가입니다. 어떤 웹서비스의 제목·설명·메뉴 링크를 받고, 그 서비스의 성격을 파악해 디자인 시스템 예시 화면으로 만들 만한 페이지 유형 3개를 고릅니다.
+
+판단 기준:
+- 그 서비스에 실제로 있을 법한 페이지를 고르십시오. 메뉴 링크에 드러난 것이 가장 강한 근거입니다.
+- 서로 성격이 다른 3개를 고르십시오. 비슷한 유형 셋보다 목록형·문서형·전환형이 섞인 쪽이 디자인 시스템 점검에 쓸모가 큽니다.
+- 근거가 약하면 confidence를 "low"로 두십시오.
+
+엄격한 제약:
+- 템플릿은 반드시 주어진 목록의 배열 인덱스(0부터)로만 답하십시오. 새 유형을 만들지 마십시오.
+- 제목·설명은 일반 명사로만 쓰십시오. 회사명·서비스명·상표를 넣지 마십시오. 예: "요금 안내"(O), "○○ 요금제"(X).
+- 제목은 20자 이내, 설명은 한 문장, 경로(crumb)는 2~3단계.
+- 오직 JSON 객체 하나만 출력하십시오. 설명·코드펜스·머리말 금지.
+
+출력 형식:
+{"kind":"<서비스 성격 한 단어, 일반 명사>","screens":[{"tpl":<정수 인덱스>,"title":"<제목>","desc":"<한 문장>","crumb":["홈","..."]}],"confidence":"high"|"mid"|"low","why":"<한국어 한 문장, 왜 이 셋인지>"}`;
+
+function buildScrUser(b) {
+  const s = b.site || {};
+  const tpls = clampArr(b.templates, 16).map((t, i) => `${i}. ${String(t.t || '').slice(0, 30)} — ${String(t.d || '').slice(0, 60)}`);
+  const nav = clampArr(s.nav, 28).map(n => `${String(n.t || '').slice(0, 30)}${n.h ? ' (' + String(n.h).slice(0, 40) + ')' : ''}`);
+  return [
+    `사이트: ${String(b.host || '(알 수 없음)').slice(0, 80)}`,
+    `제목: ${String(s.title || '(없음)').slice(0, 120)}`,
+    `설명: ${String(s.desc || '(없음)').slice(0, 160)}`,
+    `서비스명 메타: ${String(s.siteName || '(없음)').slice(0, 60)} · 유형 메타: ${String(s.ogType || '(없음)').slice(0, 40)}`,
+    `구조화 데이터 유형: ${clampArr(s.types, 6).join(', ') || '(없음)'}`,
+    `언어: ${String(s.lang || '(없음)').slice(0, 12)}`,
+    '',
+    '메뉴·푸터 링크:',
+    nav.length ? nav.join('\n') : '(없음 — 자바스크립트로 그리는 화면일 수 있습니다)',
+    '',
+    '고를 수 있는 화면 템플릿(인덱스 순):',
+    tpls.join('\n'),
+    '',
+    '서로 다른 성격의 3개를 고르고, JSON 하나만 출력하십시오.'
+  ].join('\n');
+}
+
+// 호스트에서 브랜드 토큰을 뽑는다 — 'www.instagram.com' → 'instagram'.
+// 이 문자열이 제목·설명에 섞이면 그 필드를 버린다. 데모는 남의 서비스를 흉내 내는 물건이 아니다.
+function brandToken(host) {
+  const h = String(host || '').toLowerCase().replace(/^www\./, '').split(':')[0];
+  const first = h.split('.')[0];
+  return first.length >= 3 ? first : '';
+}
+// 호스트 라벨만으로는 부족하다 — 에이전트는 한국어로 답하고, '인스타그램'은 'instagram'을 포함하지 않는다.
+// 그래서 그 사이트가 스스로 밝힌 이름(og:site_name)도 같은 자격의 토큰으로 본다.
+// 이름이 일반명사에 가까워 과하게 걸리더라도 손해는 '템플릿 기본 문구로 되돌아간다'뿐이다 — 그쪽이 안전하다.
+function brandTokens(b) {
+  const out = [], add = (s, min) => {
+    const v = String(s || '').toLowerCase().trim();
+    if (v.length >= min && out.indexOf(v) < 0) out.push(v);
+  };
+  add(brandToken(b && b.host), 3);
+  const nm = (b && b.site && b.site.siteName) || '';
+  add(nm, 2);
+  add(String(nm).split(/[\s·|—–-]+/)[0], 2);
+  return out.filter(Boolean);
+}
+function scrText(v, brands, cap) {
+  let s = String(v == null ? '' : v).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!s) return '';
+  const low = s.toLowerCase();
+  const list = Array.isArray(brands) ? brands : (brands ? [brands] : []);
+  for (const t of list) if (t && low.indexOf(t) >= 0) return '';  // 상표 문자열이 섞이면 그 필드는 통째로 버린다
+  return s.slice(0, cap);
+}
+
+/* 검증은 판정 모드와 같은 태도다 — 항목 단위로 버리고, 하나도 못 건지면 전체를 버린다.
+   전체를 버리면 클라이언트가 규칙 폴백으로 내려가 화면 3개는 어쨌든 나온다. */
+function validateScr(v, b) {
+  if (!v || typeof v !== 'object') return null;
+  const n = clampArr(b.templates, 16).length;
+  const arr = Array.isArray(v.screens) ? v.screens : null;
+  if (!n || !arr || !arr.length) return null;
+  const brand = brandTokens(b);
+  const out = [], used = new Set();
+  for (const s of arr) {
+    if (out.length >= 3) break;
+    if (!s || typeof s !== 'object') continue;
+    const t = s.tpl;
+    if (!Number.isInteger(t) || t < 0 || t >= n) continue;        // 범위 밖 인덱스는 그 항목만 버린다
+    if (used.has(t)) continue;                                    // 같은 템플릿 세 번은 추천이 아니다
+    used.add(t);
+    const crumb = (Array.isArray(s.crumb) ? s.crumb : []).map(c => scrText(c, brand, 20)).filter(Boolean).slice(0, 3);
+    out.push({ tpl: t, title: scrText(s.title, brand, 20), desc: scrText(s.desc, brand, 140), crumb });
+  }
+  if (!out.length) return null;
+  return {
+    kind: scrText(v.kind, brand, 20),
+    screens: out,
+    confidence: CONF.indexOf(v.confidence) >= 0 ? v.confidence : 'mid',
+    why: scrText(v.why, brand, 200)
+  };
+}
+
 async function ask(body, key) {
+  const scr = body.mode === 'screens';
   const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 12000);
   try {
     const r = await fetch(API, {
@@ -94,8 +199,8 @@ async function ask(body, key) {
       headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
       signal: ctl.signal,
       body: JSON.stringify({
-        model: MODEL, max_tokens: 400, temperature: 0, system: SYSTEM,
-        messages: [{ role: 'user', content: buildUser(body) }]
+        model: MODEL, max_tokens: scr ? 700 : 400, temperature: 0, system: scr ? SCR_SYSTEM : SYSTEM,
+        messages: [{ role: 'user', content: scr ? buildScrUser(body) : buildUser(body) }]
       })
     });
     const j = await r.json().catch(() => null);
@@ -127,6 +232,15 @@ module.exports = async (req, res) => {
 
   try {
     const body = await readBody(req);
+    // 화면 추천 모드 — 색 판정과 입력·출력이 다르므로 여기서 갈라진다. 실패 규약(200·무음)은 같다.
+    if (body && body.mode === 'screens') {
+      if (!Array.isArray(body.templates) || !body.templates.length)
+        return res.status(200).json({ ok: false, reason: 'no-templates' });
+      const rawS = await ask(body, key);
+      const plan = validateScr(rawS, body);
+      if (!plan) return res.status(200).json({ ok: false, reason: 'schema' });
+      return res.status(200).json({ ok: true, plan, model: MODEL });
+    }
     if (!body || !Array.isArray(body.candidates) || !body.candidates.length)
       return res.status(200).json({ ok: false, reason: 'no-candidates' });
     const raw = await ask(body, key);

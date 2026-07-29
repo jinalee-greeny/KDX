@@ -149,6 +149,10 @@ svg.i{display:block;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linec
 .ig-jd .jd-bar span{display:block;width:34%;height:100%;border-radius:99px;background:var(--fg-sub);animation:jdSlide 1.3s ease-in-out infinite}
 @keyframes jdSlide{0%{transform:translateX(-110%)}100%{transform:translateX(340%)}}
 @media (prefers-reduced-motion:reduce){.ig-jd .jd-bar span,.ig-jd.wait .jd-ic{animation:none}}
+/* v0.57 · 자동 생성한 예시 화면 안내 — 판정 카드와 같은 껍데기를 쓰고 목록만 더한다 */
+.ig-jd .sc-l{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ig-jd .sc-i{display:inline-flex;align-items:baseline;gap:5px;font-size:10px;font-weight:700;color:var(--fg);background:var(--bg);border:1px solid var(--line-2);border-radius:99px;padding:3px 11px}
+.ig-jd .sc-i s{font-size:8.5px;font-weight:700;text-decoration:none;color:var(--fg-mut)}
 .ig-sec{margin-top:16px}
 .ig-shape{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:11.5px;color:var(--fg-sub);background:var(--bg-sunken);border-radius:9px;padding:10px 13px;line-height:1.6}
 .ig-shape b{color:var(--accent)}
@@ -1231,6 +1235,7 @@ html[data-view="compare"] .board3{display:block}
       <div class="ig-sws" id="igSws"></div>
       <p class="ig-warn" id="igWarn" hidden></p>
       <div class="ig-jd" id="igJudge" hidden></div>
+      <div class="ig-jd" id="igScr" hidden></div>
       <div class="ig-rl ig-sec" id="igGradLab" hidden>그라디언트</div>
       <div class="ig-grad" id="igGrad" hidden></div>
       <div class="ig-rl ig-sec" id="igShapeLab" hidden>형태 · 곡률과 간격</div>
@@ -1687,6 +1692,39 @@ const SCR_TPL=[
   {k:'blank',t:'빈 화면부터',d:'헤더와 페이지 제목 한 칸만 두고 직접 쌓기',secs:['header','pagehead'],
    ctx:{crumb:['홈','새 페이지'],title:'새 페이지',desc:'아래 ＋ 버튼으로 필요한 섹션을 쌓아 화면을 만들어 보세요.'}}
 ];
+/* ===== v0.57 · 도메인에 맞는 예시 화면 고르기(규칙 층) =====
+   사이트가 스스로 밝힌 메뉴(GNB·푸터 링크)는 그 서비스의 정보구조를 가장 정직하게 드러낸다.
+   요금 링크가 있으면 요금 화면이 있는 서비스고, 약관 링크가 있으면 문서형 화면이 필요한 서비스다.
+   에이전트가 없거나 실패해도 이 표만으로 화면 3개가 나온다 — 자동 생성은 선택 층이 아니라 기본 동작이다. */
+const SCR_RULE=[
+  {k:'pricing',re:/요금|가격|수수료|이용료|플랜|구독|멤버십|pricing|price|plan|billing|subscri|member/i},
+  {k:'terms',re:/약관|정책|개인정보|법적|고지|terms|privacy|policy|legal|agreement/i},
+  {k:'notice',re:/공지|소식|뉴스|보도|알림|notice|news|announce|press|release|blog/i},
+  {k:'event',re:/이벤트|프로모션|쿠폰|혜택|기획전|event|promo|coupon|benefit|sale/i},
+  {k:'support',re:/문의|고객|상담|도움|지원|자주\s*묻는|support|help|contact|faq|inquir|cs\b/i},
+  {k:'products',re:/상품|제품|스토어|쇼핑|카탈로그|목록|메뉴판|product|shop|store|goods|catalog|item|collection/i},
+  {k:'detail',re:/상세|자세히|detail|spec/i},
+  {k:'my',re:/마이|내\s|계정|로그인후|대시보드|my\s?page|mypage|account|profile|dashboard/i},
+  {k:'landing',re:/소개|서비스|회사|about|intro|company|overview|feature|solution/i}
+];
+/* 셋을 고를 때 성격이 겹치지 않게 한다 — 목록형·문서형·전환형이 섞여야 디자인 시스템을 점검할 수 있다.
+   근거가 부족하면 이 순서로 채운다(어떤 서비스에도 있는 화면부터). */
+const SCR_FILL=['landing','products','support'];
+function scrPickRule(site){
+  const s=site||{};
+  const hay=[].concat(
+    (s.nav||[]).map(n=>(n.t||'')+' '+(n.h||'')),
+    [s.title||'',s.desc||'',s.siteName||'',(s.types||[]).join(' ')]
+  );
+  const hit={};
+  SCR_RULE.forEach(r=>{hit[r.k]=hay.filter(t=>r.re.test(t)).length;});
+  /* 동점일 때 표 순서가 곧 우선순위가 된다 — 무작위로 흔들리지 않게 인덱스를 보조키로 쓴다. */
+  const ranked=SCR_RULE.map((r,i)=>({k:r.k,n:hit[r.k],i})).filter(x=>x.n>0)
+    .sort((a,b)=>b.n-a.n||a.i-b.i).map(x=>x.k);
+  const out=[];
+  for(const k of ranked.concat(SCR_FILL)){if(out.length>=3)break;if(out.indexOf(k)<0)out.push(k);}
+  return{keys:out,hits:hit,evidence:ranked.length};
+}
 let screens=[],scrSeq=0,curScr=null,pickAt=null,pickKind='tpl';
 function scrName(base){let n=base,i=1;while(screens.some(s=>s.name===n)){i++;n=base+' '+i;}return n;}
 function addScreen(k){
@@ -2167,6 +2205,96 @@ function renderJudge(){
 document.getElementById('igJudge')?.addEventListener('click',e=>{
   if(!e.target.closest('#igJudgeTg'))return;
   igJudgeApply(!(igJudgeState&&igJudgeState.on));});
+/* ===== v0.57 · 도메인에 맞춘 예시 화면 자동 생성 =====
+   브랜드를 바꿔 끼우는 것까지는 색의 문제지만, '이 시스템이 우리 서비스에서 버티는가'는 화면의 문제다.
+   그래서 주소를 넣으면 색과 함께 그 서비스에 있을 법한 화면 3개를 만들어 둔다.
+   두 층으로 간다 — 메뉴 링크를 키워드 표에 대조하는 규칙 층이 기본이고, 에이전트는 그 위에서 성격을 읽는다.
+   에이전트가 없거나 늦거나 형식을 어기면 규칙 층 결과가 그대로 남는다(화면이 안 나오는 경우는 없다).
+   만든 화면은 우리 26개 섹션 어휘 안에서의 근사치지 그 사이트의 복제가 아니다 — 카드에 그렇게 적는다. */
+let igScrMade=[],igScrHost='';
+function igScrCard(cls,head,body){
+  const el=document.getElementById('igScr');if(!el)return;
+  el.hidden=false;el.className='ig-jd'+(cls?' '+cls:'');
+  el.innerHTML=`<div class="jd-h"><span class="jd-ic">화면</span><b>${head}</b></div>`+(body||'');
+}
+/* 자동 생성분은 한 묶음으로 관리한다 — 다시 분석하면 통째로 갈아끼우고, 되돌리기도 통째로 지운다.
+   사람이 ✕로 개별 삭제한 화면은 이미 목록에 없으므로 자연히 제외된다. */
+function scrDropMade(){
+  igScrMade.forEach(id=>{const i=screens.findIndex(s=>s.id===id);if(i>=0)screens.splice(i,1);});
+  const gone=igScrMade.indexOf(curScr)>=0;igScrMade=[];
+  renderPgTabs();
+  if(gone)route(screens.length?'screen':'interactive',screens.length?screens[0].id:undefined);
+}
+function scrBuild(list){
+  scrDropMade();
+  const made=[];let first=null;
+  list.forEach(it=>{
+    const tpl=SCR_TPL.find(t=>t.k===it.k);if(!tpl)return;
+    const base=tpl.ctx||DEF_CTX;
+    /* 에이전트가 준 제목·설명은 서버가 이미 상표 문자열을 걸러 냈다. 비어 있으면 템플릿 기본값을 쓴다. */
+    const ctx={crumb:(it.crumb&&it.crumb.length?it.crumb.slice(0,3):base.crumb),
+               title:it.title||base.title,desc:it.desc||base.desc};
+    const id='s'+(++scrSeq);
+    screens.push({id,name:scrName(it.title||tpl.t),secs:tpl.secs.slice(),ctx});
+    igScrMade.push(id);made.push({name:screens[screens.length-1].name,t:tpl.t});
+    if(!first)first=id;
+  });
+  renderPgTabs();
+  if(first)route('screen',first);
+  return made;
+}
+function scrList(made){
+  return `<div class="sc-l">${made.map(m=>`<span class="sc-i">${igEsc(m.name)}<s>${igEsc(m.t)}</s></span>`).join('')}</div>`;
+}
+function scrFoot(model){
+  return `<div class="jd-f"><i>${igEsc(model||'규칙')}</i><button type="button" id="igScrUndo">생성한 화면 지우기</button></div>`;
+}
+const SCR_NOTE='만든 화면은 이 데모가 가진 26개 섹션 어휘 안에서의 근사치입니다 — 그 사이트를 복제한 것이 아니라 <b>같은 성격의 화면</b>을 세워 토큰이 버티는지 보는 용도입니다. 섹션은 자유롭게 더하고 뺄 수 있습니다.';
+function igScrAuto(site,host){
+  const el=document.getElementById('igScr');if(!el)return;
+  igScrHost=host||'';
+  const rule=scrPickRule(site);
+  const runRule=why=>{
+    const made=scrBuild(rule.keys.map(k=>({k})));
+    if(!made.length){el.hidden=true;return;}
+    igScrCard('off','예시 화면 3개를 만들었습니다',
+      scrList(made)+`<p class="jd-w">${igEsc(why)} ${SCR_NOTE}</p>`+scrFoot());
+  };
+  const ruleWhy=rule.evidence
+    ?`이 사이트의 메뉴·푸터 링크에서 읽은 구조를 기준으로 골랐습니다.`
+    :`메뉴 구조를 읽지 못해 어떤 서비스에나 있는 화면부터 세웠습니다.`;
+  if(!site||location.protocol==='file:'||igJudgeOff){runRule(ruleWhy);return;}
+  igScrCard('wait','이 서비스에 맞는 예시 화면을 고르는 중',
+    '<div class="jd-bar"><span></span></div>'
+    +'<p class="jd-w">메뉴 이름만으로는 성격이 겹치는 화면 셋이 나올 수 있습니다. 지금 무슨 서비스인지를 읽고 있습니다.</p>');
+  fetch('/api/judge',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({
+    mode:'screens',host:host||'',site,
+    templates:SCR_TPL.map(t=>({k:t.k,t:t.t,d:t.d}))})})
+    .then(r=>r.json())
+    .then(j=>{
+      if(!j||!j.ok||!j.plan||!Array.isArray(j.plan.screens)||!j.plan.screens.length){
+        if(j&&j.reason==='judge-disabled')igJudgeOff=true;
+        runRule(ruleWhy);return;}
+      const p=j.plan;
+      /* 인덱스는 서버가 이미 검증했지만 한 번 더 본다 — 이 배열은 우리 것이고, 우리가 확인할 수 있다. */
+      const list=p.screens.map(s=>{const t=SCR_TPL[s.tpl];
+        return t?{k:t.k,title:s.title,desc:s.desc,crumb:s.crumb}:null;}).filter(Boolean);
+      if(!list.length){runRule(ruleWhy);return;}
+      const made=scrBuild(list);
+      if(!made.length){runRule(ruleWhy);return;}
+      igScrCard('','에이전트가 이 서비스에 맞는 화면 3개를 세웠습니다',
+        scrList(made)
+        +`<p class="jd-w">${igEsc(p.why||'')}${p.kind?` (성격: ${igEsc(p.kind)})`:''} ${SCR_NOTE}</p>`
+        +scrFoot(j.model||'agent'));
+    })
+    .catch(()=>runRule(ruleWhy));
+}
+document.getElementById('igScr')?.addEventListener('click',e=>{
+  if(!e.target.closest('#igScrUndo'))return;
+  scrDropMade();
+  igScrCard('off','생성한 화면을 지웠습니다',
+    '<p class="jd-w">＋ 화면 추가에서 언제든 직접 세울 수 있습니다. 주소를 다시 분석하면 이 화면들도 다시 만들어집니다.</p>');
+});
 document.getElementById('igSws')?.addEventListener('click',e=>{
   const b=e.target.closest('.ig-sw');if(!b)return;
   igApplySel(+b.dataset.i,undefined,true);renderGrads();});
@@ -2539,6 +2667,9 @@ function extractShape(text){
 /* URL·Figma → /api/ingest (배포 환경에서 동작) */
 async function igRemote(params,label,hdrs){
   igMsg(label+' 해석 중…');igResult.hidden=true;
+  /* 새 분석이 시작되면 지난 화면 안내는 내린다 — 이번 분석 결과가 아닌 문장이 남아 있으면 그게 근거처럼 읽힌다.
+     (만들어 둔 화면 자체는 건드리지 않는다. 지우는 건 재생성과 되돌리기의 일이다.) */
+  {const e=document.getElementById('igScr');if(e){e.hidden=true;e.innerHTML='';}}
   try{
     /* 토큰류는 헤더로만 보낸다 — 쿼리스트링에 실으면 접근 로그·리퍼러·브라우저 기록에 그대로 남는다. */
     const r=await fetch('/api/ingest?'+params,hdrs?{headers:hdrs}:undefined);
@@ -2563,7 +2694,11 @@ async function igRemote(params,label,hdrs){
     let basis=rr.basis;
     if(j.unit==='area'&&basis&&basis.indexOf('CSS')===0)basis='Figma 실측 — 보이는 레이어의 면적 점유율';
     if(j.note)basis=(basis?basis+' · ':'')+j.note;
+    /* igShow가 igHost를 소진하므로 먼저 붙들어 둔다 — 화면 추천에도 호스트가 필요하다(전체 URL은 아니다). */
+    const scrHost=igHost;
     igShow(rr.cands,j.fonts||[],j.shape||null,basis,rr.grad);
+    /* 색을 다 그린 뒤에 화면을 세운다. URL 경로에서만 — Figma 파일에는 '이 서비스의 메뉴'가 없다. */
+    if(j.source!=='figma'&&j.site)igScrAuto(j.site,scrHost);
   }catch(err){
     const local=location.protocol==='file:';
     if(!local&&err.need==='token'){

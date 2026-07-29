@@ -4,6 +4,8 @@
 // v0.56 — Figma 수집 단위를 '노드 개수'에서 '보이는 면적'으로 바꾼다. 페이지별로 따로 받아
 //         depth 제한을 없애고, 숨긴 레이어·불투명도·부모자식 중복을 반영한다.
 //         응답에 unit('area'|'count')과 note(못 읽은 페이지 안내)를 함께 싣는다.
+// v0.57 — URL 경로에 '서비스 정체 신호'(site)를 함께 싣는다. 이미 받은 HTML만 읽으므로 추가 요청 0회.
+//         예시 화면을 그 도메인에 맞게 고르기 위한 입력이다.
 // GET /api/ingest?url=https://...   → 사이트 HTML+CSS에서 컬러·폰트 추출
 // GET /api/ingest?figma=<링크|key>  → Figma API로 파일 채움색 수집
 //   토큰 출처: 요청 헤더 X-Figma-Token(사용자별) → 없으면 환경변수 FIGMA_TOKEN(배포자)
@@ -190,6 +192,91 @@ function collectImports(css, base, seen) {
   return out;
 }
 
+// ── v0.57 · 서비스 정체 신호
+// 색만 가져오면 '무슨 브랜드인가'는 알아도 '무슨 서비스인가'는 모른다.
+// 예시 화면을 그 도메인에 맞게 만들려면 후자가 필요하다 — 그런데 그건 이미 받아 둔 HTML 안에 있다.
+// 그래서 요청을 한 번도 더 보내지 않는다. 제목·설명·og·JSON-LD 유형·언어, 그리고 GNB/푸터 링크만 읽는다.
+// 링크는 '그 서비스가 스스로 밝힌 메뉴 구조'다 — 요금·약관·공지·문의가 있는지가 여기서 드러난다.
+const SITE_NAV_CAP = 28, SITE_TXT_CAP = 40;
+// 제목·설명에 실제로 자주 박히는 이름 엔티티만 푼다. 전부 풀 필요는 없다 —
+// 못 푼 엔티티는 화면 제목으로 넘어가지 않고, 여기서 원문 그대로 남아 근거로만 쓰인다.
+const ENT = {
+  nbsp: ' ', amp: '&', lt: '<', gt: '>', quot: '"', apos: "'",
+  mdash: '—', ndash: '–', hellip: '…', middot: '·', bull: '·', times: '×',
+  lsquo: '‘', rsquo: '’', ldquo: '“', rdquo: '”',
+  laquo: '«', raquo: '»', reg: '®', copy: '©', trade: '™', deg: '°', euro: '€', pound: '£', yen: '¥'
+};
+function entDec(s) {
+  return String(s || '')
+    .replace(/&#x([0-9a-f]{1,5});/gi, (_, h) => { const n = parseInt(h, 16); return n > 31 && n < 65536 ? String.fromCharCode(n) : ' '; })
+    .replace(/&#(\d{1,5});/g, (_, d) => { const n = +d; return n > 31 && n < 65536 ? String.fromCharCode(n) : ' '; })
+    .replace(/&([a-z]{2,7});/gi, (m, n) => { const v = ENT[n.toLowerCase()]; return v === undefined ? m : v; });
+}
+function txtOf(h, cap) {
+  return entDec(String(h || '').replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim().slice(0, cap || SITE_TXT_CAP);
+}
+function metaContent(html, name) {
+  // name= 이 앞에 오든 content= 가 앞에 오든 같은 태그다. 순서에 기대지 않는다.
+  const re = new RegExp('<meta\\b[^>]*(?:name|property)=["\']' + name + '["\'][^>]*>', 'i');
+  const tag = (html.match(re) || [])[0]
+    || (html.match(new RegExp('<meta\\b[^>]*content=["\'][^"\']*["\'][^>]*(?:name|property)=["\']' + name + '["\'][^>]*>', 'i')) || [])[0];
+  if (!tag) return '';
+  return txtOf((tag.match(/content\s*=\s*["']([^"']*)["']/i) || [])[1], 160);
+}
+// JSON-LD의 @type은 그 사이트가 자기를 뭐라고 부르는지에 대한 가장 직접적인 진술이다
+// (Product · Organization · NewsMediaOrganization · FinancialService …). 파싱 실패는 그냥 버린다.
+function ldTypes(html) {
+  const out = [];
+  const seen = new Set();
+  const push = v => { const s = txtOf(v, 32); if (s && !seen.has(s)) { seen.add(s); out.push(s); } };
+  const dig = (o, d) => {
+    if (!o || d > 4 || out.length >= 6) return;
+    if (Array.isArray(o)) { o.forEach(x => dig(x, d + 1)); return; }
+    if (typeof o !== 'object') return;
+    const t = o['@type'];
+    if (typeof t === 'string') push(t); else if (Array.isArray(t)) t.forEach(x => typeof x === 'string' && push(x));
+    for (const k of Object.keys(o)) if (k !== '@type') dig(o[k], d + 1);
+  };
+  let n = 0;
+  for (const m of html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)) {
+    if (++n > 4) break;
+    try { dig(JSON.parse(m[1].trim()), 0); } catch (_) { /* 깨진 LD는 흔하다 — 무시 */ }
+  }
+  return out;
+}
+function navLinks(html) {
+  // 헤더·내비·푸터 안쪽을 먼저 본다. 본문 링크는 콘텐츠지 메뉴가 아니다.
+  // 그 영역이 아예 없는(=JS로 그리는) 문서라면 전체 <a>로 후퇴한다 — 없는 것보다는 낫다.
+  let scope = (html.match(/<(?:nav|header|footer)\b[\s\S]*?<\/(?:nav|header|footer)>/gi) || []).join('\n');
+  if (scope.replace(/\s/g, '').length < 200) scope = html;
+  const out = [], seen = new Set();
+  for (const m of scope.matchAll(/<a\b([^>]*)>([\s\S]{0,400}?)<\/a>/gi)) {
+    const href = (m[1].match(/href\s*=\s*["']([^"']*)["']/i) || [])[1] || '';
+    const t = txtOf(m[2]);
+    if (!t && !href) continue;
+    if (/^(?:javascript:|mailto:|tel:|#)/i.test(href) && !t) continue;
+    let p = href;
+    try { p = new URL(href, 'https://x.invalid/').pathname; } catch (_) { p = href; }
+    const k = t + '|' + p;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push({ t, h: String(p).slice(0, 80) });
+    if (out.length >= SITE_NAV_CAP) break;
+  }
+  return out;
+}
+function siteSignals(html) {
+  return {
+    title: txtOf((html.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1], 120),
+    desc: metaContent(html, 'description') || metaContent(html, 'og:description'),
+    siteName: metaContent(html, 'og:site_name'),
+    ogType: metaContent(html, 'og:type'),
+    lang: txtOf((html.match(/<html\b[^>]*\blang\s*=\s*["']([^"']*)["']/i) || [])[1], 12),
+    types: ldTypes(html),
+    nav: navLinks(html)
+  };
+}
+
 async function ingestUrl(url) {
   const html = await fget(url);
   // HTML(실제 렌더 콘텐츠)과 CSS 번들(라이브러리 상태색 노이즈 포함)을 분리 집계
@@ -225,7 +312,7 @@ async function ingestUrl(url) {
     try { collectSvgGradients(Buffer.from(a.b64, 'base64').toString('utf8'), scounts); } catch (_) { /* 무시 */ }
   }
   gradients.push(...Object.keys(scounts).slice(0, 4));
-  return { counts, fonts, declared, shape: shapeFromCss(allCss), assets, gradients };
+  return { counts, fonts, declared, shape: shapeFromCss(allCss), assets, gradients, site: siteSignals(html) };
 }
 
 // Figma 링크에서 file key를 뽑는다. 사람은 자기가 보고 있던 주소를 그대로 붙여넣지,
@@ -374,7 +461,7 @@ module.exports = async (req, res) => {
     const colors = Object.entries(out.counts)
       .map(([hex, v]) => typeof v === 'number' ? { hex, count: v, html: 0 } : { hex, count: v.count, html: v.html })
       .sort((a, b) => (b.html * 10 + b.count) - (a.html * 10 + a.count)).slice(0, 12);
-    res.status(200).json({ colors, fonts: [...out.fonts].slice(0, 6), declared: (out.declared || []).slice(0, 6), shape: out.shape || null, assets: out.assets || [], gradients: out.gradients || [], source: figma ? 'figma' : 'url', unit: out.unit || 'count', note: out.note || '' });
+    res.status(200).json({ colors, fonts: [...out.fonts].slice(0, 6), declared: (out.declared || []).slice(0, 6), shape: out.shape || null, assets: out.assets || [], gradients: out.gradients || [], source: figma ? 'figma' : 'url', unit: out.unit || 'count', note: out.note || '', site: out.site || null });
   } catch (e) {
     res.status(500).json({ error: String(e.message || e).slice(0, 200) });
   }
