@@ -118,6 +118,13 @@ svg.i{display:block;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linec
 .ig-sw .aa{font-size:8px;color:var(--fg-mut)}
 .ig-sw .pri{font-style:normal;font-size:7.5px;font-weight:800;letter-spacing:.05em;color:var(--accent);background:var(--accent-subtle);border-radius:99px;padding:2px 7px;margin-bottom:1px}
 .ig-sw .pri.ast{color:var(--fg-sub);background:var(--bg-sunken)}
+.ig-jd{margin-top:11px;font-size:11.5px;color:var(--fg-sub);background:var(--accent-subtle);border-radius:9px;padding:9px 12px;line-height:1.6;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.ig-jd.wait{background:var(--bg-sunken);color:var(--fg-mut)}
+.ig-jd b{color:var(--accent)}
+.ig-jd em{font-style:normal;flex:1;min-width:190px}
+.ig-jd i{font-style:normal;color:var(--fg-mut)}
+.ig-jd button{font-size:10px;font-weight:700;border:1px solid var(--line-2);background:var(--bg);color:var(--fg-sub);border-radius:99px;padding:4px 11px;cursor:pointer;white-space:nowrap}
+.ig-jd button:hover{border-color:var(--accent);color:var(--accent)}
 .ig-sec{margin-top:16px}
 .ig-shape{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:11.5px;color:var(--fg-sub);background:var(--bg-sunken);border-radius:9px;padding:10px 13px;line-height:1.6}
 .ig-shape b{color:var(--accent)}
@@ -926,7 +933,7 @@ html[data-view="compare"] .board3{display:block}
     <button data-area="tokens">파운데이션</button>
   </nav>
   <button class="gconnect" id="igOpen"><svg class="i"><use href="#icon-action-external"/></svg>브랜드 연결</button>
-  <span class="gver">토큰 기반 · v0.50</span>
+  <span class="gver">토큰 기반 · v0.51</span>
 </header>
 <div class="app">
 
@@ -1183,6 +1190,7 @@ html[data-view="compare"] .board3{display:block}
       <div class="ig-rl" id="igResultLab">분석 결과</div>
       <div class="ig-sws" id="igSws"></div>
       <p class="ig-warn" id="igWarn" hidden></p>
+      <div class="ig-jd" id="igJudge" hidden></div>
       <div class="ig-rl ig-sec" id="igGradLab" hidden>그라디언트</div>
       <div class="ig-grad" id="igGrad" hidden></div>
       <div class="ig-rl ig-sec" id="igShapeLab" hidden>형태 · 곡률과 간격</div>
@@ -1972,6 +1980,9 @@ document.getElementById('igShape')?.addEventListener('click',e=>{
 function igSetKnob(attr,val){const b=document.querySelector(`#presetCtl .seg[data-attr="${attr}"] button[data-val="${val}"]`);if(b)b.click();}
 function igShow(colors,fonts,shape,basis,grad){
   const shotConf=igShotConf;igShotConf=null;      // 화면 캡처 경로에서만 세팅되는 1회성 상태
+  const jHost=igHost;igHost='';                  // 호스트도 1회성 — 다음 분석에 이전 사이트가 새지 않게
+  const jOn=igJudgeOn;igJudgeOn=false;           // 이번 렌더가 에이전트 판정 결과인가
+  if(!igJudgeSkip)igJudgeState=null;             // 새 분석이면 이전 판정을 버린다(재렌더는 유지)
   igGradSel=grad||null;igGradDropped=false;
   igCands=colors.slice(0,12);                            // igResolve가 이미 계층 순서로 정렬
   igStatus.hidden=igCands.length>0;
@@ -1982,7 +1993,7 @@ function igShow(colors,fonts,shape,basis,grad){
   document.getElementById('igResultLab').innerHTML=`Primary 후보 · <b>${igCands.length}개</b> — ${autoApply?'1순위 자동 적용':'자동 적용 보류'} · <b>눌러서 바꾸기</b>${basis?` · 판별 근거: ${basis}`:''}`;
   document.getElementById('igSws').innerHTML=igCands.map((c,i)=>{const cr=contrastWhite(c.hex);
     const lab=IG_SRC_LAB[c.src];
-    const badge=i===0?`<em class="pri">${autoApply?'PRIMARY':'1순위'}</em>`:(c.src&&c.src!=='css'?`<em class="pri ast">${lab}</em>`:'');
+    const badge=i===0?`<em class="pri">${jOn?'AI 판정':(autoApply?'PRIMARY':'1순위')}</em>`:(c.src&&c.src!=='css'?`<em class="pri ast">${lab}</em>`:'');
     return `<button class="ig-sw${i===0&&autoApply?' on':''}" data-i="${i}">${badge}<i style="background:${c.hex}"></i><span>${c.hex.toUpperCase()}</span><span class="aa">${cr>=4.5?'AA ✓':'대비 '+cr.toFixed(1)}</span></button>`;}).join('');
   /* 화면 캡처는 근거 강도가 낮은 소스다 — 등급을 감추지 않고 그대로 알린다. */
   const wn=document.getElementById('igWarn');
@@ -2002,7 +2013,70 @@ function igShow(colors,fonts,shape,basis,grad){
   renderGrads();
   renderShape();
   renderFonts(fonts);
+  renderJudge();
+  /* 규칙 판정을 다 그린 뒤에 부른다 — 에이전트가 늦거나 실패해도 화면은 이미 완성돼 있다. */
+  if(!igJudgeSkip)igJudgeAuto({host:jHost,fonts:fonts||[],shape:shape||null,basis:basis||'',grad:grad||null,shotConf});
 }
+/* ===== v0.51 · 에이전트 판정 층 =====
+   규칙 파이프라인은 '어떤 색이 많이 쓰였나'는 셀 수 있어도 '이게 브랜드의 것인가'는 셀 수 없다.
+   선언(theme-color)·로고 마크처럼 강한 근거가 있으면 규칙이 이미 맞으므로 부르지 않는다 —
+   CSS 사용 통계·화면 캡처로 떨어진 경우, 즉 규칙이 가장 자주 틀린 자리에서만 자동 호출한다.
+   에이전트는 새 색을 만들지 않는다. 이미 모은 후보 배열의 인덱스만 답하고, 서버가 그 인덱스를 검증한다.
+   실패·지연·스키마 위반은 모두 무음 폴백 — 규칙 판정이 그대로 남는다. */
+function igJudgeGate(){
+  if(igJudgeOff||igJudgeSkip)return false;
+  if(location.protocol==='file:'&&!igJudgeForce)return false;   // 로컬 파일에는 서버가 없다
+  if(igCands.length<2)return false;                             // 고를 게 하나뿐이면 판정할 것도 없다
+  const s=igCands[0].src||'css';
+  return s==='css'||s==='shot';                                 // 약한 근거일 때만
+}
+function igJudgeAuto(args){
+  if(!igJudgeGate())return;
+  const el=document.getElementById('igJudge');
+  el.hidden=false;el.className='ig-jd wait';el.innerHTML='<em>브랜드 근거 확인 중…</em>';
+  const ruleColors=igCands.slice();
+  fetch('/api/judge',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({
+    host:args.host||'',
+    candidates:ruleColors.map(c=>({hex:c.hex,src:c.src||'css',count:c.count,source:c.source})),
+    gradients:igGradMarks.slice(0,8).map(m=>({css:gradCss(m.g)})),
+    fonts:(args.fonts||[]).slice(0,8),shape:args.shape||null})})
+    .then(r=>r.json())
+    .then(j=>{
+      if(!j||!j.ok){if(j&&j.reason==='judge-disabled')igJudgeOff=true;el.hidden=true;return;}
+      const v=j.verdict;
+      if(!v||!Number.isInteger(v.primary)||!ruleColors[v.primary]){el.hidden=true;return;}  // 서버가 걸렀어도 한 번 더
+      igJudgeState={v,ruleColors,args,on:false};
+      igJudgeApply(true);
+    })
+    .catch(()=>{el.hidden=true;});               // 판정은 선택 층 — 실패하면 규칙 판정 그대로
+}
+/* on=true면 에이전트 순서로, false면 규칙 순서로 다시 그린다. 사람이 언제든 되돌릴 수 있어야 한다. */
+function igJudgeApply(on){
+  const st=igJudgeState;if(!st)return;
+  st.on=!!on;
+  const v=st.v,a=st.args;
+  /* 신뢰도 '낮음'은 순서를 바꾸지 않는다 — 캡처 신뢰도 '낮음'을 자동 적용하지 않는 것과 같은 규칙이다. */
+  const reorder=st.on&&v.confidence!=='low';
+  const colors=reorder?[st.ruleColors[v.primary],...st.ruleColors.filter((c,i)=>i!==v.primary)]:st.ruleColors;
+  /* 근거 문장은 아래 판정 패널이 이미 싣는다 — 머리말에는 무엇이 정했는지만 남긴다(같은 문장 두 번 금지). */
+  const basis=reorder?'에이전트 판정 (근거는 아래)':a.basis;
+  igJudgeSkip=true;igShotConf=a.shotConf||null;igJudgeOn=reorder;
+  try{igShow(colors,a.fonts,a.shape,basis,a.grad);}
+  finally{igJudgeSkip=false;igJudgeOn=false;}
+}
+function renderJudge(){
+  const el=document.getElementById('igJudge'),st=igJudgeState;
+  if(!el)return;
+  if(!st){el.hidden=true;el.innerHTML='';return;}
+  const v=st.v,low=v.confidence==='low',pick=st.ruleColors[v.primary];
+  el.hidden=false;el.className='ig-jd';
+  const head=low?'에이전트 판정 · 신뢰도 낮음 — 적용하지 않음':(st.on?'에이전트 판정 적용':'규칙 판정 표시 중');
+  el.innerHTML=`<em><b>${head}</b> — ${igEsc(v.why||'')} <i>(${igEsc(pick?pick.hex.toUpperCase():'')} · 신뢰도 ${SHOT_CONF[v.confidence]||igEsc(v.confidence)})</i></em>`
+    +(low?'':`<button type="button" id="igJudgeTg">${st.on?'규칙 판정으로 보기':'에이전트 판정 보기'}</button>`);
+}
+document.getElementById('igJudge')?.addEventListener('click',e=>{
+  if(!e.target.closest('#igJudgeTg'))return;
+  igJudgeApply(!(igJudgeState&&igJudgeState.on));});
 document.getElementById('igSws')?.addEventListener('click',e=>{
   const b=e.target.closest('.ig-sw');if(!b)return;
   igApplySel(+b.dataset.i,undefined,true);renderGrads();});
@@ -2184,6 +2258,8 @@ function gradSeed(g){                               // 그라디언트 → 솔�
 function gradDec(g){                                // Primary 계층에 넣을 후보(선언 다음 순위)
   return g?[{hex:gradSeed(g),count:1,source:g.stops.length+'색 그라디언트',src:'grad'}]:[];}
 let igGradSel=null,igShotConf=null,igGradMarks=[],igGradDropped=false,igShapeDet=null;  // 적용 중 / 캡처 신뢰도 / 전체 판정 / 자동 해제 여부 / 형태 분석값
+/* v0.51 에이전트 판정 층 상태 — 영구 비활성(키 없는 배포) / 재렌더 재귀 가드 / 판정 배지 1회성 / 호스트 1회성 / 테스트 강제 */
+let igJudgeState=null,igJudgeSkip=false,igJudgeOff=false,igJudgeOn=false,igJudgeForce=false,igHost='';
 const SHOT_CONF={high:'높음',mid:'보통',low:'낮음'};
 document.getElementById('gradTg').addEventListener('click',()=>{
   const b=document.getElementById('gradTg'),on=!b.classList.contains('on');
@@ -2216,6 +2292,7 @@ document.getElementById('igTextRun').addEventListener('click',()=>{
         const basis=rr.basis&&rr.basis.indexOf('CSS')===0?'북마클릿 실측 — 렌더된 화면의 실제 사용 색':rr.basis;
         const rB=pickMode((o.rads||[]).filter(v=>v>=0&&v<=48),RAD_BUCKETS,3),pB=pickMode((o.pads||[]).filter(v=>v>0&&v<=48),PAD_BUCKETS,5);
         const shape={radius:rB?rB.mode:null,radiusTop:rB?rB.top:null,radiusPct:rB?rB.pct:null,density:pB?pB.mode:null,padTop:pB?pB.top:null,padPct:pB?pB.pct:null};
+        try{igHost=new URL(o.url).hostname;}catch(_){igHost='';}
         igShow(rr.cands,o.fonts||[],shape,basis,rr.grad);
         if(!(o.bv>=3))igMsg(`이 결과는 구버전 북마클릿(bv${o.bv||1})입니다 — 그라디언트가 어느 요소에 선언됐는지(브랜드 표면인지 배너인지)를 보내지 않아 판별이 보수적으로 동작합니다. URL 탭의 🔖 Freesm 스캔 링크를 북마크바에 다시 드래그해 주세요.`);
         return;
@@ -2417,6 +2494,7 @@ document.getElementById('igUrlRun').addEventListener('click',()=>{
   const el=document.getElementById('igUrl'),u=normalizeUrl(el.value);
   if(!u){igMsg('사이트 주소를 확인해 주세요. 도메인만 입력해도 됩니다 — 예: instagram.com',true);return;}
   el.value=u;                                                                           // 보정한 주소를 그대로 보여준다
+  try{igHost=new URL(u).hostname;}catch(_){igHost='';}                                   // 판정에 넘길 건 호스트뿐 — 전체 URL은 보내지 않는다
   igRemote('url='+encodeURIComponent(u),'사이트');
 });
 /* 엔터로도 실행 — 버튼까지 가는 왕복을 없앤다 */
