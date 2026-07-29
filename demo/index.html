@@ -86,6 +86,8 @@ svg.i{display:block;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linec
 .ig-run{flex:none;height:40px;padding:0 16px;border-radius:9px;background:var(--fg);color:#fff;font-size:12.5px;font-weight:700;transition:.15s;margin-top:0}
 .ig-run:hover{background:#2b3038}
 .ig-pane[data-p="file"] .ig-run{height:38px;margin-top:10px}
+.ig-tok{margin-top:8px;letter-spacing:.04em}
+.ig-tokwarn{margin-top:6px;padding:8px 10px;border-radius:8px;background:var(--bg-sunken);border:1px solid var(--line)}
 .ig-hint{font-size:11px;color:var(--fg-mut);line-height:1.6;margin-top:10px}
 .ig-hint b{color:var(--fg-sub)}
 .ig-gbtn{font-size:11.5px;font-weight:700;color:var(--fg-sub);border:1px solid var(--line-2);border-radius:8px;padding:5px 10px;white-space:nowrap;transition:.14s}
@@ -969,7 +971,7 @@ html[data-view="compare"] .board3{display:block}
     <button data-area="tokens">파운데이션</button>
   </nav>
   <button class="gconnect" id="igOpen"><svg class="i"><use href="#icon-action-external"/></svg>브랜드 연결</button>
-  <span class="gver">토큰 기반 · v0.54</span>
+  <span class="gver">토큰 기반 · v0.55</span>
 </header>
 <div class="app">
 
@@ -1213,7 +1215,9 @@ html[data-view="compare"] .board3{display:block}
     </div>
     <div class="ig-pane" data-p="figma" hidden>
       <div class="ig-row"><input id="igFigma" placeholder="Figma 파일 링크 또는 file key" spellcheck="false"><button class="ig-run" id="igFigmaRun">해석</button></div>
-      <p class="ig-hint"><b>/api/ingest</b>가 Figma API로 파일의 채움색을 수집합니다. Vercel 환경변수 <b>FIGMA_TOKEN</b> 설정 필요.</p>
+      <input id="igFigmaTok" type="password" class="ig-tok" placeholder="Figma 개인 액세스 토큰 (figd_…)" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off">
+      <p class="ig-hint"><b>토큰은 본인 것을 넣습니다</b> — Figma 좌측 상단 계정 메뉴 → Settings → Security 탭 → Personal access tokens → Generate new token, 스코프는 <code>file_content:read</code> 하나면 됩니다. 자기 토큰으로 읽으므로 <b>자기 권한의 파일</b>만 열립니다.</p>
+      <p class="ig-hint ig-tokwarn">입력한 토큰은 <b>이 브라우저 메모리에만</b> 있습니다 — 저장하지 않으므로 새로고침하면 지워지고, 요청 헤더로만 서버에 전달됩니다(주소창·기록에 남지 않음). 배포에 <b>FIGMA_TOKEN</b> 환경변수가 설정돼 있으면 비워 둬도 됩니다.</p>
     </div>
     <div class="ig-pane" data-p="file" hidden>
       <div class="ig-drop" id="igDrop">로고·시안 이미지(SVG 포함)나 폰트 파일을 드롭 또는 클릭<br><span>SVG → 그라디언트·채움색 원문 분석 · 비트맵 → 주요 컬러 추출 · 폰트(OTF·TTF·WOFF) → 서체 등록</span></div>
@@ -2531,11 +2535,12 @@ function extractShape(text){
          density:p?p.mode:null,padTop:p?p.top:null,padPct:p?p.pct:null};
 }
 /* URL·Figma → /api/ingest (배포 환경에서 동작) */
-async function igRemote(params,label){
+async function igRemote(params,label,hdrs){
   igMsg(label+' 해석 중…');igResult.hidden=true;
   try{
-    const r=await fetch('/api/ingest?'+params);
-    if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.error||('HTTP '+r.status));}
+    /* 토큰류는 헤더로만 보낸다 — 쿼리스트링에 실으면 접근 로그·리퍼러·브라우저 기록에 그대로 남는다. */
+    const r=await fetch('/api/ingest?'+params,hdrs?{headers:hdrs}:undefined);
+    if(!r.ok){const j=await r.json().catch(()=>({}));const e=new Error(j.error||('HTTP '+r.status));e.need=j.need;throw e;}
     const j=await r.json();
     const cssCands=(j.colors||[]).map(c=>({hex:c.hex.toLowerCase(),count:c.count||1,html:c.html||0}));
     /* 2순위: 로고 마크(favicon·앱아이콘) 주요색 추출 */
@@ -2554,9 +2559,16 @@ async function igRemote(params,label){
     igShow(rr.cands,j.fonts||[],j.shape||null,rr.basis,rr.grad);
   }catch(err){
     const local=location.protocol==='file:';
+    if(!local&&err.need==='token'){
+      /* 고칠 곳이 화면 안에 있는 오류다 — 문장으로만 알리지 말고 그 자리로 데려다 놓는다. */
+      igMsg(err.message,true);
+      const t=document.getElementById('igFigmaTok');
+      if(t){t.focus();t.scrollIntoView({block:'nearest'});}
+      return;
+    }
     igMsg(local
       ?'이 기능은 배포 환경(Vercel)에서 동작합니다 — 저장소의 api/ingest.js가 서버에서 소스를 해석합니다. 지금은 "파일·텍스트" 탭을 사용하세요.'
-      :'해석 실패: '+err.message+' — /api/ingest 배포 여부(또는 Figma는 FIGMA_TOKEN 환경변수)를 확인하세요.',true);
+      :'해석 실패: '+err.message+' — /api/ingest 배포 여부(또는 Figma는 토큰 입력칸·FIGMA_TOKEN 환경변수)를 확인하세요.',true);
   }
 }
 /* 도메인만 쳐도 받는다. 스킴을 손으로 붙이게 하는 건 사람이 아니라 정규식 편의다 —
@@ -2590,8 +2602,15 @@ document.getElementById('igUrl').addEventListener('keydown',e=>{
 document.getElementById('igFigmaRun').addEventListener('click',()=>{
   const v=document.getElementById('igFigma').value.trim();
   if(!v){igMsg('Figma 파일 링크 또는 file key를 입력하세요.',true);return;}
-  igRemote('figma='+encodeURIComponent(v),'Figma');
+  /* 토큰은 입력칸에서 읽어 그때그때 헤더로 실어 보낸다. 변수에 붙들어 두지도, 저장하지도 않는다.
+     비어 있으면 헤더를 아예 만들지 않고 — 그러면 서버가 자기 FIGMA_TOKEN으로 폴백한다. */
+  const tok=(document.getElementById('igFigmaTok').value||'').trim();
+  igRemote('figma='+encodeURIComponent(v),'Figma',tok?{'X-Figma-Token':tok}:null);
 });
+/* 링크·토큰 어느 칸에서든 Enter로 실행 */
+['igFigma','igFigmaTok'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{
+  if(e.key==='Enter'){e.preventDefault();document.getElementById('igFigmaRun').click();}
+}));
 
 /* 초기 라우트 */
 route('interactive');

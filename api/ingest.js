@@ -1,7 +1,10 @@
 // KDX 브랜드 인제스트 — Vercel 서버리스 함수
 // v0.53 — 스타일시트 수집 확장: rel="stylesheet" 외에 preload as=style · .css 확장자 · @import 한 겹
+// v0.55 — Figma 토큰을 요청 헤더(X-Figma-Token)로도 받는다. 서버 환경변수는 폴백.
 // GET /api/ingest?url=https://...   → 사이트 HTML+CSS에서 컬러·폰트 추출
-// GET /api/ingest?figma=<링크|key>  → Figma API로 파일 채움색 수집 (환경변수 FIGMA_TOKEN 필요)
+// GET /api/ingest?figma=<링크|key>  → Figma API로 파일 채움색 수집
+//   토큰 출처: 요청 헤더 X-Figma-Token(사용자별) → 없으면 환경변수 FIGMA_TOKEN(배포자)
+//   토큰은 통과만 시키고 저장·기록하지 않는다.
 // 응답: { colors:[{hex,count}], fonts:[이름], gradients:[css], source }
 
 // 실제 브라우저처럼 요청(봇 차단 회피) + 403/429 시 모바일 UA로 1회 재시도 + 8초 타임아웃
@@ -222,10 +225,36 @@ async function ingestUrl(url) {
   return { counts, fonts, declared, shape: shapeFromCss(allCss), assets, gradients };
 }
 
+// Figma 링크에서 file key를 뽑는다. 사람은 자기가 보고 있던 주소를 그대로 붙여넣지,
+// 그게 design인지 board인지 proto인지 구분해서 오지 않는다 — 경로 이름을 넓게 받는다.
+// key는 영숫자 연속이고 실제로는 22자 안팎이라, 링크 안에서는 10자 이상만 key로 본다
+// (짧은 경로 조각을 key로 오인하지 않기 위한 하한).
+function figmaKey(input) {
+  const s = String(input || '').trim();
+  const m = s.match(/(?:file|design|board|proto|slides|deck)\/([A-Za-z0-9]{10,})/);
+  if (m) return m[1];
+  return (s.match(/^[A-Za-z0-9]+/) || [''])[0];      // 링크가 아니면 앞쪽 영숫자만 — key 직접 입력 경로
+}
+
+// 토큰은 그대로 아웃바운드 헤더 값이 된다. 줄바꿈·제어문자가 섞이면 헤더가 갈라지므로
+// 출력 가능한 ASCII만 통과시킨다. 값 자체는 어디에도 기록하지 않는다(로그·응답·에러 문자열 전부).
+function cleanToken(t) {
+  const s = String(t || '').trim();
+  if (!s) return '';
+  return /^[\x21-\x7e]+$/.test(s) ? s : '';
+}
+
 async function ingestFigma(input, token) {
-  const key = (input.match(/(?:file|design)\/([A-Za-z0-9]+)/) || [])[1] || input;
+  const key = figmaKey(input);
+  if (!key) throw new Error('Figma 파일 링크 또는 file key를 확인해 주세요.');
   const r = await fetch(`https://api.figma.com/v1/files/${key}?depth=4`, { headers: { 'X-Figma-Token': token } });
-  if (!r.ok) throw new Error('Figma API ' + r.status + (r.status === 403 ? ' — 토큰 권한 확인' : ''));
+  if (!r.ok) {
+    // 무엇을 고쳐야 하는지가 상태코드마다 다르다 — 숫자만 던지면 사용자가 할 수 있는 게 없다.
+    const hint = r.status === 403 ? ' — 토큰 권한 확인(file_content:read 스코프, 그리고 이 파일에 접근 가능한 계정인지)'
+      : r.status === 404 ? ' — 파일을 찾을 수 없습니다. 링크가 맞는지, 그 토큰의 계정이 이 파일을 볼 수 있는지 확인하세요.'
+        : r.status === 429 ? ' — 요청이 몰렸습니다. 잠시 후 다시 시도하세요.' : '';
+    throw new Error('Figma API ' + r.status + hint);
+  }
   const doc = await r.json();
   const counts = {}, fonts = new Set(), radii = [], spacings = [];
   (function walk(node) {
@@ -256,12 +285,24 @@ async function ingestFigma(input, token) {
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  // 토큰을 커스텀 헤더로 받으므로 브라우저가 먼저 프리플라이트를 보낸다 — 그걸 통과시켜야 본 요청이 온다.
+  // 토큰을 쿼리스트링에 싣지 않는 이유가 여기 있다: URL은 접근 로그·리퍼러·브라우저 기록에 남는다.
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Figma-Token, Content-Type');
+  res.setHeader('Access-Control-Max-Age', '86400');
+  if (req.method === 'OPTIONS') return res.status(204).end();
   const { url, figma } = req.query || {};
   try {
     let out;
     if (figma) {
-      const token = process.env.FIGMA_TOKEN;
-      if (!token) return res.status(400).json({ error: 'Vercel 환경변수 FIGMA_TOKEN이 설정되지 않았습니다.' });
+      // 사용자가 보낸 토큰이 우선, 없으면 서버에 심어둔 토큰으로 폴백한다.
+      // 이 순서여야 여러 사람이 각자 자기 권한으로 자기 파일을 읽는다 —
+      // 서버 토큰만 쓰면 모든 방문자가 배포자의 자격으로 Figma에 들어가게 된다.
+      const sent = cleanToken((req.headers || {})['x-figma-token']);
+      const raw = (req.headers || {})['x-figma-token'];
+      if (raw && !sent) return res.status(400).json({ error: '토큰에 사용할 수 없는 문자가 들어 있습니다. 다시 복사해 붙여넣어 주세요.' });
+      const token = sent || cleanToken(process.env.FIGMA_TOKEN);
+      if (!token) return res.status(400).json({ error: 'Figma 토큰이 필요합니다 — 입력칸에 개인 액세스 토큰을 넣거나, 배포에 FIGMA_TOKEN 환경변수를 설정하세요.', need: 'token' });
       out = await ingestFigma(figma, token);
     } else if (url) {
       if (!/^https?:\/\//.test(url)) return res.status(400).json({ error: 'http(s) URL만 지원합니다.' });
