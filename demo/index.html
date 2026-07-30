@@ -180,6 +180,8 @@ html[data-modal] .gnb-tabs,html[data-modal] .gnb .gmwrap{pointer-events:none}
 .ps-opt.on{border-color:var(--accent);background:var(--accent-subtle);color:var(--accent);font-weight:700}
 .ps-opt small{display:block;font-size:10.5px;font-weight:500;color:var(--fg-mut);margin-top:1px}
 .ps-opt.on small{color:var(--accent);opacity:.8}
+/* ② 조건 칩은 항목명 한 줄 — 두 줄 칩(③ 상태 깊이)과 달리 가운데 정렬로 조인다 */
+#psAxes .ps-opt{text-align:center;line-height:1.25;padding:8px 13px}
 .ps-act{display:flex;gap:8px;margin-top:19px;padding-top:17px;border-top:1px solid var(--line);align-items:center}
 .ps-act .pbtn{flex:1;background:var(--accent);color:#fff;font-weight:700;font-size:13px;border-radius:10px;padding:11px 14px}
 .ps-act .sbtn{font-size:12.5px;font-weight:600;color:var(--fg-sub);border:1px solid var(--line-2);border-radius:10px;padding:11px 14px}
@@ -1303,7 +1305,7 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
       <button data-m="spec" role="menuitem"><b><svg class="i"><use href="#icon-action-search"/></svg>스펙 시트<span class="kb">S</span></b><small>컴포넌트·모듈·패턴 스펙 색인</small></button>
     </div>
   </div>
-  <span class="gver">토큰 기반 · v0.67</span>
+  <span class="gver">토큰 기반 · v0.68</span>
 </header>
 <div class="app">
 
@@ -2499,7 +2501,8 @@ function psRenderAxes(){
   const wrap=document.getElementById('psAxes');
   wrap.innerHTML=(SCHEMA.presets.axes||[]).map(a=>
     `<div class="ps-ax"><div class="ps-axl">${esc(a.label)}<em>${esc(a.hint||'')}</em></div><div class="ps-opts" data-ax="${esc(a.key)}">`
-    +a.options.map(o=>`<button class="ps-opt${psState[a.key]===o.v?' on':''}" data-v="${esc(o.v)}">${esc(o.l)}<small>${esc(o.d||'')}</small></button>`).join('')
+    /* 조건 칩은 항목명만 — 설명은 지우지 않고 title 로 남긴다(칩이 두 줄로 벌어지지 않게) */
+    +a.options.map(o=>`<button class="ps-opt${psState[a.key]===o.v?' on':''}" data-v="${esc(o.v)}"${o.d?` title="${esc(o.d)}"`:''}>${esc(o.l)}</button>`).join('')
     +`</div></div>`).join('');
 }
 document.getElementById('psAxes').addEventListener('click',e=>{
