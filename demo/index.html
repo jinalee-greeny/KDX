@@ -1290,6 +1290,31 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
   border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:8px;padding:7px 10px;
   font:inherit;font-size:12px;font-weight:600;cursor:pointer;margin-top:6px}
 .sphbtn:hover{background:var(--bg-sunk)}
+
+/* ===== v0.70 · 워크벤치 UI 아이콘 =====
+   예시 화면만 쓰던 Lucide 스프라이트(ISC)를 데모 자신의 UI까지 끌어올렸다.
+   텍스트 글리프(✕ ▾ ← ↑ ↓ ＋ ✓ →)는 폰트마다 두께·광학 크기가 달라
+   특히 화살표류가 제 크기보다 작고 흐리게 찍혔다. 이제 아이콘 크기는
+   글자 크기에 끌려가지 않고 여기 한 곳에서만 정한다. */
+#psBack,#spsBack,.pgtabs .pgadd,.scrbar .sb-btn,.celladd,button[data-scr="add"]{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.celladd svg.i,button[data-scr="add"] svg.i{width:14px;height:14px}
+#psBack svg.i,#spsBack svg.i{width:15px;height:15px}
+.pgtabs .pgadd svg.i,.scrbar .sb-btn svg.i{width:14px;height:14px}
+.toast .tst-x{font-size:0}.toast .tst-x svg.i{width:16px;height:16px}
+#spsX{font-size:0}#spsX svg.i{width:16px;height:16px}
+.pick-x{font-size:0}.pick-x svg.i{width:17px;height:17px}
+.pgtabs .pgt .x{font-size:0}.pgtabs .pgt .x svg.i{width:12px;height:12px;stroke-width:2.4}
+.cellbar button{font-size:0}.cellbar button svg.i{width:15px;height:15px}
+.ps-tx em{display:grid;place-items:center;font-size:0}
+.ps-tx em svg.i{width:15px;height:15px;stroke-width:2.2}
+.ps-i .bx{font-size:0}.ps-i .bx svg.i{width:9px;height:9px;stroke-width:3.4}
+.tk-arr,.sv-ar,.jd-ar,.tk-layers i{display:inline-flex;align-items:center;font-size:0}
+.tk-arr svg.i,.tk-layers i svg.i{width:15px;height:15px}
+.sv-ar svg.i{width:14px;height:14px}
+.jd-ar svg.i{width:16px;height:16px;stroke-width:2.2}
+.readout .rk{display:inline-flex;align-items:center;gap:4px}
+.readout .rk-ar{display:inline-flex;align-items:center;font-size:0;opacity:.7}
+.readout .rk-ar svg.i{width:13px;height:13px}
 .sphbtn .kb{margin-left:auto;font-size:10.5px;font-weight:500;opacity:.55;border:1px solid var(--line);border-radius:4px;padding:1px 5px}
 </style>
 </head>
@@ -1322,6 +1347,14 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
 <symbol id="icon-finance-won" viewBox="0 0 24 24"><path d="M4 5l3.5 14L12 8l4.5 11L20 5M3 10h18M3 14h18"/></symbol>
 <symbol id="icon-status-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></symbol>
 <symbol id="icon-nav-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+<!-- v0.70 · 워크벤치 UI 자체가 쓰던 텍스트 글리프(✕ ▾ ← ↑ ↓ ＋ ✓ →)를 같은 세트로 끌어올린 것들 -->
+<symbol id="icon-nav-back" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+<symbol id="icon-nav-moveup" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol>
+<symbol id="icon-nav-movedown" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></symbol>
+<symbol id="icon-nav-flow" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+<symbol id="icon-action-close" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+<symbol id="icon-action-add" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+<symbol id="icon-action-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="14" height="14" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
 </defs></svg>
 
 <header class="gnb">
@@ -1343,7 +1376,7 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
       <button data-m="spec" role="menuitem"><b><svg class="i"><use href="#icon-action-search"/></svg>스펙 시트<span class="kb">S</span></b><small>컴포넌트·모듈·패턴 스펙 색인</small></button>
     </div>
   </div>
-  <span class="gver">토큰 기반 · v0.69</span>
+  <span class="gver">토큰 기반 · v0.70</span>
 </header>
 <div class="app">
 
@@ -1569,7 +1602,7 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
   <div class="ig ps" role="dialog" aria-label="프리셋 생성기">
     <div class="ig-head">
       <div><h2>프리셋</h2><p>스텝 1에서 <b>색·폰트</b>와 <b>조건</b>을 정하고, 스텝 2에서 <b>무엇을 만들지</b>를 항목 단위로 고릅니다.</p></div>
-      <button class="iconbtn" id="psClose" title="닫기" style="font-size:15px;font-weight:600">✕</button>
+      <button class="iconbtn" id="psClose" title="닫기" style="font-size:17px"><svg class="i"><use href="#icon-action-close"/></svg></button>
     </div>
     <!-- 두 스텝 — 범위가 항목 단위로 내려가면서 한 화면에 다 담기지 않는다 -->
     <div class="ps-steps" id="psSteps">
@@ -1668,7 +1701,7 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
     </section>
     </div>
     <div class="ps-act">
-      <button class="sbtn" id="psBack" hidden>← 이전</button>
+      <button class="sbtn" id="psBack" hidden><svg class="i"><use href="#icon-nav-back"/></svg>이전</button>
       <button class="pbtn" id="psNext" style="flex:1">다음 — 생성 범위</button>
       <button class="sbtn" id="psRun" style="flex:1" hidden>프리셋 산출</button>
       <button class="pbtn" id="psApply" hidden>적용하고 닫기</button>
@@ -1685,10 +1718,10 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
 <div class="spscrim" id="spScrim" hidden></div>
 <aside class="spsheet" id="spSheet" hidden role="dialog" aria-label="스펙 시트">
   <div class="sps-top">
-    <button id="spsBack" hidden>← 목록</button>
+    <button id="spsBack" hidden><svg class="i"><use href="#icon-nav-back"/></svg>목록</button>
     <div class="sps-title" id="spsTitle">스펙 시트 <em>freesm-component-schema</em></div>
     <button id="spsFull" hidden title="스펙 뷰에서 열기">전체 뷰</button>
-    <button id="spsX" title="닫기 (Esc)">✕</button>
+    <button id="spsX" title="닫기 (Esc)"><svg class="i"><use href="#icon-action-close"/></svg></button>
   </div>
   <div class="sps-search" id="spsSearchWrap"><input id="spsQ" placeholder="컴포넌트 · 모듈 · 패턴 검색" spellcheck="false" autocomplete="off"></div>
   <div class="sps-body" id="spsBody"></div>
@@ -1698,7 +1731,7 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
 <div class="toast" id="toast" hidden role="status" aria-live="polite">
   <div class="tst-m"><b id="tstT"></b><span id="tstS"></span></div>
   <button id="tstA" hidden></button>
-  <button class="tst-x" id="tstX" title="닫기">✕</button>
+  <button class="tst-x" id="tstX" title="닫기"><svg class="i"><use href="#icon-action-close"/></svg></button>
 </div>
 <div class="sptip" id="spTip" hidden></div>
 
@@ -1721,7 +1754,8 @@ document.getElementById('brands').addEventListener('click',e=>{const b=e.target.
 document.getElementById('devSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;html.setAttribute('data-device',b.dataset.d);b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));});
 
 function renderReadout(scope,el){const r=scope.getAttribute('data-radius'),d=DENS[scope.getAttribute('data-density')],bd=scope.getAttribute('data-border'),sz=scope.getAttribute('data-size');
-  el.innerHTML=[['comp/radius/button → radius/m',RAD[r].m+'px'],['comp/radius/card → radius/l',RAD[r].l+'px'],['spacing ×','×'+d],['border/'+bd,BORD[bd]+'px'],['button 높이 → hug',HUG[sz].btn+'px'],['field 높이 → hug',HUG[sz].fld+'px'],['size/touch-target/min','48px'],['size/icon',SIZE[sz].icon+'px']]
+  const AR='<span class="rk-ar"><svg class="i"><use href="#icon-nav-flow"/></svg></span>';
+  el.innerHTML=[['comp/radius/button'+AR+'radius/m',RAD[r].m+'px'],['comp/radius/card'+AR+'radius/l',RAD[r].l+'px'],['spacing ×','×'+d],['border/'+bd,BORD[bd]+'px'],['button 높이'+AR+'hug',HUG[sz].btn+'px'],['field 높이'+AR+'hug',HUG[sz].fld+'px'],['size/touch-target/min','48px'],['size/icon',SIZE[sz].icon+'px']]
    .map(([k,v])=>`<div class="rr"><span class="rk">${k}</span><span class="rv">${v}</span></div>`).join('');}
 document.querySelectorAll('#presetCtl .seg').forEach(seg=>seg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const a=seg.dataset.attr;
   frame.setAttribute(a,b.dataset.val); screenEl.setAttribute(a,b.dataset.val); if(a!=='data-layout'){ componentsEl.setAttribute(a,b.dataset.val); modulesEl.setAttribute(a,b.dataset.val); authEl.setAttribute(a,b.dataset.val); }
@@ -1834,15 +1868,17 @@ const LAYER_STEPS=[['scale','① 원시'],['brand','② 브랜드'],['semantic',
 const LAYER_OF={scale:'scale',brand:'brand',semantic:'semantic',dimension:'dimension',comp:'comp',radius:'mode',web:'mode',type:'style',icons:'style',elevation:'style'};
 function layerStrip(tab){
   const cur=LAYER_OF[tab];
-  return `<div class="tk-layers">`+LAYER_STEPS.map(([k,l])=>`<span class="tkl ${k===cur?'on':''}">${l}</span>`).join('<i>→</i>')+`</div>`;
+  return `<div class="tk-layers">`+LAYER_STEPS.map(([k,l])=>`<span class="tkl ${k===cur?'on':''}">${l}</span>`).join('<i><svg class="i"><use href="#icon-nav-flow"/></svg></i>')+`</div>`;
 }
 function chainRow(name,als,val,extra){
-  return `<div class="tk-crow"><span class="tk-cn">${name}</span>`+als.map(a=>`<span class="tk-arr">→</span><span class="tk-ca">${a}</span>`).join('')+`<span class="tk-arr">→</span><span class="tk-cp">${val}</span>${extra?`<span class="tk-cx">${extra}</span>`:''}</div>`;
+  return `<div class="tk-crow"><span class="tk-cn">${name}</span>`+als.map(a=>`<span class="tk-arr"><svg class="i"><use href="#icon-nav-flow"/></svg></span><span class="tk-ca">${a}</span>`).join('')+`<span class="tk-arr"><svg class="i"><use href="#icon-nav-flow"/></svg></span><span class="tk-cp">${val}</span>${extra?`<span class="tk-cx">${extra}</span>`:''}</div>`;
 }
 const ICON_REG=[
  ['icon-brand-logo','brand','로고 마크'],
  ['icon-action-search','action','검색'],['icon-action-external','action','외부·새 탭 이동'],
- ['icon-nav-left','nav','이전·왼쪽'],['icon-nav-right','nav','다음·오른쪽'],['icon-nav-down','nav','펼침·드롭다운'],
+ ['icon-nav-menu','nav','메뉴(햄버거)'],['icon-nav-left','nav','이전·왼쪽'],['icon-nav-right','nav','다음·오른쪽'],['icon-nav-down','nav','펼침·드롭다운'],
+ ['icon-nav-back','nav','뒤로 · 목록으로'],['icon-nav-moveup','nav','순서 올리기'],['icon-nav-movedown','nav','순서 내리기'],['icon-nav-flow','nav','관계·매핑(A→B)'],
+ ['icon-action-close','action','닫기·삭제'],['icon-action-add','action','추가'],['icon-action-copy','action','복제'],
  ['icon-status-success','status','성공·체크'],['icon-status-alert','status','경고·오류'],
  ['icon-trend-up','trend','상승(빨강 맥락)'],['icon-trend-down','trend','하락(파랑 맥락)'],
  ['icon-finance-won','finance','원화·금액'],
@@ -1872,7 +1908,7 @@ function renderTokenTab(tab){curTab=tab;
     const gname={bg:'배경·면',fg:'전경·텍스트',bdr:'보더',status:'상태(폼)',chart:'시세·차트',static:'모드 불변'};
     SEM.filter(([n])=>n.indexOf('comp/')!==0).forEach(([n,a])=>{const g=n.split('/')[0];if(g!==grp){grp=g;h+=`<div class="tk-grp">${g} <span class="c">${gname[g]||''}</span></div>`;}
       const br=a.indexOf('color/primary/')===0;const hx=resolve(a);
-      h+=`<div class="tk-srow"><span class="tk-chip"><i style="background:${hx}"></i></span><span class="tk-tn">${n}</span><span class="tk-arr">→</span><span class="tk-ref ${br?'br':''}">${a}${br?' ★':''}</span><span class="tk-hex">${hx}</span></div>`;});
+      h+=`<div class="tk-srow"><span class="tk-chip"><i style="background:${hx}"></i></span><span class="tk-tn">${n}</span><span class="tk-arr"><svg class="i"><use href="#icon-nav-flow"/></svg></span><span class="tk-ref ${br?'br':''}">${a}${br?' ★':''}</span><span class="tk-hex">${hx}</span></div>`;});
   } else if(tab==='dimension'){
     h+=`<div class="tk-note"><b>④ 치수 Dimension</b> · 색이 아닌 수. 전부 ① 원시의 <code>dimension/*</code> 하나에 별칭되며, 브랜드를 타지 않는다. 아래는 별칭 체인을 끝까지 펼친 것 — <b>토큰 이름 → 별칭 → 실제 px</b>. <b>29 변수</b>.</div>`;
     h+=`<div class="tk-grp">spacing <span class="c">간격 · 여백의 단일 사다리</span></div>`;
@@ -1890,7 +1926,7 @@ function renderTokenTab(tab){curTab=tab;
     const cn={'comp/fill':'면 채우기','comp/bdr':'선','comp/state':'상호작용 상태'};
     SEM.filter(([n])=>n.indexOf('comp/')===0).forEach(([n,a])=>{const g=n.split('/').slice(0,2).join('/');if(g!==grp){grp=g;h+=`<div class="tk-grp">${g} <span class="c">${cn[g]||''}</span></div>`;}
       const br=a.indexOf('color/primary/')===0;const hx=resolve(a);
-      h+=`<div class="tk-srow"><span class="tk-chip"><i style="background:${hx}"></i></span><span class="tk-tn">${n}</span><span class="tk-arr">→</span><span class="tk-ref ${br?'br':''}">${a}${br?' ★':''}</span><span class="tk-hex">${hx}</span></div>`;});
+      h+=`<div class="tk-srow"><span class="tk-chip"><i style="background:${hx}"></i></span><span class="tk-tn">${n}</span><span class="tk-arr"><svg class="i"><use href="#icon-nav-flow"/></svg></span><span class="tk-ref ${br?'br':''}">${a}${br?' ★':''}</span><span class="tk-hex">${hx}</span></div>`;});
     h+=`<div class="tk-grp">comp/pad <span class="c">컴포넌트 안쪽 여백 · 2단 별칭</span></div>`;
     h+=CPAD.map(([t,al,px])=>chainRow('comp/pad/'+t,[al,'dimension/'+px],px+'px')).join('');
     h+=`<div class="tk-grp">comp/gap <span class="c">컴포넌트 내부 요소 간격</span></div>`;
@@ -1920,7 +1956,7 @@ function renderTokenTab(tab){curTab=tab;
     const DR=[['Radius 모드','radius'],['Density','density'],['Border','border'],['Size 축','size'],['컨트롤 하한','touchMin'],['브레이크포인트','breakpoints']];
     const AXL={platform:'플랫폼',layout:'레이아웃 전략',first:'기준 시점',domain:'업종',density:'정보 밀도',a11y:'접근성'};
     h+=DR.map(([l,k])=>{const d=DV[k]||{};const rule=d.map?((AXL[d.by]||d.by||'조건')+' 매핑 — '+Object.entries(d.map).map(([a,b])=>a+'→'+(typeof b==='object'?(b.mode||[]).length+'모드':b)).join(' · ')):(d.rule||'');
-      return `<div class="tk-srow"><span class="tk-tn">${l}</span><span class="tk-arr">→</span><span class="tk-ref" style="flex:1;white-space:normal">${esc(rule)}</span></div><div class="tk-note" style="margin:2px 0 10px">${d.why||''}</div>`;}).join('');
+      return `<div class="tk-srow"><span class="tk-tn">${l}</span><span class="tk-arr"><svg class="i"><use href="#icon-nav-flow"/></svg></span><span class="tk-ref" style="flex:1;white-space:normal">${esc(rule)}</span></div><div class="tk-note" style="margin:2px 0 10px">${d.why||''}</div>`;}).join('');
     h+=`<div class="tk-grp">레이아웃 전략 <span class="c">데모가 실제로 소비</span></div>`;
     h+=`<table class="tk-tbl"><tr><th>전략</th><th>구현</th><th>대가</th></tr>`
       +Object.values(P.layoutStrategy||{}).map(s=>`<tr><td>${esc(s.l)}</td><td>${esc(s.impl)}</td><td class="why">${esc(s.cost)}</td></tr>`).join('')+`</table>`;
@@ -2318,8 +2354,8 @@ function delScreen(id){
 function renderPgTabs(){
   const el=document.getElementById('pgTabs');
   const base=`<button data-view="interactive">홈</button><button data-view="auth" data-tab="login">로그인</button><button data-view="auth" data-tab="signup">회원가입</button>`;
-  const mine=screens.map(s=>`<span class="pgt"><button data-view="screen" data-tab="${s.id}">${s.name}</button><i class="x" data-close="${s.id}" title="화면 삭제">✕</i></span>`).join('');
-  el.innerHTML=base+mine+`<button class="pgadd" id="pgAdd">＋ 화면 추가</button>`;
+  const mine=screens.map(s=>`<span class="pgt"><button data-view="screen" data-tab="${s.id}">${s.name}</button><i class="x" data-close="${s.id}" title="화면 삭제"><svg class="i"><use href="#icon-action-close"/></svg></i></span>`).join('');
+  el.innerHTML=base+mine+`<button class="pgadd" id="pgAdd"><svg class="i"><use href="#icon-action-add"/></svg>화면 추가</button>`;
   el.querySelectorAll('button').forEach(b=>b.classList.toggle('on',
     (b.dataset.view==='screen'&&b.dataset.tab===curScr&&html.getAttribute('data-view')==='screen')
     ||(b.dataset.view===html.getAttribute('data-view')&&b.dataset.view!=='screen'&&(!b.dataset.tab||b.dataset.tab===curAuthTab))));
@@ -2334,17 +2370,17 @@ function renderScreen(id){
   const lay=screenEl.getAttribute('data-layout')||'grid';
   const layCtl=s.secs.includes('products')
     ? `<span class="sb-lay"><em>상품 리스트</em><span class="seg sm" data-sb-lay><button data-val="grid" class="${lay==='grid'?'on':''}">Grid</button><button data-val="carousel" class="${lay==='carousel'?'on':''}">Carousel</button><button data-val="list" class="${lay==='list'?'on':''}">List</button></span></span>` : '';
-  bar.innerHTML=`<span class="sb-name">${s.name}</span><span class="sb-hint">셀 <b>${s.secs.length}</b>개 · 섹션에 마우스를 올리면 <b>순서 변경 · 복제 · 삭제</b></span>${layCtl}<span class="sb-sp"></span><button class="sb-btn" data-sb="add">＋ 섹션 추가</button><button class="sb-btn" data-sb="tpl">화면 추가</button><button class="sb-btn danger" data-sb="del">이 화면 삭제</button>`;
+  bar.innerHTML=`<span class="sb-name">${s.name}</span><span class="sb-hint">셀 <b>${s.secs.length}</b>개 · 섹션에 마우스를 올리면 <b>순서 변경 · 복제 · 삭제</b></span>${layCtl}<span class="sb-sp"></span><button class="sb-btn" data-sb="add"><svg class="i"><use href="#icon-action-add"/></svg>섹션 추가</button><button class="sb-btn" data-sb="tpl">화면 추가</button><button class="sb-btn danger" data-sb="del">이 화면 삭제</button>`;
   const ctx=s.ctx||DEF_CTX;
   const phAt=s.secs.indexOf('pagehead');
   const isDoc=s.secs.some(k=>DOCSEC.has(k));
   const cells=s.secs.map((k,i)=>{
     const raw=SEC[k],mk=(typeof raw==='function')?raw(ctx):(raw||'');
     const nohead=(phAt>=0&&i>phAt&&HEADSEC.has(k))?' data-nohead':'';
-    return `<div class="cell" data-i="${i}" data-k="${k}"${nohead}><div class="cellbar"><span class="cl">${(SEC_META[k]||{t:k}).t}</span><button data-c="up" ${i===0?'disabled':''} title="위로">↑</button><button data-c="down" ${i===s.secs.length-1?'disabled':''} title="아래로">↓</button><button data-c="dup" title="복제">⧉</button><button data-c="add" title="아래에 섹션 추가">＋</button><button data-c="del" title="삭제">✕</button></div>${mk}</div>`;
+    return `<div class="cell" data-i="${i}" data-k="${k}"${nohead}><div class="cellbar"><span class="cl">${(SEC_META[k]||{t:k}).t}</span><button data-c="up" ${i===0?'disabled':''} title="위로"><svg class="i"><use href="#icon-nav-moveup"/></svg></button><button data-c="down" ${i===s.secs.length-1?'disabled':''} title="아래로"><svg class="i"><use href="#icon-nav-movedown"/></svg></button><button data-c="dup" title="복제"><svg class="i"><use href="#icon-action-copy"/></svg></button><button data-c="add" title="아래에 섹션 추가"><svg class="i"><use href="#icon-action-add"/></svg></button><button data-c="del" title="삭제"><svg class="i"><use href="#icon-action-close"/></svg></button></div>${mk}</div>`;
   }).join('');
-  const zero=`<div class="cellzero"><p>이 화면에는 아직 섹션이 없습니다.<br>아래 버튼으로 첫 섹션을 올려보세요.</p><button class="btn btn-primary" data-scr="add">＋ 첫 섹션 추가</button></div>`;
-  screenEl.innerHTML=`<div class="page"${isDoc?' data-doc':''}><div class="inner">${s.secs.length?cells:zero}<div class="celltail"><button class="celladd" data-scr="add">＋ 섹션 추가</button></div></div></div>`;
+  const zero=`<div class="cellzero"><p>이 화면에는 아직 섹션이 없습니다.<br>아래 버튼으로 첫 섹션을 올려보세요.</p><button class="btn btn-primary" data-scr="add"><svg class="i"><use href="#icon-action-add"/></svg>첫 섹션 추가</button></div>`;
+  screenEl.innerHTML=`<div class="page"${isDoc?' data-doc':''}><div class="inner">${s.secs.length?cells:zero}<div class="celltail"><button class="celladd" data-scr="add"><svg class="i"><use href="#icon-action-add"/></svg>섹션 추가</button></div></div></div>`;
   renderPgTabs();
 }
 /* 고르기 모달 — 화면 템플릿 / 섹션 */
@@ -2352,11 +2388,11 @@ function openPick(mode,at){
   pickKind=mode;pickAt=at;
   const m=document.getElementById('pickMask'),p=document.getElementById('pick');
   if(mode==='tpl'){
-    p.innerHTML=`<div class="pick-h"><h3>어떤 화면을 추가할까요?</h3><button class="pick-x" data-pk="x">✕</button></div>
+    p.innerHTML=`<div class="pick-h"><h3>어떤 화면을 추가할까요?</h3><button class="pick-x" data-pk="x"><svg class="i"><use href="#icon-action-close"/></svg></button></div>
       <p class="pick-sub">템플릿을 고르면 <b>섹션이 미리 채워진 화면</b>이 새 탭으로 열립니다. 열린 뒤에도 섹션을 자유롭게 추가·삭제·이동할 수 있어요.</p>
       <div class="pickgrid">${SCR_TPL.map(t=>`<button class="tplc" data-tpl="${t.k}"><b>${t.t}</b><span>${t.d}</span><em>${t.secs.length}개 셀</em></button>`).join('')}</div>`;
   }else{
-    p.innerHTML=`<div class="pick-h"><h3>어떤 섹션을 넣을까요?</h3><button class="pick-x" data-pk="x">✕</button></div>
+    p.innerHTML=`<div class="pick-h"><h3>어떤 섹션을 넣을까요?</h3><button class="pick-x" data-pk="x"><svg class="i"><use href="#icon-action-close"/></svg></button></div>
       <p class="pick-sub">모든 섹션은 우측 노브(<b>곡률 · 간격 · 보더 · 크기</b>)와 <b>Brand</b>가 그대로 적용됩니다.</p>
       ${SEC_GROUPS.map(g=>`<div class="pickgrp">${g.g}</div><div class="pickgrid">${g.keys.map(k=>`<button class="tplc" data-sec="${k}"><b>${SEC_META[k].t}</b><span>${SEC_META[k].d}</span></button>`).join('')}</div>`).join('')}`;
   }
@@ -2635,7 +2671,7 @@ function psRenderScope(){
     return `<div class="ps-tg" data-tg="${esc(k)}"><div class="ps-tw">`
       +`<button class="ps-t${psScope[k]?(c.in?' on':' on zero'):''}${t.locked?' lock':''}" data-t="${esc(k)}"${t.locked?' disabled':''} title="${esc(t.d||'')}">`
       +`<span>${esc(t.label)}<small>${esc(t.d||'')}</small></span><span class="cnt">${c.in} / ${c.total}</span></button>`
-      +`<button class="ps-tx${op?' on':''}" data-ex="${esc(k)}" aria-expanded="${op?'true':'false'}">항목<em>▾</em></button>`
+      +`<button class="ps-tx${op?' on':''}" data-ex="${esc(k)}" aria-expanded="${op?'true':'false'}">항목<em><svg class="i"><use href="#icon-nav-down"/></svg></em></button>`
       +`</div><div class="ps-items"${op?'':' hidden'}>`
       +`<div class="ps-ibar"><button data-bt="${esc(k)}" data-bulk="basic">기본</button>`
       +`<button data-bt="${esc(k)}" data-bulk="all">전체</button>`
@@ -2643,7 +2679,7 @@ function psRenderScope(){
       +`<div class="ps-igrid">`+items.map(n=>{const e=SCHEMA[PS_TIER_SRC[k]][n]||{},sm=STAT[e.status]||{m:'○',l:'',c:'cd'};
         const on=!!psPick[k][n];
         return `<button class="ps-i${on?' on':''}" data-pt="${esc(k)}" data-pk="${esc(n)}" aria-pressed="${on?'true':'false'}" title="${esc(n+' · '+(sm.l||'')+(psIsBasic(k,n)?' · 기본 세트':''))}">`
-          +`<span class="bx">✓</span><span class="sd ${sm.c}">${sm.m}</span><span class="lb">${esc(n)}</span></button>`;}).join('')
+          +`<span class="bx"><svg class="i"><use href="#icon-status-success"/></svg></span><span class="sd ${sm.c}">${sm.m}</span><span class="lb">${esc(n)}</span></button>`;}).join('')
       +`</div></div></div>`;}).join('');
   Object.keys(keep).forEach(k=>{const gr=host.querySelector('.ps-tg[data-tg="'+k+'"] .ps-igrid');if(gr)gr.scrollTop=keep[k];});
   document.getElementById('psDepthL').innerHTML='빠른 선택<em>상태로 한 번에 고른 뒤 항목별로 조정합니다</em>';
@@ -3130,7 +3166,7 @@ function renderJudge(){
     :(st.on?'에이전트가 1순위를 바꿨습니다':'규칙 판정을 보는 중'));
   /* 바뀐 색을 나란히 놓는다. 지금 화면에 적용된 쪽에 테두리가 간다. */
   const swap=moved
-    ?`<div class="jd-sw">${jdChip(rule,low||!st.on,'규칙')}<span class="jd-ar">→</span>${jdChip(pick,!low&&st.on,low?'에이전트 제안':'에이전트')}</div>`
+    ?`<div class="jd-sw">${jdChip(rule,low||!st.on,'규칙')}<span class="jd-ar"><svg class="i"><use href="#icon-nav-flow"/></svg></span>${jdChip(pick,!low&&st.on,low?'에이전트 제안':'에이전트')}</div>`
     :`<div class="jd-sw">${jdChip(pick,true,'규칙·에이전트 일치')}</div>`;
   igJudgeCard('',head,
     swap+`<p class="jd-w">${igEsc(v.why||'')}</p>`
@@ -3773,8 +3809,8 @@ function svRow(k,v){
   else if(typeof v==='number')out=`<code>${v}</code>`;
   else{
     const tv=tokVal(v);
-    if(tv&&tv.t==='c')out=`<i class="sv-sw" style="background:${tv.hex}"></i><code>${esc(v)}</code><span class="sv-ar">→</span><span class="sv-al">${esc(tv.al)}</span><span class="sv-hx">${tv.hex}</span>`;
-    else if(tv&&tv.t==='n')out=`<code>${esc(v)}</code><span class="sv-ar">→</span><span class="sv-al">${esc(tv.al)}</span><span class="sv-hx">${tv.px}</span>`;
+    if(tv&&tv.t==='c')out=`<i class="sv-sw" style="background:${tv.hex}"></i><code>${esc(v)}</code><span class="sv-ar"><svg class="i"><use href="#icon-nav-flow"/></svg></span><span class="sv-al">${esc(tv.al)}</span><span class="sv-hx">${tv.hex}</span>`;
+    else if(tv&&tv.t==='n')out=`<code>${esc(v)}</code><span class="sv-ar"><svg class="i"><use href="#icon-nav-flow"/></svg></span><span class="sv-al">${esc(tv.al)}</span><span class="sv-hx">${tv.px}</span>`;
     else out=`<code>${esc(v)}</code>`;
   }
   return `<div class="sv-row"><span class="sv-k">${esc(k)}</span><span class="sv-v">${out}</span></div>`;
