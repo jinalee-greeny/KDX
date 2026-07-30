@@ -222,7 +222,45 @@ html[data-modal] .gnb-tabs,html[data-modal] .gnb .gmwrap{pointer-events:none}
 .ps-tog{font-size:12px;font-weight:700;color:var(--accent);border:1px solid var(--accent-line);border-radius:9px;padding:7px 12px;transition:.14s;white-space:nowrap}
 .ps-tog:hover,.ps-tog.on{background:var(--accent-subtle)}
 .ps-b[hidden]{display:none}
-.ps-tiers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+/* ===== v0.69 · 두 스텝 =====
+   ①색·폰트 + ②조건이 스텝 1, ③생성 범위가 스텝 2다. 범위가 항목 단위로
+   내려가면서 세로로 길어져, 조건과 한 화면에 두면 둘 다 스크롤 밖으로 밀린다. */
+.ps-steps{display:flex;align-items:stretch;gap:8px;margin:14px 0 2px}
+.ps-st{flex:1;display:flex;align-items:center;gap:9px;border:1.5px solid var(--line-2);background:var(--bg);border-radius:10px;padding:8px 12px;text-align:left;cursor:pointer;transition:.13s;min-width:0}
+.ps-st:hover{border-color:var(--fg-mut)}
+.ps-st i{flex:none;font-style:normal;font-size:10.5px;font-weight:800;width:20px;height:20px;display:grid;place-items:center;border-radius:99px;background:var(--bg-sunken);color:var(--fg-mut)}
+.ps-st>span{min-width:0}
+.ps-st b{display:block;font-size:12.5px;font-weight:700;color:var(--fg-sub);line-height:1.3}
+.ps-st small{display:block;font-size:10.5px;font-weight:500;color:var(--fg-mut);margin-top:1px}
+.ps-st.on{border-color:var(--accent);background:var(--accent-subtle)}
+.ps-st.on i{background:var(--accent);color:#fff}
+.ps-st.on b{color:var(--accent)}
+.ps-st.on small{color:var(--accent);opacity:.8}
+.ps-st.done i{background:var(--accent-subtle);color:var(--accent)}
+.ps-step[hidden]{display:none}
+/* 티어는 이제 가로 3칸이 아니라 세로 3행 — 각 행이 항목 목록을 품는다 */
+.ps-tiers{display:flex;flex-direction:column;gap:8px}
+.ps-tw{display:flex;gap:6px;align-items:stretch}
+.ps-tw .ps-t{flex:1}
+.ps-tx{flex:none;display:flex;align-items:center;gap:6px;border:1.5px solid var(--line-2);background:var(--bg);border-radius:9px;padding:7px 12px;font-size:11.5px;font-weight:700;color:var(--fg-mut);cursor:pointer;transition:.13s;white-space:nowrap}
+.ps-tx:hover{border-color:var(--fg-mut);color:var(--fg-sub)}
+.ps-tx.on{border-color:var(--accent);color:var(--accent)}
+.ps-tx em{font-style:normal;font-size:9px;transition:transform .16s}
+.ps-tx.on em{transform:rotate(180deg)}
+.ps-items{margin-top:7px;border-left:2px solid var(--line-2);padding-left:11px}
+.ps-items[hidden]{display:none}
+.ps-ibar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:7px}
+.ps-ibar button{font-size:10.5px;font-weight:700;color:var(--fg-sub);border:1px solid var(--line-2);border-radius:6px;padding:3px 9px;transition:.12s}
+.ps-ibar button:hover{border-color:var(--accent);color:var(--accent)}
+.ps-ibar em{font-style:normal;font-size:10.5px;font-weight:700;color:var(--fg-mut);margin-left:auto;font-variant-numeric:tabular-nums}
+.ps-igrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;max-height:232px;overflow-y:auto;padding-right:3px}
+.ps-i{display:flex;align-items:center;gap:6px;border:1.5px solid var(--line-2);background:var(--bg);border-radius:8px;padding:6px 9px;font-size:11.5px;font-weight:600;color:var(--fg-sub);cursor:pointer;transition:.12s;text-align:left;line-height:1.3;min-width:0}
+.ps-i:hover{border-color:var(--fg-mut)}
+.ps-i.on{border-color:var(--accent);background:var(--accent-subtle);color:var(--accent);font-weight:700}
+.ps-i .bx{flex:none;width:13px;height:13px;border-radius:4px;border:1.5px solid var(--line-2);display:grid;place-items:center;font-size:8.5px;line-height:1;color:transparent}
+.ps-i.on .bx{background:var(--accent);border-color:var(--accent);color:#fff}
+.ps-i .sd{flex:none;font-size:9.5px}
+.ps-i .lb{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ps-t{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line-2);background:var(--bg);border-radius:9px;padding:7px 11px;font-size:12.5px;font-weight:600;color:var(--fg-sub);cursor:pointer;transition:.13s;text-align:left;line-height:1.35}
 .ps-t:hover{border-color:var(--fg-mut)}
 .ps-t.on{border-color:var(--accent);background:var(--accent-subtle);color:var(--accent);font-weight:700}
@@ -1305,7 +1343,7 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
       <button data-m="spec" role="menuitem"><b><svg class="i"><use href="#icon-action-search"/></svg>스펙 시트<span class="kb">S</span></b><small>컴포넌트·모듈·패턴 스펙 색인</small></button>
     </div>
   </div>
-  <span class="gver">토큰 기반 · v0.68</span>
+  <span class="gver">토큰 기반 · v0.69</span>
 </header>
 <div class="app">
 
@@ -1530,9 +1568,15 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
 <div class="ig-ov" id="psOv" hidden>
   <div class="ig ps" role="dialog" aria-label="프리셋 생성기">
     <div class="ig-head">
-      <div><h2>프리셋</h2><p>①에서 <b>색·폰트</b>를 브랜드 소스에서 가져오고, ②에서 <b>조건</b>을 고르고, ③에서 <b>어디까지 만들지</b>를 정합니다.</p></div>
+      <div><h2>프리셋</h2><p>스텝 1에서 <b>색·폰트</b>와 <b>조건</b>을 정하고, 스텝 2에서 <b>무엇을 만들지</b>를 항목 단위로 고릅니다.</p></div>
       <button class="iconbtn" id="psClose" title="닫기" style="font-size:15px;font-weight:600">✕</button>
     </div>
+    <!-- 두 스텝 — 범위가 항목 단위로 내려가면서 한 화면에 다 담기지 않는다 -->
+    <div class="ps-steps" id="psSteps">
+      <button class="ps-st on" data-s="1"><i>1</i><span><b>브랜드 · 조건</b><small>색·폰트 + 6축</small></span></button>
+      <button class="ps-st" data-s="2"><i>2</i><span><b>생성 범위</b><small>티어 · 항목 고르기</small></span></button>
+    </div>
+    <div class="ps-step" data-s="1">
     <!-- ① 색 · 폰트 — 조건에서 도출할 수 없는 값이라 조건보다 앞에 온다 -->
     <section class="ps-s" id="psSecBrand">
       <div class="ps-h">
@@ -1610,19 +1654,24 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
       <p class="ps-hd">치수 · 모드 · 레이아웃 — 여기서 고른 값이 파운데이션 한 벌과 적합성 판정으로 이어집니다.</p>
       <div id="psAxes"></div>
     </section>
+    </div>
 
+    <div class="ps-step" data-s="2" hidden>
     <!-- ③ 생성 범위 -->
     <section class="ps-s">
       <div class="ps-h"><div class="ps-hl"><i>3</i>생성 범위</div></div>
-      <p class="ps-hd">어디까지 만들 것인가 — 조건과 별개입니다.</p>
+      <p class="ps-hd">어디까지 만들 것인가 — 조건과 별개입니다. 티어를 펼쳐 <b>항목 단위</b>로 고릅니다.</p>
+      <div class="ps-ax" style="margin:0 0 11px"><div class="ps-axl" id="psDepthL">빠른 선택</div><div class="ps-opts" id="psDepth"></div></div>
       <div class="ps-tiers" id="psTiers"></div>
-      <div class="ps-ax" style="margin-top:11px"><div class="ps-axl" id="psDepthL">상태 깊이</div><div class="ps-opts" id="psDepth"></div></div>
       <div class="ps-zero" id="psZero" hidden></div>
       <div class="ps-sug" id="psSug" hidden></div>
     </section>
+    </div>
     <div class="ps-act">
-      <button class="sbtn" id="psRun" style="flex:1">프리셋 산출</button>
-      <button class="pbtn" id="psApply">적용하고 닫기</button>
+      <button class="sbtn" id="psBack" hidden>← 이전</button>
+      <button class="pbtn" id="psNext" style="flex:1">다음 — 생성 범위</button>
+      <button class="sbtn" id="psRun" style="flex:1" hidden>프리셋 산출</button>
+      <button class="pbtn" id="psApply" hidden>적용하고 닫기</button>
       <button class="sbtn" id="psReset">기본값</button>
     </div>
     <div class="ps-res" id="psRes" hidden></div>
@@ -2494,7 +2543,7 @@ gMenu.addEventListener('click',e=>{const b=e.target.closest('button[data-m]');if
 });
 
 const psOv=document.getElementById('psOv');
-let psState=null,psScope=null,psBuilt=false,psLast=null;
+let psState=null,psScope=null,psBuilt=false,psLast=null,psPick=null,psStep=1;
 
 function psDefaults(){const o={};(SCHEMA.presets.axes||[]).forEach(a=>o[a.key]=a.default);return o;}
 function psRenderAxes(){
@@ -2517,66 +2566,137 @@ document.getElementById('psAxes').addEventListener('click',e=>{
    같은 조건에서도 1차는 확정 컴포넌트만, 2차는 모듈까지 갈 수 있다.
    상태 문턱은 새로 만들지 않고 항목마다 이미 붙어 있는 status 를 그대로 쓴다. */
 const PS_TIER_SRC={cmp:'components',mod:'modules',pat:'patterns'};
-function psScopeDefaults(){const S=SCHEMA.presets.scope,o={depth:S.depth.default};S.tiers.forEach(t=>o[t.key]=true);return o;}
-function psAllow(){const d=SCHEMA.presets.scope.depth.options.find(o=>o.v===psScope.depth);return d?d.allow:[];}
+function psScopeDefaults(){const S=SCHEMA.presets.scope,o={depth:'basic'};S.tiers.forEach(t=>o[t.key]=true);return o;}
+function psNames(k){return Object.keys(SCHEMA[PS_TIER_SRC[k]]||{}).filter(n=>n!=='_tier');}
+/* '아주 기본 요소' — 새 필드를 만들지 않고, 스키마가 이미 말하고 있는 값만 읽는다.
+   컴포넌트는 priority 1(6개), 모듈은 조립 재료(composedOf)가 적힌 것(5개),
+   패턴은 반응형 거동이 적혔거나 스펙이 확정된 것(7개). 모듈·패턴에는 priority
+   필드가 없어서 대신 쓰는 규칙이다 — 스키마에 우선순위가 생기면 여기를 지운다. */
+function psIsBasic(k,n){
+  const e=(SCHEMA[PS_TIER_SRC[k]]||{})[n]||{};
+  if(k==='cmp')return e.priority===1;
+  if(k==='mod')return Array.isArray(e.composedOf)&&e.composedOf.length>0;
+  return !!e.responsive||e.status==='spec_confirmed';
+}
+function psPickDefaults(){const o={};Object.keys(PS_TIER_SRC).forEach(k=>{o[k]={};psNames(k).forEach(n=>o[k][n]=psIsBasic(k,n));});return o;}
 function psTierCount(k){
-  const src=SCHEMA[PS_TIER_SRC[k]]||{},allow=psAllow();
-  const names=Object.keys(src).filter(n=>n!=='_tier');
-  return {total:names.length,in:psScope[k]?names.filter(n=>allow.indexOf(src[n].status)>=0).length:0};
+  const names=psNames(k);
+  return {total:names.length,in:psScope[k]?names.filter(n=>psPick[k]&&psPick[k][n]).length:0};
 }
-/* 같은 티어를 '다른 깊이였다면 몇 개인가'로 세어 본다 — 0개가 버그가 아니라
-   상태 문턱의 결과라는 걸 말해 주려면 그 문턱을 낮춘 경우를 알아야 한다. */
-function psTierCountAt(k,depthV){
-  const src=SCHEMA[PS_TIER_SRC[k]]||{},d=SCHEMA.presets.scope.depth.options.find(o=>o.v===depthV);
-  const allow=d?d.allow:[];
-  return Object.keys(src).filter(n=>n!=='_tier'&&allow.indexOf(src[n].status)>=0).length;
+/* 상태 깊이는 v0.69부터 '문턱'이 아니라 '빠른 선택'이다 — 문턱으로 두면 모듈
+   (19개 전부 후보·검토)은 기본 깊이에서 영영 0개라, 항목을 고르게 하자는
+   취지와 정면으로 부딪힌다. allow 배열은 스키마 값을 그대로 쓴다. */
+function psQuickOpts(){
+  return [{v:'basic',l:'기본',d:'바로 만들 수 있는 것'}].concat(SCHEMA.presets.scope.depth.options);
 }
-/* 켜져 있는데 0개인 티어 — 그리고 그걸 0이 아니게 만드는 가장 낮은 깊이 */
+function psQuickSet(v){
+  psScope.depth=v;
+  if(v==='basic'){psPick=psPickDefaults();return;}
+  const d=SCHEMA.presets.scope.depth.options.find(o=>o.v===v),allow=d?d.allow:[];
+  Object.keys(PS_TIER_SRC).forEach(k=>{const src=SCHEMA[PS_TIER_SRC[k]]||{};
+    psNames(k).forEach(n=>psPick[k][n]=allow.indexOf(src[n].status)>=0);});
+}
+/* 지금 체크 상태와 정확히 겹치는 빠른 선택 값 — 없으면 null(=직접 고름) */
+function psQuickMatch(){
+  const hit=psQuickOpts().find(o=>Object.keys(PS_TIER_SRC).every(k=>{const src=SCHEMA[PS_TIER_SRC[k]]||{};
+    return psNames(k).every(n=>{
+      const want=o.v==='basic'?psIsBasic(k,n):(o.allow||[]).indexOf(src[n].status)>=0;
+      return !!psPick[k][n]===want;});}));
+  return hit?hit.v:null;
+}
+function psQuickLabel(v){const o=psQuickOpts().find(x=>x.v===v);return o?o.l:'직접 고름';}
+/* 켜져 있는데 고른 항목이 0개인 티어 */
 function psZeroTiers(){
-  const S=SCHEMA.presets.scope;
-  return S.tiers.filter(t=>psScope[t.key]&&psTierCount(t.key).in===0)
-    .map(t=>{const fix=S.depth.options.find(o=>psTierCountAt(t.key,o.v)>0);
-      return {t:t,total:Object.keys(SCHEMA[PS_TIER_SRC[t.key]]||{}).filter(n=>n!=='_tier').length,
-        fix:fix&&fix.v!==psScope.depth?fix:null};});
+  return SCHEMA.presets.scope.tiers.filter(t=>psScope[t.key]&&psTierCount(t.key).in===0)
+    .map(t=>({t:t,total:psNames(t.key).length,basic:psNames(t.key).filter(n=>psIsBasic(t.key,n)).length}));
 }
 function psInScope(pfx,name){
   if(!PS_TIER_SRC[pfx])return true;            /* gap(파운데이션 공백)은 생성 대상이 아니다 */
   if(!psScope[pfx])return false;
   if(!name||name==='*')return true;
-  const e=(SCHEMA[PS_TIER_SRC[pfx]]||{})[name];
-  return !e||psAllow().indexOf(e.status)>=0;
+  if(!(SCHEMA[PS_TIER_SRC[pfx]]||{})[name])return true;
+  return !!(psPick[pfx]&&psPick[pfx][name]);
 }
 function psSuggestPending(){
   return (SCHEMA.presets.scope.suggest||[]).map((s,i)=>({s,i}))
     .filter(({s})=>Object.keys(s.when).every(k=>psState[k]===s.when[k])
       &&Object.keys(s.set).some(k=>psScope[k]!==s.set[k]));
 }
+let psOpenT={cmp:false,mod:false,pat:false};
 function psRenderScope(){
-  const S=SCHEMA.presets.scope;
-  document.getElementById('psTiers').innerHTML=S.tiers.map(t=>{const c=psTierCount(t.key);
-    return `<button class="ps-t${psScope[t.key]?(c.in?' on':' on zero'):''}${t.locked?' lock':''}" data-t="${esc(t.key)}"${t.locked?' disabled':''} title="${esc(t.d||'')}">`
-      +`<span>${esc(t.label)}<small>${esc(t.d||'')}</small></span><span class="cnt">${c.in} / ${c.total}</span></button>`;}).join('');
-  document.getElementById('psDepthL').innerHTML=esc(S.depth.label)+`<em>${esc(S.depth.hint||'')}</em>`;
-  document.getElementById('psDepth').innerHTML=S.depth.options.map(o=>
+  const S=SCHEMA.presets.scope,host=document.getElementById('psTiers');
+  psScope.depth=psQuickMatch()||'custom';
+  /* 다시 그리면서 열려 있던 목록의 스크롤 위치를 잃지 않는다 */
+  const keep={};host.querySelectorAll('.ps-tg').forEach(g=>{const gr=g.querySelector('.ps-igrid');if(gr)keep[g.dataset.tg]=gr.scrollTop;});
+  host.innerHTML=S.tiers.map(t=>{const k=t.key,c=psTierCount(k),op=!!psOpenT[k];
+    const items=psNames(k).slice().sort((a,b)=>{
+      const sa=STAT_ORDER.indexOf((SCHEMA[PS_TIER_SRC[k]][a]||{}).status),sb=STAT_ORDER.indexOf((SCHEMA[PS_TIER_SRC[k]][b]||{}).status);
+      return sa!==sb?sa-sb:a.localeCompare(b,'ko');});
+    return `<div class="ps-tg" data-tg="${esc(k)}"><div class="ps-tw">`
+      +`<button class="ps-t${psScope[k]?(c.in?' on':' on zero'):''}${t.locked?' lock':''}" data-t="${esc(k)}"${t.locked?' disabled':''} title="${esc(t.d||'')}">`
+      +`<span>${esc(t.label)}<small>${esc(t.d||'')}</small></span><span class="cnt">${c.in} / ${c.total}</span></button>`
+      +`<button class="ps-tx${op?' on':''}" data-ex="${esc(k)}" aria-expanded="${op?'true':'false'}">항목<em>▾</em></button>`
+      +`</div><div class="ps-items"${op?'':' hidden'}>`
+      +`<div class="ps-ibar"><button data-bt="${esc(k)}" data-bulk="basic">기본</button>`
+      +`<button data-bt="${esc(k)}" data-bulk="all">전체</button>`
+      +`<button data-bt="${esc(k)}" data-bulk="none">해제</button><em>${c.in} / ${c.total} 선택</em></div>`
+      +`<div class="ps-igrid">`+items.map(n=>{const e=SCHEMA[PS_TIER_SRC[k]][n]||{},sm=STAT[e.status]||{m:'○',l:'',c:'cd'};
+        const on=!!psPick[k][n];
+        return `<button class="ps-i${on?' on':''}" data-pt="${esc(k)}" data-pk="${esc(n)}" aria-pressed="${on?'true':'false'}" title="${esc(n+' · '+(sm.l||'')+(psIsBasic(k,n)?' · 기본 세트':''))}">`
+          +`<span class="bx">✓</span><span class="sd ${sm.c}">${sm.m}</span><span class="lb">${esc(n)}</span></button>`;}).join('')
+      +`</div></div></div>`;}).join('');
+  Object.keys(keep).forEach(k=>{const gr=host.querySelector('.ps-tg[data-tg="'+k+'"] .ps-igrid');if(gr)gr.scrollTop=keep[k];});
+  document.getElementById('psDepthL').innerHTML='빠른 선택<em>상태로 한 번에 고른 뒤 항목별로 조정합니다</em>';
+  document.getElementById('psDepth').innerHTML=psQuickOpts().map(o=>
     `<button class="ps-opt${psScope.depth===o.v?' on':''}" data-d="${esc(o.v)}">${esc(o.l)}<small>${esc(o.d||'')}</small></button>`).join('');
   const zel=document.getElementById('psZero'),zt=psZeroTiers();
   if(!zt.length){zel.hidden=true;zel.innerHTML='';}
   else{zel.hidden=false;zel.innerHTML=zt.map(z=>
-    `<div><b>${esc(z.t.label)}</b> 티어는 켜져 있지만 지금 깊이에서는 0개입니다 — ${z.total}개 전부가 이 문턱 아래 상태입니다.`
-    +(z.fix?` <button data-zd="${esc(z.fix.v)}">${esc(z.fix.l)}까지 넓히기</button>`:'')+`</div>`).join('');}
+    `<div><b>${esc(z.t.label)}</b> 티어는 켜져 있지만 고른 항목이 0개입니다 — ${z.total}개 중 하나도 고르지 않았습니다.`
+    +(z.basic?` <button data-zt="${esc(z.t.key)}" data-zb="basic">기본 ${z.basic}개 고르기</button>`:'')
+    +` <button data-zt="${esc(z.t.key)}" data-zb="all">전체 고르기</button></div>`).join('');}
   const el=document.getElementById('psSug'),pend=psSuggestPending();
   if(!pend.length){el.hidden=true;el.innerHTML='';}
   else{el.hidden=false;el.innerHTML=pend.map(({s,i})=>
     `<div><b>제안</b> ${esc(s.why)} <button data-sg="${i}">이대로 맞추기</button></div>`).join('');}
 }
-document.getElementById('psTiers').addEventListener('click',e=>{const b=e.target.closest('.ps-t');
+function psBulk(k,mode){
+  psNames(k).forEach(n=>psPick[k][n]=mode==='all'?true:mode==='none'?false:psIsBasic(k,n));
+  if(mode!=='none')psScope[k]=true;
+}
+document.getElementById('psTiers').addEventListener('click',e=>{
+  const ex=e.target.closest('[data-ex]');
+  if(ex){psOpenT[ex.dataset.ex]=!psOpenT[ex.dataset.ex];psRenderScope();return;}
+  const bk=e.target.closest('[data-bulk]');
+  if(bk){psBulk(bk.dataset.bt,bk.dataset.bulk);psRenderScope();return;}
+  const it=e.target.closest('[data-pk]');
+  if(it){const k=it.dataset.pt;psPick[k][it.dataset.pk]=!psPick[k][it.dataset.pk];
+    if(psPick[k][it.dataset.pk])psScope[k]=true;psRenderScope();return;}
+  const b=e.target.closest('.ps-t');
   if(!b||b.disabled)return;psScope[b.dataset.t]=!psScope[b.dataset.t];psRenderScope();});
 document.getElementById('psDepth').addEventListener('click',e=>{const b=e.target.closest('.ps-opt');
-  if(!b)return;psScope.depth=b.dataset.d;psRenderScope();});
-document.getElementById('psZero').addEventListener('click',e=>{const b=e.target.closest('button[data-zd]');
-  if(!b)return;psScope.depth=b.dataset.zd;psRenderScope();});
+  if(!b)return;psQuickSet(b.dataset.d);psRenderScope();});
+document.getElementById('psZero').addEventListener('click',e=>{const b=e.target.closest('button[data-zt]');
+  if(!b)return;psBulk(b.dataset.zt,b.dataset.zb);psRenderScope();});
 document.getElementById('psSug').addEventListener('click',e=>{const b=e.target.closest('button[data-sg]');
-  if(!b)return;Object.assign(psScope,SCHEMA.presets.scope.suggest[+b.dataset.sg].set);psRenderScope();});
+  if(!b)return;const set=SCHEMA.presets.scope.suggest[+b.dataset.sg].set;
+  Object.keys(set).forEach(k=>{if(k==='depth')psQuickSet(set[k]);else psScope[k]=set[k];});psRenderScope();});
+
+/* --- 스텝 — ①색·폰트+②조건이 1, ③생성 범위가 2 --- */
+function psSetStep(n){
+  psStep=n;
+  document.querySelectorAll('#psSteps .ps-st').forEach(b=>{const s=+b.dataset.s;
+    b.classList.toggle('on',s===n);b.classList.toggle('done',s<n);});
+  document.querySelectorAll('#psOv .ps-step').forEach(d=>d.hidden=(+d.dataset.s)!==n);
+  document.getElementById('psBack').hidden=n===1;
+  document.getElementById('psNext').hidden=n!==1;
+  document.getElementById('psRun').hidden=n!==2;
+  document.getElementById('psApply').hidden=n!==2;
+  const ig=document.querySelector('.ig.ps');if(ig)ig.scrollTop=0;
+}
+document.getElementById('psSteps').addEventListener('click',e=>{const b=e.target.closest('.ps-st');if(b)psSetStep(+b.dataset.s);});
+document.getElementById('psNext').addEventListener('click',()=>psSetStep(2));
+document.getElementById('psBack').addEventListener('click',()=>psSetStep(1));
 
 /* 범위를 실제로 건다 — 좌측 탐색의 스펙 항목과 GNB 영역 탭.
    범위 밖 항목은 목록에서 지우지 않는다. 적합성 판정과 같은 원칙이다. */
@@ -2620,9 +2740,10 @@ function psCompute(st){
   out.touchMin=(st.platform==='app'||st.a11y==='aaa')?48:32;
   out.strategy=SCHEMA.presets.layoutStrategy[st.layout];
   out.fits=(SCHEMA.presets.fitRules||[]).filter(f=>Object.keys(f.when).every(k=>st[k]===f.when[k]));
-  const S=SCHEMA.presets.scope,dep=S.depth.options.find(o=>o.v===psScope.depth);
-  const rows=S.tiers.map(t=>Object.assign({label:t.label,key:t.key,on:!!psScope[t.key]},psTierCount(t.key)));
-  out.scope={rows:rows,total:rows.reduce((a,r)=>a+r.in,0),depth:psScope.depth,depthLabel:dep?dep.l:psScope.depth,state:{...psScope}};
+  const S=SCHEMA.presets.scope;
+  const rows=S.tiers.map(t=>Object.assign({label:t.label,key:t.key,on:!!psScope[t.key],
+    picked:psScope[t.key]?psNames(t.key).filter(n=>psPick[t.key][n]):[]},psTierCount(t.key)));
+  out.scope={rows:rows,total:rows.reduce((a,r)=>a+r.in,0),depth:psScope.depth,depthLabel:psQuickLabel(psScope.depth),state:{...psScope},picks:JSON.parse(JSON.stringify(psPick))};
   return out;
 }
 
@@ -2662,10 +2783,11 @@ function psRenderResult(o){
    +`<div class="ps-note"><b>구현</b> ${o.strategy.impl}<br><b>대가</b> ${o.strategy.cost}`
    +(o.strategy.note?`<br><b>이 데모에서</b> ${o.strategy.note}`:'')+`</div>`;
   const SC=SCHEMA.presets.scope;
-  h+=`<div class="ps-sec">생성 범위 · ${o.scope.total}개 항목</div><table class="ps-tbl">`
-   +`<tr><th style="width:96px">티어</th><th style="width:118px">범위 / 전체</th><th>기준</th></tr>`
+  h+=`<div class="ps-sec">생성 범위 · ${o.scope.total}개 항목 <span style="font-weight:600;color:var(--fg-mut)">· ${esc2(o.scope.depthLabel)}</span></div><table class="ps-tbl">`
+   +`<tr><th style="width:96px">티어</th><th style="width:118px">범위 / 전체</th><th>고른 항목</th></tr>`
    +o.scope.rows.map(r=>`<tr><td>${esc2(r.label)}</td><td><span class="ps-chip k">${r.in} / ${r.total}</span></td>`
-     +`<td class="why">${r.on?esc2(o.scope.depthLabel)+' 상태까지':'티어 전체 제외 — 이번 차수에서 만들지 않습니다'}</td></tr>`).join('')
+     +`<td class="why">${!r.on?'티어 전체 제외 — 이번 차수에서 만들지 않습니다'
+        :(r.picked.length?r.picked.map(n=>esc2(n)).join(' · '):'고른 항목이 없습니다 — 범위 설정에서 항목을 펼쳐 고르세요')}</td></tr>`).join('')
    +`</table><div class="ps-note">${SC.consumedBy}</div>`;
   h+=`<div class="ps-sec">적합성 판정 · ${o.fits.length}건</div>`;
   h+=o.fits.length?`<div class="ps-fit">`+o.fits.map(f=>{const k=PS_KIND[f.kind]||PS_KIND.info;
@@ -2693,7 +2815,8 @@ function psBrandBodySet(open,scroll){
   if(open&&scroll)requestAnimationFrame(()=>document.getElementById('psSecBrand').scrollIntoView({block:'start',behavior:'smooth'}));
 }
 function psOpenModal(showRes,brand){
-  if(!psBuilt){psState=psDefaults();psScope=psScopeDefaults();psRenderAxes();psRenderScope();psBuilt=true;}
+  if(!psBuilt){psState=psDefaults();psScope=psScopeDefaults();psPick=psPickDefaults();psRenderAxes();psRenderScope();psBuilt=true;}
+  psSetStep(showRes?2:1);
   psBrandSync();psOv.hidden=false;
   if(brand)psBrandBodySet(true,true);
   const R=document.getElementById('psRes');
@@ -2718,7 +2841,8 @@ document.getElementById('psApply').addEventListener('click',()=>{
     '결과 보기',()=>psOpenModal(true));
 });
 document.getElementById('psReset').addEventListener('click',()=>{
-  psState=psDefaults();psScope=psScopeDefaults();psRenderAxes();psRenderScope();psLast=null;
+  psState=psDefaults();psScope=psScopeDefaults();psPick=psPickDefaults();
+  psOpenT={cmp:false,mod:false,pat:false};psRenderAxes();psRenderScope();psSetStep(1);psLast=null;
   const H=document.documentElement;delete H.dataset.plat;delete H.dataset.lyt;
   ['data-radius|default','data-density|default','data-border|default','data-size|m'].forEach(s=>{const[a,v]=s.split('|');igSetKnob(a,v);});
   const dk=document.querySelector('#devSeg button[data-d="desktop"]');if(dk){dk.disabled=false;dk.style.opacity='';dk.title='';}
