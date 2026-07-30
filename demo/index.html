@@ -79,7 +79,11 @@ svg.i{display:block;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linec
 .gnb-tabs button{font-size:13px;font-weight:600;color:var(--fg-sub);padding:8px 14px;border-radius:9px;transition:.14s;white-space:nowrap}
 .gnb-tabs button:hover{background:var(--bg-sunken);color:var(--fg)}
 .gnb-tabs button.on{background:var(--accent-subtle);color:var(--accent);font-weight:700}
-.gnb .gconnect{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--accent);border:1px solid var(--accent-line);border-radius:9px;padding:7px 13px;transition:.15s;white-space:nowrap}
+.gnb .gspec{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--fg-sub);border:1px solid var(--line);border-radius:9px;padding:7px 11px;transition:.15s;white-space:nowrap}
+.gnb .gspec.on{color:var(--accent);border-color:var(--accent-line);background:var(--accent-wash,rgba(0,0,0,.03))}
+.gnb .gspec:hover{color:var(--fg);background:var(--bg-sunk);border-color:var(--line-2)}
+.gnb .gspec .kb{font-size:10px;font-weight:500;opacity:.55;border:1px solid var(--line);border-radius:4px;padding:0 4px;line-height:1.5}
+.gnb .gconnect{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--accent);border:1px solid var(--accent-line);border-radius:9px;padding:7px 13px;transition:.15s;white-space:nowrap}
 .gnb .gconnect:hover{background:var(--accent-subtle)}
 .gnb .gconnect svg{width:14px;height:14px}
 .gnb .gver{font-size:11px;color:var(--fg-mut);white-space:nowrap}
@@ -1046,6 +1050,59 @@ html[data-view="compare"] .board3{display:block}
 .cmpx-ramp i:first-child{border-radius:5px 0 0 5px}.cmpx-ramp i:last-child{border-radius:0 5px 5px 0}
 .cmpx.has-custom{min-width:860px}
 .cmpx.has-custom .cmpx-row{grid-template-columns:130px repeat(4,1fr)}
+/* ============ 스펙 힌트 · 스펙 시트 ============ */
+.sptip{position:fixed;z-index:2400;max-width:340px;padding:11px 13px 10px;border-radius:10px;
+  background:var(--bg-ev-raised,#fff);border:1px solid var(--line);box-shadow:0 12px 32px rgba(0,0,0,.16),0 2px 6px rgba(0,0,0,.08);
+  font-family:'Pretendard Variable',system-ui,sans-serif;font-size:12px;line-height:1.6;color:var(--fg-sub);pointer-events:auto}
+.sptip[hidden]{display:none}
+.sptip .st-h{display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.sptip .st-n{font-weight:700;font-size:13px;color:var(--fg)}
+.sptip .st-t{margin-left:auto;font-size:10.5px;letter-spacing:.02em;color:var(--fg-sub);opacity:.7}
+.sptip .st-r{display:flex;gap:8px;padding:2px 0;font-variant-numeric:tabular-nums}
+.sptip .st-k{flex:0 0 96px;color:var(--fg-sub);opacity:.75;font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sptip .st-v{flex:1;color:var(--fg);font-size:11.5px;display:flex;align-items:center;gap:5px;min-width:0}
+.sptip .st-v span.px{opacity:.6}
+.sptip .st-sw{width:11px;height:11px;border-radius:3px;border:1px solid var(--line);flex:0 0 auto}
+.sptip .st-sec{margin-top:7px;padding-top:7px;border-top:1px solid var(--line)}
+.sptip .st-f{display:flex;align-items:center;gap:8px;margin-top:9px;padding-top:8px;border-top:1px solid var(--line)}
+.sptip .st-go{appearance:none;border:1px solid var(--line);background:var(--bg);color:var(--fg);
+  border-radius:7px;padding:4px 9px;font:inherit;font-size:11.5px;font-weight:600;cursor:pointer}
+.sptip .st-go:hover{background:var(--bg-sunk)}
+.sptip .st-warn{color:#a86a00;font-weight:600}
+[data-sp].sp-hl{outline:1.5px dashed var(--accent);outline-offset:2px;border-radius:3px}
+html[data-sphint="off"] [data-sp].sp-hl{outline:none}
+
+.spscrim{position:fixed;top:54px;left:0;right:0;bottom:0;z-index:2300;background:rgba(0,0,0,.28)}
+.spscrim[hidden]{display:none}
+.spsheet{position:fixed;top:54px;right:0;bottom:0;width:min(470px,92vw);z-index:2350;display:flex;flex-direction:column;
+  background:var(--bg);border-left:1px solid var(--line);box-shadow:-16px 0 44px rgba(0,0,0,.16);border-top:1px solid var(--line);
+  font-family:'Pretendard Variable',system-ui,sans-serif}
+.spsheet[hidden]{display:none}
+.sps-top{display:flex;align-items:center;gap:8px;padding:14px 16px 11px;border-bottom:1px solid var(--line);flex:0 0 auto}
+.sps-title{font-size:14px;font-weight:700;color:var(--fg);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sps-title em{font-style:normal;font-weight:500;font-size:11.5px;color:var(--fg-sub);opacity:.75;margin-left:6px}
+.sps-top button{appearance:none;border:1px solid var(--line);background:var(--bg);color:var(--fg-sub);
+  border-radius:7px;padding:4px 9px;font:inherit;font-size:11.5px;font-weight:600;cursor:pointer;flex:0 0 auto}
+.sps-top button:hover{background:var(--bg-sunk);color:var(--fg)}
+.sps-search{padding:10px 16px;border-bottom:1px solid var(--line);flex:0 0 auto}
+.sps-search input{width:100%;box-sizing:border-box;padding:8px 11px;border:1px solid var(--line);border-radius:8px;
+  background:var(--bg-sunk);font:inherit;font-size:12.5px;color:var(--fg)}
+.sps-search input:focus{outline:none;border-color:var(--accent)}
+.sps-body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:14px 16px 40px}
+.sps-gl{font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--fg-sub);opacity:.7;margin:14px 0 6px}
+.sps-gl:first-child{margin-top:0}
+.sps-i{display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;appearance:none;text-align:left;
+  border:1px solid transparent;background:none;border-radius:8px;padding:6px 9px;font:inherit;font-size:12.5px;color:var(--fg);cursor:pointer}
+.sps-i:hover{background:var(--bg-sunk);border-color:var(--line)}
+.sps-i .sd{flex:0 0 auto;font-size:10px}
+.sps-i .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sps-i .mt{font-size:10.5px;color:var(--fg-sub);opacity:.6;flex:0 0 auto}
+.sps-none{padding:20px 4px;font-size:12.5px;color:var(--fg-sub);opacity:.7}
+.sphbtn{appearance:none;display:flex;align-items:center;gap:7px;width:100%;box-sizing:border-box;
+  border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:8px;padding:7px 10px;
+  font:inherit;font-size:12px;font-weight:600;cursor:pointer;margin-top:6px}
+.sphbtn:hover{background:var(--bg-sunk)}
+.sphbtn .kb{margin-left:auto;font-size:10.5px;font-weight:500;opacity:.55;border:1px solid var(--line);border-radius:4px;padding:1px 5px}
 </style>
 </head>
 <body>
@@ -1088,8 +1145,9 @@ html[data-view="compare"] .board3{display:block}
     <button data-area="patterns">패턴</button>
     <button data-area="tokens">파운데이션</button>
   </nav>
+  <button class="gspec" id="gSpecBtn" title="스펙 시트 열기 (S)"><svg class="i"><use href="#icon-action-search"/></svg>스펙 시트<span class="kb">S</span></button>
   <button class="gconnect" id="igOpen"><svg class="i"><use href="#icon-action-external"/></svg>브랜드 연결</button>
-  <span class="gver">토큰 기반 · v0.61</span>
+  <span class="gver">토큰 기반 · v0.62</span>
 </header>
 <div class="app">
 
@@ -1296,6 +1354,11 @@ html[data-view="compare"] .board3{display:block}
       <div class="grp"><span class="gl">크기 <em>Size</em></span><div class="seg sm" data-attr="data-size"><button data-val="s">S</button><button data-val="m" class="on">M</button><button data-val="l">L</button></div></div>
       <div class="grp"><span class="gl">해석된 토큰 값</span><div class="readout" id="readout"></div></div>
     </div>
+    <div class="grp" id="specHintGrp"><span class="gl">스펙 <em>기본 스펙 확인</em></span>
+      <div class="seg sm" id="spHintSeg"><button data-v="on" class="on">힌트 켬</button><button data-v="off">끔</button></div>
+      <button class="sphbtn" id="spOpenBtn">스펙 시트 열기<span class="kb">S</span></button>
+      <p class="hintnote" id="spHintNote">화면 위 요소에 마우스를 올리면 그 요소가 어떤 스펙에 해당하는지, 어떤 토큰을 쓰는지 바로 보입니다. <b>스펙 시트</b>는 컴포넌트·모듈·패턴 전체를 한곳에서 검색해 여는 색인입니다 — 어느 화면에 있든 <b>S</b> 키로 열립니다.</p>
+    </div>
     <div id="modNote" class="grp" style="display:none"><span class="gl">모듈 · 패턴</span><p class="hintnote"><b>모듈(B. Molecule)</b>은 컴포넌트를 조합한 반복 블록, <b>패턴(C. Pattern)</b>은 페이지·섹션 단위 구조입니다 — 스키마 티어에 맞춰 GNB에서 갈라 두었습니다. 우측 노브(곡률·간격·보더·크기)와 Brand가 실시간 반영됩니다. <b>상품 리스트</b>는 모듈 안에서 Grid·Carousel·List 변형을 전환합니다.</p></div>
     <div id="compareNote" class="grp" style="display:none"><span class="gl">비교 모드</span><p class="hintnote">브랜드를 바꿀 때 <b>실제로 달라지는 것</b>만 3열로 나란히 봅니다 — primary 램프, accent 계열 토큰, 그리고 브랜드에 민감한 컴포넌트(버튼·포커스·칩·CTA·히어로 강조). 레이아웃·본문 등 <b>브랜드 무관</b> 요소는 생략했습니다.</p></div>
     <div id="scrNote" class="grp" style="display:none"><span class="gl">예시 화면</span><p class="hintnote">템플릿을 고르면 <b>섹션이 채워진 화면</b>이 새 탭으로 열립니다. 섹션 위에 마우스를 올리면 <b>순서 변경 · 복제 · 삭제</b>, 아래 <b>＋ 섹션 추가</b>로 26종 섹션을 언제든 끼워 넣을 수 있습니다. 모든 셀에 Brand와 우측 노브가 실시간 반영됩니다.</p></div>
@@ -1378,6 +1441,20 @@ html[data-view="compare"] .board3{display:block}
 
 <!-- ============ 화면 · 섹션 고르기 모달 ============ -->
 <div class="pickmask" id="pickMask"><div class="pick" id="pick" role="dialog" aria-label="화면 고르기"></div></div>
+
+<!-- ============ 스펙 시트 (어느 화면에서든 열리는 스펙 색인) ============ -->
+<div class="spscrim" id="spScrim" hidden></div>
+<aside class="spsheet" id="spSheet" hidden role="dialog" aria-label="스펙 시트">
+  <div class="sps-top">
+    <button id="spsBack" hidden>← 목록</button>
+    <div class="sps-title" id="spsTitle">스펙 시트 <em>freesm-component-schema</em></div>
+    <button id="spsFull" hidden title="스펙 뷰에서 열기">전체 뷰</button>
+    <button id="spsX" title="닫기 (Esc)">✕</button>
+  </div>
+  <div class="sps-search" id="spsSearchWrap"><input id="spsQ" placeholder="컴포넌트 · 모듈 · 패턴 검색" spellcheck="false" autocomplete="off"></div>
+  <div class="sps-body" id="spsBody"></div>
+</aside>
+<div class="sptip" id="spTip" hidden></div>
 
 <script>
 const html=document.documentElement, frame=document.getElementById('frame'), navEl=document.getElementById('nav'), componentsEl=document.getElementById('componentsView'), modulesEl=document.getElementById('modulesView'), authEl=document.getElementById('authView'), screenEl=document.getElementById('screenView');
@@ -3185,8 +3262,243 @@ function buildSpecNav(){
 }
 buildSpecNav();
 
+/* ================= 스펙 힌트 · 스펙 시트 =================
+   기본 스펙을 데모 화면에서 바로 알 수 있게 하는 두 개의 장치.
+   ① 스펙 힌트 — 화면 위 요소에 마우스를 올리면 그 요소가 어떤 스펙 항목인지,
+      어떤 토큰을 쓰는지, 변형이 몇 종인지 툴팁으로 보여준다.
+   ② 스펙 시트 — 어느 화면에 있든 S 키로 열리는 우측 색인. 62개 항목을 검색하고
+      전체 스펙 카드를 그 자리에서 읽는다. 스펙 뷰로 이동하지 않아도 된다. */
+
+/* 데모 DOM ↔ 스키마 항목 매핑. 일반 → 구체 순서로 두어 뒤가 앞을 덮는다. */
+const SPEC_SEL=[
+  ['cmp:Card','.card, .pcard, .fcard, .mycard, .authcard, .evcard, .hcard, .tplc'],
+  ['cmp:Button','.btn'],
+  ['cmp:Icon Button','.iconbtn'],
+  ['cmp:Input','.inp, .fld input, .fld textarea'],
+  ['cmp:Select / Dropdown trigger','.fsel, .fld select, select.opt'],
+  ['cmp:Checkbox','.chk'],
+  ['cmp:Radio','.rdo'],
+  ['cmp:Switch','.tgl'],
+  ['cmp:Segmented Control','.seg'],
+  ['cmp:Chip','.chip, .fchip'],
+  ['cmp:Badge / Tag','.badge, .tag, .ntag, .pcat, .htag, .stt'],
+  ['cmp:Avatar','.avatar, .mark'],
+  ['cmp:Link','.foot a, .navlinks a, .inner-cta a, .hct a'],
+  ['cmp:Image Frame','.pthumb, .evthumb'],
+  ['cmp:Progress bar / Spinner','.hbar, .gbar, .jd-bar'],
+  ['cmp:Toast','.alert'],
+  ['cmp:Modal shell','.ig, .pick'],
+  ['mod:Form Field','.fld'],
+  ['mod:Navigation Header','nav.nav, header.nav'],
+  ['mod:Footer','.foot'],
+  ['mod:Card Group / Grid','.plist, .cards'],
+  ['mod:Stepper / Progress Flow','.steps'],
+  ['mod:Accordion','.fq'],
+  ['pat:Hero Section','.hero'],
+  ['pat:Stats / Metrics Band','.metrics'],
+  ['pat:Feature Grid','.cards'],
+  ['pat:CTA Banner','.ctaband'],
+  ['pat:Logo Wall / Partner Strip','.logowall'],
+  ['pat:FAQ Accordion Section','.faq']
+];
+/* .cards 는 두 번 나온다 — 뒤(패턴 Feature Grid)가 이긴다. 아코디언은 섹션(.faq)=패턴, 항목(.fq)=모듈로 나눠 잡는다.
+   주석: 인스펙터·스펙 시트는 주석 대상이 아니다. 데모 표면(main)과 데모용 모달(#igOv·#pickMask)만 훑는다. */
+
+const spTip=document.getElementById('spTip');
+const spSheet=document.getElementById('spSheet'),spScrim=document.getElementById('spScrim');
+const spsBody=document.getElementById('spsBody'),spsTitle=document.getElementById('spsTitle');
+const spsBack=document.getElementById('spsBack'),spsFull=document.getElementById('spsFull');
+const spsQ=document.getElementById('spsQ'),spsSearchWrap=document.getElementById('spsSearchWrap');
+let spHint=true,spCur=null,spTipT=0,spHideT=0,spTipKey=null;
+
+function spItem(key){
+  const i=key.indexOf(':'),pfx=key.slice(0,i),name=key.slice(i+1);
+  const T=TIERS[pfx];if(!T)return null;
+  const it=(SCHEMA[T.k]||{})[name];
+  return it?{pfx,name,it,T}:null;
+}
+function spDefects(name){return (SCHEMA.specDefects||[]).filter(d=>d.state!=='resolved'&&defectHits(d,name));}
+
+/* 툴팁 본문 — 상태 · 골격 · 핵심 토큰 · 변형 · 미결 */
+function spTipHTML(key){
+  const o=spItem(key);if(!o)return '';
+  const {name,it,T,pfx}=o,st=STAT[it.status]||{m:'·',l:it.status,c:'cd'};
+  const tier=(T.label||'')+((SCHEMA[T.k]._tier||'').split('.')[0]?' · '+(SCHEMA[T.k]._tier||'').split('.')[0]:'');
+  let h=`<div class="st-h"><span class="sd ${st.c}">${st.m}</span><span class="st-n">${esc(name)}</span><span class="st-t">${esc(tier)}</span></div>`;
+
+  const L=it.layout||{},bits=[];
+  if(L.widthSizing||L.heightSizing)bits.push('폭 '+(L.widthSizing||'—')+' · 높이 '+(L.heightSizing||'—'));
+  if(L.autoLayout)bits.push(L.autoLayout==='HORIZONTAL'?'가로 배치':L.autoLayout==='VERTICAL'?'세로 배치':esc(L.autoLayout));
+  if(it.variantCount)bits.push('변형 '+it.variantCount+'종');
+  if(it.composedOf)bits.push('구성 '+it.composedOf.length+'종');
+  if(bits.length)h+=`<div style="margin-bottom:6px;opacity:.8">${esc(bits.join('  ·  '))}</div>`;
+
+  /* 치수 토큰 — layout 안에서 실제로 해석되는 것만 */
+  const rows=[];
+  Object.keys(L).forEach(k=>{
+    if(k==='note'||rows.length>=4)return;
+    const v=L[k];if(typeof v!=='string')return;
+    const t=tokVal(v);if(t)rows.push([k,v,t]);
+  });
+  /* 색 토큰 — 첫 번째 variant 축의 첫 조합 */
+  const TB=it.tokenBindings||{};
+  const ax=Object.keys(TB)[0];
+  if(ax&&TB[ax]&&typeof TB[ax]==='object'){
+    const first=Object.keys(TB[ax])[0],b=TB[ax][first];
+    if(b&&typeof b==='object'){
+      ['fill','text','border','bg','icon','track'].forEach(k=>{
+        if(rows.length>=8||!b[k])return;
+        const t=tokVal(b[k]);if(t)rows.push([k+'('+first+')',b[k],t]);
+      });
+    }
+  }
+  rows.forEach(([k,v,t])=>{
+    const val=t.t==='c'
+      ?`<i class="st-sw" style="background:${t.hex}"></i>${esc(t.hex)}`
+      :`${esc(String(t.px))}${/px|%|,/.test(String(t.px))?'':'px'}`;
+    h+=`<div class="st-r"><span class="st-k" title="${esc(k)}">${esc(k)}</span><span class="st-v">${val}<span class="px">${esc(v)}</span></span></div>`;
+  });
+
+  const va=it.variantAxes?Object.keys(it.variantAxes).map(a=>a+' '+it.variantAxes[a].length).join(' · '):'';
+  if(va)h+=`<div class="st-sec">변형 축 ${esc(va)}</div>`;
+
+  const df=spDefects(name),oq=(it.openQuestions||[]).length;
+  if(df.length||oq)h+=`<div class="st-sec"><span class="st-warn">${df.length?'스펙 결함 '+df.length+'건':''}${df.length&&oq?' · ':''}${oq?'미결 질문 '+oq+'건':''}</span></div>`;
+
+  const d=DEMO_LINK[key];
+  h+=`<div class="st-f"><button class="st-go" data-spgo="${esc(key)}">전체 스펙 →</button>`
+   + (it.status==='spec_confirmed'&&!d?`<span class="st-warn">전용 데모 없음</span>`:'')
+   + `</div>`;
+  return h;
+}
+
+function spTipShow(el,key){
+  spTip.innerHTML=spTipHTML(key);spTipKey=key;spTip.hidden=false;
+  const r=el.getBoundingClientRect(),tw=spTip.offsetWidth,th=spTip.offsetHeight;
+  let x=r.left,y=r.bottom+8;
+  if(x+tw>innerWidth-12)x=innerWidth-tw-12;
+  if(x<12)x=12;
+  if(y+th>innerHeight-12)y=Math.max(12,r.top-th-8);
+  spTip.style.left=x+'px';spTip.style.top=y+'px';
+  el.classList.add('sp-hl');
+}
+function spTipHide(){
+  clearTimeout(spTipT);spTip.hidden=true;spTipKey=null;
+  if(spCur){spCur.classList.remove('sp-hl');spCur=null;}
+}
+const SP_ROOTS=['main','#igOv','#pickMask'];
+function spRoots(){return SP_ROOTS.map(x=>document.querySelector(x)).filter(Boolean);}
+document.addEventListener('pointerover',e=>{
+  if(!spHint||spSheet.hidden===false)return;
+  const el=e.target.closest('[data-sp]');
+  if(!el||el===spCur)return;
+  clearTimeout(spHideT);clearTimeout(spTipT);
+  if(spCur)spCur.classList.remove('sp-hl');
+  spCur=el;
+  spTipT=setTimeout(()=>{if(spCur===el)spTipShow(el,el.dataset.sp);},320);
+});
+document.addEventListener('pointerout',e=>{
+  if(!spCur)return;
+  const to=e.relatedTarget;
+  if(to&&(spCur.contains(to)||spTip.contains(to)))return;
+  clearTimeout(spTipT);
+  spHideT=setTimeout(spTipHide,220);
+});
+spTip.addEventListener('pointerenter',()=>clearTimeout(spHideT));
+spTip.addEventListener('pointerleave',()=>{spHideT=setTimeout(spTipHide,180);});
+spTip.addEventListener('click',e=>{
+  const b=e.target.closest('[data-spgo]');if(!b)return;
+  const k=b.dataset.spgo;spTipHide();spSheetOpen(k);
+});
+
+/* 요소에 스펙 키를 붙인다. 렌더가 끝날 때마다 다시 돈다. */
+function spAnnotate(){
+  const roots=spRoots();
+  roots.forEach(R=>{
+    R.querySelectorAll('[data-sp]').forEach(el=>{el.removeAttribute('data-sp');el.classList.remove('sp-hl');});
+    SPEC_SEL.forEach(([k,sel])=>{
+      let ns;try{ns=R.querySelectorAll(sel);}catch(err){return;}
+      ns.forEach(el=>{el.dataset.sp=k;});
+    });
+  });
+}
+let spObT=0,spOb=new MutationObserver(()=>{clearTimeout(spObT);spObT=setTimeout(spAnnotate,80);});
+spRoots().forEach(R=>spOb.observe(R,{childList:true,subtree:true}));
+
+/* ---------- 스펙 시트 ---------- */
+function spSheetIndex(q){
+  q=(q||'').trim().toLowerCase();
+  let h='',n=0;
+  Object.keys(TIERS).forEach(pfx=>{
+    const T=TIERS[pfx],src=SCHEMA[T.k]||{};
+    const names=Object.keys(src).filter(k=>k!=='_tier'&&(!q||k.toLowerCase().includes(q)));
+    if(!names.length)return;
+    const ord=n=>STAT_ORDER.indexOf(src[n].status);
+    names.sort((a,b)=>ord(a)-ord(b)||a.localeCompare(b));
+    h+=`<div class="sps-gl">${esc(T.label)} · ${names.length}</div>`;
+    names.forEach(name=>{
+      n++;
+      const st=STAT[src[name].status]||{m:'·',c:'cd'},d=DEMO_LINK[pfx+':'+name];
+      h+=`<button class="sps-i" data-spk="${esc(pfx+':'+name)}"><span class="sd ${st.c}">${st.m}</span>`
+       + `<span class="nm">${esc(name)}</span><span class="mt">${d?esc(d[2].split(' · ').pop()):'미구현'}</span></button>`;
+    });
+  });
+  return n?h:`<div class="sps-none">“${esc(q)}”에 해당하는 항목이 없습니다.</div>`;
+}
+function spSheetOpen(key){
+  spTipHide();
+  spScrim.hidden=false;spSheet.hidden=false;
+  if(key){spSheetCard(key);}
+  else{
+    spsBack.hidden=true;spsFull.hidden=true;spsSearchWrap.style.display='';
+    spsTitle.innerHTML='스펙 시트 <em>freesm-component-schema v'+esc(SCHEMA.version||'')+'</em>';
+    spsBody.innerHTML=spSheetIndex(spsQ.value);
+    setTimeout(()=>spsQ.focus(),30);
+  }
+  spsBody.scrollTop=0;spSheetMark();
+}
+function spSheetCard(key){
+  const o=spItem(key);if(!o)return;
+  spsBack.hidden=false;spsFull.hidden=false;spsSearchWrap.style.display='none';
+  spsTitle.innerHTML=esc(o.name)+' <em>'+esc(o.T.label)+'</em>';
+  spsFull.dataset.spk=key;
+  spsBody.innerHTML=renderSpecCard(o.pfx,o.name);
+  spsBody.scrollTop=0;
+}
+function spSheetClose(){spSheet.hidden=true;spScrim.hidden=true;spSheetMark();}
+function spSheetMark(){document.getElementById('gSpecBtn').classList.toggle('on',!spSheet.hidden);}
+document.getElementById('spsX').addEventListener('click',spSheetClose);
+spScrim.addEventListener('click',spSheetClose);
+spsBack.addEventListener('click',()=>spSheetOpen(null));
+spsFull.addEventListener('click',()=>{const k=spsFull.dataset.spk;spSheetClose();if(k)route('spec',k);});
+spsQ.addEventListener('input',()=>{spsBody.innerHTML=spSheetIndex(spsQ.value);});
+spsBody.addEventListener('click',e=>{
+  const i=e.target.closest('[data-spk]');if(i){spSheetCard(i.dataset.spk);return;}
+  const r=e.target.closest('tr[data-spec]');if(r){spSheetCard(r.dataset.spec);return;}
+  const g=e.target.closest('[data-go]');
+  if(g){spSheetClose();route(g.dataset.go,g.dataset.gotab||undefined);}
+});
+document.getElementById('spOpenBtn').addEventListener('click',()=>spSheetOpen(null));
+document.getElementById('gSpecBtn').addEventListener('click',()=>spSheet.hidden?spSheetOpen(null):spSheetClose());
+document.getElementById('spHintSeg').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  spHint=b.dataset.v==='on';
+  document.documentElement.setAttribute('data-sphint',b.dataset.v);
+  b.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+  if(!spHint)spTipHide();
+});
+document.addEventListener('keydown',e=>{
+  const t=e.target,typing=t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'||t.isContentEditable);
+  if(e.key==='Escape'&&!spSheet.hidden){spSheetClose();return;}
+  if(typing||e.metaKey||e.ctrlKey||e.altKey)return;
+  if(e.key==='s'||e.key==='S'){e.preventDefault();spSheet.hidden?spSheetOpen(null):spSheetClose();}
+});
+document.documentElement.setAttribute('data-sphint','on');
+
+
 /* 초기 라우트 */
 route('interactive');
+spAnnotate();
 </script>
 </body>
 </html>
