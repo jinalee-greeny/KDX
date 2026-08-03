@@ -846,6 +846,9 @@ html[data-view="spec"] .spec{display:block}
 .sv-note.sv-done{border-left-color:#3f9d5a;background:rgba(63,157,90,.06);opacity:.72}
 .sv-note.sv-done b{color:#2f7a45}
 .sv-note.sv-ready{border-left-color:#3f9d5a;background:rgba(63,157,90,.06)}
+.sv-implbox{margin:10px 0 14px;padding:18px;border-radius:12px;background:var(--bg-sunken);overflow-x:auto}
+.sv-implbox .mod-stage-wrap{margin-top:0}
+.sv-implbox .cmp-sec{margin-bottom:0}
 .sv-note.sv-ready b{color:#2f7a45}
 .nav-item .navimpl{width:11px;height:11px;margin-left:5px;color:#3f9d5a;vertical-align:-1px}
 .sv-q{margin:0;padding-left:17px;font-family:'Pretendard Variable',system-ui,sans-serif;font-size:12.5px;line-height:1.7;color:var(--fg-sub)}
@@ -1391,7 +1394,7 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
       <button data-m="spec" role="menuitem"><b><svg class="i"><use href="#icon-action-search"/></svg>스펙 시트<span class="kb">S</span></b><small>컴포넌트·모듈·패턴 스펙 색인</small></button>
     </div>
   </div>
-  <span class="gver">구현+스펙 통합 · v0.74</span>
+  <span class="gver">구현+스펙 한 페이지 · v0.75</span>
 </header>
 <div class="app">
 
@@ -1801,7 +1804,6 @@ function route(view,tab){
   document.querySelectorAll('#gnbTabs button').forEach(x=>x.classList.toggle('on',x.dataset.area===area));
   document.querySelectorAll('#nav .nav-group').forEach(g=>g.classList.toggle('on',g.dataset.area===area));
   document.querySelectorAll('#nav .nav-item').forEach(x=>x.classList.toggle('on',x.dataset.view===view && (!x.dataset.tab||x.dataset.tab===tab)));
-  document.querySelectorAll('#nav [data-spgo]').forEach(x=>{const d=DEMO_LINK[x.dataset.spgo];x.classList.toggle('on',!!d&&d[0]===view&&(d[1]||'')===String(tab||''));});
   const cmp=view==='compare',tok=view==='tokens',comp=view==='components',mod=(view==='modules'||view==='patterns'),auth=view==='auth',home=view==='interactive',scr=view==='screen',spc=view==='spec';
   document.getElementById('presetCtl').style.display=(home||comp||mod||auth||scr)?'':'none';  // 노브: 홈+컴포넌트+모듈+인증
   document.getElementById('deviceGrp').style.display=(home||auth||mod||scr)?'':'none';  // 디바이스: 홈·인증·모듈(실제 리플로우). 컴포넌트는 고정→Responsive 탭에서 별도 정리
@@ -1820,11 +1822,7 @@ function route(view,tab){
   if(scr)renderScreen(tab||curScr);
   renderPgTabs();
 }
-document.getElementById('nav').addEventListener('click',e=>{
-  const sg=e.target.closest('[data-spgo]');
-  if(sg){const key=sg.dataset.spgo,d=DEMO_LINK[key];if(d){route(d[0],d[1]);spSheetOpen(key);}return;}
-  const b=e.target.closest('.nav-item');if(!b)return;route(b.dataset.view,b.dataset.tab);
-});
+document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('.nav-item');if(!b)return;route(b.dataset.view,b.dataset.tab);});
 document.getElementById('gnbTabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;route(...AREA_DEFAULT[b.dataset.area]);});
 document.getElementById('pgTabs').addEventListener('click',e=>{
   const x=e.target.closest('.x'); if(x){delScreen(x.dataset.close);return;}
@@ -2034,10 +2032,7 @@ const BSIZE=[['Small','btn-sm','utility/standard/xs/500','12/16',40],['Medium','
 /* Input 은 보더가 있어 실제 박스 높이 = pad-y×2 + line-height + bdr-width×2.
    스펙은 hug 높이에 stroke 를 포함하는지 명시하지 않는다 — 아래 값은 stroke 포함 실측. */
 const ISIZE=[['Small','inp-sm','body/s/400','14/22',48],['Medium','','body/m/400','16/24',50],['Large','inp-lg','body/l/400','18/28',54]];
-function renderCmpTab(tab){curCmpTab=tab;
-  document.querySelectorAll('#cmpTabs button').forEach(x=>x.classList.toggle('on',x.dataset.t===tab));
-  const P=document.getElementById('cmpPanel');let h='';
-  if(tab==='buttons'){
+function implButton(){let h='';
     h+='<div class="cmp-sec"><div class="cmp-h"><h3>Button</h3><span class="anat">.btn · .btn-{primary|secondary|neutral|ghost|danger} · .btn-{sm|lg}</span></div><div class="cmp-desc">style 4종 × size 3종 × state 2종 = <b>24 variant</b>이 Figma 스펙 범위입니다. Hover·Focus·Pressed는 Figma variant가 아니라 <b>웹 전용 CSS 상호작용 상태</b>로 둡니다 — 아래 매트릭스에서 회색 헤더가 그 구간입니다.</div>';
     h+='<div class="mtx-wrap"><div class="cmatrix" style="grid-template-columns:80px repeat('+BST.length+',minmax(84px,1fr))"><span></span>'+BST.map(([,l,spec])=>`<span class="ch"${spec?'':' style="opacity:.45"'}>${l}${spec?'':' ·css'}</span>`).join('');
     BVAR.forEach(([lab,cls,mk])=>{h+=`<span class="rh">${lab}${mk?`<sup style="color:var(--fg-mut)">${mk}</sup>`:''}</span>`+BST.map(([st])=>`<span class="cell"><button class="btn ${cls} ${st}">${lab}</button></span>`).join('');});
@@ -2048,7 +2043,9 @@ function renderCmpTab(tab){curCmpTab=tab;
     h+='<div class="cmp-note" style="margin:12px 0 0">세 사이즈 모두 시각 높이가 <b>size/touch-target/min(48px)</b>에 못 미칩니다. 버튼을 부풀리는 대신 <b>::after로 48px 히트 영역만 겹쳐</b> 터치 하한선을 보장합니다 — 시각 크기와 터치 타깃을 분리하는 방식.</div>';
     h+='<div class="cmp-sub">With icon</div><div class="crow"><button class="btn btn-primary">시작하기 <svg class="i"><use href="#icon-action-external"/></svg></button><button class="btn btn-ghost"><svg class="i"><use href="#icon-action-search"/></svg> 검색</button><button class="btn btn-secondary"><svg class="i"><use href="#icon-cat-asset"/></svg> 자산 보기</button></div>';
     h+='<div class="cmp-note">fill=<b>comp/fill/accent/primary</b> · hover=<b>accent/strong</b> · pressed=<b>accent/press</b> · focus=<b>focus-ring</b> · disabled=<b>comp/fill/neutral/disabled + comp/fg/disabled</b> · radius=<b>comp/radius/button→radius/m</b> · pad=<b>comp/pad/button-x 20 / -y 12</b> · gap=<b>comp/gap/s 8</b> · 높이=<b>hug</b>(pad-y×2 + line-height) · 하한=<b>size/touch-target/min 48</b></div></div>';
-  } else if(tab==='forms'){
+return h;
+}
+function implForms(){let h='';
     const fld=(stt,cls,val,ph,helper,err)=>`<div class="fld"><span class="stt">${stt}</span><label class="fl">투자 금액${err?' <span class="req">*</span>':''}</label><div class="inp ${cls}"><svg class="i"><use href="#icon-finance-won"/></svg><span class="${val?'':'ph'}">${val||ph}</span></div>${err?`<div class="fe"><svg class="i"><use href="#icon-status-alert"/></svg>${err}</div>`:helper?`<div class="fh">${helper}</div>`:''}</div>`;
     h+='<div class="cmp-sec"><div class="cmp-h"><h3>Input / Field</h3><span class="anat">.inp · .is-{hover|focus|error|disabled}</span></div><div class="cmp-desc">라벨 · 필드 · 헬퍼/에러. 상태별 보더·포커스 링·배경이 토큰에 바인딩됩니다.</div><div class="flds">';
     h+=fld('Default','','','50,000','원 단위로 입력','');
@@ -2063,7 +2060,9 @@ function renderCmpTab(tab){curCmpTab=tab;
     h+='<div class="cmp-sub">Select</div><div class="fld"><div class="inp"><span>부동산</span><svg class="i" style="margin-left:auto"><use href="#icon-nav-down"/></svg></div></div>';
     h+='<div class="cmp-note">border=<b>comp/bdr/default</b> · focus=<b>comp/bdr/focus-ring</b> · error=<b>status/fg/critical</b> · disabled bg=<b>bg/sunken</b> · radius=<b>comp/radius/input→radius/s</b> · pad=<b>comp/pad/field-x 16 / -y 12</b> · gap=<b>comp/gap/s 8</b> · 폭=<b>fill</b>(하한 48) · 높이=<b>hug</b>(pad-y×2 + line-height)</div>';
     h+='<div class="cmp-note" style="margin:10px 0 0">Focus·Error를 <b>보더 색만</b> 바꿔서 표시하면 default 보더 대비 각각 <b>1.03:1 · 1.29:1</b> — 흑백·색각이상에서 상태 변화가 보이지 않습니다. 그래서 fill은 건드리지 않고 바깥에 <b>3px ring</b>을 둘러 색 이외의 신호(두께)를 함께 줍니다. Error 배경 틴트(status/bg/critical)는 <b>권장하지 않습니다</b> — 필드 배경이 바뀌면 disabled/readonly로 읽히고, state 축 전체에서 <b>comp/fill/field/*</b>가 하나로 유지되는 불변식이 깨집니다.</div></div>';
-  } else if(tab==='card'){
+return h;
+}
+function implCard(){let h='';
     h+='<div class="cmp-sec"><div class="cmp-h"><h3>Card</h3><span class="anat">.card · .card-{flat|raised}</span></div><div class="cmp-desc">elevation 축 2종(Flat·Raised). Light 모드에서는 <b>bg/default</b>와 <b>bg/ev/raised</b>가 둘 다 #FFFFFF라, 두 변형을 가르는 건 오직 <b>보더냐 그림자냐</b>입니다 — 면 색은 아무 역할도 하지 않습니다.</div>';
     h+='<div class="cardrow">';
     h+='<div><div class="clab">Flat</div><div class="card card-flat"><div class="ct">분기 리포트</div><div class="cd">보더로만 면을 구분합니다. 표 안이나 리스트처럼 카드가 반복될 때 씁니다.</div><div class="crow"><button class="btn btn-secondary btn-sm">열기</button></div></div></div>';
@@ -2073,13 +2072,17 @@ function renderCmpTab(tab){curCmpTab=tab;
     h+='<div class="cmp-note" style="margin:14px 0 0">스펙은 Raised를 <b>shadow/2</b>로 잠정 지정해 뒀지만, <b>shadow/1(rest) → shadow/2(hover)</b>를 권장합니다. 이 데모의 elevation 사다리는 이미 elev-1을 "카드 rest", elev-2를 "카드 hover" 역할로 쓰고 있고, rest를 2에 고정하면 hover가 올라갈 자리가 없어집니다. 덧붙여 <b>shadow/2</b>의 원시값 <code>0px 4px 4px rgba(0,0,0,.1)</code>은 blur가 offset과 같고 spread가 0이라 가장자리가 딱딱합니다 — 2겹으로 부드럽게 푸는 elev-2 쪽이 현재 데모의 표면 언어에 맞습니다. foundationGaps의 Elevation "명칭 통일" 항목에 같이 묶어 처리하는 게 좋겠습니다.</div>';
     h+='<div class="cmp-note" style="margin:10px 0 0">fill=<b>bg/default</b>(Flat) · <b>bg/ev/raised</b>(Raised) · border=<b>comp/bdr/subtle</b>(Flat만) · radius=<b>comp/radius/card→radius/l</b> · pad=<b>comp/pad/card 24</b> · gap=<b>comp/gap/m 12</b> · 폭=<b>fill</b> · 높이=<b>hug</b></div>';
     h+='<div class="cmp-note" style="margin:10px 0 0">보더 두께 토큰이 아직 없습니다. 미리보기 아티팩트가 Button·Card는 1px, Input은 1.5px로 <b>임의로</b> 그린 것도 이 때문입니다 — <b>comp/bdr-width/*</b>(1)와 ring 두께(3)를 파운데이션에 추가해야 합니다. 또한 <b>comp/bdr/default</b>는 black@60%(#666666), <b>comp/bdr/subtle</b>은 black@20%(#CCCCCC)라 "default"가 "subtle"보다 3배 무겁습니다 — 램프 배정이 뒤집혀 있습니다.</div></div>';
-  } else if(tab==='selection'){
+return h;
+}
+function implSelection(){let h='';
     h+='<div class="cmp-sec"><div class="cmp-h"><h3>Selection</h3><span class="anat">.chk · .rdo · .tgl</span></div><div class="cmp-desc">체크박스 · 라디오 · 토글. 선택 상태는 accent, 비활성은 disabled 토큰.</div>';
     h+='<div class="cmp-sub">Checkbox</div><div class="crow" style="gap:22px"><span class="opt"><span class="chk on"><svg class="i"><use href="#icon-status-success"/></svg></span>선택됨</span><span class="opt"><span class="chk"></span>미선택</span><span class="opt dis"><span class="chk dis"></span>비활성</span></div>';
     h+='<div class="cmp-sub">Radio</div><div class="crow" style="gap:22px"><span class="opt"><span class="rdo on"></span>선택됨</span><span class="opt"><span class="rdo"></span>미선택</span><span class="opt dis"><span class="rdo dis"></span>비활성</span></div>';
     h+='<div class="cmp-sub">Toggle</div><div class="crow" style="gap:22px"><span class="opt"><span class="tgl on"></span>On</span><span class="opt"><span class="tgl"></span>Off</span><span class="opt dis"><span class="tgl dis"></span>비활성</span></div>';
     h+='<div class="cmp-note">선택=<b>comp/fill/accent/primary</b> · 보더=<b>bdr</b> · 트랙=<b>comp-track</b> · knob 그림자=<b>elev-1</b> · 비활성=<b>comp-disabled</b></div></div>';
-  } else if(tab==='feedback'){
+return h;
+}
+function implFeedback(){let h='';
     const al=(cls,ic,t,d)=>`<div class="alert ${cls}"><span class="ai"><svg class="i"><use href="#${ic}"/></svg></span><div><div class="at">${t}</div><div class="ad">${d}</div></div></div>`;
     h+='<div class="cmp-sec"><div class="cmp-h"><h3>Feedback</h3><span class="anat">.alert · .badge · .chip</span></div><div class="cmp-desc">배지 · 칩 · 알림. status 색은 브랜드 무관 고정, info만 accent를 씁니다.</div>';
     h+='<div class="cmp-sub">Badges</div><div class="crow"><span class="badge suc"><svg class="i"><use href="#icon-status-success"/></svg>성공</span><span class="badge warn">경고</span><span class="badge crit">오류</span><span class="badge up"><svg class="i"><use href="#icon-trend-up"/></svg>3.2%</span><span class="badge down"><svg class="i"><use href="#icon-trend-down"/></svg>1.4%</span></div>';
@@ -2087,19 +2090,9 @@ function renderCmpTab(tab){curCmpTab=tab;
     h+='<div class="cmp-sub">Alerts</div><div class="crow" style="flex-direction:column;align-items:stretch;gap:10px">';
     h+=al('info','i-gem','정보','브랜드 미확정 상태의 시스템 데모입니다.')+al('suc','i-check','성공','투자가 정상적으로 완료되었습니다.')+al('warn','i-alert','경고','모집 마감까지 D-1 남았습니다.')+al('crit','i-alert','오류','최소 투자 금액을 확인해 주세요.');
     h+='</div><div class="cmp-note">status=<b>st-success/warning/critical</b>(브랜드 무관) · info=<b>accent-subtle</b> · chart 배지=<b>up/down</b>(빨강·파랑 고정)</div></div>';
-  } else if(tab==='icon'){
-    h+='<div class="cmp-sec"><div class="cmp-h"><h3>Icon</h3><span class="anat">&lt;svg class="i"&gt;&lt;use href="#icon-…"/&gt;&lt;/svg&gt;</span></div><div class="cmp-desc">아이콘은 <b>currentColor</b>를 상속하고 크기는 <b>size/icon</b> 토큰을 따릅니다. 전체 목록·소스·교체는 토큰 뷰 → <b>Icons</b>(교체 지점) 참고.</div>';
-    h+='<div class="cmp-sub">Size · size/icon</div><div class="crow" style="align-items:flex-end;gap:22px">'+ICON_SZ.map(([k,px])=>`<span style="display:flex;flex-direction:column;align-items:center;gap:6px"><svg class="i" style="width:${px}px;height:${px}px"><use href="#icon-action-search"/></svg><span style="font-family:'Pretendard Variable',system-ui,sans-serif;font-size:10px;color:var(--fg-mut)">${k} · ${px}</span></span>`).join('')+'</div>';
-    h+='<div class="cmp-sub">Color · currentColor 상속</div><div class="crow" style="gap:14px">'
-      +'<span style="color:var(--fg)"><svg class="i" style="width:22px;height:22px"><use href="#icon-status-success"/></svg></span>'
-      +'<span style="color:var(--accent)"><svg class="i" style="width:22px;height:22px"><use href="#icon-status-success"/></svg></span>'
-      +'<span style="color:var(--fg-mut)"><svg class="i" style="width:22px;height:22px"><use href="#icon-status-success"/></svg></span>'
-      +'<span style="background:var(--accent);color:#fff;padding:8px;border-radius:8px;display:inline-flex"><svg class="i" style="width:22px;height:22px"><use href="#icon-status-success"/></svg></span></div>';
-    h+='<div class="cmp-sub">자동 매핑 · 컴포넌트 기본 아이콘</div><table class="tk-tbl" style="max-width:580px"><tr><th>컴포넌트 / 슬롯</th><th>기본 아이콘</th><th></th></tr>'
-      +ICON_MAP.map(([slot,ic])=>{const first=ic.split(' ')[0].replace('icon-cat-*','icon-cat-realestate');return `<tr><td>${slot}</td><td>${ic}</td><td><svg class="i" style="width:16px;height:16px;color:var(--accent)"><use href="#${first}"/></svg></td></tr>`;}).join('')+'</table>';
-    h+='<div class="cmp-sub">적용 예</div><div class="crow"><div class="fld" style="width:250px"><div class="inp"><svg class="i"><use href="#icon-action-search"/></svg><span class="ph">상품 검색</span></div></div><div class="fld" style="width:180px"><div class="inp"><span>부동산</span><svg class="i" style="margin-left:auto"><use href="#icon-nav-down"/></svg></div></div></div>';
-    h+='<div class="cmp-note">크기=<b>size/icon</b>(12·16·20·24·32) · 색=<b>currentColor</b> 상속 · 매핑된 슬롯엔 기본 아이콘 자동 적용 · 소스/교체=<b>토큰 뷰 → Icons</b></div></div>';
-  } else if(tab==='responsive'){
+return h;
+}
+function implResponsive(){let h='';
     /* v0.63: 이 탭은 더 이상 하드코딩 표가 아니다 — SCHEMA.web(1급 섹션)을 그대로 읽어 그린다.
        선언(스키마)과 구현(@container)이 갈라지는 걸 막으려면 표시도 한 군데서만 나와야 한다. */
     const W=SCHEMA.web||{},BK=W.breakpoints||[],RS=W.responsiveScale||{},CD=W.consumedByDemo||{};
@@ -2122,7 +2115,30 @@ function renderCmpTab(tab){curCmpTab=tab;
     h+=`<div class="cmp-sub">전 해상도 고정</div><div class="rsp-fixed">${W.fixedAcrossBreakpoints||''} 크기 변형이 필요하면 디바이스가 아니라 <b>Size 노브(S·M·L)</b>로 조절합니다 — 노브는 스펙의 size 축을 한 칸씩 밀어줍니다. 버튼·필드의 높이는 더 이상 고정값이 아니라 <b>comp/pad/*-y ×2 + line-height</b>로 hug 결정되고(버튼 40·44·46 / 필드 48·50·54), 터치 하한선 <b>size/touch-target/min 48</b>은 히트 영역으로 별도 보장합니다. <b>size/control</b> 32·40·48은 이제 텍스트가 없는 고정 지오메트리 컨트롤(체크박스·라디오·토글·아이콘 버튼)에만 남깁니다. <b>size/icon</b> 16·20·24.</div>`;
     h+=`<div class="cmp-sub">구현 방식</div><div class="rsp-fixed">${W.implementation||''}</div>`;
     h+='<div class="cmp-note">반응형 소스=<b>Web 컬렉션</b>(mobile·tablet·desktop 3모드) · 스키마 <code>web</code> 섹션이 이 표의 유일한 출처 · 항목별 반응형 규칙은 각 컴포넌트/모듈/패턴 <b>스펙 카드의 “반응형”</b> 섹션에서, 전체 표는 <b>스펙 시트(S) → 반응형 브레이크포인트</b>에서 확인</div></div>';
+return h;
+}
+function renderCmpTab(tab){curCmpTab=tab;
+  document.querySelectorAll('#cmpTabs button').forEach(x=>x.classList.toggle('on',x.dataset.t===tab));
+  const P=document.getElementById('cmpPanel');let h='';
+  if(tab==='buttons')h=implButton();
+  else if(tab==='forms')h=implForms();
+  else if(tab==='card')h=implCard();
+  else if(tab==='selection')h=implSelection();
+  else if(tab==='feedback')h=implFeedback();
+  else if(tab==='icon'){
+    h+='<div class="cmp-sec"><div class="cmp-h"><h3>Icon</h3><span class="anat">&lt;svg class="i"&gt;&lt;use href="#icon-…"/&gt;&lt;/svg&gt;</span></div><div class="cmp-desc">아이콘은 <b>currentColor</b>를 상속하고 크기는 <b>size/icon</b> 토큰을 따릅니다. 전체 목록·소스·교체는 토큰 뷰 → <b>Icons</b>(교체 지점) 참고.</div>';
+    h+='<div class="cmp-sub">Size · size/icon</div><div class="crow" style="align-items:flex-end;gap:22px">'+ICON_SZ.map(([k,px])=>`<span style="display:flex;flex-direction:column;align-items:center;gap:6px"><svg class="i" style="width:${px}px;height:${px}px"><use href="#icon-action-search"/></svg><span style="font-family:'Pretendard Variable',system-ui,sans-serif;font-size:10px;color:var(--fg-mut)">${k} · ${px}</span></span>`).join('')+'</div>';
+    h+='<div class="cmp-sub">Color · currentColor 상속</div><div class="crow" style="gap:14px">'
+      +'<span style="color:var(--fg)"><svg class="i" style="width:22px;height:22px"><use href="#icon-status-success"/></svg></span>'
+      +'<span style="color:var(--accent)"><svg class="i" style="width:22px;height:22px"><use href="#icon-status-success"/></svg></span>'
+      +'<span style="color:var(--fg-mut)"><svg class="i" style="width:22px;height:22px"><use href="#icon-status-success"/></svg></span>'
+      +'<span style="background:var(--accent);color:#fff;padding:8px;border-radius:8px;display:inline-flex"><svg class="i" style="width:22px;height:22px"><use href="#icon-status-success"/></svg></span></div>';
+    h+='<div class="cmp-sub">자동 매핑 · 컴포넌트 기본 아이콘</div><table class="tk-tbl" style="max-width:580px"><tr><th>컴포넌트 / 슬롯</th><th>기본 아이콘</th><th></th></tr>'
+      +ICON_MAP.map(([slot,ic])=>{const first=ic.split(' ')[0].replace('icon-cat-*','icon-cat-realestate');return `<tr><td>${slot}</td><td>${ic}</td><td><svg class="i" style="width:16px;height:16px;color:var(--accent)"><use href="#${first}"/></svg></td></tr>`;}).join('')+'</table>';
+    h+='<div class="cmp-sub">적용 예</div><div class="crow"><div class="fld" style="width:250px"><div class="inp"><svg class="i"><use href="#icon-action-search"/></svg><span class="ph">상품 검색</span></div></div><div class="fld" style="width:180px"><div class="inp"><span>부동산</span><svg class="i" style="margin-left:auto"><use href="#icon-nav-down"/></svg></div></div></div>';
+    h+='<div class="cmp-note">크기=<b>size/icon</b>(12·16·20·24·32) · 색=<b>currentColor</b> 상속 · 매핑된 슬롯엔 기본 아이콘 자동 적용 · 소스/교체=<b>토큰 뷰 → Icons</b></div></div>';
   }
+  else if(tab==='responsive')h=implResponsive();
   P.innerHTML=`<div class="cmp-stage">${h}</div>`;
 }
 document.getElementById('cmpTabs').innerHTML=CMP_TABS.map(([t,l],i)=>`<button data-t="${t}" class="${i===0?'on':''}">${l}</button>`).join('');
@@ -3803,6 +3819,24 @@ const DEMO_LINK={
   'pat:반응형 그리드 레이아웃':['components','responsive','컴포넌트 · Responsive'],
   'pat:브랜드 컬러 스왑 메커니즘':['compare',null,'브랜드 비교']
 };
+/* 스펙 카드에 그대로 박아 넣을 "구현" 미리보기 — 화면을 옮기지 않고 스펙과 한 페이지에 같이 보이게 한다.
+   컴포넌트 쪽은 renderCmpTab이 쓰는 것과 같은 impl* 함수를 재사용하고(이중 관리 없음),
+   모듈·패턴 쪽은 재사용 섹션 마크업(M)을 모듈 뷰와 동일한 틀(page·inner)로 감싼다. */
+function wrapPage(html){return `<div class="mod-stage-wrap"><div class="mod-stage"><div class="page"><div class="inner">${html}</div></div></div></div>`;}
+const TAB_IMPL_FN={
+  'components:buttons':implButton,'components:forms':implForms,'components:card':implCard,
+  'components:selection':implSelection,'components:feedback':implFeedback,'components:responsive':implResponsive,
+  'modules:header':()=>wrapPage(M.header),'modules:steps':()=>wrapPage(M.steps),
+  'modules:products':()=>wrapPage(M.products),'modules:footer':()=>wrapPage(M.footer),
+  'patterns:hero':()=>wrapPage(M.hero),'patterns:stats':()=>wrapPage(M.stats),
+  'patterns:features':()=>wrapPage(M.features),'patterns:cta':()=>wrapPage(M.cta),
+  'patterns:logowall':()=>wrapPage(M.logowall),'patterns:faq':()=>wrapPage(M.faq)
+};
+function implPreview(key){
+  const d=DEMO_LINK[key];if(!d)return '';
+  const fn=TAB_IMPL_FN[d[0]+':'+(d[1]||'')];
+  return fn?fn():'';
+}
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 /* 토큰 이름 → 실제 값. 파운데이션 뷰의 데이터를 그대로 재사용해 스펙 카드에서도 값이 보이게 한다. */
 function tokVal(n){
@@ -3884,10 +3918,15 @@ function renderSpecCard(pfx,name){
   h+=`</div>`;
   h+=`<div class="sv-meta">${esc(STAT[it.status]?SCHEMA.statusLegend[it.status]:'')}</div>`;
   {
-    const d=DEMO_LINK[key];
+    const d=DEMO_LINK[key],prev=d?implPreview(key):'';
     h+=`<div class="sv-sec"><div class="sv-st">구현</div>`;
-    if(d)h+=`<div class="sv-note sv-ready"><b>구현 완료</b> — ${esc(d[2])}에서 실제 화면으로 확인할 수 있습니다. 아래 버튼을 누르면 이 화면이 스펙과 나란히 열립니다.</div>${demoBtn(key)}`;
-    else{
+    if(d&&prev){
+      h+=`<div class="sv-note sv-ready"><b>구현 완료</b> — 아래는 ${esc(d[2])}에서 쓰는 실제 마크업·CSS 그대로의 미리보기입니다(현재 선택된 브랜드가 그대로 반영됩니다).</div>`;
+      h+=`<div class="sv-implbox">${prev}</div>`;
+      h+=demoBtn(key);
+    }else if(d){
+      h+=`<div class="sv-note sv-ready"><b>구현 완료</b> — ${esc(d[2])}에서 실제 화면으로 확인할 수 있습니다.</div>${demoBtn(key)}`;
+    }else{
       const IMPL_MSG={spec_confirmed:'스펙은 확정됐지만 데모 화면은 아직 만들지 않았습니다. 아래 토큰 바인딩·variant를 그대로 구현하면 됩니다.',tokens_identified:'토큰까지는 특정됐지만 variant·상태 구성이 아직 정리되지 않아 구현 전 단계입니다.',candidate_only:'아직 후보 단계입니다 — 디자인 검토를 거쳐 스펙이 확정된 뒤 구현이 이어집니다.',review:'검토 중인 스펙입니다. 확정 후 구현 예정입니다.'};
       h+=`<div class="sv-note sv-pend"><b>구현 준비중</b> — ${esc(IMPL_MSG[it.status]||'아직 데모에 구현되지 않았습니다.')}</div>`;
     }
@@ -4002,14 +4041,12 @@ function renderSpec(tab){
 }
 document.getElementById('specPanel').addEventListener('click',e=>{
   const r=e.target.closest('tr[data-spec]');
-  if(r){const key=r.dataset.spec,d=DEMO_LINK[key];if(d){route(d[0],d[1]);spSheetOpen(key);}else route('spec',key);return;}
+  if(r){route('spec',r.dataset.spec);return;}
   const g=e.target.closest('[data-go]');
-  if(g){
-    if(g.dataset.go==='cmp-web'){route('components','responsive');return;}
-    route(g.dataset.go,g.dataset.gotab||undefined);
-    /* 구현으로 이동한 뒤에도 보고 있던 스펙 항목을 시트로 다시 열어 화면과 나란히 보이게 한다 */
-    if(curSpec&&curSpec.indexOf(':')>0&&curSpec.slice(curSpec.indexOf(':')+1)!=='*')spSheetOpen(curSpec);
-  }
+  if(g){if(g.dataset.go==='cmp-web'){route('components','responsive');return;}route(g.dataset.go,g.dataset.gotab||undefined);}
+  /* 인라인 구현 미리보기 안의 FAQ 아코디언도 눌러볼 수 있게 */
+  const fq=e.target.closest('.sv-implbox .faq .fq');
+  if(fq){fq.parentNode.classList.toggle('open');}
 });
 /* 브랜드 스왑 시 스펙 카드의 색 값도 다시 계산 */
 const _setBrand2=setBrand;setBrand=function(b){_setBrand2(b);if(html.getAttribute('data-view')==='spec')renderSpec();};
@@ -4025,8 +4062,7 @@ function buildSpecNav(){
     h+='<button class="nav-item" data-view="spec" data-tab="'+pfx+':*">전체 목록</button>';
     STAT_ORDER.forEach(st=>names.filter(n=>src[n].status===st).forEach(n=>{
       const sm=STAT[st],key=pfx+':'+n,d=DEMO_LINK[key];
-      if(d)h+='<button class="nav-item" data-spgo="'+esc(key)+'" title="'+sm.l+' · 구현됨 · '+esc(d[2])+'"><span class="sd '+sm.c+'">'+sm.m+'</span>'+esc(n)+'<svg class="i navimpl"><use href="#icon-status-success"/></svg></button>';
-      else h+='<button class="nav-item" data-view="spec" data-tab="'+esc(key)+'" title="'+sm.l+' · 구현 준비중"><span class="sd '+sm.c+'">'+sm.m+'</span>'+esc(n)+'</button>';
+      h+='<button class="nav-item" data-view="spec" data-tab="'+esc(key)+'" title="'+sm.l+(d?' · 구현됨':' · 구현 준비중')+'"><span class="sd '+sm.c+'">'+sm.m+'</span>'+esc(n)+(d?'<svg class="i navimpl"><use href="#icon-status-success"/></svg>':'')+'</button>';
     }));
     grp.insertAdjacentHTML('beforeend',h);
   });
@@ -4298,7 +4334,7 @@ spsBody.addEventListener('click',e=>{
   const i=e.target.closest('[data-spk]');if(i){spSheetCard(i.dataset.spk);return;}
   const r=e.target.closest('tr[data-spec]');if(r){spSheetCard(r.dataset.spec);return;}
   const g=e.target.closest('[data-go]');
-  if(g){if(g.dataset.go==='cmp-web'){spSheetCard('web:breakpoints');return;}route(g.dataset.go,g.dataset.gotab||undefined);}
+  if(g){if(g.dataset.go==='cmp-web'){spSheetCard('web:breakpoints');return;}spSheetClose();route(g.dataset.go,g.dataset.gotab||undefined);}
 });
 document.getElementById('spHintSw').addEventListener('click',e=>{
   const b=e.currentTarget;spHint=!spHint;
