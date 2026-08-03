@@ -1394,7 +1394,7 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
       <button data-m="spec" role="menuitem"><b><svg class="i"><use href="#icon-action-search"/></svg>스펙 시트<span class="kb">S</span></b><small>컴포넌트·모듈·패턴 스펙 색인</small></button>
     </div>
   </div>
-  <span class="gver">구현+스펙 한 페이지 · v0.75</span>
+  <span class="gver">R값 버그 수정 · v0.76</span>
 </header>
 <div class="app">
 
@@ -3922,7 +3922,7 @@ function renderSpecCard(pfx,name){
     h+=`<div class="sv-sec"><div class="sv-st">구현</div>`;
     if(d&&prev){
       h+=`<div class="sv-note sv-ready"><b>구현 완료</b> — 아래는 ${esc(d[2])}에서 쓰는 실제 마크업·CSS 그대로의 미리보기입니다(현재 선택된 브랜드가 그대로 반영됩니다).</div>`;
-      h+=`<div class="sv-implbox">${prev}</div>`;
+      h+=`<div class="sv-implbox" data-layout="grid" data-radius="default" data-density="default" data-border="default" data-size="m">${prev}</div>`;
       h+=demoBtn(key);
     }else if(d){
       h+=`<div class="sv-note sv-ready"><b>구현 완료</b> — ${esc(d[2])}에서 실제 화면으로 확인할 수 있습니다.</div>${demoBtn(key)}`;
