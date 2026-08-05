@@ -1148,6 +1148,16 @@ html[data-view="screen"] .lyrbox{display:block}
 .cell:hover>.celltag{display:inline-block;background:var(--fg-mut)}
 .cell.sel>.celltag{display:inline-block;background:var(--accent)}
 .cell:first-child>.celltag{transform:none;border-radius:0 0 6px 0}
+/* --- 셀 안 글자 고쳐 쓰기 (v0.81) ---
+   고른 셀에서만 편집이 열린다. 피그마도 프레임을 고른 다음에야 텍스트에 캐럿이 들어간다.
+   테두리는 '여기를 고칠 수 있다'는 표시일 뿐이므로 레이아웃을 밀지 않는 outline 으로 그린다. */
+.cell [data-t][contenteditable="true"]{outline:1px dashed var(--accent-line);outline-offset:2px;border-radius:3px;cursor:text}
+.cell [data-t][contenteditable="true"]:hover{background:var(--accent-subtle)}
+.cell [data-t][contenteditable="true"]:focus{outline:2px solid var(--accent);outline-offset:2px;background:var(--bg);box-shadow:var(--sh-1)}
+.cell [data-t].edited{box-shadow:inset 0 -2px 0 var(--accent-line)}
+.sp-num{display:flex;align-items:center;gap:7px}
+.sp-num .sp-b{flex:0 0 34px;font-size:15px;line-height:1;padding:6px 0}
+.sp-num .sp-ix{flex:1;text-align:center}
 /* --- 우측 속성 패널 --- */
 .sp-t{font-size:14px;font-weight:800;letter-spacing:-.01em;margin-bottom:3px}
 .sp-d{font-size:11.5px;color:var(--fg-mut);line-height:1.6}
@@ -1411,7 +1421,7 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
       <button data-m="spec" role="menuitem"><b><svg class="i"><use href="#icon-action-search"/></svg>스펙 시트<span class="kb">S</span></b><small>컴포넌트·모듈·패턴 스펙 색인</small></button>
     </div>
   </div>
-  <span class="gver">스크린 3패널 편집 · v0.80</span>
+  <span class="gver">섹션 내용 편집 · v0.81</span>
 </header>
 <div class="app">
 
@@ -1770,6 +1780,9 @@ const RAD={sharp:{md:4,lg:6},default:{md:12,lg:16},rounded:{md:20,lg:24}}, DENS=
       /* Button·Input 은 고정 높이를 쓰지 않는다 — pad-y×2 + line-height 로 hug. 아래는 그 계산 결과(표시용) */
       HUG={sm:{btn:40,fld:48},md:{btn:44,fld:50},lg:{btn:46,fld:54}};
 const KNOBS=[['data-layout','grid'],['data-radius','default'],['data-density','default'],['data-border','default'],['data-size','md']];
+/* 스크린에서 data-layout 은 화면이 아니라 '셀'에 건다 — 같은 화면에 Grid 목록과 List 목록이 같이 설 수 있어야 한다.
+   그러면 화면 전체 노브는 '아직 따로 정하지 않은 셀의 기본값' 이 되므로, 속성이 아니라 이 변수로 들고 있는다. */
+let scrLay='grid';
 
 function setBrand(b){html.setAttribute('data-brand',b);
   /* 그라디언트는 커스텀 브랜드가 실제로 수집한 값에만 존재한다. 다른 브랜드로 넘어가면 면 적용을 끈다
@@ -1786,7 +1799,9 @@ function renderReadout(scope,el){const r=scope.getAttribute('data-radius'),d=DEN
   el.innerHTML=[['comp/radius/button'+AR+'radius/md',RAD[r].md+'px'],['comp/radius/card'+AR+'radius/lg',RAD[r].lg+'px'],['spacing ×','×'+d],['border/'+bd,BORD[bd]+'px'],['button 높이'+AR+'hug',HUG[sz].btn+'px'],['field 높이'+AR+'hug',HUG[sz].fld+'px'],['a11y/touch-target/min','48px'],['w·h/icon',SIZE[sz].icon+'px']]
    .map(([k,v])=>`<div class="rr"><span class="rk">${k}</span><span class="rv">${v}</span></div>`).join('');}
 document.querySelectorAll('#presetCtl .seg').forEach(seg=>seg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const a=seg.dataset.attr;
-  frame.setAttribute(a,b.dataset.val); screenEl.setAttribute(a,b.dataset.val); if(a!=='data-layout'){ componentsEl.setAttribute(a,b.dataset.val); modulesEl.setAttribute(a,b.dataset.val); authEl.setAttribute(a,b.dataset.val); }
+  frame.setAttribute(a,b.dataset.val);
+  if(a==='data-layout'){ scrLay=b.dataset.val; if(curScr&&html.getAttribute('data-view')==='screen')renderScreen(curScr); }
+  else { screenEl.setAttribute(a,b.dataset.val); componentsEl.setAttribute(a,b.dataset.val); modulesEl.setAttribute(a,b.dataset.val); authEl.setAttribute(a,b.dataset.val); }
   seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); renderReadout(frame,document.getElementById('readout'));}));
 renderReadout(frame,document.getElementById('readout'));
 
@@ -2362,6 +2377,9 @@ const DEF_CTX={crumb:['홈','전체 상품'],title:'전체 상품',desc:'검증�
 const HEADSEC=new Set(['products','features','steps','events','coupon','pricing','contact']);
 /* 하나라도 포함되면 '문서형 화면'으로 보고 섹션 리듬을 좁힙니다 */
 const DOCSEC=new Set(['pagehead','pdetail','pspec','notice','terms','mysum','holdings','empty','e404']);
+/* data-layout(Grid·Carousel·List)이 실제로 무엇인가를 바꾸는 섹션 — 지금은 .plist 를 가진 products 뿐이다.
+   나머지 섹션에 변형 세그를 띄우면 눌러도 아무 일이 없는 버튼이 되므로 여기서 문을 좁힌다. */
+const VARSEC=new Set(['products']);
 const SCR_TPL=[
   {k:'products',t:'상품 목록',d:'페이지 헤더 · 필터 · 카드 그리드 · 페이지네이션',secs:['header','pagehead','filter','products','pager','footer'],
    ctx:{crumb:['홈','조각투자','전체 상품'],title:'전체 상품',desc:'검증을 마친 조각투자 상품을 한눈에 살펴보세요. 카테고리와 모집 상태로 좁혀 볼 수 있습니다.'}},
@@ -2424,11 +2442,21 @@ function scrName(base){let n=base,i=1;while(screens.some(s=>s.name===n)){i++;n=b
 /* 섹션의 '표시' 상태는 secs와 나란한 불리언 배열로 둔다.
    secs 안에 넣지 않은 이유: SCR_TPL·자동 생성·인제스트가 전부 키 배열을 그대로 넘겨주기 때문이다.
    대신 순서를 건드리는 모든 경로를 아래 네 함수로 모아, 두 배열이 어긋날 자리를 없앴다. */
-function scrOff(s){if(!s.off||s.off.length!==s.secs.length)s.off=s.secs.map(()=>false);return s.off;}
-function secMove(s,i,j){const o=scrOff(s);const k=s.secs.splice(i,1)[0],f=o.splice(i,1)[0];s.secs.splice(j,0,k);o.splice(j,0,f);}
-function secDel(s,i){scrOff(s);s.secs.splice(i,1);s.off.splice(i,1);}
-function secDup(s,i){scrOff(s);s.secs.splice(i+1,0,s.secs[i]);s.off.splice(i+1,0,s.off[i]);}
-function secAdd(s,at,k){scrOff(s);s.secs.splice(at,0,k);s.off.splice(at,0,false);}
+/* secs 와 나란히 도는 배열은 이제 넷이다.
+   off = 표시 여부 · txt = 고쳐 쓴 글자(자리번호→HTML) · vr = 이 셀만의 변형 · ct = 이 셀만의 항목 수.
+   전부 '아직 정하지 않음(null)' 을 기본으로 둔다 — 정하지 않은 셀은 화면 노브를 그대로 따라가야 하기 때문이다. */
+const SPAR=['secs','off','txt','vr','ct'];
+function scrOff(s){const n=s.secs.length;
+  if(!s.off||s.off.length!==n)s.off=s.secs.map(()=>false);
+  if(!s.txt||s.txt.length!==n)s.txt=s.secs.map(()=>null);
+  if(!s.vr||s.vr.length!==n)s.vr=s.secs.map(()=>null);
+  if(!s.ct||s.ct.length!==n)s.ct=s.secs.map(()=>null);
+  return s.off;}
+function secMove(s,i,j){scrOff(s);SPAR.forEach(f=>{const v=s[f].splice(i,1)[0];s[f].splice(j,0,v);});}
+function secDel(s,i){scrOff(s);SPAR.forEach(f=>s[f].splice(i,1));}
+/* 복제한 셀은 원본과 따로 논다 — 고쳐 쓴 글자까지 얕게 복사하면 한쪽을 고칠 때 다른 쪽이 같이 바뀐다. */
+function secDup(s,i){scrOff(s);SPAR.forEach(f=>{const v=s[f][i];s[f].splice(i+1,0,(v&&typeof v==='object')?JSON.parse(JSON.stringify(v)):v);});}
+function secAdd(s,at,k){scrOff(s);s.secs.splice(at,0,k);s.off.splice(at,0,false);s.txt.splice(at,0,null);s.vr.splice(at,0,null);s.ct.splice(at,0,null);}
 function addScreen(k){
   const tpl=SCR_TPL.find(t=>t.k===k)||SCR_TPL[SCR_TPL.length-1];
   const id='s'+(++scrSeq);
@@ -2476,16 +2504,34 @@ function renderScrProps(){
       <button class="sp-b" data-sp="add"><svg class="i"><use href="#icon-action-add"/></svg>섹션 추가</button>
       <button class="sp-b" data-sp="tpl"><svg class="i"><use href="#icon-action-add"/></svg>스크린 추가</button>
       <button class="sp-b danger" data-sp="del"${s?'':' disabled'}>이 스크린 삭제</button></div></div>
-      <div class="grp"><p class="hintnote">좌측 <b>레이어</b>에서 섹션을 끌어 순서를 바꾸고, 눈 아이콘으로 숨깁니다. 캔버스나 레이어에서 섹션을 <b>클릭</b>하면 이 자리가 그 섹션의 속성으로 바뀝니다. 아무것도 고르지 않았을 때는 화면 전체에 걸리는 노브(곡률 · 간격 · 보더 · 크기)가 열립니다.</p></div>`;
+      <div class="grp"><p class="hintnote">좌측 <b>레이어</b>에서 섹션을 끌어 순서를 바꾸고, 눈 아이콘으로 숨깁니다. 캔버스나 레이어에서 섹션을 <b>클릭</b>하면 이 자리가 그 섹션의 속성으로 바뀌고, 그때부터 그 섹션 안의 <b>글자·항목 수·변형</b>을 고칠 수 있습니다. 아무것도 고르지 않았을 때는 화면 전체에 걸리는 노브(곡률 · 간격 · 보더 · 크기)가 열립니다.</p></div>`;
   }
   if(has){
     const k=s.secs[selIdx],m=SEC_META[k]||{t:k,d:''},n=s.secs.length;
-    const lay=screenEl.getAttribute('data-layout')||'grid';
-    const vari=(k==='products')
-      ? `<div class="grp"><span class="gl">변형 <em>Variant</em></span><div class="seg sm" data-sp-lay><button data-val="grid" class="${lay==='grid'?'on':''}">Grid</button><button data-val="carousel" class="${lay==='carousel'?'on':''}">Carousel</button><button data-val="list" class="${lay==='list'?'on':''}">List</button></div></div>`
+    /* 변형은 이제 화면이 아니라 이 셀의 것이다. 따로 정하지 않았으면 화면 노브(scrLay)를 그대로 쓴다. */
+    const lay=s.vr[selIdx]||scrLay;
+    const vari=VARSEC.has(k)
+      ? `<div class="grp"><span class="gl">변형 <em>Variant</em></span><div class="seg sm" data-sp-lay><button data-val="grid" class="${lay==='grid'?'on':''}">Grid</button><button data-val="carousel" class="${lay==='carousel'?'on':''}">Carousel</button><button data-val="list" class="${lay==='list'?'on':''}">List</button></div>${s.vr[selIdx]?`<div class="sp-acts" style="margin-top:6px"><button class="sp-b" data-sp="vrrst">화면 기본값으로</button></div>`:`<p class="hintnote">아직 이 셀만의 변형을 정하지 않아 화면 기본값 <b>${lay}</b>를 따릅니다. 같은 화면에 Grid 목록과 List 목록을 나란히 둘 수도 있습니다.</p>`}</div>`
       : `<div class="grp"><span class="gl">변형 <em>Variant</em></span><p class="hintnote">이 섹션에는 선택할 변형이 없습니다 — 곡률·간격·보더·크기는 화면 전체 노브를 따릅니다.</p></div>`;
+    /* 항목 수 — 셀을 그린 뒤 DOM에서 잰 '되풀이 묶음'의 원래 개수를 기준으로 삼는다. */
+    const cel=screenEl.querySelector(`.cell[data-i="${selIdx}"]`);
+    const n0=cel?+(cel.dataset.n0||0):0;
+    const cnt=(s.ct[selIdx]!=null)?s.ct[selIdx]:n0;
+    const items=n0>=2
+      ? `<div class="grp"><span class="gl">항목 수 <em>Items</em></span><div class="sp-num">
+      <button class="sp-b" data-sp="cntdn"${cnt<=1?' disabled':''}>−</button>
+      <span class="sp-ix">${cnt}개</span>
+      <button class="sp-b" data-sp="cntup"${cnt>=16?' disabled':''}>＋</button></div>
+      ${s.ct[selIdx]!=null?`<div class="sp-acts" style="margin-top:6px"><button class="sp-b" data-sp="ctrst">원래 ${n0}개로</button></div>`:`<p class="hintnote">카드·행·항목을 늘리면 마지막 항목을 본떠 이어 붙이고, 줄이면 뒤에서부터 덜어냅니다.</p>`}</div>`
+      : '';
+    const edN=s.txt[selIdx]?Object.keys(s.txt[selIdx]).length:0;
     pr.innerHTML=`<div class="grp"><span class="gl">섹션 <em>Section</em></span>
       <div class="sp-t">${m.t}</div><div class="sp-d">${m.d||''}</div></div>
+      <div class="grp"><span class="gl">글자 <em>Content</em></span>
+      <p class="hintnote">고른 섹션 안의 글자는 <b>그 자리에서 바로</b> 고쳐 쓸 수 있습니다. 점선이 그려진 곳을 클릭하세요. <b>Enter</b>로 확정, <b>Esc</b>로 편집을 빠져나옵니다.</p>
+      <div class="sp-acts" style="margin-top:6px"><button class="sp-b" data-sp="txtrst"${edN?'':' disabled'}>고친 글자 되돌리기${edN?` (${edN})`:''}</button></div></div>
+      ${items}
+      ${vari}
       <div class="grp"><span class="gl">순서 <em>Order</em></span><div class="sp-ord">
       <button class="sp-b" data-sp="up"${selIdx===0?' disabled':''}><svg class="i"><use href="#icon-nav-moveup"/></svg>위로</button>
       <button class="sp-b" data-sp="down"${selIdx===n-1?' disabled':''}><svg class="i"><use href="#icon-nav-movedown"/></svg>아래로</button>
@@ -2493,18 +2539,89 @@ function renderScrProps(){
       <div class="grp"><span class="gl">표시 <em>Visibility</em></span><div class="seg sm" data-sp-show>
       <button data-sp="show" data-val="on" class="${s.off[selIdx]?'':'on'}">표시</button>
       <button data-sp="show" data-val="off" class="${s.off[selIdx]?'on':''}">숨김</button></div></div>
-      ${vari}
       <div class="grp"><span class="gl">동작 <em>Actions</em></span><div class="sp-acts">
       <button class="sp-b" data-sp="dup"><svg class="i"><use href="#icon-action-copy"/></svg>복제</button>
       <button class="sp-b" data-sp="add"><svg class="i"><use href="#icon-action-add"/></svg>아래에 추가</button>
       <button class="sp-b danger" data-sp="secdel"><svg class="i"><use href="#icon-action-close"/></svg>이 섹션 삭제</button></div></div>`;
   }
 }
+/* ===== v0.81 · 셀 안을 고치는 층 =====
+   섹션 26종은 거의 전부 '박아 넣은 HTML 문자열' 이다. 그래서 원본을 데이터 모델로 갈아엎는 대신,
+   그려 놓은 DOM 위에 세 가지 덧칠을 얹는 방식을 택했다 — 항목 수 → 자리번호 → 고쳐 쓴 글자.
+   순서가 중요하다. 항목을 먼저 늘리고 줄여야 자리번호가 흔들리지 않는다. */
+
+/* 글자를 고칠 수 있는 최소 단위 = '자기 밑에 글자를 가진 다른 요소가 없는' 요소.
+   <p>안내 <b>강조</b></p> 같은 섞인 문단은 p 가 아니라 b 만 잡히지만,
+   대신 사용자가 글자를 고치다 구조를 지워 버리는 사고가 생기지 않는다. */
+function edUnits(cell){
+  const out=[];
+  cell.querySelectorAll('*').forEach(el=>{
+    if(el.namespaceURI&&el.namespaceURI.indexOf('svg')>=0)return;
+    const tn=el.tagName;
+    if(tn==='SVG'||tn==='USE'||tn==='INPUT'||tn==='TEXTAREA'||tn==='SELECT'||tn==='OPTION'||tn==='SCRIPT'||tn==='STYLE')return;
+    if(el.classList&&el.classList.contains('celltag'))return;
+    const t=el.textContent;
+    if(!t||!t.trim())return;
+    let deep=false;
+    el.querySelectorAll('*').forEach(d=>{if(!deep&&d.textContent&&d.textContent.trim())deep=true;});
+    if(deep)return;
+    out.push(el);
+  });
+  return out;
+}
+/* 되풀이 묶음 찾기 — 같은 꼴의 자식이 가장 많이 늘어선 컨테이너 하나.
+   카드 그리드·표 본문·FAQ 목록·메뉴가 모두 이 한 가지 규칙으로 잡힌다. */
+function repBox(cell){
+  let best=null,bn=1;
+  const sig=c=>c.tagName+'.'+(c.getAttribute('class')||'');
+  cell.querySelectorAll('*').forEach(el=>{
+    if(el.namespaceURI&&el.namespaceURI.indexOf('svg')>=0)return;
+    const ch=el.children;
+    if(ch.length<2)return;
+    const s0=sig(ch[0]);
+    for(let i=1;i<ch.length;i++)if(sig(ch[i])!==s0)return;
+    if(ch.length>bn){bn=ch.length;best=el;}
+  });
+  return best;
+}
+function applyCount(box,n){
+  const ch=Array.prototype.slice.call(box.children),base=ch.length;
+  if(n<base){for(let i=n;i<base;i++)box.removeChild(ch[i]);}
+  else if(n>base){for(let i=base;i<n;i++)box.appendChild(ch[i%base].cloneNode(true));}
+}
+/* 캔버스를 그린 직후 한 번 도는 덧칠. renderScreen 안에서만 부른다. */
+function applyEdits(s){
+  screenEl.querySelectorAll('.cell').forEach(cell=>{
+    const i=+cell.dataset.i;
+    const box=repBox(cell);
+    if(box){
+      cell.dataset.n0=box.children.length;
+      if(s.ct[i]!=null&&s.ct[i]!==box.children.length)applyCount(box,s.ct[i]);
+    }else delete cell.dataset.n0;
+    const ov=s.txt[i];
+    edUnits(cell).forEach((el,n)=>{
+      el.setAttribute('data-t',n);
+      if(ov&&ov[n]!=null){el.innerHTML=ov[n];el.classList.add('edited');}
+      /* 글자 옆의 아이콘·뱃지는 편집 대상이 아니다 — 섬으로 만들어 지워지지 않게 한다 */
+      Array.prototype.forEach.call(el.children,ch=>ch.setAttribute('contenteditable','false'));
+    });
+  });
+  setEditable(selIdx);
+}
+/* 고른 셀에서만 캐럿이 들어간다 — 피그마도 프레임을 고른 다음에야 텍스트가 열린다 */
+function setEditable(i){
+  screenEl.querySelectorAll('[data-t][contenteditable="true"]').forEach(el=>el.removeAttribute('contenteditable'));
+  if(i==null)return;
+  const cell=screenEl.querySelector(`.cell[data-i="${i}"]`);
+  if(!cell)return;
+  cell.querySelectorAll('[data-t]').forEach(el=>el.setAttribute('contenteditable','true'));
+}
 /* 선택 표시만 갈아 끼운다 — 캔버스를 다시 그리면 미리보기 안에서 열어 둔 FAQ·탭이 닫힌다. */
 function markSel(i){
   if(selIdx===i)return;
   selIdx=i;
   screenEl.querySelectorAll('.cell').forEach(c=>c.classList.toggle('sel',+c.dataset.i===i));
+  setEditable(i);
   renderScrNav();renderScrProps();
 }
 function renderScreen(id){
@@ -2519,10 +2636,14 @@ function renderScreen(id){
   const cells=s.secs.map((k,i)=>{
     const raw=SEC[k],mk=(typeof raw==='function')?raw(ctx):(raw||'');
     const nohead=(phAt>=0&&i>phAt&&HEADSEC.has(k))?' data-nohead':'';
-    return `<div class="cell${i===selIdx?' sel':''}" data-i="${i}" data-k="${k}"${nohead}${s.off[i]?' hidden':''}><span class="celltag">${(SEC_META[k]||{t:k}).t}</span>${mk}</div>`;
+    /* 변형은 셀에 건다 — 화면에도 같이 걸려 있으면 명시도가 같아 소스 순서가 이기고, 셀 설정이 무시된다 */
+    const lay=VARSEC.has(k)?` data-layout="${s.vr[i]||scrLay}"`:'';
+    return `<div class="cell${i===selIdx?' sel':''}" data-i="${i}" data-k="${k}"${nohead}${lay}${s.off[i]?' hidden':''}><span class="celltag">${(SEC_META[k]||{t:k}).t}</span>${mk}</div>`;
   }).join('');
   const zero=`<div class="cellzero"><p>이 화면에는 아직 섹션이 없습니다.<br>아래 버튼으로 첫 섹션을 올려보세요.</p><button class="btn btn-primary" data-scr="add"><svg class="i"><use href="#icon-action-add"/></svg>첫 섹션 추가</button></div>`;
   screenEl.innerHTML=`<div class="page"${isDoc?' data-doc':''}><div class="inner">${s.secs.length?cells:zero}<div class="celltail"><button class="celladd" data-scr="add"><svg class="i"><use href="#icon-action-add"/></svg>섹션 추가</button></div></div></div>`;
+  screenEl.removeAttribute('data-layout');
+  applyEdits(s);
   renderScrNav();renderScrProps();
 }
 /* 고르기 모달 — 화면 템플릿 / 섹션 */
@@ -2555,6 +2676,9 @@ document.addEventListener('keydown',e=>{
   if(e.key!=='Escape')return;
   const pm=document.getElementById('pickMask');
   if(pm.classList.contains('on')){closePick();return;}
+  /* 글자를 고치는 중이면 먼저 편집에서 빠져나온다 — 한 번 더 누르면 선택이 풀린다 */
+  const ae=document.activeElement;
+  if(ae&&ae.getAttribute&&ae.getAttribute('contenteditable')==='true'){ae.blur();return;}
   if(html.getAttribute('data-view')==='screen'&&selIdx!=null)markSel(null);
 });
 /* ---- 좌측 패널: 페이지 이동 · 스크린 추가/삭제 · 레이어 선택/표시/정렬 ---- */
@@ -2606,7 +2730,7 @@ lyrList.addEventListener('drop',e=>{
 /* ---- 우측 속성 패널: 선택한 섹션(없으면 화면)에 거는 동작 ---- */
 document.querySelector('.inspector').addEventListener('click',e=>{
   const lb=e.target.closest('[data-sp-lay] button');
-  if(lb){screenEl.setAttribute('data-layout',lb.dataset.val);lb.parentNode.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===lb));return;}
+  if(lb){const s0=screens.find(x=>x.id===curScr);if(s0&&selIdx!=null){scrOff(s0);s0.vr[selIdx]=lb.dataset.val;renderScreen(s0.id);}return;}
   const b=e.target.closest('[data-sp]');if(!b)return;
   const c=b.dataset.sp;
   if(c==='tpl'){openTplPick();return;}
@@ -2621,6 +2745,17 @@ document.querySelector('.inspector').addEventListener('click',e=>{
   else if(c==='dup'){secDup(s,i);selIdx=i+1;}
   else if(c==='secdel'){secDel(s,i);selIdx=null;}
   else if(c==='show'){scrOff(s)[i]=(b.dataset.val==='off');}
+  else if(c==='txtrst'){s.txt[i]=null;}
+  else if(c==='vrrst'){s.vr[i]=null;}
+  else if(c==='ctrst'){s.ct[i]=null;}
+  else if(c==='cntup'||c==='cntdn'){
+    const cel=screenEl.querySelector(`.cell[data-i="${i}"]`);
+    const n0=cel?+(cel.dataset.n0||0):0;if(!n0)return;
+    const cur=(s.ct[i]!=null)?s.ct[i]:n0;
+    const nx=cur+(c==='cntup'?1:-1);
+    if(nx<1||nx>16)return;
+    s.ct[i]=(nx===n0)?null:nx;/* 원래 개수로 돌아오면 '정하지 않음' 으로 되돌린다 */
+  }
   else return;
   renderScreen(s.id);
 });
@@ -2628,7 +2763,9 @@ document.querySelector('.inspector').addEventListener('click',e=>{
 screenEl.addEventListener('click',e=>{
   const s=screens.find(x=>x.id===curScr);if(!s)return;
   if(e.target.closest('[data-scr="add"]')){openSecPick(null);return;}
-  const fq=e.target.closest('.fq');if(fq){fq.parentElement.classList.toggle('open');markSel(cellIx(fq));return;}
+  /* 질문 글자를 고치려고 누른 클릭이 아코디언을 여닫으면 안 된다 — 편집이 열려 있으면 캐럿만 놓는다.
+     칩·탭·페이지 번호는 눌러도 다시 그리지 않으므로 선택 표시와 캐럿이 함께 살아 있어도 문제가 없다. */
+  const fq=e.target.closest('.fq');if(fq){if(!edUnit(e.target))fq.parentElement.classList.toggle('open');markSel(cellIx(fq));return;}
   const seg=e.target.closest('.fchip,.ptabs button,.pg,.fcard,.price');
   if(seg&&(seg.classList.contains('fchip')||seg.closest('.ptabs')||seg.classList.contains('pg'))){
     const wrap=seg.parentElement;
@@ -2641,6 +2778,41 @@ screenEl.addEventListener('click',e=>{
   markSel(cellIx(e.target));
 });
 function cellIx(t){const c=t.closest?t.closest('.cell'):null;return c?+c.dataset.i:null;}
+/* ---- 캔버스에서 글자 고쳐 쓰기 ---- */
+function edUnit(t){const el=t&&t.closest?t.closest('[data-t]'):null;return(el&&el.getAttribute('contenteditable')==='true')?el:null;}
+screenEl.addEventListener('input',e=>{
+  const el=edUnit(e.target);if(!el)return;
+  const s=screens.find(x=>x.id===curScr);if(!s)return;
+  const cell=el.closest('.cell');if(!cell)return;
+  const i=+cell.dataset.i,n=+el.getAttribute('data-t');
+  scrOff(s);
+  const had=!!s.txt[i];
+  if(!s.txt[i])s.txt[i]={};
+  s.txt[i][n]=el.innerHTML;
+  el.classList.add('edited');
+  /* 되돌리기 버튼이 열려야 하는 첫 순간에만 패널을 다시 그린다 — 타자마다 그리면 낭비다 */
+  if(!had)renderScrProps();
+});
+/* 비워 버린 칸은 원래 문구로 되돌린다 — 빈 칸만 남으면 무엇을 지웠는지 알 수 없게 된다 */
+screenEl.addEventListener('focusout',e=>{
+  const el=e.target&&e.target.closest?e.target.closest('[data-t]'):null;if(!el)return;
+  if(el.textContent&&el.textContent.trim())return;
+  const s=screens.find(x=>x.id===curScr);if(!s)return;
+  const cell=el.closest('.cell');if(!cell)return;
+  const i=+cell.dataset.i,n=+el.getAttribute('data-t');
+  if(s.txt[i]&&s.txt[i][n]!=null){delete s.txt[i][n];if(!Object.keys(s.txt[i]).length)s.txt[i]=null;renderScreen(s.id);}
+});
+screenEl.addEventListener('keydown',e=>{
+  const el=edUnit(e.target);if(!el)return;
+  if(e.key==='Enter'){e.preventDefault();el.blur();}
+});
+/* 붙여넣기는 글자만 — 남의 서식이 들어오면 셀 안의 토큰 적용이 깨진다 */
+screenEl.addEventListener('paste',e=>{
+  const el=edUnit(e.target);if(!el)return;
+  e.preventDefault();
+  const t=(e.clipboardData||window.clipboardData).getData('text/plain').replace(/\s+/g,' ');
+  document.execCommand('insertText',false,t);
+});
 
 /* ================= 커스텀 브랜드 (시드 → 램프 자동 생성 · 인제스트 지점) ================= */
 let customBrand=null;
