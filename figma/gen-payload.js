@@ -209,7 +209,10 @@ for (const [name, d] of Object.entries(T.typography)) {
     fontWeight: d.weight,
     fontSize: d.size,
     lineHeight: { unit: 'PIXELS', value: d.lineHeight },
-    letterSpacing: { unit: 'PERCENT', value: d.letterSpacing }
+    // 자간은 px 다. tokens.json 은 단위를 적지 않는데, 같은 자리에 있는 size·lineHeight 가
+    // 전부 px 이고 CSS letter-spacing 은 %를 아예 받지 않는다. %로 읽으면 -0.4% of 40px
+    // = -0.16px 로 사실상 0이 되어 토큰이 무의미해진다. px 이어야 변수 바인딩도 가능하다.
+    letterSpacing: { unit: 'PIXELS', value: d.letterSpacing }
   });
 }
 // 로드해야 할 폰트 조합 — 플러그인이 createTextStyle 전에 loadFontAsync 로 미리 받아야 한다

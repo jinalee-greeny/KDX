@@ -46,6 +46,49 @@ python3 figma/parity-check.py                   # 구 01~06.js 가 만들던 것
 | `styles` | 텍스트 44 · 이펙트 6 · 미리 로드할 폰트 조합 4 |
 | `components` | 23개 컴포넌트셋의 variantAxes · tokenBindings · layout |
 
+## 새 파일용 7컬렉션 배치 — `relayout-payload.js`
+
+`build-payload.json`은 **지금 있는 파일**(5컬렉션)을 갱신하는 용도다.
+빈 파일에 처음부터 지을 때는 배치가 다르다 — `relayout-payload.js`가 그 변환을 맡는다.
+
+```
+Scale           → Primitive
+Brand           → Brand
+Semantic(COLOR) → Semantic/color
+Semantic(FLOAT) → Semantic/dimension
+(신규)          → Semantic/typo      ← tokens.json 의 typography 에서 합성
+Radius          → Radius
+Web             → Web
+```
+
+컬렉션 이름에 슬래시를 넣으면 Figma 가 `Semantic` 그룹 아래로 묶어 준다.
+**화면상으로는 4칸으로 보이지만 실제 컬렉션은 7개다** — Figma 컬렉션은 모드축을 하나만 가지므로
+Radius(sharp/default/rounded)와 Web(mobile/tablet/desktop)은 한 컬렉션에 같이 못 산다.
+
+`Semantic/typo`는 이 단계에서 새로 생긴다. `tokens.json`의 타이포 키는 굵기가 마지막 마디에 붙어 있는데
+(`body/md/400`), 굵기를 떼면 **27개 역할**이 남고 같은 역할 안에서 size·lineHeight·letterSpacing이
+굵기마다 달라지는 경우가 하나도 없다 — 그래서 굵기 없는 변수 81개(27×3)로 접힌다.
+굵기는 텍스트 스타일 이름에만 남는다.
+
+```bash
+node figma/relayout-payload.js       # → figma/build-payload.split7.json (386개)
+node figma/validate-payload.js --in figma/build-payload.split7.json
+```
+
+이관표(`migrations`)는 넣지 않는다. 빈 파일에는 옮길 기존 변수가 없다.
+
+## 자간은 px 다 (2026-08-05 교정)
+
+`tokens.json`은 단위를 적지 않는다. 초기 생성기는 `letterSpacing`만 `PERCENT`로 가정했는데 이게 틀렸다.
+
+- 같은 자리의 `size`·`lineHeight`는 전부 px다. 자간만 다른 단위일 이유가 없다.
+- **CSS `letter-spacing`은 %를 받지 않는다** — %로 읽으면 데모가 렌더할 수 없는 값이 된다.
+- %로 읽으면 `-0.4%` × 40px = -0.16px 로 눈에 안 보인다. px로 읽어야 사이즈 대비 약 -1%의 의미 있는 조임이 된다.
+- Figma는 바인딩된 FLOAT 변수를 **px로 해석**한다. %인 동안에는 `Semantic/typo`의 자간 변수 27개를 아무도 못 쓴다.
+
+쓰이는 값은 `-0.4`·`-0.2`·`0` 세 가지뿐이고 **소수다**. 바뀐 건 단위지 값이 아니다 —
+진짜 정수로 반올림하면 셋 다 0이 되어 자간 토큰이 사라진다.
+
 ## 이관표를 왜 따로 두는가
 
 지금 Figma 파일의 변수는 옛 이름이고 Button·Input·Card 레이어가 거기 묶여 있다.
