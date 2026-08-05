@@ -2,7 +2,7 @@
   "$meta": {
     "payloadVersion": 1,
     "generator": "figma/gen-payload.js",
-    "tokensVersion": "0.77",
+    "tokensVersion": "0.78",
     "schemaVersion": "0.78",
     "schemaSource": "demo/index.html 내장 SCHEMA",
     "brand": {
@@ -106,7 +106,7 @@
       {
         "collection": "Radius",
         "from": "radius/2xs",
-        "to": "radius/xxs"
+        "to": "radius/undefined"
       },
       {
         "collection": "Radius",
@@ -126,7 +126,7 @@
       {
         "collection": "Radius",
         "from": "radius/2xl",
-        "to": "radius/xxl"
+        "to": "radius/undefined"
       }
     ],
     "variableSplits": [
@@ -330,7 +330,7 @@
       },
       {
         "from": "Radius 이전의 Scale/radius/2xs",
-        "now": "Radius/radius/xxs"
+        "now": "Radius/radius/2xs"
       },
       {
         "from": "Radius 이전의 Scale/radius/xs",
@@ -354,7 +354,7 @@
       },
       {
         "from": "Radius 이전의 Scale/radius/2xl",
-        "now": "Radius/radius/xxl"
+        "now": "Radius/radius/2xl"
       },
       {
         "from": "Radius 이전의 Scale/radius/full",
@@ -363,10 +363,6 @@
     ],
     "styleRenames": {
       "text": [
-        {
-          "from": "display/2xl/700",
-          "to": "display/xxl/700"
-        },
         {
           "from": "display/l/700",
           "to": "display/lg/700"
@@ -394,14 +390,6 @@
         {
           "from": "heading/s/600",
           "to": "heading/sm/600"
-        },
-        {
-          "from": "body/2xl/400",
-          "to": "body/xxl/400"
-        },
-        {
-          "from": "body/2xl/600",
-          "to": "body/xxl/600"
         },
         {
           "from": "body/l/400",
@@ -5093,10 +5081,10 @@
         "CORNER_RADIUS"
       ],
       "codeSyntax": {
-        "WEB": "var(--radius-xxs)"
+        "WEB": "var(--radius-2xs)"
       },
       "collection": "Radius",
-      "name": "radius/xxs",
+      "name": "radius/2xs",
       "type": "FLOAT",
       "values": {
         "sharp": {
@@ -5243,10 +5231,10 @@
         "CORNER_RADIUS"
       ],
       "codeSyntax": {
-        "WEB": "var(--radius-xxl)"
+        "WEB": "var(--radius-2xl)"
       },
       "collection": "Radius",
-      "name": "radius/xxl",
+      "name": "radius/2xl",
       "type": "FLOAT",
       "values": {
         "sharp": {
@@ -6014,7 +6002,7 @@
     ],
     "text": [
       {
-        "name": "display/xxl/700",
+        "name": "display/2xl/700",
         "fontFamily": "Pretendard Variable",
         "fontStyle": "Bold",
         "fontWeight": 700,
@@ -6149,7 +6137,7 @@
         }
       },
       {
-        "name": "body/xxl/400",
+        "name": "body/2xl/400",
         "fontFamily": "Pretendard Variable",
         "fontStyle": "Regular",
         "fontWeight": 400,
@@ -6164,7 +6152,7 @@
         }
       },
       {
-        "name": "body/xxl/600",
+        "name": "body/2xl/600",
         "fontFamily": "Pretendard Variable",
         "fontStyle": "SemiBold",
         "fontWeight": 600,
@@ -8033,13 +8021,13 @@
       "variantCount": 3,
       "layout": {
         "fill": "comp/fill/neutral/tertiary",
-        "cornerRadius": "shape variant에 따라 radius/xxs(Text)·radius/sm(Rectangle)·radius/full(Circle)"
+        "cornerRadius": "shape variant에 따라 radius/2xs(Text)·radius/sm(Rectangle)·radius/full(Circle)"
       },
       "tokenBindings": {
         "fill": "comp/fill/neutral/tertiary",
         "shape": {
           "Text": {
-            "cornerRadius": "radius/xxs"
+            "cornerRadius": "radius/2xs"
           },
           "Rectangle": {
             "cornerRadius": "radius/sm"

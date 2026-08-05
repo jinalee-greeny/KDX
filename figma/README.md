@@ -40,7 +40,7 @@ python3 figma/parity-check.py                   # 구 01~06.js 가 만들던 것
 | 키 | 내용 |
 |---|---|
 | `$meta` | 버전·브랜드 연결 여부·정책(삭제 금지/고아 보고/제자리 개명/dry-run 필수)·경고 |
-| `migrations` | v0.4 → v0.77 이관표. 개명 21 · 분할 11 · 이름충돌 4 · 컬렉션 이동 22 · 스타일 개명 38 |
+| `migrations` | v0.4 → v0.77 이관표. 개명 21 · 분할 11 · 이름충돌 4 · 컬렉션 이동 22 · 스타일 개명 35 |
 | `collections` | Scale · Brand · Semantic · Radius(3모드) · Web(3모드) |
 | `variables` | 305개. 이름·타입·모드별 값 또는 별칭·scopes·codeSyntax |
 | `styles` | 텍스트 44 · 이펙트 6 · 미리 로드할 폰트 조합 4 |

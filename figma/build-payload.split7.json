@@ -2,7 +2,7 @@
  "$meta": {
   "payloadVersion": 1,
   "generator": "figma/relayout-payload.js (figma/gen-payload.js 산출물 재배치)",
-  "tokensVersion": "0.77",
+  "tokensVersion": "0.78",
   "schemaVersion": "0.78",
   "schemaSource": "demo/index.html 내장 SCHEMA",
   "brand": {
@@ -4604,7 +4604,7 @@
   },
   {
    "collection": "Radius",
-   "name": "radius/xxs",
+   "name": "radius/2xs",
    "type": "FLOAT",
    "values": {
     "sharp": {
@@ -4624,7 +4624,7 @@
     "CORNER_RADIUS"
    ],
    "codeSyntax": {
-    "WEB": "var(--radius-xxs)"
+    "WEB": "var(--radius-2xs)"
    }
   },
   {
@@ -4754,7 +4754,7 @@
   },
   {
    "collection": "Radius",
-   "name": "radius/xxl",
+   "name": "radius/2xl",
    "type": "FLOAT",
    "values": {
     "sharp": {
@@ -4774,7 +4774,7 @@
     "CORNER_RADIUS"
    ],
    "codeSyntax": {
-    "WEB": "var(--radius-xxl)"
+    "WEB": "var(--radius-2xl)"
    }
   },
   {
@@ -5498,7 +5498,7 @@
   },
   {
    "collection": "Semantic/typo",
-   "name": "display/xxl/size",
+   "name": "display/2xl/size",
    "type": "FLOAT",
    "values": {
     "Value": {
@@ -5510,12 +5510,12 @@
     "FONT_SIZE"
    ],
    "codeSyntax": {
-    "WEB": "var(--type-display-xxl-size)"
+    "WEB": "var(--type-display-2xl-size)"
    }
   },
   {
    "collection": "Semantic/typo",
-   "name": "display/xxl/lineHeight",
+   "name": "display/2xl/lineHeight",
    "type": "FLOAT",
    "values": {
     "Value": {
@@ -5527,12 +5527,12 @@
     "LINE_HEIGHT"
    ],
    "codeSyntax": {
-    "WEB": "var(--type-display-xxl-lineHeight)"
+    "WEB": "var(--type-display-2xl-lineHeight)"
    }
   },
   {
    "collection": "Semantic/typo",
-   "name": "display/xxl/letterSpacing",
+   "name": "display/2xl/letterSpacing",
    "type": "FLOAT",
    "values": {
     "Value": {
@@ -5544,7 +5544,7 @@
     "LETTER_SPACING"
    ],
    "codeSyntax": {
-    "WEB": "var(--type-display-xxl-letterSpacing)"
+    "WEB": "var(--type-display-2xl-letterSpacing)"
    }
   },
   {
@@ -5804,7 +5804,7 @@
   },
   {
    "collection": "Semantic/typo",
-   "name": "body/xxl/size",
+   "name": "body/2xl/size",
    "type": "FLOAT",
    "values": {
     "Value": {
@@ -5816,12 +5816,12 @@
     "FONT_SIZE"
    ],
    "codeSyntax": {
-    "WEB": "var(--type-body-xxl-size)"
+    "WEB": "var(--type-body-2xl-size)"
    }
   },
   {
    "collection": "Semantic/typo",
-   "name": "body/xxl/lineHeight",
+   "name": "body/2xl/lineHeight",
    "type": "FLOAT",
    "values": {
     "Value": {
@@ -5833,12 +5833,12 @@
     "LINE_HEIGHT"
    ],
    "codeSyntax": {
-    "WEB": "var(--type-body-xxl-lineHeight)"
+    "WEB": "var(--type-body-2xl-lineHeight)"
    }
   },
   {
    "collection": "Semantic/typo",
-   "name": "body/xxl/letterSpacing",
+   "name": "body/2xl/letterSpacing",
    "type": "FLOAT",
    "values": {
     "Value": {
@@ -5850,7 +5850,7 @@
     "LETTER_SPACING"
    ],
    "codeSyntax": {
-    "WEB": "var(--type-body-xxl-letterSpacing)"
+    "WEB": "var(--type-body-2xl-letterSpacing)"
    }
   },
   {
@@ -6895,7 +6895,7 @@
   ],
   "text": [
    {
-    "name": "display/xxl/700",
+    "name": "display/2xl/700",
     "fontFamily": "Pretendard Variable",
     "fontStyle": "Bold",
     "fontWeight": 700,
@@ -7030,7 +7030,7 @@
     }
    },
    {
-    "name": "body/xxl/400",
+    "name": "body/2xl/400",
     "fontFamily": "Pretendard Variable",
     "fontStyle": "Regular",
     "fontWeight": 400,
@@ -7045,7 +7045,7 @@
     }
    },
    {
-    "name": "body/xxl/600",
+    "name": "body/2xl/600",
     "fontFamily": "Pretendard Variable",
     "fontStyle": "SemiBold",
     "fontWeight": 600,
@@ -8914,13 +8914,13 @@
    "variantCount": 3,
    "layout": {
     "fill": "comp/fill/neutral/tertiary",
-    "cornerRadius": "shape variant에 따라 radius/xxs(Text)·radius/sm(Rectangle)·radius/full(Circle)"
+    "cornerRadius": "shape variant에 따라 radius/2xs(Text)·radius/sm(Rectangle)·radius/full(Circle)"
    },
    "tokenBindings": {
     "fill": "comp/fill/neutral/tertiary",
     "shape": {
      "Text": {
-      "cornerRadius": "radius/xxs"
+      "cornerRadius": "radius/2xs"
      },
      "Rectangle": {
       "cornerRadius": "radius/sm"

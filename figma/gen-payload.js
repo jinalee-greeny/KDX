@@ -312,7 +312,9 @@ for (const [name, c] of Object.entries(S.components)) {
 // 지금 Figma 파일의 278개 변수는 옛 이름이고, Button·Input·Card 레이어가 거기 묶여 있다.
 // 플러그인은 이 표를 보고 '제자리 개명'을 해야 기존 바인딩이 살아남는다.
 // 표에 없는 이름은 신규 생성, 페이로드에 없는 기존 변수는 고아로 보고만 한다(삭제 금지).
-const SZ = { '2xs': 'xxs', 's': 'sm', 'm': 'md', 'l': 'lg', '2xl': 'xxl' };
+// 구 스크립트는 한 글자 약칭(s·m·l)을 썼다. 2xs·2xl 은 그때도 지금도 같은 이름이므로 표에 없다
+// — 사이즈 스케일은 xs~xl 을 벗어나면 문자를 겹치지 않고 숫자를 앞에 붙인다(2xl·2xs).
+const SZ = { 's': 'sm', 'm': 'md', 'l': 'lg' };
 const variableRenames = [];
 const variableSplits  = [];
 const R = (collection, from, to) => variableRenames.push({ collection, from, to });
