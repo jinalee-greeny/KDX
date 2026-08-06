@@ -961,6 +961,11 @@ async function applyComponents(payload, push, problems) {
       catch (e) { sayOnce(node.name + ' — ' + what + ' 적용 실패: ' + (e && e.message ? e.message : String(e))); return undefined; }
     };
 
+    /* 폰트를 무엇보다 먼저 확보한다. 폰트가 안 불러와진 텍스트 노드는 글자뿐 아니라
+       textAutoResize·크기 같은 '글자 모양에 영향을 주는 속성 전부'를 거절한다.
+       실제 파일에서 set_textAutoResize 한 줄 때문에 23 세트가 통째로 죽었다. */
+    if (node.type === 'TEXT') await ensureFont(node.fontName);
+
     // 레이아웃 먼저 — 크기 규칙이 여기에 매인다
     if (p.layout !== undefined && 'layoutMode' in node)
       T('레이아웃', () => { node.layoutMode = p.layout === 'NONE' ? 'NONE' : p.layout; });
@@ -1077,7 +1082,11 @@ async function applyComponents(payload, push, problems) {
       if (p.textStyle !== undefined) {
         const k = valueKind(p.textStyle);
         const s = k.kind === 'style' ? tByName.get(k.name) : null;
-        if (s) { try { await node.setTextStyleIdAsync(s.id); } catch (e) { sayOnce(node.name + ' 텍스트 스타일 — ' + e.message); } }
+        if (s) {
+          try { await node.setTextStyleIdAsync(s.id); } catch (e) { sayOnce(node.name + ' 텍스트 스타일 — ' + e.message); }
+          // 스타일이 폰트를 바꾼다 — 바뀐 폰트를 곧바로 다시 불러온다
+          await ensureFont(node.fontName);
+        }
         else if (k.kind === 'style') sayOnce('컴포넌트 — 없는 텍스트 스타일 ' + k.name);
       }
       if (p.chars !== undefined) {
@@ -1153,9 +1162,12 @@ async function applyComponents(payload, push, problems) {
 
     const parentAuto = 'layoutMode' in parent && parent.layoutMode !== 'NONE';
     if (node.type === 'TEXT') {
-      // 새 텍스트 노드는 파일 기본 폰트를 쓴다 — 불러오기 전에는 characters 를 못 쓴다
-      node.textAutoResize = 'WIDTH_AND_HEIGHT';
-      if (await ensureFont(node.fontName)) { try { node.characters = ' '; } catch (e) { /* 아래에서 다시 알린다 */ } }
+      /* 새 텍스트 노드는 파일 기본 폰트(보통 Inter Regular)로 시작한다.
+         그 폰트를 불러오기 전에는 textAutoResize 조차 쓸 수 없다 — 반드시 폰트가 먼저다. */
+      if (await ensureFont(node.fontName)) {
+        try { node.textAutoResize = 'WIDTH_AND_HEIGHT'; } catch (e) { /* 아래에서 다시 잡는다 */ }
+        try { node.characters = ' '; } catch (e) { /* 아래에서 다시 알린다 */ }
+      }
     }
     await applyProps(node, props, parentAuto, parentBox);
 
