@@ -597,6 +597,9 @@ async function applyStyles(payload, push, problems) {
  */
 
 const BUILD_PAGE = '[Freesm] Components';
+/* 세트를 담는 세로 오토레이아웃 프레임. 자리 계산을 Figma 에 맡겨야 겹치지 않는다 —
+   set.height 를 읽어 다음 y 를 더하는 방식은 세트가 자기 크기를 다시 맞추는 순간 어긋난다. */
+const COMP_HOLDER = '[Freesm] 컴포넌트 세트';
 
 /* 값 해석 — 페이로드 안에서 별칭을 따라가 숫자를 얻는다.
    노드는 먼저 크기를 가져야 하므로, 변수를 걸기 전에 쓸 초깃값이 필요하다. */
@@ -714,21 +717,24 @@ function allCombos(build) {
   return rows;
 }
 
-/* combineAsVariants 는 자식 위치를 잡아 주지 않는다 — 변형이 전부 (0,0) 에 겹쳐 쌓이고
-   세트 크기도 변형 한 개짜리로 접힌다. 마지막 축을 열로 두고 격자로 편다.
-   allCombos 가 마지막 축을 가장 빠르게 돌리므로 자식 순서가 곧 행 우선 순서다. */
-function layoutVariants(set, build, gap, pad) {
+/* combineAsVariants 는 자식 위치를 잡아 주지 않는다 — 만들어 둔 변형이 전부 (0,0) 이라
+   세트 안에서 그대로 겹쳐 쌓인다. 그래서 두 겹으로 막는다.
+   1) 합치기 전에 절대좌표 격자로 편다 (세트가 처음부터 올바른 크기로 태어난다)
+   2) 합친 뒤 세트 자체에 줄바꿈 오토레이아웃을 건다 — 배치를 Figma 가 맡으면
+      변형끼리 겹치는 일 자체가 불가능해진다. 막히면 1) 의 격자가 그대로 남는다. */
+function gridVariants(kids, build, gap, pad) {
   const G = gap === undefined ? 40 : gap, P = pad === undefined ? 32 : pad;
-  const kids = set.children.slice();
-  if (!kids.length) return;
+  if (!kids.length) return { w: 1, h: 1, cols: 1, maxW: 1 };
   const last = build.order[build.order.length - 1];
   const cols = Math.max(1, Math.min(((build.axes || {})[last] || []).length || kids.length, kids.length));
   const rows = Math.ceil(kids.length / cols);
   const colW = new Array(cols).fill(0), rowH = new Array(rows).fill(0);
+  let maxW = 0;
   kids.forEach((k, i) => {
     const c = i % cols, r = Math.floor(i / cols);
     colW[c] = Math.max(colW[c], k.width);
     rowH[r] = Math.max(rowH[r], k.height);
+    maxW = Math.max(maxW, k.width);
   });
   const xs = [], ys = [];
   let acc = P;
@@ -737,9 +743,33 @@ function layoutVariants(set, build, gap, pad) {
   acc = P;
   for (let r = 0; r < rows; r++) { ys.push(acc); acc += rowH[r] + G; }
   const totalH = acc - G + P;
-  kids.forEach((k, i) => { k.x = xs[i % cols]; k.y = ys[Math.floor(i / cols)]; });
-  try { set.resizeWithoutConstraints(Math.max(totalW, 1), Math.max(totalH, 1)); }
-  catch (e) { try { set.resize(Math.max(totalW, 1), Math.max(totalH, 1)); } catch (e2) { /* 무시 */ } }
+  kids.forEach((k, i) => {
+    try { k.x = xs[i % cols]; k.y = ys[Math.floor(i / cols)]; } catch (e) { /* 무시 */ }
+  });
+  return { w: Math.max(totalW, 1), h: Math.max(totalH, 1), cols: cols, maxW: Math.max(maxW, 1), gap: G, pad: P };
+}
+
+/* 세트를 Figma 가 관리하는 줄바꿈 오토레이아웃으로 바꾼다. 성공하면 true. */
+function wrapSet(set, box) {
+  try {
+    set.layoutMode = 'HORIZONTAL';
+    set.layoutWrap = 'WRAP';
+    set.itemSpacing = box.gap;
+    set.counterAxisSpacing = box.gap;
+    set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = box.pad;
+    set.counterAxisAlignItems = 'MIN';
+    set.primaryAxisSizingMode = 'FIXED';
+    // 가장 넓은 변형 기준으로 한 줄 폭을 잡는다 — 좁은 변형은 한 줄에 더 들어가도 무방하다
+    const rowW = box.pad * 2 + box.cols * box.maxW + (box.cols - 1) * box.gap;
+    set.resize(Math.max(rowW, 1), Math.max(set.height, 1));
+    set.counterAxisSizingMode = 'AUTO';
+    return true;
+  } catch (e) {
+    try { set.layoutMode = 'NONE'; } catch (e2) { /* 무시 */ }
+    try { set.resizeWithoutConstraints(box.w, box.h); }
+    catch (e2) { try { set.resize(box.w, box.h); } catch (e3) { /* 무시 */ } }
+    return false;
+  }
 }
 
 /* ---------- dry-run ---------- */
@@ -773,7 +803,15 @@ async function dryRunComponents(payload) {
   // 안 열고 .children 을 만지면 그 자리에서 던진다 — dry-run 이 통째로 죽는다.
   const page = figma.root.children.find((p) => p.name === BUILD_PAGE);
   const onPage = new Map();
-  if (page) { await page.loadAsync(); for (const c of page.children) onPage.set(c.name, c); }
+  if (page) {
+    await page.loadAsync();
+    for (const c of page.children) {
+      onPage.set(c.name, c);
+      // 지난 실행의 세트는 담는 프레임 안에 들어 있다 — 그 안까지 본다
+      if (c.type === 'FRAME' && c.name === COMP_HOLDER)
+        for (const g of c.children) onPage.set(g.name, g);
+    }
+  }
 
   for (const b of builds) {
     out.totalVariants += b.variantCount;
@@ -799,7 +837,7 @@ async function dryRunComponents(payload) {
 async function applyComponents(payload, push, problems) {
   const builds = payload.componentBuilds || [];
   const meta = payload.$componentBuilds || {};
-  const rep = { sets: 0, variants: 0, renamedPrev: 0, skipped: 0 };
+  const rep = { sets: 0, variants: 0, renamedPrev: 0, skipped: 0, lostVariants: 0 };
   if (!builds.length) { push('skip', '빌드표가 없어 컴포넌트 단계를 건너뜁니다.'); return rep; }
 
   const st = await readState();
@@ -851,25 +889,51 @@ async function applyComponents(payload, push, problems) {
   else await page.loadAsync();   // dynamic-page — 열지 않으면 children 접근이 던진다
   await figma.setCurrentPageAsync(page);
 
-  /* 같은 이름이 이 페이지에 이미 있으면 지우지 않고 옆으로 밀어 둔다.
-     기존 인스턴스는 옛 컴포넌트를 계속 가리키므로 깨지지 않는다. */
+  /* 세트를 담을 세로 오토레이아웃 프레임을 확보한다.
+     세트를 페이지에 직접 놓고 y 를 더해 가면, 세트가 자기 크기를 다시 맞추는 순간
+     계산이 어긋나 아래 세트를 덮어쓴다. 프레임 안에 넣으면 간격을 Figma 가 지킨다. */
+  let holder = page.children.find((c) => c.type === 'FRAME' && c.name === COMP_HOLDER) || null;
+  const holderIsNew = !holder;
+  if (!holder) {
+    holder = figma.createFrame();
+    holder.name = COMP_HOLDER;
+    page.appendChild(holder);
+  }
+  try {
+    holder.layoutMode = 'VERTICAL';
+    holder.layoutWrap = 'NO_WRAP';
+    holder.primaryAxisSizingMode = 'AUTO';
+    holder.counterAxisSizingMode = 'AUTO';
+    holder.counterAxisAlignItems = 'MIN';
+    holder.itemSpacing = 120;
+    holder.paddingLeft = holder.paddingRight = holder.paddingTop = holder.paddingBottom = 64;
+    holder.fills = [];
+    holder.clipsContent = false;
+  } catch (e) { problems.push('컴포넌트 담을 프레임 설정 실패 — ' + e.message); }
+  if (holderIsNew) {
+    // 기존 내용 오른쪽에서 시작한다
+    let ox = 0;
+    for (const c of page.children) if (c !== holder) ox = Math.max(ox, c.x + c.width + 160);
+    try { holder.x = ox; holder.y = 0; } catch (e) { /* 무시 */ }
+  }
+
+  /* 같은 이름이 이미 있으면 지우지 않고 이름만 밀어 둔다.
+     기존 인스턴스는 옛 컴포넌트를 계속 가리키므로 깨지지 않는다.
+     지난 실행의 세트는 담는 프레임 안에 있으므로 그 안까지 본다. */
   {
     const want = new Set(builds.map((b) => b.name));
-    for (const c of page.children.slice()) {
+    const scan = page.children.concat(holder.children);
+    const taken = new Set(scan.map((x) => x.name));
+    for (const c of scan) {
       if ((c.type !== 'COMPONENT_SET' && c.type !== 'COMPONENT') || !want.has(c.name)) continue;
       let n = c.name + ' — 이전', i = 2;
-      const taken = new Set(page.children.map((x) => x.name));
       while (taken.has(n)) { n = c.name + ' — 이전 ' + i; i++; }
       c.name = n;
+      taken.add(n);
       rep.renamedPrev++;
       push('ok', '기존 컴포넌트 개명 — ' + n + ' (지우지 않았습니다)');
     }
   }
-
-  /* 놓을 자리 — 기존 내용 오른쪽에서 시작한다 */
-  let originX = 0;
-  for (const c of page.children) originX = Math.max(originX, c.x + c.width + 160);
-  let cursorY = 0;
 
   /* 같은 토큰이 136개 변형에서 반복해 실패한다 — 한 번만 알린다 */
   const said = new Set();
@@ -890,21 +954,29 @@ async function applyComponents(payload, push, problems) {
       return null;
     };
 
+    /* 한 속성이 던져도 변형 하나가 통째로 날아가지 않게 감싼다.
+       Figma 는 노드 종류·부모 상태에 따라 같은 속성을 받기도 하고 거절하기도 한다. */
+    const T = (what, fn) => {
+      try { return fn(); }
+      catch (e) { sayOnce(node.name + ' — ' + what + ' 적용 실패: ' + (e && e.message ? e.message : String(e))); return undefined; }
+    };
+
     // 레이아웃 먼저 — 크기 규칙이 여기에 매인다
-    if (p.layout !== undefined && 'layoutMode' in node) node.layoutMode = p.layout === 'NONE' ? 'NONE' : p.layout;
+    if (p.layout !== undefined && 'layoutMode' in node)
+      T('레이아웃', () => { node.layoutMode = p.layout === 'NONE' ? 'NONE' : p.layout; });
     const auto = 'layoutMode' in node && node.layoutMode !== 'NONE';
     if (auto) {
-      if (p.alignPrimary) node.primaryAxisAlignItems = p.alignPrimary;
-      if (p.alignCounter) node.counterAxisAlignItems = p.alignCounter;
+      if (p.alignPrimary) T('주축 정렬', () => { node.primaryAxisAlignItems = p.alignPrimary; });
+      if (p.alignCounter) T('교차축 정렬', () => { node.counterAxisAlignItems = p.alignCounter; });
       for (const [key, fields] of [['pad', ['paddingLeft', 'paddingRight', 'paddingTop', 'paddingBottom']],
                                    ['padX', ['paddingLeft', 'paddingRight']],
                                    ['padY', ['paddingTop', 'paddingBottom']]]) {
         if (p[key] === undefined) continue;
         const k = valueKind(p[key]);
         const n = num(p[key]);
-        for (const f of fields) { node[f] = n === null ? 0 : n; if (k.kind === 'token') bindNum(node, f, k.name); }
+        for (const f of fields) T('여백 ' + f, () => { node[f] = n === null ? 0 : n; if (k.kind === 'token') bindNum(node, f, k.name); });
       }
-      if (p.gap !== undefined) { node.itemSpacing = num(p.gap) || 0; const k = valueKind(p.gap); if (k.kind === 'token') bindNum(node, 'itemSpacing', k.name); }
+      if (p.gap !== undefined) T('간격', () => { node.itemSpacing = num(p.gap) || 0; const k = valueKind(p.gap); if (k.kind === 'token') bindNum(node, 'itemSpacing', k.name); });
     }
 
     // 크기 — 숫자를 먼저, HUG 를 나중에.
@@ -939,8 +1011,8 @@ async function applyComponents(payload, push, problems) {
     };
     if (node.type === 'TEXT') {
       const wn = p.w !== undefined && !isHug(p.w), hn = p.h !== undefined && !isHug(p.h);
-      if (wn && hn) node.textAutoResize = 'NONE';
-      else if (wn) node.textAutoResize = 'HEIGHT';
+      if (wn && hn) T('글자 자동크기', () => { node.textAutoResize = 'NONE'; });
+      else if (wn) T('글자 자동크기', () => { node.textAutoResize = 'HEIGHT'; });
     }
     sizeNum('w', 'w', 'width', 'layoutSizingHorizontal');
     sizeNum('h', 'h', 'height', 'layoutSizingVertical');
@@ -965,29 +1037,29 @@ async function applyComponents(payload, push, problems) {
       if (p[key] === undefined || !('topLeftRadius' in node)) continue;
       const k = valueKind(p[key]);
       const n = num(p[key]);
-      for (const f of radiusFields[key]) { node[f] = n === null ? 0 : n; if (k.kind === 'token') bindNum(node, f, k.name); }
+      for (const f of radiusFields[key]) T('모서리 ' + f, () => { node[f] = n === null ? 0 : n; if (k.kind === 'token') bindNum(node, f, k.name); });
     }
 
     // 칠 · 선
-    if (p.fill !== undefined && 'fills' in node) {
+    if (p.fill !== undefined && 'fills' in node) T('칠', () => {
       const k = valueKind(p.fill);
       node.fills = k.kind === 'token' ? [solid(k.name)] : [];
-    }
-    if (p.border !== undefined && 'strokes' in node) {
+    });
+    if (p.border !== undefined && 'strokes' in node) T('선', () => {
       const k = valueKind(p.border);
       if (k.kind === 'token') {
         node.strokes = [solid(k.name)];
         if (node.strokeWeight === 0) node.strokeWeight = 1;
         try { node.strokeAlign = 'INSIDE'; } catch (e) { /* ellipse 등은 무시 */ }
       } else node.strokes = [];
-    }
-    if (p.strokeWeight !== undefined && 'strokeWeight' in node) {
+    });
+    if (p.strokeWeight !== undefined && 'strokeWeight' in node) T('선 두께', () => {
       const k = valueKind(p.strokeWeight);
       const n = num(p.strokeWeight);
-      if (n !== null) node.strokeWeight = n;
+      if (n !== null && n >= 0) node.strokeWeight = n;
       if (k.kind === 'token') bindNum(node, 'strokeWeight', k.name);
-    }
-    if (p.borderStyle === 'DASHED' && 'dashPattern' in node) node.dashPattern = [4, 4];
+    });
+    if (p.borderStyle === 'DASHED' && 'dashPattern' in node) T('점선', () => { node.dashPattern = [4, 4]; });
 
     // 그림자 — 이펙트 스타일로만 건다
     if (p.shadow !== undefined && 'setEffectStyleIdAsync' in node) {
@@ -1026,19 +1098,19 @@ async function applyComponents(payload, push, problems) {
       node.fills = [];
     }
 
-    if (p.visible !== undefined) node.visible = !!p.visible;
+    if (p.visible !== undefined) T('표시', () => { node.visible = !!p.visible; });
 
     // 원호 — 스피너. 표는 border+strokeWeight 로 적지만, Figma 에서 호를 선으로 그리면
     // 부채꼴 테두리가 되어 두 줄이 보인다. 그래서 도넛 채우기로 옮겨 그린다.
-    if (p.arc !== undefined && node.type === 'ELLIPSE') {
-      const sw = node.strokeWeight || 2;
+    if (p.arc !== undefined && node.type === 'ELLIPSE') T('원호', () => {
+      const sw = typeof node.strokeWeight === 'number' && node.strokeWeight > 0 ? node.strokeWeight : 2;
       const inner = Math.max(0, Math.min(0.95, 1 - (2 * sw) / Math.max(node.width, 1)));
       node.arcData = { startingAngle: -Math.PI / 2, endingAngle: -Math.PI / 2 + Math.PI * 2 * p.arc, innerRadius: inner };
       if (node.strokes.length) { node.fills = node.strokes.slice(); node.strokes = []; }
-    }
+    });
 
     // 절대 배치
-    if (p.absolute && parentBox) {
+    if (p.absolute && parentBox) T('절대 배치', () => {
       if (parentAuto) { try { node.layoutPositioning = 'ABSOLUTE'; } catch (e) { /* 무시 */ } }
       const PW = parentBox.w, PH = parentBox.h;
       const ratio = typeof p.ratio === 'number' ? p.ratio : null;
@@ -1056,9 +1128,10 @@ async function applyComponents(payload, push, problems) {
         const cx = node.x + node.width / 2, cy = node.y + node.height / 2;
         placeRotated(node, cx, cy, p.rotation);
       }
-    } else if (p.rotation) {
-      placeRotated(node, node.x + node.width / 2, node.y + node.height / 2, p.rotation);
-    }
+    });
+    // 절대 배치가 아닌데 회전만 있는 경우 (절대 배치 안에서는 위에서 이미 돌린다)
+    if (!(p.absolute && parentBox) && p.rotation)
+      T('회전', () => { placeRotated(node, node.x + node.width / 2, node.y + node.height / 2, p.rotation); });
   };
 
   /* ---- 슬롯 한 개를 만든다 ---- */
@@ -1076,7 +1149,7 @@ async function applyComponents(payload, push, problems) {
     } else node = figma.createFrame();
     node.name = spec.name;
     if (node.type === 'FRAME' && node.getPluginData('freesmIcon') !== '1') node.fills = [];
-    parent.appendChild(node);
+    parent.appendChild(node);   // 여기서 던지면 그 변형만 실패한다 (바깥에서 잡는다)
 
     const parentAuto = 'layoutMode' in parent && parent.layoutMode !== 'NONE';
     if (node.type === 'TEXT') {
@@ -1100,30 +1173,43 @@ async function applyComponents(payload, push, problems) {
   for (const b of builds) {
     let variants = [];
     let madeSet = null;
+    let lost = 0;
     try {
       for (const combo of allCombos(b)) {
-        const p = effectiveProps(b, combo);
-        const root = figma.createComponent();
-        root.name = b.order.map((ax) => ax + '=' + combo[ax]).join(', ');
-        root.fills = [];
-        page.appendChild(root);
-        await applyProps(root, p, false, null);
-        for (const spec of (b.slots || [])) {
-          const sp = mergeDelta(mergeDelta({}, spec), (p.slots || {})[spec.name]);
-          // HUG 루트는 슬롯이 붙을 때마다 커진다 — 절대 배치의 기준 상자를 매번 새로 잰다
-          await makeSlot(spec, sp, root, { w: root.width, h: root.height });
+        const vName = b.order.map((ax) => ax + '=' + combo[ax]).join(', ');
+        let root = null;
+        // 변형 하나가 터져도 세트 전체를 버리지 않는다 — 그 변형만 빼고 나머지는 살린다
+        try {
+          const p = effectiveProps(b, combo);
+          root = figma.createComponent();
+          root.name = vName;
+          root.fills = [];
+          page.appendChild(root);
+          await applyProps(root, p, false, null);
+          for (const spec of (b.slots || [])) {
+            const sp = mergeDelta(mergeDelta({}, spec), (p.slots || {})[spec.name]);
+            // HUG 루트는 슬롯이 붙을 때마다 커진다 — 절대 배치의 기준 상자를 매번 새로 잰다
+            await makeSlot(spec, sp, root, { w: root.width, h: root.height });
+          }
+          variants.push(root);
+        } catch (ev) {
+          lost++;
+          if (root) { try { if (!root.removed) root.remove(); } catch (e2) { /* 무시 */ } }
+          problems.push('컴포넌트 ' + b.name + ' · 변형 ' + vName + ' 실패 — ' + (ev && ev.message ? ev.message : String(ev)));
         }
-        variants.push(root);
       }
+      if (!variants.length) throw new Error('살아남은 변형이 없습니다');
 
+      // 합치기 전에 격자로 펴 둔다 — 세트가 처음부터 올바른 크기로 태어난다
+      const box = gridVariants(variants, b);
       const set = figma.combineAsVariants(variants, page);
       madeSet = set;
       set.name = b.name;
-      // combineAsVariants 는 변형을 (0,0) 에 겹쳐 쌓아 둔다 — 여기서 격자로 편다
-      layoutVariants(set, b);
-      set.x = originX;
-      set.y = cursorY;
-      cursorY += set.height + 120;
+      // 세트 자체를 줄바꿈 오토레이아웃으로 — 변형끼리 겹치는 일이 구조적으로 불가능해진다
+      wrapSet(set, box);
+      // 세로 간격은 담는 프레임의 오토레이아웃이 지킨다 — 좌표를 직접 계산하지 않는다
+      holder.appendChild(set);
+      try { set.layoutSizingHorizontal = 'FIXED'; } catch (e) { /* 무시 */ }
 
       const lines = [];
       if (b.notes) lines.push.apply(lines, b.notes);
@@ -1137,12 +1223,14 @@ async function applyComponents(payload, push, problems) {
 
       rep.sets++;
       rep.variants += variants.length;
-      push('ok', '컴포넌트 — ' + b.name + ' (' + variants.length + '개 변형)');
+      rep.lostVariants += lost;
+      push(lost ? 'skip' : 'ok', '컴포넌트 — ' + b.name + ' (' + variants.length + '개 변형'
+        + (lost ? ' · 변형 ' + lost + '개 실패' : '') + ')');
     } catch (e) {
       // 실패한 세트의 조각을 페이지에 남기지 않는다.
       // combineAsVariants 뒤에 터지면 변형의 부모가 이미 세트라 낱개 제거로는 안 지워진다 — 세트를 지운다.
       if (madeSet) { try { if (!madeSet.removed) madeSet.remove(); } catch (e2) { /* 무시 */ } }
-      else for (const v of variants) { try { if (!v.removed && v.parent === page) v.remove(); } catch (e2) { /* 무시 */ } }
+      else for (const v of variants) { try { if (!v.removed) v.remove(); } catch (e2) { /* 무시 */ } }
       rep.skipped++;
       problems.push('컴포넌트 ' + b.name + ' 생성 실패 — ' + (e && e.message ? e.message : String(e)));
       push('err', '컴포넌트 실패 — ' + b.name);
@@ -1151,7 +1239,8 @@ async function applyComponents(payload, push, problems) {
 
   push('ok', '컴포넌트 ' + rep.sets + '세트 · 변형 ' + rep.variants + '개'
     + (rep.renamedPrev ? ' · 기존 개명 ' + rep.renamedPrev + '건' : '')
-    + (rep.skipped ? ' · 실패 ' + rep.skipped + '건' : ''));
+    + (rep.lostVariants ? ' · 변형 실패 ' + rep.lostVariants + '개' : '')
+    + (rep.skipped ? ' · 세트 실패 ' + rep.skipped + '건' : ''));
   if ((meta.provisional || []).length)
     push('skip', '잠정 수치 ' + meta.provisional.length + '건 — 전용 토큰이 없어 숫자로 넣었습니다.');
   return rep;
