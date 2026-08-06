@@ -8374,5 +8374,2672 @@
       ],
       "unresolvedTokens": []
     }
-  ]
+  ],
+  "componentBuilds": [
+    {
+      "name": "Button",
+      "form": "box",
+      "axes": {
+        "style": [
+          "Primary",
+          "Secondary",
+          "Neutral",
+          "Ghost"
+        ],
+        "size": [
+          "Small",
+          "Medium",
+          "Large"
+        ],
+        "state": [
+          "Default",
+          "Disabled"
+        ]
+      },
+      "order": [
+        "style",
+        "size",
+        "state"
+      ],
+      "base": {
+        "layout": "HORIZONTAL",
+        "alignPrimary": "CENTER",
+        "alignCounter": "CENTER",
+        "w": "HUG",
+        "h": "HUG",
+        "minW": {
+          "t": "a11y/touch-target/min"
+        },
+        "padX": {
+          "t": "comp/padding/button/x"
+        },
+        "padY": {
+          "t": "comp/padding/button/y"
+        },
+        "gap": {
+          "t": "comp/gap/sm"
+        },
+        "radius": {
+          "t": "comp/radius/button"
+        }
+      },
+      "slots": [
+        {
+          "kind": "text",
+          "name": "Label",
+          "chars": "Label"
+        }
+      ],
+      "per": {
+        "style": {
+          "Primary": {
+            "fill": {
+              "t": "comp/fill/accent/primary"
+            },
+            "border": null,
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "fg/inverse/default"
+                }
+              }
+            }
+          },
+          "Secondary": {
+            "fill": {
+              "t": "comp/fill/accent/secondary"
+            },
+            "border": null,
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "fg/accent/primary"
+                }
+              }
+            }
+          },
+          "Neutral": {
+            "fill": {
+              "t": "comp/fill/neutral/primary"
+            },
+            "border": null,
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "fg/inverse/default"
+                }
+              }
+            }
+          },
+          "Ghost": {
+            "fill": {
+              "t": "comp/fill/neutral/ghost"
+            },
+            "border": {
+              "t": "comp/bdr/default"
+            },
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "fg/default"
+                }
+              }
+            }
+          }
+        },
+        "size": {
+          "Small": {
+            "slots": {
+              "Label": {
+                "textStyle": {
+                  "s": "utility/standard/xs/500"
+                }
+              }
+            }
+          },
+          "Medium": {
+            "slots": {
+              "Label": {
+                "textStyle": {
+                  "s": "utility/standard/sm/500"
+                }
+              }
+            }
+          },
+          "Large": {
+            "slots": {
+              "Label": {
+                "textStyle": {
+                  "s": "utility/standard/md/500"
+                }
+              }
+            }
+          }
+        },
+        "state": {
+          "Default": {},
+          "Disabled": {
+            "fill": {
+              "t": "comp/fill/neutral/disabled"
+            },
+            "border": null,
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "comp/fg/disabled"
+                }
+              }
+            }
+          }
+        }
+      },
+      "notes": [
+        "높이는 텍스트 line-height + paddingY×2 로 자연 결정된다 — 높이 토큰을 직접 걸지 않는다.",
+        "state=Disabled 는 style 의 fill·border·text 를 모두 덮는다(스펙의 overrides:[style])."
+      ],
+      "variantCount": 24
+    },
+    {
+      "name": "Input",
+      "form": "box",
+      "axes": {
+        "size": [
+          "Small",
+          "Medium",
+          "Large"
+        ],
+        "state": [
+          "Default",
+          "Focused",
+          "Error",
+          "Disabled"
+        ]
+      },
+      "order": [
+        "size",
+        "state"
+      ],
+      "base": {
+        "layout": "HORIZONTAL",
+        "alignPrimary": "MIN",
+        "alignCounter": "CENTER",
+        "w": 280,
+        "wIntent": "FILL",
+        "h": "HUG",
+        "minW": {
+          "t": "a11y/touch-target/min"
+        },
+        "padX": {
+          "t": "comp/padding/field/x"
+        },
+        "padY": {
+          "t": "comp/padding/field/y"
+        },
+        "radius": {
+          "t": "comp/radius/input"
+        }
+      },
+      "slots": [
+        {
+          "kind": "text",
+          "name": "Placeholder",
+          "chars": "Placeholder"
+        }
+      ],
+      "per": {
+        "size": {
+          "Small": {
+            "slots": {
+              "Placeholder": {
+                "textStyle": {
+                  "s": "body/sm/400"
+                }
+              }
+            }
+          },
+          "Medium": {
+            "slots": {
+              "Placeholder": {
+                "textStyle": {
+                  "s": "body/md/400"
+                }
+              }
+            }
+          },
+          "Large": {
+            "slots": {
+              "Placeholder": {
+                "textStyle": {
+                  "s": "body/lg/400"
+                }
+              }
+            }
+          }
+        },
+        "state": {
+          "Default": {
+            "fill": {
+              "t": "comp/fill/field/default"
+            },
+            "border": {
+              "t": "comp/bdr/default"
+            },
+            "slots": {
+              "Placeholder": {
+                "fill": {
+                  "t": "fg/subtle"
+                }
+              }
+            }
+          },
+          "Focused": {
+            "fill": {
+              "t": "comp/fill/field/default"
+            },
+            "border": {
+              "t": "comp/bdr/focused"
+            },
+            "slots": {
+              "Placeholder": {
+                "fill": {
+                  "t": "fg/subtle"
+                }
+              }
+            }
+          },
+          "Error": {
+            "fill": {
+              "t": "comp/fill/field/default"
+            },
+            "border": {
+              "t": "status/fg/error"
+            },
+            "slots": {
+              "Placeholder": {
+                "fill": {
+                  "t": "fg/subtle"
+                }
+              }
+            }
+          },
+          "Disabled": {
+            "fill": {
+              "t": "comp/fill/field/disabled"
+            },
+            "border": {
+              "t": "comp/bdr/disabled"
+            },
+            "slots": {
+              "Placeholder": {
+                "fill": {
+                  "t": "comp/fg/disabled"
+                }
+              }
+            }
+          }
+        }
+      },
+      "notes": [
+        "스펙의 align.primary 는 \"SPACE_BETWEEN or CENTER\" 로 열려 있다. 후행 아이콘이 없는 기본형이므로 MIN(좌측 정렬)로 만든다.",
+        "값 텍스트(fg/default)는 placeholder 슬롯을 덮어써서 쓴다 — 슬롯을 둘로 나누면 인스턴스에서 둘 다 보인다."
+      ],
+      "variantCount": 12
+    },
+    {
+      "name": "Card",
+      "form": "box",
+      "axes": {
+        "elevation": [
+          "Flat",
+          "Raised"
+        ]
+      },
+      "order": [
+        "elevation"
+      ],
+      "base": {
+        "layout": "VERTICAL",
+        "alignPrimary": "MIN",
+        "alignCounter": "MIN",
+        "w": 320,
+        "wIntent": "FILL",
+        "h": "HUG",
+        "pad": {
+          "t": "comp/padding/card"
+        },
+        "gap": {
+          "t": "comp/gap/md"
+        },
+        "radius": {
+          "t": "comp/radius/card"
+        }
+      },
+      "slots": [
+        {
+          "kind": "text",
+          "name": "Title",
+          "chars": "Title",
+          "textStyle": {
+            "s": "heading/sm/600"
+          },
+          "fill": {
+            "t": "fg/default"
+          }
+        },
+        {
+          "kind": "text",
+          "name": "Body",
+          "chars": "본문 텍스트가 들어갑니다.",
+          "textStyle": {
+            "s": "body/sm/400"
+          },
+          "fill": {
+            "t": "fg/subtle"
+          }
+        }
+      ],
+      "per": {
+        "elevation": {
+          "Flat": {
+            "fill": {
+              "t": "bg/default"
+            },
+            "border": {
+              "t": "comp/bdr/subtle"
+            },
+            "shadow": null
+          },
+          "Raised": {
+            "fill": {
+              "t": "bg/ev/raised"
+            },
+            "border": null,
+            "shadow": {
+              "s": "elevation/2"
+            }
+          }
+        }
+      },
+      "notes": [],
+      "variantCount": 2
+    },
+    {
+      "name": "Chip",
+      "form": "box",
+      "axes": {
+        "state": [
+          "Default",
+          "Selected",
+          "Disabled"
+        ]
+      },
+      "order": [
+        "state"
+      ],
+      "base": {
+        "layout": "HORIZONTAL",
+        "alignPrimary": "CENTER",
+        "alignCounter": "CENTER",
+        "w": "HUG",
+        "h": "HUG",
+        "padX": {
+          "t": "comp/gap/sm"
+        },
+        "padY": {
+          "t": "comp/gap/xs"
+        },
+        "gap": {
+          "t": "comp/gap/xs"
+        },
+        "radius": {
+          "t": "comp/radius/chip"
+        }
+      },
+      "slots": [
+        {
+          "kind": "text",
+          "name": "Label",
+          "chars": "Chip",
+          "textStyle": {
+            "s": "utility/standard/xs/500"
+          }
+        },
+        {
+          "kind": "icon",
+          "name": "Remove",
+          "glyph": "x",
+          "w": {
+            "t": "w/icon/xs"
+          },
+          "h": {
+            "t": "h/icon/xs"
+          }
+        }
+      ],
+      "per": {
+        "state": {
+          "Default": {
+            "fill": {
+              "t": "comp/fill/neutral/secondary"
+            },
+            "border": null,
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "fg/default"
+                }
+              },
+              "Remove": {
+                "fill": {
+                  "t": "fg/default"
+                }
+              }
+            }
+          },
+          "Selected": {
+            "fill": {
+              "t": "comp/fill/accent/secondary"
+            },
+            "border": {
+              "t": "comp/bdr/focused"
+            },
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "fg/accent/primary"
+                }
+              },
+              "Remove": {
+                "fill": {
+                  "t": "fg/accent/primary"
+                }
+              }
+            }
+          },
+          "Disabled": {
+            "fill": {
+              "t": "comp/fill/neutral/disabled"
+            },
+            "border": null,
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "comp/fg/disabled"
+                }
+              },
+              "Remove": {
+                "fill": {
+                  "t": "comp/fg/disabled"
+                }
+              }
+            }
+          }
+        }
+      },
+      "notes": [
+        "제거 아이콘 색은 스펙에 따로 없다 — 라벨 색을 따라간다."
+      ],
+      "variantCount": 3
+    },
+    {
+      "name": "Modal shell",
+      "form": "box",
+      "axes": {
+        "form": [
+          "Dialog",
+          "BottomSheet"
+        ]
+      },
+      "order": [
+        "form"
+      ],
+      "base": {
+        "layout": "VERTICAL",
+        "alignPrimary": "MIN",
+        "alignCounter": "MIN",
+        "w": 480,
+        "h": "HUG",
+        "pad": {
+          "t": "comp/padding/card"
+        },
+        "gap": {
+          "t": "comp/gap/md"
+        },
+        "fill": {
+          "t": "bg/ev/raised"
+        },
+        "shadow": {
+          "s": "elevation/4"
+        }
+      },
+      "slots": [
+        {
+          "kind": "text",
+          "name": "Title",
+          "chars": "제목",
+          "textStyle": {
+            "s": "heading/sm/600"
+          },
+          "fill": {
+            "t": "fg/default"
+          }
+        },
+        {
+          "kind": "text",
+          "name": "Body",
+          "chars": "내용이 들어갑니다.",
+          "textStyle": {
+            "s": "body/sm/400"
+          },
+          "fill": {
+            "t": "fg/subtle"
+          }
+        }
+      ],
+      "per": {
+        "form": {
+          "Dialog": {
+            "radius": {
+              "t": "comp/radius/modal"
+            }
+          },
+          "BottomSheet": {
+            "radiusTop": {
+              "t": "comp/radius/modal"
+            },
+            "radiusBottom": 0
+          }
+        }
+      },
+      "notes": [
+        "오버레이(bg/variant/overlay)는 셸의 일부가 아니라 셸을 덮는 별도 레이어다 — 여기서 만들지 않는다.",
+        "모바일 뷰포트에서 폭을 FILL 로 바꾸는 규칙은 Web 컬렉션 breakpoint 를 쓰는 배치 규칙이며 변형 축이 아니다."
+      ],
+      "variantCount": 2
+    },
+    {
+      "name": "Pill",
+      "form": "box",
+      "axes": {
+        "tone": [
+          "Neutral",
+          "Success",
+          "Warning",
+          "Error"
+        ]
+      },
+      "order": [
+        "tone"
+      ],
+      "base": {
+        "layout": "HORIZONTAL",
+        "alignPrimary": "CENTER",
+        "alignCounter": "CENTER",
+        "w": "HUG",
+        "h": "HUG",
+        "padX": {
+          "t": "comp/gap/sm"
+        },
+        "padY": {
+          "t": "comp/gap/xs"
+        },
+        "radius": {
+          "t": "comp/radius/pill"
+        }
+      },
+      "slots": [
+        {
+          "kind": "text",
+          "name": "Label",
+          "chars": "Pill",
+          "textStyle": {
+            "s": "utility/tight/xs/500"
+          }
+        }
+      ],
+      "per": {
+        "tone": {
+          "Neutral": {
+            "fill": {
+              "t": "comp/fill/neutral/tertiary"
+            },
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "fg/subtle"
+                }
+              }
+            }
+          },
+          "Success": {
+            "fill": {
+              "t": "status/bg/success"
+            },
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "status/fg/success"
+                }
+              }
+            }
+          },
+          "Warning": {
+            "fill": {
+              "t": "status/bg/warning"
+            },
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "status/fg/warning"
+                }
+              }
+            }
+          },
+          "Error": {
+            "fill": {
+              "t": "status/bg/error"
+            },
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "status/fg/error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "notes": [],
+      "variantCount": 4
+    },
+    {
+      "name": "Icon Button",
+      "form": "box",
+      "axes": {
+        "style": [
+          "Primary",
+          "Secondary",
+          "Neutral",
+          "Ghost"
+        ],
+        "size": [
+          "Small",
+          "Medium",
+          "Large"
+        ],
+        "state": [
+          "Default",
+          "Disabled"
+        ]
+      },
+      "order": [
+        "style",
+        "size",
+        "state"
+      ],
+      "base": {
+        "layout": "HORIZONTAL",
+        "alignPrimary": "CENTER",
+        "alignCounter": "CENTER",
+        "radius": {
+          "t": "comp/radius/button"
+        },
+        "padX": 0,
+        "padY": 0
+      },
+      "slots": [
+        {
+          "kind": "icon",
+          "name": "Icon",
+          "glyph": "search"
+        }
+      ],
+      "per": {
+        "style": {
+          "Primary": {
+            "fill": {
+              "t": "comp/fill/accent/primary"
+            },
+            "border": null,
+            "slots": {
+              "Icon": {
+                "fill": {
+                  "t": "fg/inverse/default"
+                }
+              }
+            }
+          },
+          "Secondary": {
+            "fill": {
+              "t": "comp/fill/accent/secondary"
+            },
+            "border": null,
+            "slots": {
+              "Icon": {
+                "fill": {
+                  "t": "fg/accent/primary"
+                }
+              }
+            }
+          },
+          "Neutral": {
+            "fill": {
+              "t": "comp/fill/neutral/primary"
+            },
+            "border": null,
+            "slots": {
+              "Icon": {
+                "fill": {
+                  "t": "fg/inverse/default"
+                }
+              }
+            }
+          },
+          "Ghost": {
+            "fill": {
+              "t": "comp/fill/neutral/ghost"
+            },
+            "border": {
+              "t": "comp/bdr/default"
+            },
+            "slots": {
+              "Icon": {
+                "fill": {
+                  "t": "fg/default"
+                }
+              }
+            }
+          }
+        },
+        "size": {
+          "Small": {
+            "w": {
+              "t": "w/control/sm"
+            },
+            "h": {
+              "t": "h/control/sm"
+            },
+            "slots": {
+              "Icon": {
+                "w": {
+                  "t": "w/icon/sm"
+                },
+                "h": {
+                  "t": "h/icon/sm"
+                }
+              }
+            }
+          },
+          "Medium": {
+            "w": {
+              "t": "w/control/md"
+            },
+            "h": {
+              "t": "h/control/md"
+            },
+            "slots": {
+              "Icon": {
+                "w": {
+                  "t": "w/icon/md"
+                },
+                "h": {
+                  "t": "h/icon/md"
+                }
+              }
+            }
+          },
+          "Large": {
+            "w": {
+              "t": "w/control/lg"
+            },
+            "h": {
+              "t": "h/control/lg"
+            },
+            "slots": {
+              "Icon": {
+                "w": {
+                  "t": "w/icon/lg"
+                },
+                "h": {
+                  "t": "h/icon/lg"
+                }
+              }
+            }
+          }
+        },
+        "state": {
+          "Default": {},
+          "Disabled": {
+            "fill": {
+              "t": "comp/fill/neutral/disabled"
+            },
+            "border": null,
+            "slots": {
+              "Icon": {
+                "fill": {
+                  "t": "comp/fg/disabled"
+                }
+              }
+            }
+          }
+        }
+      },
+      "notes": [
+        "아이콘은 자리표시자다 — Freesm 아이콘 세트가 Figma 컴포넌트로 올라오면 인스턴스 스왑 슬롯으로 바꾼다."
+      ],
+      "variantCount": 24
+    },
+    {
+      "name": "Checkbox",
+      "form": "box",
+      "axes": {
+        "state": [
+          "Unchecked",
+          "Checked",
+          "Indeterminate",
+          "Disabled"
+        ]
+      },
+      "order": [
+        "state"
+      ],
+      "base": {
+        "layout": "HORIZONTAL",
+        "alignPrimary": "CENTER",
+        "alignCounter": "CENTER",
+        "w": {
+          "t": "w/control/md"
+        },
+        "h": {
+          "t": "h/control/md"
+        },
+        "fill": null,
+        "padX": 0,
+        "padY": 0
+      },
+      "slots": [
+        {
+          "kind": "frame",
+          "name": "Box",
+          "w": {
+            "t": "w/icon/sm"
+          },
+          "h": {
+            "t": "h/icon/sm"
+          },
+          "radius": {
+            "t": "comp/radius/checkbox"
+          },
+          "layout": "HORIZONTAL",
+          "alignPrimary": "CENTER",
+          "alignCounter": "CENTER",
+          "children": [
+            {
+              "kind": "icon",
+              "name": "Mark",
+              "glyph": "check",
+              "w": {
+                "t": "w/icon/xs"
+              },
+              "h": {
+                "t": "h/icon/xs"
+              }
+            }
+          ]
+        }
+      ],
+      "per": {
+        "state": {
+          "Unchecked": {
+            "slots": {
+              "Box": {
+                "fill": {
+                  "t": "comp/fill/neutral/ghost"
+                },
+                "border": {
+                  "t": "comp/bdr/default"
+                }
+              },
+              "Mark": {
+                "visible": false
+              }
+            }
+          },
+          "Checked": {
+            "slots": {
+              "Box": {
+                "fill": {
+                  "t": "comp/fill/accent/primary"
+                },
+                "border": null
+              },
+              "Mark": {
+                "visible": true,
+                "glyph": "check",
+                "fill": {
+                  "t": "fg/inverse/default"
+                }
+              }
+            }
+          },
+          "Indeterminate": {
+            "slots": {
+              "Box": {
+                "fill": {
+                  "t": "comp/fill/accent/primary"
+                },
+                "border": null
+              },
+              "Mark": {
+                "visible": true,
+                "glyph": "minus",
+                "fill": {
+                  "t": "fg/inverse/default"
+                }
+              }
+            }
+          },
+          "Disabled": {
+            "slots": {
+              "Box": {
+                "fill": {
+                  "t": "comp/fill/neutral/disabled"
+                },
+                "border": {
+                  "t": "comp/bdr/disabled"
+                }
+              },
+              "Mark": {
+                "visible": true,
+                "glyph": "check",
+                "fill": {
+                  "t": "comp/fg/disabled"
+                }
+              }
+            }
+          }
+        }
+      },
+      "notes": [
+        "루트는 히트 영역(w·h/control/md), 안쪽 Box 가 눈에 보이는 체크박스(w·h/icon/sm)다 — 스펙의 비주얼/히트 분리 그대로.",
+        "스펙은 마크 글리프를 \"아이콘 세트 확정 후 결정\"으로 열어 뒀다. 잠정으로 check·minus 를 쓴다.",
+        "라벨은 Checkbox 안이 아니라 Form Field 모듈에서 조합한다 — 여기에 슬롯을 두지 않는다."
+      ],
+      "variantCount": 4
+    },
+    {
+      "name": "Radio",
+      "form": "box",
+      "axes": {
+        "state": [
+          "Unchecked",
+          "Checked",
+          "Disabled"
+        ]
+      },
+      "order": [
+        "state"
+      ],
+      "base": {
+        "layout": "HORIZONTAL",
+        "alignPrimary": "CENTER",
+        "alignCounter": "CENTER",
+        "w": {
+          "t": "w/control/md"
+        },
+        "h": {
+          "t": "h/control/md"
+        },
+        "fill": null,
+        "padX": 0,
+        "padY": 0
+      },
+      "slots": [
+        {
+          "kind": "frame",
+          "name": "Circle",
+          "w": {
+            "t": "w/icon/sm"
+          },
+          "h": {
+            "t": "h/icon/sm"
+          },
+          "radius": {
+            "t": "comp/radius/radio"
+          },
+          "layout": "HORIZONTAL",
+          "alignPrimary": "CENTER",
+          "alignCounter": "CENTER",
+          "children": [
+            {
+              "kind": "ellipse",
+              "name": "Dot",
+              "w": 8,
+              "h": 8
+            }
+          ]
+        }
+      ],
+      "per": {
+        "state": {
+          "Unchecked": {
+            "slots": {
+              "Circle": {
+                "fill": {
+                  "t": "comp/fill/neutral/ghost"
+                },
+                "border": {
+                  "t": "comp/bdr/default"
+                }
+              },
+              "Dot": {
+                "visible": false
+              }
+            }
+          },
+          "Checked": {
+            "slots": {
+              "Circle": {
+                "fill": {
+                  "t": "comp/fill/neutral/ghost"
+                },
+                "border": {
+                  "t": "comp/fill/accent/primary"
+                }
+              },
+              "Dot": {
+                "visible": true,
+                "fill": {
+                  "t": "comp/fill/accent/primary"
+                }
+              }
+            }
+          },
+          "Disabled": {
+            "slots": {
+              "Circle": {
+                "fill": {
+                  "t": "comp/fill/neutral/disabled"
+                },
+                "border": {
+                  "t": "comp/bdr/disabled"
+                }
+              },
+              "Dot": {
+                "visible": true,
+                "fill": {
+                  "t": "comp/fg/disabled"
+                }
+              }
+            }
+          }
+        }
+      },
+      "notes": [
+        "comp/radius/radio 는 999(radius/full) 이므로 사각 프레임이 원으로 보인다."
+      ],
+      "variantCount": 3
+    },
+    {
+      "name": "Switch",
+      "form": "box",
+      "axes": {
+        "state": [
+          "Off",
+          "On",
+          "Disabled"
+        ]
+      },
+      "order": [
+        "state"
+      ],
+      "base": {
+        "layout": "HORIZONTAL",
+        "alignCounter": "CENTER",
+        "w": 42,
+        "h": {
+          "t": "h/icon/lg"
+        },
+        "padX": {
+          "t": "comp/gap/xs"
+        },
+        "padY": {
+          "t": "comp/gap/xs"
+        },
+        "radius": {
+          "t": "comp/radius/switch"
+        }
+      },
+      "slots": [
+        {
+          "kind": "ellipse",
+          "name": "Thumb",
+          "w": 16,
+          "h": 16
+        }
+      ],
+      "per": {
+        "state": {
+          "Off": {
+            "alignPrimary": "MIN",
+            "fill": {
+              "t": "comp/bdr/default"
+            },
+            "slots": {
+              "Thumb": {
+                "fill": {
+                  "t": "comp/fill/inverse/default"
+                }
+              }
+            }
+          },
+          "On": {
+            "alignPrimary": "MAX",
+            "fill": {
+              "t": "comp/fill/accent/primary"
+            },
+            "slots": {
+              "Thumb": {
+                "fill": {
+                  "t": "comp/fill/inverse/default"
+                }
+              }
+            }
+          },
+          "Disabled": {
+            "alignPrimary": "MIN",
+            "fill": {
+              "t": "comp/fill/neutral/disabled"
+            },
+            "slots": {
+              "Thumb": {
+                "fill": {
+                  "t": "comp/fill/neutral/tertiary"
+                }
+              }
+            }
+          }
+        }
+      },
+      "notes": [
+        "썸의 좌우 위치는 좌표가 아니라 auto-layout 정렬(MIN/MAX)로 만든다 — 트랙 폭이 바뀌어도 따라간다.",
+        "트랙 폭·썸 크기는 전용 토큰이 없어 숫자다. 토큰이 생기면 이 두 줄만 바꾸면 된다."
+      ],
+      "variantCount": 3
+    },
+    {
+      "name": "Select / Dropdown trigger",
+      "form": "box",
+      "axes": {
+        "state": [
+          "Default",
+          "Focused",
+          "Error",
+          "Disabled"
+        ]
+      },
+      "order": [
+        "state"
+      ],
+      "base": {
+        "layout": "HORIZONTAL",
+        "alignPrimary": "SPACE_BETWEEN",
+        "alignCounter": "CENTER",
+        "w": 280,
+        "wIntent": "FILL",
+        "h": "HUG",
+        "minW": {
+          "t": "a11y/touch-target/min"
+        },
+        "padX": {
+          "t": "comp/padding/field/x"
+        },
+        "padY": {
+          "t": "comp/padding/field/y"
+        },
+        "gap": {
+          "t": "comp/gap/sm"
+        },
+        "radius": {
+          "t": "comp/radius/input"
+        }
+      },
+      "slots": [
+        {
+          "kind": "text",
+          "name": "Placeholder",
+          "chars": "선택하세요",
+          "textStyle": {
+            "s": "body/md/400"
+          }
+        },
+        {
+          "kind": "icon",
+          "name": "Chevron",
+          "glyph": "chevron-down",
+          "w": {
+            "t": "w/icon/sm"
+          },
+          "h": {
+            "t": "h/icon/sm"
+          }
+        }
+      ],
+      "per": {
+        "state": {
+          "Default": {
+            "fill": {
+              "t": "comp/fill/field/default"
+            },
+            "border": {
+              "t": "comp/bdr/default"
+            },
+            "slots": {
+              "Placeholder": {
+                "fill": {
+                  "t": "fg/subtle"
+                }
+              },
+              "Chevron": {
+                "fill": {
+                  "t": "fg/subtle"
+                }
+              }
+            }
+          },
+          "Focused": {
+            "fill": {
+              "t": "comp/fill/field/default"
+            },
+            "border": {
+              "t": "comp/bdr/focused"
+            },
+            "slots": {
+              "Placeholder": {
+                "fill": {
+                  "t": "fg/subtle"
+                }
+              },
+              "Chevron": {
+                "fill": {
+                  "t": "fg/subtle"
+                }
+              }
+            }
+          },
+          "Error": {
+            "fill": {
+              "t": "comp/fill/field/default"
+            },
+            "border": {
+              "t": "status/fg/error"
+            },
+            "slots": {
+              "Placeholder": {
+                "fill": {
+                  "t": "fg/subtle"
+                }
+              },
+              "Chevron": {
+                "fill": {
+                  "t": "fg/subtle"
+                }
+              }
+            }
+          },
+          "Disabled": {
+            "fill": {
+              "t": "comp/fill/field/disabled"
+            },
+            "border": {
+              "t": "comp/bdr/disabled"
+            },
+            "slots": {
+              "Placeholder": {
+                "fill": {
+                  "t": "comp/fg/disabled"
+                }
+              },
+              "Chevron": {
+                "fill": {
+                  "t": "comp/fg/disabled"
+                }
+              }
+            }
+          }
+        }
+      },
+      "notes": [],
+      "variantCount": 4
+    },
+    {
+      "name": "Avatar",
+      "form": "box",
+      "axes": {
+        "shape": [
+          "Circle",
+          "Square"
+        ],
+        "size": [
+          "Small",
+          "Medium",
+          "Large"
+        ]
+      },
+      "order": [
+        "shape",
+        "size"
+      ],
+      "base": {
+        "layout": "HORIZONTAL",
+        "alignPrimary": "CENTER",
+        "alignCounter": "CENTER",
+        "padX": 0,
+        "padY": 0,
+        "fill": {
+          "t": "comp/fill/neutral/tertiary"
+        }
+      },
+      "slots": [
+        {
+          "kind": "text",
+          "name": "Initials",
+          "chars": "AB",
+          "fill": {
+            "t": "fg/subtle"
+          }
+        }
+      ],
+      "per": {
+        "shape": {
+          "Circle": {
+            "radius": {
+              "t": "radius/full"
+            }
+          },
+          "Square": {
+            "radius": {
+              "t": "radius/sm"
+            }
+          }
+        },
+        "size": {
+          "Small": {
+            "w": {
+              "t": "w/avatar/sm"
+            },
+            "h": {
+              "t": "h/avatar/sm"
+            },
+            "slots": {
+              "Initials": {
+                "textStyle": {
+                  "s": "utility/tight/xs/500"
+                }
+              }
+            }
+          },
+          "Medium": {
+            "w": {
+              "t": "w/avatar/md"
+            },
+            "h": {
+              "t": "h/avatar/md"
+            },
+            "slots": {
+              "Initials": {
+                "textStyle": {
+                  "s": "utility/standard/xs/500"
+                }
+              }
+            }
+          },
+          "Large": {
+            "w": {
+              "t": "w/avatar/lg"
+            },
+            "h": {
+              "t": "h/avatar/lg"
+            },
+            "slots": {
+              "Initials": {
+                "textStyle": {
+                  "s": "utility/standard/sm/500"
+                }
+              }
+            }
+          }
+        }
+      },
+      "notes": [
+        "이미지가 있으면 이니셜 슬롯을 덮어 이미지 fill 로 바꾼다 — 이미지 자체는 컴포넌트에 넣지 않는다."
+      ],
+      "variantCount": 6
+    },
+    {
+      "name": "Badge / Tag",
+      "form": "box",
+      "axes": {
+        "form": [
+          "Label",
+          "Dot"
+        ],
+        "tone": [
+          "Neutral",
+          "Success",
+          "Warning",
+          "Error"
+        ]
+      },
+      "order": [
+        "form",
+        "tone"
+      ],
+      "base": {
+        "layout": "HORIZONTAL",
+        "alignPrimary": "CENTER",
+        "alignCounter": "CENTER",
+        "w": "HUG",
+        "h": "HUG"
+      },
+      "slots": [
+        {
+          "kind": "text",
+          "name": "Label",
+          "chars": "Badge",
+          "textStyle": {
+            "s": "utility/tight/xs/500"
+          }
+        }
+      ],
+      "per": {
+        "form": {
+          "Label": {
+            "padX": {
+              "t": "comp/gap/sm"
+            },
+            "padY": {
+              "t": "comp/gap/xs"
+            },
+            "radius": {
+              "t": "comp/radius/pill"
+            },
+            "slots": {
+              "Label": {
+                "visible": true
+              }
+            }
+          },
+          "Dot": {
+            "padX": 0,
+            "padY": 0,
+            "w": {
+              "t": "dimension/8"
+            },
+            "h": {
+              "t": "dimension/8"
+            },
+            "radius": {
+              "t": "radius/full"
+            },
+            "slots": {
+              "Label": {
+                "visible": false
+              }
+            }
+          }
+        },
+        "tone": {
+          "Neutral": {
+            "fill": {
+              "t": "comp/fill/neutral/tertiary"
+            },
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "fg/subtle"
+                }
+              }
+            }
+          },
+          "Success": {
+            "fill": {
+              "t": "status/bg/success"
+            },
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "status/fg/success"
+                }
+              }
+            }
+          },
+          "Warning": {
+            "fill": {
+              "t": "status/bg/warning"
+            },
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "status/fg/warning"
+                }
+              }
+            }
+          },
+          "Error": {
+            "fill": {
+              "t": "status/bg/error"
+            },
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "status/fg/error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "combos": {
+        "form=Dot,tone=Neutral": {
+          "fill": {
+            "t": "fg/subtler"
+          }
+        },
+        "form=Dot,tone=Success": {
+          "fill": {
+            "t": "status/fg/success"
+          }
+        },
+        "form=Dot,tone=Warning": {
+          "fill": {
+            "t": "status/fg/warning"
+          }
+        },
+        "form=Dot,tone=Error": {
+          "fill": {
+            "t": "status/fg/error"
+          }
+        }
+      },
+      "notes": [
+        "Label 형의 레이아웃·토큰은 Pill 과 사실상 같다 — 통합 여부는 아직 열린 사항이다.",
+        "Dot 형은 라벨 슬롯을 숨기고 dimension/8 정사각 + radius/full 로 만든다."
+      ],
+      "variantCount": 8
+    },
+    {
+      "name": "Tooltip",
+      "form": "box",
+      "axes": {
+        "placement": [
+          "Top",
+          "Bottom",
+          "Left",
+          "Right"
+        ]
+      },
+      "order": [
+        "placement"
+      ],
+      "base": {
+        "layout": "HORIZONTAL",
+        "alignPrimary": "CENTER",
+        "alignCounter": "CENTER",
+        "w": "HUG",
+        "h": "HUG",
+        "padX": {
+          "t": "comp/gap/sm"
+        },
+        "padY": {
+          "t": "comp/gap/xs"
+        },
+        "radius": {
+          "t": "comp/radius/tooltip"
+        },
+        "fill": {
+          "t": "bg/variant/inverse"
+        },
+        "shadow": {
+          "s": "elevation/2"
+        }
+      },
+      "slots": [
+        {
+          "kind": "text",
+          "name": "Label",
+          "chars": "설명",
+          "textStyle": {
+            "s": "body/xs/400"
+          },
+          "fill": {
+            "t": "fg/inverse/default"
+          }
+        },
+        {
+          "kind": "rect",
+          "name": "Arrow",
+          "fill": {
+            "t": "bg/variant/inverse"
+          },
+          "rotation": 45,
+          "w": 8,
+          "h": 8,
+          "absolute": true
+        }
+      ],
+      "per": {
+        "placement": {
+          "Top": {
+            "slots": {
+              "Arrow": {
+                "anchor": "BOTTOM"
+              }
+            }
+          },
+          "Bottom": {
+            "slots": {
+              "Arrow": {
+                "anchor": "TOP"
+              }
+            }
+          },
+          "Left": {
+            "slots": {
+              "Arrow": {
+                "anchor": "RIGHT"
+              }
+            }
+          },
+          "Right": {
+            "slots": {
+              "Arrow": {
+                "anchor": "LEFT"
+              }
+            }
+          }
+        }
+      },
+      "notes": [
+        "placement 는 툴팁이 붙는 방향이다 — 화살표는 반대쪽에 달린다(Top 배치면 화살표는 아래).",
+        "화살표 규격은 스펙에 없다. 8×8 정사각 45° 회전은 잠정값이며 토큰이 생기면 교체한다."
+      ],
+      "variantCount": 4
+    },
+    {
+      "name": "Link",
+      "form": "box",
+      "axes": {
+        "size": [
+          "Small",
+          "Medium"
+        ],
+        "state": [
+          "Default",
+          "Visited",
+          "Disabled"
+        ]
+      },
+      "order": [
+        "size",
+        "state"
+      ],
+      "base": {
+        "layout": "HORIZONTAL",
+        "alignPrimary": "MIN",
+        "alignCounter": "CENTER",
+        "w": "HUG",
+        "h": "HUG",
+        "padX": 0,
+        "padY": 0,
+        "fill": null
+      },
+      "slots": [
+        {
+          "kind": "text",
+          "name": "Label",
+          "chars": "링크 텍스트",
+          "decoration": "UNDERLINE"
+        }
+      ],
+      "per": {
+        "size": {
+          "Small": {
+            "slots": {
+              "Label": {
+                "textStyle": {
+                  "s": "link/sm/500"
+                }
+              }
+            }
+          },
+          "Medium": {
+            "slots": {
+              "Label": {
+                "textStyle": {
+                  "s": "link/md/500"
+                }
+              }
+            }
+          }
+        },
+        "state": {
+          "Default": {
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "fg/link/default"
+                }
+              }
+            }
+          },
+          "Visited": {
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "fg/link/visited"
+                }
+              }
+            }
+          },
+          "Disabled": {
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "comp/fg/disabled"
+                },
+                "decoration": "NONE"
+              }
+            }
+          }
+        }
+      },
+      "notes": [
+        "스펙은 \"자체 auto-layout 없는 인라인 텍스트\"다. 컴포넌트 루트는 프레임이어야 하므로 패딩 0·배경 없음의 껍데기만 두고 실체는 텍스트 노드다."
+      ],
+      "variantCount": 6
+    },
+    {
+      "name": "Divider",
+      "form": "box",
+      "axes": {
+        "orientation": [
+          "Horizontal",
+          "Vertical"
+        ]
+      },
+      "order": [
+        "orientation"
+      ],
+      "base": {
+        "layout": "NONE",
+        "fill": {
+          "t": "comp/bdr/subtle"
+        },
+        "radius": 0
+      },
+      "slots": [],
+      "per": {
+        "orientation": {
+          "Horizontal": {
+            "w": 200,
+            "wIntent": "FILL",
+            "h": {
+              "t": "dimension/1"
+            }
+          },
+          "Vertical": {
+            "w": {
+              "t": "dimension/1"
+            },
+            "h": 200,
+            "hIntent": "FILL"
+          }
+        }
+      },
+      "notes": [],
+      "variantCount": 2
+    },
+    {
+      "name": "Progress bar / Spinner",
+      "form": "box",
+      "axes": {
+        "form": [
+          "Bar",
+          "Spinner"
+        ],
+        "size": [
+          "Small",
+          "Medium",
+          "Large"
+        ]
+      },
+      "order": [
+        "form",
+        "size"
+      ],
+      "base": {
+        "layout": "NONE",
+        "fill": {
+          "t": "comp/fill/neutral/tertiary"
+        }
+      },
+      "slots": [
+        {
+          "kind": "frame",
+          "name": "Fill",
+          "fill": {
+            "t": "comp/fill/accent/primary"
+          },
+          "absolute": true,
+          "anchor": "LEFT"
+        },
+        {
+          "kind": "ellipse",
+          "name": "Ring",
+          "fill": null,
+          "border": {
+            "t": "comp/fill/accent/primary"
+          },
+          "absolute": true,
+          "anchor": "FULL",
+          "arc": 0.75
+        }
+      ],
+      "per": {
+        "form": {
+          "Bar": {
+            "w": 240,
+            "wIntent": "FILL",
+            "h": {
+              "t": "comp/track/bar-height"
+            },
+            "radius": {
+              "t": "comp/radius/progress"
+            },
+            "fill": {
+              "t": "comp/fill/neutral/tertiary"
+            },
+            "slots": {
+              "Fill": {
+                "visible": true,
+                "ratio": 0.6,
+                "radius": {
+                  "t": "comp/radius/progress"
+                }
+              },
+              "Ring": {
+                "visible": false
+              }
+            }
+          },
+          "Spinner": {
+            "fill": null,
+            "radius": 0,
+            "slots": {
+              "Fill": {
+                "visible": false
+              },
+              "Ring": {
+                "visible": true,
+                "strokeWeight": {
+                  "t": "comp/track/spinner-stroke"
+                }
+              }
+            }
+          }
+        },
+        "size": {
+          "Small": {},
+          "Medium": {},
+          "Large": {}
+        }
+      },
+      "combos": {
+        "form=Spinner,size=Small": {
+          "w": {
+            "t": "w/icon/sm"
+          },
+          "h": {
+            "t": "h/icon/sm"
+          }
+        },
+        "form=Spinner,size=Medium": {
+          "w": {
+            "t": "w/icon/md"
+          },
+          "h": {
+            "t": "h/icon/md"
+          }
+        },
+        "form=Spinner,size=Large": {
+          "w": {
+            "t": "w/icon/lg"
+          },
+          "h": {
+            "t": "h/icon/lg"
+          }
+        }
+      },
+      "notes": [
+        "Bar 형에는 size 축이 걸리는 토큰이 없다 — 세 변형의 모양이 같다. 스펙이 축을 그렇게 선언했으므로 그대로 만들고, 굵기 토큰이 생기면 채운다.",
+        "Spinner 는 75% 원호(arc)로 만든다 — 회전 애니메이션은 Figma 컴포넌트가 아니라 프로토타입의 몫이다.",
+        "표에는 Ring 을 border+strokeWeight 로 적었지만, Figma 에서 호를 선으로 그리면 부채꼴 테두리가 되어 두 줄로 보인다. 그래서 플러그인이 같은 굵기의 도넛 채우기(innerRadius)로 옮겨 그린다 — 보이는 결과는 같고, 굵기 토큰은 그대로 산다.",
+        "Bar 의 채움 비율 60% 는 보여 주기용 기본값이다."
+      ],
+      "variantCount": 6
+    },
+    {
+      "name": "Skeleton",
+      "form": "box",
+      "axes": {
+        "shape": [
+          "Text",
+          "Rectangle",
+          "Circle"
+        ]
+      },
+      "order": [
+        "shape"
+      ],
+      "base": {
+        "layout": "NONE",
+        "fill": {
+          "t": "comp/fill/neutral/tertiary"
+        }
+      },
+      "slots": [],
+      "per": {
+        "shape": {
+          "Text": {
+            "w": 160,
+            "h": 16,
+            "radius": {
+              "t": "radius/2xs"
+            }
+          },
+          "Rectangle": {
+            "w": 160,
+            "h": 96,
+            "radius": {
+              "t": "radius/sm"
+            }
+          },
+          "Circle": {
+            "w": 40,
+            "h": 40,
+            "radius": {
+              "t": "radius/full"
+            }
+          }
+        }
+      },
+      "notes": [
+        "스펙 상태가 tokens_identified 다 — 색과 라운드만 확정이고 치수는 아직 스펙에 없다. 위 숫자는 잠정이다."
+      ],
+      "variantCount": 3
+    },
+    {
+      "name": "Toast",
+      "form": "box",
+      "axes": {
+        "tone": [
+          "Neutral",
+          "Success",
+          "Warning",
+          "Error"
+        ]
+      },
+      "order": [
+        "tone"
+      ],
+      "base": {
+        "layout": "HORIZONTAL",
+        "alignPrimary": "MIN",
+        "alignCounter": "CENTER",
+        "w": "HUG",
+        "h": "HUG",
+        "padX": {
+          "t": "comp/padding/field/x"
+        },
+        "padY": {
+          "t": "comp/padding/field/y"
+        },
+        "gap": {
+          "t": "comp/gap/sm"
+        },
+        "radius": {
+          "t": "comp/radius/toast"
+        },
+        "fill": {
+          "t": "bg/variant/inverse"
+        },
+        "shadow": {
+          "s": "elevation/3"
+        }
+      },
+      "slots": [
+        {
+          "kind": "icon",
+          "name": "Icon",
+          "glyph": "info",
+          "w": {
+            "t": "w/icon/sm"
+          },
+          "h": {
+            "t": "h/icon/sm"
+          }
+        },
+        {
+          "kind": "text",
+          "name": "Label",
+          "chars": "알림 메시지",
+          "textStyle": {
+            "s": "body/sm/400"
+          },
+          "fill": {
+            "t": "fg/inverse/default"
+          }
+        }
+      ],
+      "per": {
+        "tone": {
+          "Neutral": {
+            "slots": {
+              "Icon": {
+                "fill": {
+                  "t": "fg/inverse/subtle"
+                }
+              }
+            }
+          },
+          "Success": {
+            "slots": {
+              "Icon": {
+                "fill": {
+                  "t": "status/fg/success"
+                }
+              }
+            }
+          },
+          "Warning": {
+            "slots": {
+              "Icon": {
+                "fill": {
+                  "t": "status/fg/warning"
+                }
+              }
+            }
+          },
+          "Error": {
+            "slots": {
+              "Icon": {
+                "fill": {
+                  "t": "status/fg/error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "notes": [
+        "최대 폭은 Web 컬렉션 container 를 참조하는 배치 규칙이다 — 변형 축이 아니므로 여기서는 HUG 로 둔다."
+      ],
+      "variantCount": 4
+    },
+    {
+      "name": "Segmented Control",
+      "form": "box",
+      "axes": {
+        "state": [
+          "Unselected",
+          "Selected",
+          "Disabled"
+        ]
+      },
+      "order": [
+        "state"
+      ],
+      "base": {
+        "layout": "HORIZONTAL",
+        "alignPrimary": "CENTER",
+        "alignCounter": "CENTER",
+        "w": "HUG",
+        "h": "HUG",
+        "padX": {
+          "t": "comp/gap/md"
+        },
+        "padY": {
+          "t": "comp/padding/button/y"
+        },
+        "radius": {
+          "t": "comp/radius/input"
+        }
+      },
+      "slots": [
+        {
+          "kind": "text",
+          "name": "Label",
+          "chars": "항목",
+          "textStyle": {
+            "s": "utility/standard/sm/500"
+          }
+        }
+      ],
+      "per": {
+        "state": {
+          "Unselected": {
+            "fill": {
+              "t": "comp/fill/neutral/ghost"
+            },
+            "shadow": null,
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "fg/subtle"
+                }
+              }
+            }
+          },
+          "Selected": {
+            "fill": {
+              "t": "bg/ev/raised"
+            },
+            "shadow": {
+              "s": "elevation/1"
+            },
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "fg/default"
+                }
+              }
+            }
+          },
+          "Disabled": {
+            "fill": {
+              "t": "comp/fill/neutral/ghost"
+            },
+            "shadow": null,
+            "slots": {
+              "Label": {
+                "fill": {
+                  "t": "comp/fg/disabled"
+                }
+              }
+            }
+          }
+        }
+      },
+      "notes": [
+        "이 컴포넌트는 세그먼트 하나다 — state 축이 세그먼트의 상태이기 때문이다.",
+        "바깥 컨테이너(padding comp/gap/xs · fill comp/fill/neutral/tertiary · radius comp/radius/input)는 세그먼트를 담는 조합 규칙이며 변형이 아니다."
+      ],
+      "variantCount": 3
+    },
+    {
+      "name": "Slider",
+      "form": "box",
+      "axes": {
+        "state": [
+          "Default",
+          "Disabled"
+        ]
+      },
+      "order": [
+        "state"
+      ],
+      "base": {
+        "layout": "NONE",
+        "fill": null,
+        "w": 240,
+        "h": {
+          "t": "h/icon/md"
+        }
+      },
+      "slots": [
+        {
+          "kind": "frame",
+          "name": "Track",
+          "absolute": true,
+          "anchor": "CENTER_H",
+          "h": {
+            "t": "comp/track/slider-height"
+          },
+          "radius": {
+            "t": "comp/radius/slider"
+          },
+          "fill": {
+            "t": "comp/fill/neutral/tertiary"
+          },
+          "children": [
+            {
+              "kind": "frame",
+              "name": "Fill",
+              "absolute": true,
+              "anchor": "LEFT",
+              "ratio": 0.5,
+              "radius": {
+                "t": "comp/radius/slider"
+              }
+            }
+          ]
+        },
+        {
+          "kind": "ellipse",
+          "name": "Thumb",
+          "absolute": true,
+          "anchor": "RATIO_H",
+          "ratio": 0.5,
+          "w": {
+            "t": "w/icon/md"
+          },
+          "h": {
+            "t": "h/icon/md"
+          },
+          "radius": {
+            "t": "comp/radius/slider"
+          }
+        }
+      ],
+      "per": {
+        "state": {
+          "Default": {
+            "slots": {
+              "Fill": {
+                "fill": {
+                  "t": "comp/fill/accent/primary"
+                }
+              },
+              "Thumb": {
+                "fill": {
+                  "t": "comp/fill/inverse/default"
+                },
+                "border": {
+                  "t": "comp/bdr/focused"
+                }
+              }
+            }
+          },
+          "Disabled": {
+            "slots": {
+              "Fill": {
+                "fill": {
+                  "t": "comp/fill/neutral/disabled"
+                }
+              },
+              "Thumb": {
+                "fill": {
+                  "t": "comp/fill/inverse/default"
+                },
+                "border": {
+                  "t": "comp/bdr/disabled"
+                }
+              }
+            }
+          }
+        }
+      },
+      "notes": [
+        "값 50% 는 보여 주기용 기본값이다 — 트랙 채움과 썸 위치가 같은 비율을 쓴다."
+      ],
+      "variantCount": 2
+    },
+    {
+      "name": "Image Frame",
+      "form": "box",
+      "axes": {
+        "radius": [
+          "Small",
+          "Medium",
+          "Large"
+        ]
+      },
+      "order": [
+        "radius"
+      ],
+      "base": {
+        "layout": "HORIZONTAL",
+        "alignPrimary": "CENTER",
+        "alignCounter": "CENTER",
+        "w": 240,
+        "wIntent": "FILL",
+        "h": 160,
+        "padX": 0,
+        "padY": 0,
+        "fill": {
+          "t": "comp/fill/neutral/tertiary"
+        }
+      },
+      "slots": [
+        {
+          "kind": "icon",
+          "name": "Placeholder",
+          "glyph": "image",
+          "w": {
+            "t": "w/icon/lg"
+          },
+          "h": {
+            "t": "h/icon/lg"
+          },
+          "fill": {
+            "t": "fg/subtler"
+          }
+        }
+      ],
+      "per": {
+        "radius": {
+          "Small": {
+            "radius": {
+              "t": "comp/radius/image/sm"
+            }
+          },
+          "Medium": {
+            "radius": {
+              "t": "comp/radius/image/md"
+            }
+          },
+          "Large": {
+            "radius": {
+              "t": "comp/radius/image/lg"
+            }
+          }
+        }
+      },
+      "notes": [
+        "이미지가 채워지면 자리표시자 아이콘을 숨기고 프레임 fill 을 이미지로 바꾼다."
+      ],
+      "variantCount": 3
+    },
+    {
+      "name": "Attachment Input",
+      "form": "box",
+      "axes": {
+        "state": [
+          "Default",
+          "DragOver",
+          "Error",
+          "Disabled"
+        ]
+      },
+      "order": [
+        "state"
+      ],
+      "base": {
+        "layout": "VERTICAL",
+        "alignPrimary": "CENTER",
+        "alignCounter": "CENTER",
+        "w": 320,
+        "wIntent": "FILL",
+        "h": "HUG",
+        "pad": {
+          "t": "comp/padding/card"
+        },
+        "gap": {
+          "t": "comp/gap/sm"
+        },
+        "radius": {
+          "t": "comp/radius/input"
+        },
+        "borderStyle": "DASHED"
+      },
+      "slots": [
+        {
+          "kind": "icon",
+          "name": "Icon",
+          "glyph": "upload",
+          "w": {
+            "t": "w/icon/lg"
+          },
+          "h": {
+            "t": "h/icon/lg"
+          }
+        },
+        {
+          "kind": "text",
+          "name": "Label",
+          "chars": "파일을 끌어다 놓거나 눌러서 선택하세요",
+          "textStyle": {
+            "s": "body/sm/400"
+          }
+        }
+      ],
+      "per": {
+        "state": {
+          "Default": {
+            "fill": {
+              "t": "comp/fill/field/default"
+            },
+            "border": {
+              "t": "comp/bdr/default"
+            },
+            "slots": {
+              "Icon": {
+                "fill": {
+                  "t": "fg/subtle"
+                }
+              },
+              "Label": {
+                "fill": {
+                  "t": "fg/subtle"
+                }
+              }
+            }
+          },
+          "DragOver": {
+            "fill": {
+              "t": "bg/accent/subtle"
+            },
+            "border": {
+              "t": "comp/bdr/focused"
+            },
+            "slots": {
+              "Icon": {
+                "fill": {
+                  "t": "fg/accent/primary"
+                }
+              },
+              "Label": {
+                "fill": {
+                  "t": "fg/accent/primary"
+                }
+              }
+            }
+          },
+          "Error": {
+            "fill": {
+              "t": "comp/fill/field/default"
+            },
+            "border": {
+              "t": "status/fg/error"
+            },
+            "slots": {
+              "Icon": {
+                "fill": {
+                  "t": "status/fg/error"
+                }
+              },
+              "Label": {
+                "fill": {
+                  "t": "status/fg/error"
+                }
+              }
+            }
+          },
+          "Disabled": {
+            "fill": {
+              "t": "comp/fill/field/disabled"
+            },
+            "border": {
+              "t": "comp/bdr/disabled"
+            },
+            "slots": {
+              "Icon": {
+                "fill": {
+                  "t": "comp/fg/disabled"
+                }
+              },
+              "Label": {
+                "fill": {
+                  "t": "comp/fg/disabled"
+                }
+              }
+            }
+          }
+        }
+      },
+      "notes": [
+        "DASHED 테두리는 토큰 대상이 아닌 스트로크 스타일 속성이다."
+      ],
+      "variantCount": 4
+    }
+  ],
+  "$componentBuilds": {
+    "note": "플러그인이 실제로 읽는 표. 값은 {t:토큰}·{s:스타일}·숫자/열거값뿐이다.",
+    "textStyleMap": {
+      "body/xs": "body/xs/400",
+      "body/sm": "body/sm/400",
+      "body/md": "body/md/400",
+      "body/lg": "body/lg/400",
+      "link/sm": "link/sm/500",
+      "link/md": "link/md/500",
+      "heading/sm": "heading/sm/600",
+      "utility/standard/xs": "utility/standard/xs/500",
+      "utility/standard/sm": "utility/standard/sm/500",
+      "utility/standard/md": "utility/standard/md/500",
+      "utility/tight/xs": "utility/tight/xs/500"
+    },
+    "provisional": [
+      "Input 기본 폭 280 — 스펙은 FILL 이지만 컴포넌트 루트에는 FILL 을 걸 수 없다",
+      "Card 기본 폭 320 — 스펙은 FILL(부모 그리드 폭)",
+      "Modal 폭 480 — 스펙 본문의 \"desktop 480px 기준\"을 숫자로 옮긴 것. 전용 토큰 없음",
+      "Radio 안쪽 점 8 — 비주얼 원 16 의 절반. 전용 토큰 없음",
+      "Radio 안쪽 점 8 — 동일",
+      "Switch 트랙 폭 42 — 스펙의 \"트랙 높이(24)의 약 1.75배\". 전용 토큰 없음",
+      "Switch 썸 16 — 스펙의 \"트랙 높이(24) − comp/gap/xs(4)×2\". 전용 토큰 없음",
+      "Switch 썸 16 — 동일",
+      "Select 기본 폭 280 — 스펙은 FILL",
+      "Tooltip 화살표 8×8 정사각을 45° 돌려 쓴다. 스펙에 화살표 규격이 없어 잠정",
+      "Tooltip 화살표 8×8 — 동일",
+      "Divider 기본 길이 200 — 스펙은 FILL",
+      "Divider 기본 길이 200 — 스펙은 FILL",
+      "Progress Bar 기본 길이 240 — 스펙은 FILL",
+      "Skeleton Text 160×16 — 한 줄 텍스트 자리. 전용 토큰 없음",
+      "Skeleton Text 높이 16",
+      "Skeleton Rectangle 160×96 — 이미지 자리. 전용 토큰 없음",
+      "Skeleton Rectangle 높이 96",
+      "Skeleton Circle 40×40 — 아바타 자리. 전용 토큰 없음",
+      "Skeleton Circle 40×40",
+      "Slider 기본 길이 240 — 스펙에 폭 토큰이 없다",
+      "Image Frame 기본 240×160(3:2) — 스펙은 FILL 폭 + aspectRatio 속성",
+      "Image Frame 기본 높이 160 — 3:2 기준",
+      "Attachment Input 기본 폭 320 — 스펙은 FILL"
+    ],
+    "usesTokens": [
+      "a11y/touch-target/min",
+      "bg/accent/subtle",
+      "bg/default",
+      "bg/ev/raised",
+      "bg/variant/inverse",
+      "comp/bdr/default",
+      "comp/bdr/disabled",
+      "comp/bdr/focused",
+      "comp/bdr/subtle",
+      "comp/fg/disabled",
+      "comp/fill/accent/primary",
+      "comp/fill/accent/secondary",
+      "comp/fill/field/default",
+      "comp/fill/field/disabled",
+      "comp/fill/inverse/default",
+      "comp/fill/neutral/disabled",
+      "comp/fill/neutral/ghost",
+      "comp/fill/neutral/primary",
+      "comp/fill/neutral/secondary",
+      "comp/fill/neutral/tertiary",
+      "comp/gap/md",
+      "comp/gap/sm",
+      "comp/gap/xs",
+      "comp/padding/button/x",
+      "comp/padding/button/y",
+      "comp/padding/card",
+      "comp/padding/field/x",
+      "comp/padding/field/y",
+      "comp/radius/button",
+      "comp/radius/card",
+      "comp/radius/checkbox",
+      "comp/radius/chip",
+      "comp/radius/image/lg",
+      "comp/radius/image/md",
+      "comp/radius/image/sm",
+      "comp/radius/input",
+      "comp/radius/modal",
+      "comp/radius/pill",
+      "comp/radius/progress",
+      "comp/radius/radio",
+      "comp/radius/slider",
+      "comp/radius/switch",
+      "comp/radius/toast",
+      "comp/radius/tooltip",
+      "comp/track/bar-height",
+      "comp/track/slider-height",
+      "comp/track/spinner-stroke",
+      "dimension/1",
+      "dimension/8",
+      "fg/accent/primary",
+      "fg/default",
+      "fg/inverse/default",
+      "fg/inverse/subtle",
+      "fg/link/default",
+      "fg/link/visited",
+      "fg/subtle",
+      "fg/subtler",
+      "h/avatar/lg",
+      "h/avatar/md",
+      "h/avatar/sm",
+      "h/control/lg",
+      "h/control/md",
+      "h/control/sm",
+      "h/icon/lg",
+      "h/icon/md",
+      "h/icon/sm",
+      "h/icon/xs",
+      "radius/2xs",
+      "radius/full",
+      "radius/sm",
+      "status/bg/error",
+      "status/bg/success",
+      "status/bg/warning",
+      "status/fg/error",
+      "status/fg/success",
+      "status/fg/warning",
+      "w/avatar/lg",
+      "w/avatar/md",
+      "w/avatar/sm",
+      "w/control/lg",
+      "w/control/md",
+      "w/control/sm",
+      "w/icon/lg",
+      "w/icon/md",
+      "w/icon/sm",
+      "w/icon/xs"
+    ],
+    "usesStyles": [
+      "body/lg/400",
+      "body/md/400",
+      "body/sm/400",
+      "body/xs/400",
+      "elevation/1",
+      "elevation/2",
+      "elevation/3",
+      "elevation/4",
+      "heading/sm/600",
+      "link/md/500",
+      "link/sm/500",
+      "utility/standard/md/500",
+      "utility/standard/sm/500",
+      "utility/standard/xs/500",
+      "utility/tight/xs/500"
+    ],
+    "totalVariants": 136
+  }
 }

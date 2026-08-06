@@ -255,8 +255,9 @@ for (const [name, cssStr] of Object.entries(T.effect.elevation)) {
 }
 
 // ---------- 컴포넌트 ----------
-// 스키마의 variantAxes/tokenBindings 가 그대로 컴포넌트셋 구조다.
-// 페이로드는 구조만 옮기고, 실제 노드 생성 규칙은 플러그인이 해석한다.
+// 스키마의 variantAxes/tokenBindings 는 사람이 읽는 서술이다. 그대로 옮겨 목록으로
+// 싣되, 플러그인이 실제로 노드를 만들 때 보는 것은 figma/component-build.js 의
+// 빌드표다(componentBuilds). 두 축이 어긋나면 아래 검증에서 생성이 멈춘다.
 const components = [];
 const bindable = new Set(variables.map(v => v.name));
 const styleNames = new Set(textStyles.map(s => s.name).concat(effectStyles.map(s => s.name)));
@@ -306,6 +307,42 @@ for (const [name, c] of Object.entries(S.components)) {
     properties: c.properties || [],
     unresolvedTokens: uniq
   });
+}
+
+// ---------- 컴포넌트 빌드표 ----------
+// 기계가 읽는 표. 값은 {t:토큰} · {s:스타일} · 숫자/열거값뿐이고 문장이 없다.
+// 검증은 경고가 아니라 예외다 — 잘못된 컴포넌트는 변수와 달리 '그럴듯하게 잘못된
+// 모양'으로 사용자 파일에 남기 때문에, 어긋나면 페이로드를 아예 내지 않는다.
+const CB = require('./component-build.js');
+let componentBuilds = [];
+let componentBuildMeta = null;
+{
+  const schemaAxes = {};
+  for (const [name, c] of Object.entries(S.components)) {
+    if (name.startsWith('_')) continue;
+    schemaAxes[name] = c.variantAxes || {};
+  }
+  let used;
+  try {
+    used = CB.validate(CB.BUILDS, { variableNames: bindable, styleNames, schemaAxes });
+  } catch (e) {
+    console.error('\n' + e.message);
+    process.exit(1);
+  }
+  // 스키마에 있는데 빌드표에 없는 컴포넌트는 조용히 빠진다 — 경고로 드러낸다.
+  const built = new Set(CB.BUILDS.map(b => b.name));
+  for (const name of Object.keys(schemaAxes))
+    if (!built.has(name)) W('컴포넌트 ' + name + ' 이(가) 빌드표에 없어 생성되지 않습니다.');
+
+  componentBuilds = CB.BUILDS.map(b => Object.assign({}, b, { variantCount: CB.variantCount(b) }));
+  componentBuildMeta = {
+    note: '플러그인이 실제로 읽는 표. 값은 {t:토큰}·{s:스타일}·숫자/열거값뿐이다.',
+    textStyleMap: CB.TEXT,
+    provisional: CB.PROVISIONAL,
+    usesTokens: used.tokens,
+    usesStyles: used.styles,
+    totalVariants: componentBuilds.reduce((a, b) => a + b.variantCount, 0)
+  };
 }
 
 // ---------- 이관표 (v0.4/구 스크립트 → v0.77) ----------
@@ -413,7 +450,9 @@ const payload = {
   collections,
   variables,
   styles: { fontsToLoad, text: textStyles, effect: effectStyles },
-  components
+  components,
+  componentBuilds,
+  $componentBuilds: componentBuildMeta
 };
 
 // ---------- 이관표 자기 검사 ----------
@@ -459,5 +498,9 @@ console.log('이관표 — 개명 ' + variableRenames.length + ' · 분할 ' + v
   + ' · 스타일 개명 ' + (styleRenames.text.length + styleRenames.effect.length));
 console.log('텍스트 스타일 ' + textStyles.length + ' · 이펙트 스타일 ' + effectStyles.length
   + ' · 폰트 조합 ' + fontsToLoad.length + ' · 컴포넌트 ' + components.length);
+console.log('컴포넌트 빌드표 ' + componentBuilds.length + ' 세트 · 변형 '
+  + componentBuildMeta.totalVariants + ' · 참조 토큰 ' + componentBuildMeta.usesTokens.length
+  + ' · 참조 스타일 ' + componentBuildMeta.usesStyles.length
+  + ' · 잠정 수치 ' + componentBuildMeta.provisional.length);
 if (warn.length) { console.log('\n경고 ' + warn.length + '건'); warn.forEach(w => console.log('  · ' + w)); }
 else console.log('\n경고 없음');

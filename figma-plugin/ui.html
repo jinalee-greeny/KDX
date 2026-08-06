@@ -106,6 +106,7 @@
   <span id="foot" class="mut"></span>
   <span class="sp"></span>
   <label class="ck" id="stylewrap"><input type="checkbox" id="dostyles" checked> 스타일도 적용</label>
+  <label class="ck" id="compwrap"><input type="checkbox" id="docomponents" checked> 컴포넌트도 생성</label>
   <button id="back" hidden>뒤로</button>
   <button id="go" class="pri" disabled>차이 확인</button>
 </footer>
@@ -122,6 +123,7 @@ function setStep(n){
   }
   $('back').hidden = n===1;
   $('stylewrap').style.display = n===2 ? 'flex' : 'none';
+  $('compwrap').style.display = n===2 ? 'flex' : 'none';
   $('go').textContent = n===1 ? '차이 확인' : n===2 ? '적용' : '닫기';
   $('go').disabled = n===2 ? false : (n===1 ? !payload : false);
   $('go').className = n===2 ? 'pri' : (n===3 ? '' : 'pri');
@@ -140,7 +142,8 @@ function parseSrc(){
       + ' · 컬렉션 '+o.collections.length+' · 변수 '+o.variables.length
       + ' · 텍스트 스타일 '+(((o.styles||{}).text)||[]).length
       + ' · 이펙트 '+(((o.styles||{}).effect)||[]).length
-      + ' · 컴포넌트 '+((o.components||[]).length)+'(생성 안 함)';
+      + ' · 컴포넌트 '+((o.componentBuilds||[]).length)+' 세트'
+      + '/'+(((o.$componentBuilds||{}).totalVariants)||0)+' 변형';
     $('go').disabled = false;
   } catch(e){
     payload=null; $('p1msg').innerHTML = '<span class="err">✘ '+e.message+'</span>'; $('go').disabled=true;
@@ -185,7 +188,8 @@ function renderPlan(p){
     + chip('b', c.renames, '제자리 개명')
     + chip('b', c.splits, '분할')
     + chip('', c.same, '변화 없음')
-    + chip('c', c.orphans, '고아(유지)');
+    + chip('c', c.orphans, '고아(유지)')
+    + (c.componentSets ? chip('a', c.componentSets, '컴포넌트 세트') + chip('a', c.componentVariants, '변형') : '');
 
   let h = '';
 
@@ -261,11 +265,34 @@ function renderPlan(p){
         p.orphans.map(o=>'<tr><td class="k">'+esc(o.collection)+'/'+esc(o.name)+'</td><td class="v">'+esc(o.type)+'</td></tr>').join(''))
     : '<p class="hint">없습니다.</p>';
 
-  h += '<h3>컴포넌트 <span class="n">생성 안 함</span></h3>';
-  h += '<p class="hint">페이로드의 컴포넌트 '+p.components.length+'건은 <b>스펙 목록</b>입니다. 이 플러그인은 컴포넌트를 만들지 않습니다 — Figma 는 토큰의 집이지 컴포넌트의 집이 아니라는 원칙 그대로입니다.</p>';
-  h += box('스펙 목록', p.components.length,
-      p.components.map(c=>'<tr><td class="k">'+esc(c.name)+'</td><td class="v">'+esc(c.status||'')
-        +(c.variantCount?' · 변형 '+c.variantCount:'')+'</td></tr>').join(''));
+  const cp = p.componentPlan || null;
+  if (!cp || !cp.create.length) {
+    h += '<h3>컴포넌트 <span class="n">생성 안 함</span></h3>';
+    h += '<p class="hint">페이로드에 빌드표(componentBuilds)가 없습니다. 스펙 '+((p.components||[]).length)+'건은 문장이라 기계가 읽지 않습니다.</p>';
+  } else {
+    h += '<h3>컴포넌트 <span class="n">'+cp.create.length+' 세트 · '+cp.totalVariants+' 변형</span></h3>';
+    h += '<p class="hint">전용 페이지 <b>'+esc(cp.page)+'</b> 안에서만 만듭니다'
+       + (cp.pageExists?' (이미 있는 페이지를 씁니다).':' (없어서 새로 만듭니다).')
+       + ' 페이지 밖의 컴포넌트는 손대지 않습니다.</p>';
+    h += box('만들 세트', cp.create.length,
+        cp.create.map(c=>'<tr><td class="k">'+esc(c.name)+'</td><td class="v">변형 '+c.variantCount
+          +' · 축 '+esc(c.axes)+'</td></tr>').join(''));
+    if (cp.renamePrev.length)
+      h += box('같은 이름이 이 페이지에 있어 “— 이전”으로 밀어 둘 세트', cp.renamePrev.length,
+          cp.renamePrev.map(n=>'<tr><td class="k">'+esc(n)+'</td><td class="v">개명 · 삭제 안 함</td></tr>').join(''));
+    if (cp.elsewhere.length)
+      h += box('다른 페이지에 같은 이름 (알리기만 함)', cp.elsewhere.length,
+          cp.elsewhere.map(o=>'<tr><td class="k">'+esc(o.name)+'</td><td class="v">'+esc(o.page)+' · 손대지 않음</td></tr>').join(''));
+    if (cp.missingTokens.length)
+      h += box('빌드표가 찾는데 파일에 없는 토큰', cp.missingTokens.length,
+          cp.missingTokens.map(n=>'<tr><td class="k">'+esc(n)+'</td><td class="v">변수 단계가 먼저 돌면 생깁니다</td></tr>').join(''));
+    if (cp.missingStyles.length)
+      h += box('빌드표가 찾는데 파일에 없는 스타일', cp.missingStyles.length,
+          cp.missingStyles.map(n=>'<tr><td class="k">'+esc(n)+'</td><td class="v">스타일 단계가 먼저 돌면 생깁니다</td></tr>').join(''));
+    if (cp.provisional.length)
+      h += box('토큰이 없어 숫자로 박은 잠정 수치', cp.provisional.length,
+          cp.provisional.map(n=>'<tr><td class="k">'+esc(n)+'</td><td class="v">토큰이 생기면 교체</td></tr>').join(''));
+  }
 
   $('plan').innerHTML = h;
   $('foot').textContent = '적용을 누르면 위 내용이 이 파일에 반영됩니다.';
@@ -293,7 +320,7 @@ $('go').onclick = () => {
   } else if (step === 2) {
     $('log').innerHTML=''; $('result').innerHTML=''; setStep(3);
     $('go').disabled = true; $('foot').textContent = '적용하는 중…';
-    parent.postMessage({pluginMessage:{type:'apply', payload, opts:{styles:$('dostyles').checked}}}, '*');
+    parent.postMessage({pluginMessage:{type:'apply', payload, opts:{styles:$('dostyles').checked, components:$('docomponents').checked}}}, '*');
   } else {
     parent.postMessage({pluginMessage:{type:'close'}}, '*');
   }
@@ -310,6 +337,9 @@ onmessage = (e) => {
       + '<b>'+(m.report.problems.length?'문제 '+m.report.problems.length+'건과 함께 끝났습니다':'모두 반영했습니다')+'</b><br>'
       + '신규 '+s.created+' · 값 주입 '+s.valuesSet+' · 개명 '+s.renamed+' · 분할 '+s.split
       + ' · 텍스트 스타일 '+s.styles.text+' · 이펙트 '+s.styles.effect
+      + (s.components?' · 컴포넌트 '+s.components.sets+' 세트/'+s.components.variants+' 변형'
+          +(s.components.renamedPrev?' (이전 '+s.components.renamedPrev+'건 개명)':'')
+          +(s.components.skipped?' · 실패 '+s.components.skipped:''):'')
       + (s.crossCollection?'<br><span class="warn">컬렉션 이동 '+s.crossCollection+'건은 손으로 처리해야 합니다.</span>':'')
       + '</div>';
     $('go').disabled = false; $('go').textContent='닫기'; $('go').className='';

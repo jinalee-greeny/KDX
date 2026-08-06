@@ -215,7 +215,7 @@ html[data-modal] .gnb-tabs,html[data-modal] .gnb .gmwrap{pointer-events:none}
 .ps-f.info i{background:var(--line-2);color:var(--fg-sub)}
 .ps-note{font-size:11px;color:var(--fg-mut);line-height:1.6;margin-top:10px}
 .ps-note b{color:var(--fg-sub)}
-/* ===== Figma 내보내기 패널 (v0.82) ==========================================
+/* ===== Figma 내보내기 패널 (v0.83) ==========================================
    인제스트가 '밖에서 안으로'라면 이쪽은 '안에서 밖으로'다. 다만 대칭이 완전하지
    않다 — 인제스트는 서버가 해석해 주지만, 내보내기는 브라우저가 Figma 파일을
    만질 수 없다. 그래서 이 패널의 일은 '페이로드를 확인해서 손에 쥐여 주는 것'
@@ -1455,7 +1455,7 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
       <button data-m="spec" role="menuitem"><b><svg class="i"><use href="#icon-action-search"/></svg>스펙 시트<span class="kb">S</span></b><small>컴포넌트·모듈·패턴 스펙 색인</small></button>
     </div>
   </div>
-  <span class="gver">Figma 내보내기 · v0.82</span>
+  <span class="gver">Figma 내보내기 · v0.83</span>
 </header>
 <div class="app">
 
@@ -1786,7 +1786,7 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
 <!-- ============ 화면 · 섹션 고르기 모달 ============ -->
 <div class="pickmask" id="pickMask"><div class="pick" id="pick" role="dialog" aria-label="화면 고르기"></div></div>
 
-<!-- ============ Figma 내보내기 (v0.82) ============
+<!-- ============ Figma 내보내기 (v0.83) ============
      인제스트가 '밖에서 안으로'라면 이쪽은 '안에서 밖으로'다. 다만 브라우저는
      Figma 파일을 열 수 없으므로, 이 창의 일은 페이로드를 확인시키고 손에
      쥐여 주는 데서 끝난다. 파일을 실제로 고치는 것은 Figma 안의 플러그인이다. -->
@@ -1832,7 +1832,7 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
 
     <div class="fx-sec">
       <h4>원칙</h4>
-      <p><b>삭제 없음</b> — 페이로드에는 지우라는 지시가 없습니다. 짝이 없는 변수는 보고만 합니다. · <b>개명은 제자리</b> — 지우고 새로 만들지 않습니다. · <b>dry-run 필수</b> — 적용 전에 사람이 확인합니다. · <b>컴포넌트는 만들지 않습니다</b> — Figma 에는 원칙적으로 컴포넌트를 직접 만들지 않습니다.</p>
+      <p><b>삭제 없음</b> — 페이로드에는 지우라는 지시가 없습니다. 짝이 없는 변수는 보고만 합니다. · <b>개명은 제자리</b> — 지우고 새로 만들지 않습니다. · <b>dry-run 필수</b> — 적용 전에 사람이 확인합니다. · <b>컴포넌트는 전용 페이지 안에서만</b> — <code>[Freesm] Components</code> 페이지에만 만듭니다. 같은 이름이 그 페이지에 있으면 지우지 않고 <code>— 이전</code>으로 밀어 두고, 다른 페이지의 같은 이름은 알리기만 합니다.</p>
     </div>
   </div>
 </div>
@@ -3036,7 +3036,7 @@ gMenu.addEventListener('click',e=>{const b=e.target.closest('button[data-m]');if
   else if(m==='figma')fxOpen();
 });
 
-/* --- Figma 내보내기 (v0.82) --------------------------------------------------
+/* --- Figma 내보내기 (v0.83) --------------------------------------------------
    페이로드는 데모 안에 복사해 두지 않고 매번 ../figma/build-payload.json 을
    읽는다. 복사본을 두면 토큰이 바뀔 때마다 두 곳이 어긋나고, 그 어긋남은
    조용히 잘못된 파일을 만든다. 대신 읽어 온 페이로드의 schemaVersion 을
@@ -3094,7 +3094,7 @@ function fxRender(src){
     ['컬렉션',(d.collections||[]).length,(d.collections||[]).reduce((a,c)=>a+(c.modes||[]).length,0)+'개 모드'],
     ['변수',(d.variables||[]).length,'값·스코프 포함'],
     ['스타일',nStyle,(d.styles&&(d.styles.fontsToLoad||[]).length||0)+'개 폰트'],
-    ['컴포넌트',(d.components||[]).length,'스펙만 전달']
+    ['컴포넌트',(d.componentBuilds||[]).length+' 세트',((((d.$componentBuilds||{}).totalVariants)||0))+'개 변형']
   ].map(c=>'<div class="fx-c"><i>'+c[0]+'</i><b>'+c[1]+'</b><small>'+fxEsc(c[2])+'</small></div>').join('');
   document.getElementById('fxGrid').hidden=false;
 

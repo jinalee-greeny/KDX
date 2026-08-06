@@ -6,9 +6,11 @@
  *   · 삭제 없음        — 페이로드에 없는 것은 '고아'로 보고만 한다.
  *   · 개명은 제자리    — variable.name 을 고쳐 기존 바인딩을 살린다.
  *   · dry-run 필수     — 적용 전에 신규·개명·값변경을 사람이 확인한다.
- *   · 컴포넌트 생성 없음 — payload.components 는 스펙 목록일 뿐, 여기서 만들지 않는다.
+ *   · 컴포넌트는 격리   — payload.componentBuilds 를 읽어 만들되, 전용 페이지
+ *                        '[Freesm] Components' 안에서만 만들고 고친다.
+ *                        같은 이름이 그 페이지에 있으면 '— 이전' 으로 개명해 남긴다.
  *
- * 실행 순서: 컬렉션/모드 → 개명 → 분할 → 변수 생성 → 값 주입 → 스타일
+ * 실행 순서: 컬렉션/모드 → 개명 → 분할 → 변수 생성 → 값 주입 → 스타일 → 컴포넌트
  */
 
 figma.showUI(__html__, { width: 560, height: 720, themeColors: true });
@@ -300,6 +302,9 @@ async function dryRun(payload) {
   /* 4) 스타일 */
   const styles = await dryRunStyles(payload);
 
+  /* 5) 컴포넌트 */
+  const componentPlan = await dryRunComponents(payload);
+
   return {
     meta: payload.$meta || {},
     migrations: mg,
@@ -310,6 +315,7 @@ async function dryRun(payload) {
     components: (payload.components || []).map((c) => ({
       name: c.name, status: c.status, variantCount: c.variantCount
     })),
+    componentPlan,
     counts: {
       create: variables.create.length,
       update: variables.update.length,
@@ -318,7 +324,9 @@ async function dryRun(payload) {
       splits: mg.splits.filter((s) => s.status === 'split').length,
       unsafe: mg.renames.filter((r) => r.status === 'unsafe').length
             + mg.splits.filter((s) => s.status === 'unsafe').length,
-      orphans: orphanFiltered.length
+      orphans: orphanFiltered.length,
+      componentSets: componentPlan.create.length,
+      componentVariants: componentPlan.totalVariants
     }
   };
 }
@@ -380,6 +388,7 @@ async function dryRunStyles(payload) {
 
 async function apply(payload, opts) {
   const doStyles = !opts || opts.styles !== false;
+  const doComponents = !opts || opts.components !== false;
   const log = [];
   const problems = [];
   const push = (t, m) => { log.push({ t, m }); figma.ui.postMessage({ type: 'progress', line: { t, m } }); };
@@ -492,6 +501,11 @@ async function apply(payload, opts) {
   if (doStyles) styleReport = await applyStyles(payload, push, problems);
   else push('skip', '스타일 단계는 껐습니다.');
 
+  /* 7) 컴포넌트 — 스타일 다음이어야 한다. 텍스트·이펙트 스타일을 이름으로 찾아 건다. */
+  let componentReport = { sets: 0, variants: 0, renamedPrev: 0, skipped: 0 };
+  if (doComponents) componentReport = await applyComponents(payload, push, problems);
+  else push('skip', '컴포넌트 단계는 껐습니다.');
+
   for (const p of problems) push('err', p);
 
   return {
@@ -503,6 +517,7 @@ async function apply(payload, opts) {
       renamed: mg.renames.filter((r) => r.status === 'rename').length,
       split: mg.splits.filter((s) => s.status === 'split').length,
       styles: styleReport,
+      components: componentReport,
       crossCollection: mg.crossCollection.length
     }
   };
@@ -565,6 +580,484 @@ async function applyStyles(payload, push, problems) {
   }
   push('ok', '이펙트 스타일 ' + rep.effect + '개 반영');
 
+  return rep;
+}
+
+/* ───────────────────────── 컴포넌트 생성 ─────────────────────────
+ *
+ * 읽는 것은 payload.componentBuilds — figma/component-build.js 가 낸 기계용 표다.
+ * payload.components 는 사람이 읽는 스펙 서술이라 여기서 쓰지 않는다.
+ *
+ * 안전 규칙
+ *   · 만든 것은 전용 페이지 '[Freesm] Components' 에만 둔다. 사용자의 다른 페이지는
+ *     읽지도 고치지도 않는다.
+ *   · 전용 페이지에 같은 이름이 이미 있으면 지우지 않고 '— 이전' 으로 개명해 옆에 둔다.
+ *     기존 인스턴스는 그 옛 컴포넌트를 계속 가리키므로 아무것도 깨지지 않는다.
+ *   · 다른 페이지에 같은 이름이 있으면 손대지 않고 보고만 한다.
+ */
+
+const BUILD_PAGE = '[Freesm] Components';
+
+/* 값 해석 — 페이로드 안에서 별칭을 따라가 숫자를 얻는다.
+   노드는 먼저 크기를 가져야 하므로, 변수를 걸기 전에 쓸 초깃값이 필요하다. */
+function makeNumResolver(payload) {
+  const byKey = new Map();
+  const nameToCol = new Map();
+  const ambiguous = [];
+  const PREF = ['Semantic', 'Radius', 'Scale', 'Brand', 'Web'];
+  for (const v of (payload.variables || [])) {
+    byKey.set(KEY(v.collection, v.name), v);
+    const cur = nameToCol.get(v.name);
+    if (cur === undefined) nameToCol.set(v.name, v.collection);
+    else if (cur !== v.collection) {
+      const win = PREF.indexOf(v.collection) < PREF.indexOf(cur) ? v.collection : cur;
+      nameToCol.set(v.name, win);
+      ambiguous.push(v.name + ' (' + cur + ' · ' + v.collection + ' → ' + win + ')');
+    }
+  }
+  const defMode = new Map();
+  for (const c of (payload.collections || [])) defMode.set(c.name, c.defaultMode || c.modes[0]);
+
+  function resolve(name, depth) {
+    const col = nameToCol.get(name);
+    if (!col) return null;
+    const pv = byKey.get(KEY(col, name));
+    if (!pv || depth > 8) return null;
+    const mv = pv.values[defMode.get(col)] || pv.values[Object.keys(pv.values)[0]];
+    if (!mv) return null;
+    if (mv.kind === 'alias') return resolve(mv.name, depth + 1);
+    return typeof mv.value === 'number' ? mv.value : parseFloat(mv.value);
+  }
+  return {
+    collectionOf: (name) => nameToCol.get(name) || null,
+    num: (name) => { const n = resolve(name, 0); return typeof n === 'number' && isFinite(n) ? n : null; },
+    ambiguous: [...new Set(ambiguous)]
+  };
+}
+
+/* 아이콘 자리. 이 디자인 시스템에는 아직 아이콘 라이브러리가 없다.
+   빈 프레임을 두면 변형이 망가져 보이므로, 24 그리드 위의 단순 선 도형을 직접 그린다.
+   나중에 진짜 아이콘 컴포넌트로 바꿔 끼우라고 컴포넌트 설명에 적어 둔다. */
+const GLYPHS = {
+  'check':        ['M5 13l4 4L19 7'],
+  'minus':        ['M6 12h12'],
+  'x':            ['M6 6l12 12', 'M18 6L6 18'],
+  'search':       ['M17 11a6 6 0 1 1-12 0 6 6 0 0 1 12 0z', 'M20 20l-4.2-4.2'],
+  'chevron-down': ['M6 9l6 6 6-6'],
+  'info':         ['M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z', 'M12 11.5v4.5', 'M12 8h.01'],
+  'image':        ['M3 5h18v14H3z', 'M3 16l5-5 4 4 3-3 6 6', 'M8.5 9.5h.01'],
+  'upload':       ['M12 16V4', 'M7 9l5-5 5 5', 'M4 17v3h16v-3']
+};
+
+function makeIcon(glyph, size) {
+  const paths = GLYPHS[glyph] || GLYPHS['x'];
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" '
+    + 'fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+    + paths.map((d) => '<path d="' + d + '"/>').join('') + '</svg>';
+  const node = figma.createNodeFromSvg(svg);
+  node.name = 'icon/' + glyph;
+  node.resize(size || 24, size || 24);
+  return node;
+}
+
+/* 아이콘 색은 프레임이 아니라 그 안의 선에 걸린다 */
+function paintIcon(node, paint) {
+  const targets = node.findAll ? node.findAll((n) => 'strokes' in n) : [];
+  for (const n of targets) { try { n.strokes = [paint]; } catch (e) { /* 무시 */ } }
+}
+
+/* 회전한 노드를 '보이는 중심' 기준으로 놓는다.
+   x·y 는 회전 전 좌상단의 위치라, 45° 돌린 화살표는 그냥 놓으면 어긋난다. */
+function placeRotated(node, cx, cy, deg) {
+  const r = (deg * Math.PI) / 180, c = Math.cos(r), s = Math.sin(r);
+  const w = node.width / 2, h = node.height / 2;
+  node.relativeTransform = [[c, s, cx - (c * w + s * h)], [-s, c, cy - (-s * w + c * h)]];
+}
+
+/* 페이로드가 쓰는 값 한 개를 푼다 — {t:토큰} · {s:스타일} · 숫자 · 열거값 */
+function valueKind(v) {
+  if (v === null || v === undefined) return { kind: 'none' };
+  if (typeof v === 'object' && typeof v.t === 'string') return { kind: 'token', name: v.t };
+  if (typeof v === 'object' && typeof v.s === 'string') return { kind: 'style', name: v.s };
+  if (typeof v === 'number') return { kind: 'num', value: v };
+  return { kind: 'raw', value: v };
+}
+
+/* base + per(축별) + combos 를 한 덩어리로 합친다.
+   축 순서대로 덮어쓰고, combos 가 마지막이다. slots 는 슬롯 이름별로 따로 합친다. */
+function mergeDelta(target, delta) {
+  if (!delta) return target;
+  for (const k in delta) {
+    if (k === 'slots') {
+      target.slots = target.slots || {};
+      for (const n in delta.slots) target.slots[n] = mergeDelta(target.slots[n] || {}, delta.slots[n]);
+    } else target[k] = delta[k];
+  }
+  return target;
+}
+
+function effectiveProps(build, combo) {
+  const out = mergeDelta({}, build.base);
+  for (const ax of build.order) mergeDelta(out, (build.per[ax] || {})[combo[ax]]);
+  const key = build.order.map((ax) => ax + '=' + combo[ax]).join(',');
+  mergeDelta(out, (build.combos || {})[key]);
+  return out;
+}
+
+function allCombos(build) {
+  let rows = [{}];
+  for (const ax of build.order) {
+    const next = [];
+    for (const r of rows) for (const v of build.axes[ax]) next.push(Object.assign({}, r, { [ax]: v }));
+    rows = next;
+  }
+  return rows;
+}
+
+/* ---------- dry-run ---------- */
+
+async function dryRunComponents(payload) {
+  const builds = payload.componentBuilds || [];
+  const meta = payload.$componentBuilds || {};
+  const out = {
+    page: BUILD_PAGE,
+    pageExists: !!figma.root.children.find((p) => p.name === BUILD_PAGE),
+    create: [], renamePrev: [], elsewhere: [],
+    missingStyles: [], missingTokens: [],
+    provisional: meta.provisional || [],
+    totalVariants: 0
+  };
+  if (!builds.length) return out;
+
+  const st = await readState();
+  const R = makeNumResolver(payload);
+  const texts = await figma.getLocalTextStylesAsync();
+  const effects = await figma.getLocalEffectStylesAsync();
+  const styleNames = new Set(texts.map((s) => s.name).concat(effects.map((s) => s.name)));
+
+  for (const n of (meta.usesStyles || [])) if (!styleNames.has(n)) out.missingStyles.push(n);
+  for (const n of (meta.usesTokens || [])) {
+    const col = R.collectionOf(n);
+    if (!col || !st.varByKey.get(KEY(col, n))) out.missingTokens.push(n);
+  }
+
+  const page = figma.root.children.find((p) => p.name === BUILD_PAGE);
+  const onPage = new Map();
+  if (page) for (const c of page.children) onPage.set(c.name, c);
+
+  for (const b of builds) {
+    out.totalVariants += b.variantCount;
+    if (onPage.has(b.name)) out.renamePrev.push(b.name);
+    out.create.push({ name: b.name, variantCount: b.variantCount, axes: Object.keys(b.axes).join(' · ') });
+  }
+
+  // 다른 페이지의 같은 이름 — 손대지 않고 알리기만 한다
+  const names = new Set(builds.map((b) => b.name));
+  for (const p of figma.root.children) {
+    if (p.name === BUILD_PAGE) continue;
+    for (const c of p.children) {
+      if ((c.type === 'COMPONENT_SET' || c.type === 'COMPONENT') && names.has(c.name))
+        out.elsewhere.push({ page: p.name, name: c.name, type: c.type });
+    }
+  }
+  return out;
+}
+
+/* ---------- 적용 ---------- */
+
+async function applyComponents(payload, push, problems) {
+  const builds = payload.componentBuilds || [];
+  const meta = payload.$componentBuilds || {};
+  const rep = { sets: 0, variants: 0, renamedPrev: 0, skipped: 0 };
+  if (!builds.length) { push('skip', '빌드표가 없어 컴포넌트 단계를 건너뜁니다.'); return rep; }
+
+  const st = await readState();
+  const mg = planMigrations(payload, st);
+  const lookup = makeLookup(st, mg);
+  const R = makeNumResolver(payload);
+  for (const a of R.ambiguous) problems.push('토큰 이름이 두 컬렉션에 있습니다 — ' + a);
+
+  for (const f of (payload.styles && payload.styles.fontsToLoad) || []) {
+    try { await figma.loadFontAsync(f); } catch (e) { /* 스타일 단계에서 이미 보고했다 */ }
+  }
+  const texts = await figma.getLocalTextStylesAsync();
+  const effects = await figma.getLocalEffectStylesAsync();
+  const tByName = new Map(texts.map((s) => [s.name, s]));
+  const eByName = new Map(effects.map((s) => [s.name, s]));
+
+  const varOf = (name) => {
+    const col = R.collectionOf(name);
+    return col ? lookup(col, name) : null;
+  };
+  const solid = (tokenName) => {
+    let paint = { type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 }, opacity: 1 };
+    const v = varOf(tokenName);
+    if (!v) { problems.push('컴포넌트 — 없는 토큰 ' + tokenName); return paint; }
+    try { paint = figma.variables.setBoundVariableForPaint(paint, 'color', v); }
+    catch (e) { problems.push('컴포넌트 색 바인딩 실패 ' + tokenName + ' — ' + e.message); }
+    return paint;
+  };
+  const bindNum = (node, field, tokenName) => {
+    const v = varOf(tokenName);
+    if (!v) { problems.push('컴포넌트 — 없는 토큰 ' + tokenName); return; }
+    try { node.setBoundVariable(field, v); }
+    catch (e) { problems.push('컴포넌트 ' + field + ' 바인딩 실패 ' + tokenName + ' — ' + e.message); }
+  };
+
+  /* 페이지 확보 */
+  let page = figma.root.children.find((p) => p.name === BUILD_PAGE);
+  if (!page) { page = figma.createPage(); page.name = BUILD_PAGE; push('ok', '페이지 신규 — ' + BUILD_PAGE); }
+  await figma.setCurrentPageAsync(page);
+
+  /* 같은 이름이 이 페이지에 이미 있으면 지우지 않고 옆으로 밀어 둔다.
+     기존 인스턴스는 옛 컴포넌트를 계속 가리키므로 깨지지 않는다. */
+  {
+    const want = new Set(builds.map((b) => b.name));
+    for (const c of page.children.slice()) {
+      if ((c.type !== 'COMPONENT_SET' && c.type !== 'COMPONENT') || !want.has(c.name)) continue;
+      let n = c.name + ' — 이전', i = 2;
+      const taken = new Set(page.children.map((x) => x.name));
+      while (taken.has(n)) { n = c.name + ' — 이전 ' + i; i++; }
+      c.name = n;
+      rep.renamedPrev++;
+      push('ok', '기존 컴포넌트 개명 — ' + n + ' (지우지 않았습니다)');
+    }
+  }
+
+  /* 놓을 자리 — 기존 내용 오른쪽에서 시작한다 */
+  let originX = 0;
+  for (const c of page.children) originX = Math.max(originX, c.x + c.width + 160);
+  let cursorY = 0;
+
+  /* ---- 한 노드에 속성 한 벌 적용 ---- */
+  const applyProps = async (node, p, parentAuto, parentBox) => {
+    const num = (v) => {
+      const k = valueKind(v);
+      if (k.kind === 'num') return k.value;
+      if (k.kind === 'token') { const n = R.num(k.name); return n === null ? 24 : n; }
+      return null;
+    };
+
+    // 레이아웃 먼저 — 크기 규칙이 여기에 매인다
+    if (p.layout !== undefined && 'layoutMode' in node) node.layoutMode = p.layout === 'NONE' ? 'NONE' : p.layout;
+    const auto = 'layoutMode' in node && node.layoutMode !== 'NONE';
+    if (auto) {
+      if (p.alignPrimary) node.primaryAxisAlignItems = p.alignPrimary;
+      if (p.alignCounter) node.counterAxisAlignItems = p.alignCounter;
+      for (const [key, fields] of [['pad', ['paddingLeft', 'paddingRight', 'paddingTop', 'paddingBottom']],
+                                   ['padX', ['paddingLeft', 'paddingRight']],
+                                   ['padY', ['paddingTop', 'paddingBottom']]]) {
+        if (p[key] === undefined) continue;
+        const k = valueKind(p[key]);
+        const n = num(p[key]);
+        for (const f of fields) { node[f] = n === null ? 0 : n; if (k.kind === 'token') bindNum(node, f, k.name); }
+      }
+      if (p.gap !== undefined) { node.itemSpacing = num(p.gap) || 0; const k = valueKind(p.gap); if (k.kind === 'token') bindNum(node, 'itemSpacing', k.name); }
+    }
+
+    // 크기
+    const sizeAxis = (key, dim, field, sizingProp) => {
+      if (p[key] === undefined) return;
+      if (p[key] === 'HUG') {
+        if (auto || node.type === 'TEXT') { try { node[sizingProp] = 'HUG'; } catch (e) { /* 무시 */ } }
+        return;
+      }
+      const k = valueKind(p[key]);
+      const n = num(p[key]);
+      if (n === null) return;
+      if (parentAuto) { try { node[sizingProp] = 'FIXED'; } catch (e) { /* 무시 */ } }
+      try { node.resize(dim === 'w' ? Math.max(n, 0.01) : node.width, dim === 'h' ? Math.max(n, 0.01) : node.height); }
+      catch (e) { problems.push(node.name + ' 크기 — ' + e.message); }
+      if (k.kind === 'token') bindNum(node, field, k.name);
+    };
+    if (node.type === 'TEXT' && (p.w !== undefined || p.h !== undefined)) node.textAutoResize = 'NONE';
+    sizeAxis('w', 'w', 'width', 'layoutSizingHorizontal');
+    sizeAxis('h', 'h', 'height', 'layoutSizingVertical');
+    if (p.minW !== undefined) {
+      const k = valueKind(p.minW);
+      const n = num(p.minW);
+      if ('minWidth' in node && n !== null) { node.minWidth = n; if (k.kind === 'token') bindNum(node, 'minWidth', k.name); }
+    }
+
+    // 모서리
+    const radiusFields = { radius: ['topLeftRadius', 'topRightRadius', 'bottomLeftRadius', 'bottomRightRadius'],
+                           radiusTop: ['topLeftRadius', 'topRightRadius'],
+                           radiusBottom: ['bottomLeftRadius', 'bottomRightRadius'] };
+    for (const key in radiusFields) {
+      if (p[key] === undefined || !('topLeftRadius' in node)) continue;
+      const k = valueKind(p[key]);
+      const n = num(p[key]);
+      for (const f of radiusFields[key]) { node[f] = n === null ? 0 : n; if (k.kind === 'token') bindNum(node, f, k.name); }
+    }
+
+    // 칠 · 선
+    if (p.fill !== undefined && 'fills' in node) {
+      const k = valueKind(p.fill);
+      node.fills = k.kind === 'token' ? [solid(k.name)] : [];
+    }
+    if (p.border !== undefined && 'strokes' in node) {
+      const k = valueKind(p.border);
+      if (k.kind === 'token') {
+        node.strokes = [solid(k.name)];
+        if (node.strokeWeight === 0) node.strokeWeight = 1;
+        try { node.strokeAlign = 'INSIDE'; } catch (e) { /* ellipse 등은 무시 */ }
+      } else node.strokes = [];
+    }
+    if (p.strokeWeight !== undefined && 'strokeWeight' in node) {
+      const k = valueKind(p.strokeWeight);
+      const n = num(p.strokeWeight);
+      if (n !== null) node.strokeWeight = n;
+      if (k.kind === 'token') bindNum(node, 'strokeWeight', k.name);
+    }
+    if (p.borderStyle === 'DASHED' && 'dashPattern' in node) node.dashPattern = [4, 4];
+
+    // 그림자 — 이펙트 스타일로만 건다
+    if (p.shadow !== undefined && 'setEffectStyleIdAsync' in node) {
+      const k = valueKind(p.shadow);
+      if (k.kind === 'style') {
+        const s = eByName.get(k.name);
+        if (s) { try { await node.setEffectStyleIdAsync(s.id); } catch (e) { problems.push(node.name + ' 그림자 — ' + e.message); } }
+        else problems.push('컴포넌트 — 없는 이펙트 스타일 ' + k.name);
+      } else node.effects = [];
+    }
+
+    // 글자
+    if (node.type === 'TEXT') {
+      if (p.chars !== undefined) node.characters = String(p.chars);
+      if (p.textStyle !== undefined) {
+        const k = valueKind(p.textStyle);
+        const s = k.kind === 'style' ? tByName.get(k.name) : null;
+        if (s) { try { await node.setTextStyleIdAsync(s.id); } catch (e) { problems.push(node.name + ' 텍스트 스타일 — ' + e.message); } }
+        else if (k.kind === 'style') problems.push('컴포넌트 — 없는 텍스트 스타일 ' + k.name);
+      }
+      if (p.decoration !== undefined) node.textDecoration = p.decoration === 'NONE' ? 'NONE' : p.decoration;
+    }
+
+    // 아이콘 색은 프레임이 아니라 안쪽 선에 건다
+    if (node.getPluginData && node.getPluginData('freesmIcon') === '1' && p.fill !== undefined) {
+      const k = valueKind(p.fill);
+      if (k.kind === 'token') paintIcon(node, solid(k.name));
+      node.fills = [];
+    }
+
+    if (p.visible !== undefined) node.visible = !!p.visible;
+
+    // 원호 — 스피너. 표는 border+strokeWeight 로 적지만, Figma 에서 호를 선으로 그리면
+    // 부채꼴 테두리가 되어 두 줄이 보인다. 그래서 도넛 채우기로 옮겨 그린다.
+    if (p.arc !== undefined && node.type === 'ELLIPSE') {
+      const sw = node.strokeWeight || 2;
+      const inner = Math.max(0, Math.min(0.95, 1 - (2 * sw) / Math.max(node.width, 1)));
+      node.arcData = { startingAngle: -Math.PI / 2, endingAngle: -Math.PI / 2 + Math.PI * 2 * p.arc, innerRadius: inner };
+      if (node.strokes.length) { node.fills = node.strokes.slice(); node.strokes = []; }
+    }
+
+    // 절대 배치
+    if (p.absolute && parentBox) {
+      if (parentAuto) { try { node.layoutPositioning = 'ABSOLUTE'; } catch (e) { /* 무시 */ } }
+      const PW = parentBox.w, PH = parentBox.h;
+      const ratio = typeof p.ratio === 'number' ? p.ratio : null;
+      const a = p.anchor;
+      if (a === 'FULL') { node.resize(Math.max(PW, 0.01), Math.max(PH, 0.01)); node.x = 0; node.y = 0; node.constraints = { horizontal: 'STRETCH', vertical: 'STRETCH' }; }
+      else if (a === 'CENTER_H') { node.resize(Math.max(PW, 0.01), Math.max(node.height, 0.01)); node.x = 0; node.y = (PH - node.height) / 2; node.constraints = { horizontal: 'STRETCH', vertical: 'CENTER' }; }
+      // 높이를 따로 적지 않은 채움 막대는 부모 높이를 그대로 쓴다.
+      // node.height 를 그냥 쓰면 새로 만든 프레임의 기본값 100 이 들어와 트랙 밖으로 삐져나온다.
+      else if (a === 'LEFT') { const hh = p.h !== undefined ? node.height : PH; if (ratio !== null) node.resize(Math.max(PW * ratio, 0.01), Math.max(hh, 0.01)); else node.resize(Math.max(node.width, 0.01), Math.max(PH, 0.01)); node.x = 0; node.y = (PH - node.height) / 2; node.constraints = { horizontal: 'MIN', vertical: 'CENTER' }; }
+      else if (a === 'RIGHT') { node.x = PW - node.width / 2; node.y = (PH - node.height) / 2; node.constraints = { horizontal: 'MAX', vertical: 'CENTER' }; }
+      else if (a === 'TOP') { node.x = (PW - node.width) / 2; node.y = -node.height / 2; node.constraints = { horizontal: 'CENTER', vertical: 'MIN' }; }
+      else if (a === 'BOTTOM') { node.x = (PW - node.width) / 2; node.y = PH - node.height / 2; node.constraints = { horizontal: 'CENTER', vertical: 'MAX' }; }
+      else if (a === 'RATIO_H') { node.x = PW * (ratio === null ? 0.5 : ratio) - node.width / 2; node.y = (PH - node.height) / 2; node.constraints = { horizontal: 'MIN', vertical: 'CENTER' }; }
+      if (p.rotation) {
+        const cx = node.x + node.width / 2, cy = node.y + node.height / 2;
+        placeRotated(node, cx, cy, p.rotation);
+      }
+    } else if (p.rotation) {
+      placeRotated(node, node.x + node.width / 2, node.y + node.height / 2, p.rotation);
+    }
+  };
+
+  /* ---- 슬롯 한 개를 만든다 ---- */
+  const makeSlot = async (spec, props, parent, parentBox) => {
+    let node;
+    if (spec.kind === 'text') node = figma.createText();
+    else if (spec.kind === 'rect') node = figma.createRectangle();
+    else if (spec.kind === 'ellipse') node = figma.createEllipse();
+    else if (spec.kind === 'icon') {
+      const glyph = props.glyph || spec.glyph || 'x';
+      const k = valueKind(props.w !== undefined ? props.w : spec.w);
+      const size = k.kind === 'token' ? (R.num(k.name) || 16) : (k.kind === 'num' ? k.value : 16);
+      node = makeIcon(glyph, size);
+      node.setPluginData('freesmIcon', '1');
+    } else node = figma.createFrame();
+    node.name = spec.name;
+    if (node.type === 'FRAME' && node.getPluginData('freesmIcon') !== '1') node.fills = [];
+    parent.appendChild(node);
+
+    const parentAuto = 'layoutMode' in parent && parent.layoutMode !== 'NONE';
+    if (node.type === 'TEXT') { node.textAutoResize = 'WIDTH_AND_HEIGHT'; node.characters = ' '; }
+    await applyProps(node, props, parentAuto, parentBox);
+
+    if (spec.children && spec.children.length) {
+      const box = { w: node.width, h: node.height };
+      for (const ch of spec.children) {
+        const chProps = mergeDelta(mergeDelta({}, ch), (props.slots || {})[ch.name]);
+        await makeSlot(ch, chProps, node, box);
+      }
+    }
+    return node;
+  };
+
+  /* ---- 컴포넌트셋 하나 ---- */
+  for (const b of builds) {
+    let variants = [];
+    try {
+      for (const combo of allCombos(b)) {
+        const p = effectiveProps(b, combo);
+        const root = figma.createComponent();
+        root.name = b.order.map((ax) => ax + '=' + combo[ax]).join(', ');
+        root.fills = [];
+        page.appendChild(root);
+        await applyProps(root, p, false, null);
+        const box = { w: root.width, h: root.height };
+        for (const spec of (b.slots || [])) {
+          const sp = mergeDelta(mergeDelta({}, spec), (p.slots || {})[spec.name]);
+          await makeSlot(spec, sp, root, box);
+        }
+        variants.push(root);
+      }
+
+      const set = figma.combineAsVariants(variants, page);
+      set.name = b.name;
+      set.x = originX;
+      set.y = cursorY;
+      cursorY += set.height + 120;
+
+      const lines = [];
+      if (b.notes) lines.push.apply(lines, b.notes);
+      const wI = b.base && b.base.wIntent, hI = b.base && b.base.hIntent;
+      if (wI === 'FILL') lines.push('폭은 원래 FILL 입니다 — 컴포넌트 루트에는 FILL 을 걸 수 없어 기본 폭을 숫자로 두었습니다. 배치할 때 폭을 채우기로 바꾸세요.');
+      if (hI === 'FILL') lines.push('높이는 원래 FILL 입니다 — 배치할 때 높이를 채우기로 바꾸세요.');
+      if ((b.slots || []).some((s) => s.kind === 'icon'))
+        lines.push('아이콘은 임시 도형입니다 — 아이콘 라이브러리가 생기면 바꿔 끼우세요.');
+      lines.push('figma/component-build.js 가 만든 것입니다. 손으로 고치면 다음 실행에서 새 세트가 생기고 이 세트는 "— 이전" 으로 밀립니다.');
+      set.description = lines.join('\n');
+
+      rep.sets++;
+      rep.variants += variants.length;
+      push('ok', '컴포넌트 — ' + b.name + ' (' + variants.length + '개 변형)');
+    } catch (e) {
+      // 실패한 세트의 조각을 페이지에 남기지 않는다 — 아직 세트가 아니라 낱개 컴포넌트다
+      for (const v of variants) { try { if (!v.removed && v.parent === page) v.remove(); } catch (e2) { /* 무시 */ } }
+      rep.skipped++;
+      problems.push('컴포넌트 ' + b.name + ' 생성 실패 — ' + (e && e.message ? e.message : String(e)));
+      push('err', '컴포넌트 실패 — ' + b.name);
+    }
+  }
+
+  push('ok', '컴포넌트 ' + rep.sets + '세트 · 변형 ' + rep.variants + '개'
+    + (rep.renamedPrev ? ' · 기존 개명 ' + rep.renamedPrev + '건' : '')
+    + (rep.skipped ? ' · 실패 ' + rep.skipped + '건' : ''));
+  if ((meta.provisional || []).length)
+    push('skip', '잠정 수치 ' + meta.provisional.length + '건 — 전용 토큰이 없어 숫자로 넣었습니다.');
   return rep;
 }
 
