@@ -1,0 +1,325 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Freesm 토큰 빌더</title>
+<style>
+  :root{
+    --bg:var(--figma-color-bg,#fff);
+    --bg2:var(--figma-color-bg-secondary,#f5f5f5);
+    --fg:var(--figma-color-text,#1e1e1e);
+    --fg2:var(--figma-color-text-secondary,#6b6b6b);
+    --line:var(--figma-color-border,#e6e6e6);
+    --acc:var(--figma-color-bg-brand,#0d99ff);
+    --accfg:var(--figma-color-text-onbrand,#fff);
+    --warn:var(--figma-color-text-warning,#a07800);
+    --err:var(--figma-color-text-danger,#c02f1d);
+    --ok:var(--figma-color-text-success,#1b8a4b);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font:11px/1.5 Inter,-apple-system,'Pretendard Variable',sans-serif;color:var(--fg);background:var(--bg);
+       height:100vh;display:flex;flex-direction:column}
+  button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--bg);color:var(--fg);
+         border-radius:6px;padding:6px 12px}
+  button:hover{background:var(--bg2)}
+  button.pri{background:var(--acc);color:var(--accfg);border-color:transparent;font-weight:600}
+  button.pri:hover{filter:brightness(.93)}
+  button:disabled{opacity:.4;cursor:default}
+  textarea,input{font:inherit;width:100%;border:1px solid var(--line);border-radius:6px;padding:7px 8px;
+                 background:var(--bg);color:var(--fg);resize:none}
+  textarea{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;line-height:1.45}
+  /* 단계 표시 */
+  .steps{display:flex;gap:0;border-bottom:1px solid var(--line);flex:none}
+  .steps div{flex:1;padding:9px 8px;text-align:center;font-weight:600;color:var(--fg2);border-bottom:2px solid transparent}
+  .steps div.on{color:var(--fg);border-bottom-color:var(--acc)}
+  .steps div small{display:block;font-weight:400;font-size:10px;opacity:.7;margin-top:1px}
+  /* 본문 */
+  main{flex:1;overflow:auto;padding:12px}
+  section[hidden]{display:none}
+  footer{flex:none;border-top:1px solid var(--line);padding:9px 12px;display:flex;gap:8px;align-items:center;background:var(--bg)}
+  footer .sp{flex:1}
+  .hint{color:var(--fg2);margin:6px 0 10px}
+  .row{display:flex;gap:6px;margin-bottom:9px}
+  h3{font-size:11px;font-weight:700;margin:14px 0 5px;display:flex;align-items:center;gap:6px}
+  h3:first-child{margin-top:0}
+  .n{font-weight:600;color:var(--fg2);background:var(--bg2);border-radius:99px;padding:0 6px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .chip{border:1px solid var(--line);border-radius:6px;padding:6px 9px;min-width:74px}
+  .chip b{display:block;font-size:15px;line-height:1.25}
+  .chip span{color:var(--fg2);font-size:10px}
+  .chip.a b{color:var(--ok)} .chip.b b{color:var(--acc)} .chip.c b{color:var(--warn)}
+  details{border:1px solid var(--line);border-radius:6px;margin-bottom:6px;overflow:hidden}
+  details>summary{padding:7px 9px;cursor:pointer;font-weight:600;background:var(--bg2);list-style:none;
+                  display:flex;align-items:center;gap:6px}
+  details>summary::-webkit-details-marker{display:none}
+  details>summary::before{content:'▸';opacity:.5}
+  details[open]>summary::before{content:'▾'}
+  .tbl{max-height:230px;overflow:auto}
+  table{width:100%;border-collapse:collapse;font-size:10px}
+  td{padding:4px 8px;border-top:1px solid var(--line);vertical-align:top;word-break:break-all}
+  td.k{font-family:ui-monospace,Menlo,monospace;white-space:nowrap}
+  td.v{color:var(--fg2)}
+  .swatch{display:inline-block;width:9px;height:9px;border-radius:2px;border:1px solid rgba(128,128,128,.4);
+          vertical-align:-1px;margin-right:4px}
+  .warn{color:var(--warn)} .err{color:var(--err)} .ok{color:var(--ok)} .mut{color:var(--fg2)}
+  .note{border-left:2px solid var(--warn);background:var(--bg2);padding:7px 9px;border-radius:0 5px 5px 0;margin-bottom:8px}
+  .note.e{border-left-color:var(--err)}
+  #log{font-family:ui-monospace,Menlo,monospace;font-size:10px;line-height:1.6}
+  #log div{padding:1px 0;border-bottom:1px solid var(--line)}
+  label.ck{display:flex;align-items:center;gap:6px;color:var(--fg2)}
+  label.ck input{width:auto}
+</style>
+
+<div class="steps">
+  <div id="s1" class="on">1 · 페이로드<small>붙여넣기 또는 URL</small></div>
+  <div id="s2">2 · 차이<small>dry-run</small></div>
+  <div id="s3">3 · 적용<small>실행 기록</small></div>
+</div>
+
+<main>
+  <!-- ───── 1 ───── -->
+  <section id="p1">
+    <p class="hint"><b>figma/build-payload.json</b> 의 내용을 붙여넣거나 URL 로 불러옵니다.
+      이 플러그인은 <b>아무것도 지우지 않습니다</b> — 개명은 제자리에서 하고, 페이로드에 없는 변수는 고아로 보고만 합니다.</p>
+    <div class="row">
+      <input id="url" placeholder="https://… /build-payload.json">
+      <button id="fetch">불러오기</button>
+    </div>
+    <textarea id="src" rows="18" placeholder='{ "$meta": { … }, "collections": [ … ], "variables": [ … ] }'></textarea>
+    <div id="p1msg" class="hint" style="margin-top:8px"></div>
+  </section>
+
+  <!-- ───── 2 ───── -->
+  <section id="p2" hidden>
+    <div id="planmeta" class="hint"></div>
+    <div id="chips" class="chips"></div>
+    <div id="plan"></div>
+  </section>
+
+  <!-- ───── 3 ───── -->
+  <section id="p3" hidden>
+    <div id="result"></div>
+    <h3>실행 기록</h3>
+    <div id="log"></div>
+  </section>
+</main>
+
+<footer>
+  <span id="foot" class="mut"></span>
+  <span class="sp"></span>
+  <label class="ck" id="stylewrap"><input type="checkbox" id="dostyles" checked> 스타일도 적용</label>
+  <button id="back" hidden>뒤로</button>
+  <button id="go" class="pri" disabled>차이 확인</button>
+</footer>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let payload = null, plan = null, step = 1;
+
+function setStep(n){
+  step = n;
+  for (const i of [1,2,3]) {
+    $('s'+i).classList.toggle('on', i===n);
+    $('p'+i).hidden = i!==n;
+  }
+  $('back').hidden = n===1;
+  $('stylewrap').style.display = n===2 ? 'flex' : 'none';
+  $('go').textContent = n===1 ? '차이 확인' : n===2 ? '적용' : '닫기';
+  $('go').disabled = n===2 ? false : (n===1 ? !payload : false);
+  $('go').className = n===2 ? 'pri' : (n===3 ? '' : 'pri');
+}
+
+/* ── 1단계 ── */
+function parseSrc(){
+  const t = $('src').value.trim();
+  if (!t) { payload=null; $('p1msg').textContent=''; $('go').disabled=true; return; }
+  try {
+    const o = JSON.parse(t);
+    if (!o.variables || !o.collections) throw new Error('variables · collections 가 없습니다 — build-payload.json 이 맞나요?');
+    payload = o;
+    const m = o.$meta || {};
+    $('p1msg').innerHTML = '<span class="ok">✔ 읽었습니다</span> — 토큰 v'+(m.tokensVersion||'?')
+      + ' · 컬렉션 '+o.collections.length+' · 변수 '+o.variables.length
+      + ' · 텍스트 스타일 '+(((o.styles||{}).text)||[]).length
+      + ' · 이펙트 '+(((o.styles||{}).effect)||[]).length
+      + ' · 컴포넌트 '+((o.components||[]).length)+'(생성 안 함)';
+    $('go').disabled = false;
+  } catch(e){
+    payload=null; $('p1msg').innerHTML = '<span class="err">✘ '+e.message+'</span>'; $('go').disabled=true;
+  }
+}
+$('src').addEventListener('input', parseSrc);
+$('fetch').onclick = async () => {
+  const u = $('url').value.trim();
+  if (!u) return;
+  $('p1msg').textContent = '불러오는 중…';
+  try {
+    const r = await fetch(u);
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    $('src').value = await r.text();
+    parseSrc();
+  } catch(e){ $('p1msg').innerHTML = '<span class="err">✘ 불러오지 못했습니다 — '+e.message+'</span>'; }
+};
+
+/* ── 렌더 도우미 ── */
+const esc = (s) => String(s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function sw(v){
+  const m = String(v).match(/^#([0-9a-f]{6}|[0-9a-f]{8})$/i);
+  return m ? '<i class="swatch" style="background:'+v+'"></i>' : '';
+}
+function box(title, n, rowsHtml, open){
+  if (!n) return '';
+  return '<details'+(open?' open':'')+'><summary>'+esc(title)+' <span class="n">'+n+'</span></summary>'
+       + '<div class="tbl"><table>'+rowsHtml+'</table></div></details>';
+}
+
+/* ── 2단계 ── */
+function renderPlan(p){
+  const m = p.meta||{};
+  $('planmeta').innerHTML = '토큰 v'+esc(m.tokensVersion||'?')+' · 스키마 v'+esc(m.schemaVersion||'?')
+    + ' · 생성기 '+esc(m.generator||'?')
+    + (m.brand&&m.brand.connected===false ? ' · <span class="warn">브랜드 미연결(자리표시 색)</span>' : '');
+
+  const c = p.counts;
+  $('chips').innerHTML =
+      chip('a', c.create, '신규 변수')
+    + chip('b', c.update, '값 변경')
+    + chip('b', c.renames, '제자리 개명')
+    + chip('b', c.splits, '분할')
+    + chip('', c.same, '변화 없음')
+    + chip('c', c.orphans, '고아(유지)');
+
+  let h = '';
+
+  /* 경고 먼저 */
+  const warns = [];
+  if (p.variables.typeMismatch.length)
+    warns.push('타입이 다른 변수 '+p.variables.typeMismatch.length+'개는 건너뜁니다 — Figma 는 변수 타입을 바꿀 수 없습니다.');
+  if (p.variables.missingAliasTarget.length)
+    warns.push('별칭 대상이 없는 항목 '+p.variables.missingAliasTarget.length+'건이 있습니다.');
+  if (p.collections.defaultModeManual.length)
+    warns.push('기본 모드는 API 로 지정할 수 없습니다 — '
+      + p.collections.defaultModeManual.map(x=>x.collection+'→'+x.want).join(', ')+' 는 Figma 에서 손으로 바꿔 주세요.');
+  if (p.migrations.crossCollection.length)
+    warns.push('컬렉션 이동 '+p.migrations.crossCollection.length+'건은 옮길 수 없습니다 — 아래 목록대로 손으로 처리해 주세요.');
+  (m.warnings||[]).forEach(w => warns.push('생성기 경고 — '+w));
+  if (p.counts.unsafe)
+    warns.push('이관표 '+p.counts.unsafe+'건이 위험해서 거부됐습니다 — 새 이름이 비었거나, 옛 이름이 지금도 정규 이름입니다. 페이로드를 다시 만들어 주세요.');
+  if (warns.length) h += '<div class="note">'+warns.map(esc).join('<br>')+'</div>';
+
+  h += '<h3>변수</h3>';
+  h += box('신규 생성', p.variables.create.length,
+      p.variables.create.map(v=>'<tr><td class="k">'+esc(v.collection)+'/'+esc(v.name)+'</td><td class="v">'+esc(v.type)+'</td></tr>').join(''));
+  h += box('값 변경', p.variables.update.length,
+      p.variables.update.map(v=>'<tr><td class="k">'+esc(v.collection)+'/'+esc(v.name)
+        +(Object.keys(v).includes('mode')?'<span class="mut"> ['+esc(v.mode)+']</span>':'')+'</td>'
+        +'<td class="v">'+sw(v.from)+esc(v.from)+' → '+sw(v.to)+'<b>'+esc(v.to)+'</b></td></tr>').join(''));
+  h += box('타입 불일치 — 건너뜀', p.variables.typeMismatch.length,
+      p.variables.typeMismatch.map(v=>'<tr><td class="k">'+esc(v.collection)+'/'+esc(v.name)+'</td>'
+        +'<td class="v err">'+esc(v.now)+' ≠ '+esc(v.want)+'</td></tr>').join(''));
+  h += box('별칭 대상 없음', p.variables.missingAliasTarget.length,
+      p.variables.missingAliasTarget.map(v=>'<tr><td class="k">'+esc(v.from)+'</td><td class="v err">→ '+esc(v.to)+'</td></tr>').join(''));
+
+  h += '<h3>이관표</h3>';
+  const R = p.migrations.renames;
+  h += box('제자리 개명', R.length,
+      R.map(r=>'<tr><td class="k">'+esc(r.from)+' → '+esc(r.to)+'</td>'
+        +'<td class="v '+(r.status==='rename'?'ok':(r.status==='unsafe'?'err':'mut'))+'">'
+        +(r.status==='rename'?'적용':(r.status==='unsafe'?'거부 — ':'')+esc(r.why||''))+'</td></tr>').join(''), true);
+  const S = p.migrations.splits;
+  h += box('분할 (w 유지 · h 신설)', S.length,
+      S.map(s=>'<tr><td class="k">'+esc(s.from)+' → '+esc((s.into||[]).join(' + '))+'</td>'
+        +'<td class="v '+(s.status==='split'?'ok':(s.status==='unsafe'?'err':'mut'))+'">'
+        +(s.status==='split'?'적용':(s.status==='unsafe'?'거부 — ':'')+esc(s.why||''))+'</td></tr>').join(''));
+  h += box('이름충돌 — 기존 것 유지', p.migrations.conflicts.length,
+      p.migrations.conflicts.map(c=>'<tr><td class="k">'+esc(c.existing)+' ← '+esc(c.duplicate)+'</td>'
+        +'<td class="v">'+esc(c.why)+'</td></tr>').join(''));
+  h += box('컬렉션 이동 — 손으로 처리', p.migrations.crossCollection.length,
+      p.migrations.crossCollection.map(x=>'<tr><td class="k">'+esc(x.from)+'</td><td class="v">→ '+esc(x.now)+'</td></tr>').join(''));
+
+  h += '<h3>컬렉션</h3>';
+  h += box('신규 컬렉션', p.collections.create.length,
+      p.collections.create.map(c=>'<tr><td class="k">'+esc(c.name)+'</td><td class="v">모드 '+esc(c.modes.join(', '))+'</td></tr>').join(''), true);
+  h += box('모드 추가', p.collections.addModes.length,
+      p.collections.addModes.map(c=>'<tr><td class="k">'+esc(c.collection)+'</td><td class="v">'+esc(c.modes.join(', '))+'</td></tr>').join(''), true);
+
+  const T = p.styles.text, E = p.styles.effect;
+  h += '<h3>스타일</h3>';
+  h += box('텍스트 — 개명', T.rename.length,
+      T.rename.map(r=>'<tr><td class="k">'+esc(r.from)+'</td><td class="v">→ '+esc(r.to)+'</td></tr>').join(''));
+  h += box('텍스트 — 신규', T.create.length,
+      T.create.map(n=>'<tr><td class="k">'+esc(n)+'</td><td class="v">신규</td></tr>').join(''));
+  h += box('텍스트 — 값 변경', T.update.length,
+      T.update.map(u=>'<tr><td class="k">'+esc(u.name)+'</td><td class="v">'+esc(u.diff.join(' · '))+'</td></tr>').join(''));
+  h += box('이펙트 — 신규·변경', E.create.length + E.update.length,
+      E.create.map(n=>'<tr><td class="k">'+esc(n)+'</td><td class="v">신규</td></tr>').join('')
+      + E.update.map(u=>'<tr><td class="k">'+esc(u.name)+'</td><td class="v">'+esc(u.source||'값 변경')+'</td></tr>').join(''));
+  const sameStyles = T.same + E.same;
+  if (sameStyles) h += '<p class="hint">변화 없는 스타일 '+sameStyles+'개는 건드리지 않습니다.</p>';
+
+  h += '<h3>고아 <span class="n">삭제하지 않음</span></h3>';
+  h += p.orphans.length
+    ? box('페이로드에 없는 파일 변수', p.orphans.length,
+        p.orphans.map(o=>'<tr><td class="k">'+esc(o.collection)+'/'+esc(o.name)+'</td><td class="v">'+esc(o.type)+'</td></tr>').join(''))
+    : '<p class="hint">없습니다.</p>';
+
+  h += '<h3>컴포넌트 <span class="n">생성 안 함</span></h3>';
+  h += '<p class="hint">페이로드의 컴포넌트 '+p.components.length+'건은 <b>스펙 목록</b>입니다. 이 플러그인은 컴포넌트를 만들지 않습니다 — Figma 는 토큰의 집이지 컴포넌트의 집이 아니라는 원칙 그대로입니다.</p>';
+  h += box('스펙 목록', p.components.length,
+      p.components.map(c=>'<tr><td class="k">'+esc(c.name)+'</td><td class="v">'+esc(c.status||'')
+        +(c.variantCount?' · 변형 '+c.variantCount:'')+'</td></tr>').join(''));
+
+  $('plan').innerHTML = h;
+  $('foot').textContent = '적용을 누르면 위 내용이 이 파일에 반영됩니다.';
+}
+function chip(cls, n, label){
+  return '<div class="chip '+cls+'"><b>'+n+'</b><span>'+label+'</span></div>';
+}
+
+/* ── 3단계 ── */
+function line(l){
+  const cls = l.t==='err'?'err':l.t==='warn'?'warn':l.t==='ok'?'ok':'mut';
+  const mark = {ok:'✔',warn:'⚠',err:'✘',skip:'–',manual:'✋'}[l.t]||'·';
+  const d = document.createElement('div');
+  d.className = cls;
+  d.textContent = mark+' '+l.m;
+  $('log').appendChild(d);
+  d.scrollIntoView({block:'nearest'});
+}
+
+/* ── 버튼 ── */
+$('go').onclick = () => {
+  if (step === 1) {
+    $('go').disabled = true; $('foot').textContent = '차이를 계산하는 중…';
+    parent.postMessage({pluginMessage:{type:'dryrun', payload}}, '*');
+  } else if (step === 2) {
+    $('log').innerHTML=''; $('result').innerHTML=''; setStep(3);
+    $('go').disabled = true; $('foot').textContent = '적용하는 중…';
+    parent.postMessage({pluginMessage:{type:'apply', payload, opts:{styles:$('dostyles').checked}}}, '*');
+  } else {
+    parent.postMessage({pluginMessage:{type:'close'}}, '*');
+  }
+};
+$('back').onclick = () => setStep(step===3 ? 2 : 1);
+
+onmessage = (e) => {
+  const m = e.data.pluginMessage; if (!m) return;
+  if (m.type === 'plan') { plan = m.plan; setStep(2); renderPlan(plan); }
+  else if (m.type === 'progress') { line(m.line); }
+  else if (m.type === 'done') {
+    const s = m.report.summary;
+    $('result').innerHTML = '<div class="note'+(m.report.problems.length?' e':'')+'">'
+      + '<b>'+(m.report.problems.length?'문제 '+m.report.problems.length+'건과 함께 끝났습니다':'모두 반영했습니다')+'</b><br>'
+      + '신규 '+s.created+' · 값 주입 '+s.valuesSet+' · 개명 '+s.renamed+' · 분할 '+s.split
+      + ' · 텍스트 스타일 '+s.styles.text+' · 이펙트 '+s.styles.effect
+      + (s.crossCollection?'<br><span class="warn">컬렉션 이동 '+s.crossCollection+'건은 손으로 처리해야 합니다.</span>':'')
+      + '</div>';
+    $('go').disabled = false; $('go').textContent='닫기'; $('go').className='';
+    $('foot').textContent = '';
+  }
+  else if (m.type === 'error') {
+    $('result').innerHTML = '<div class="note e"><b>중단됐습니다</b><br>'+esc(m.message)+'</div>';
+    $('go').disabled = false; $('foot').textContent = '';
+  }
+};
+
+setStep(1);
+</script>

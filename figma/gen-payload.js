@@ -354,7 +354,8 @@ for (const [f, t] of [['button-x','button/x'],['button-y','button/y'],['card','c
   R('Semantic', 'comp/pad/' + f, 'comp/padding/' + t);
 for (const k of ['s','m','l']) R('Semantic', 'comp/gap/' + k, 'comp/gap/' + SZ[k]);
 // Radius — 스텝 이름만 sm/md/lg 표기로
-for (const k of ['2xs','s','m','l','2xl']) R('Radius', 'radius/' + k, 'radius/' + SZ[k]);
+// 2xs·2xl 은 그때도 지금도 같은 이름이다 — 표에 넣으면 radius/undefined 로 개명해 버린다.
+for (const k of ['s','m','l']) R('Radius', 'radius/' + k, 'radius/' + SZ[k]);
 
 // 컬렉션을 건너뛰는 것은 개명이 안 된다. Figma 변수는 컬렉션 사이를 이동하지 못한다.
 // 구 02-scale-dimension.js 가 Scale 안에 만들어 둔 spacing/*·radius/* 22개가 여기 해당한다.
@@ -414,6 +415,35 @@ const payload = {
   styles: { fontsToLoad, text: textStyles, effect: effectStyles },
   components
 };
+
+// ---------- 이관표 자기 검사 ----------
+// 개명표는 '옛 이름 → 새 이름'이다. 두 가지가 어긋나면 살아 있는 변수를 망가뜨린다.
+//  (1) 새 이름이 비었다 — SZ 표에 없는 키를 넣으면 radius/undefined 같은 것이 나온다.
+//  (2) 옛 이름이 지금도 정규 이름이다 — 개명하면 현행 변수를 이름 없는 곳으로 밀어낸다.
+{
+  const live = new Set(variables.map(v => v.collection + '\u0000' + v.name));
+  const bad = [];
+  for (const r of variableRenames) {
+    if (!r.to || /undefined|^\s*$/.test(String(r.to).split('/').pop()))
+      bad.push('개명 새 이름이 비었습니다 — ' + r.collection + '/' + r.from + ' → ' + r.to);
+    if (live.has(r.collection + '\u0000' + r.from))
+      bad.push('개명 옛 이름이 지금도 정규 이름입니다 — ' + r.collection + '/' + r.from + ' (개명하면 현행 변수가 사라집니다)');
+    if (!live.has(r.collection + '\u0000' + r.to))
+      bad.push('개명 새 이름이 페이로드에 없습니다 — ' + r.collection + '/' + r.to);
+  }
+  for (const s of variableSplits) {
+    if (live.has(s.collection + '\u0000' + s.from))
+      bad.push('분할 옛 이름이 지금도 정규 이름입니다 — ' + s.collection + '/' + s.from);
+    for (const n of s.into)
+      if (!live.has(s.collection + '\u0000' + n))
+        bad.push('분할 결과 이름이 페이로드에 없습니다 — ' + s.collection + '/' + n);
+  }
+  if (bad.length) {
+    console.error('\n이관표 자기 검사 실패 ' + bad.length + '건');
+    for (const b of bad) console.error('  · ' + b);
+    process.exit(1);
+  }
+}
 
 fs.mkdirSync(path.dirname(OUT_PATH), { recursive: true });
 fs.writeFileSync(OUT_PATH, JSON.stringify(payload, null, 2) + '\n', 'utf8');

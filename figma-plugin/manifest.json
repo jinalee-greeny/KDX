@@ -1,0 +1,13 @@
+{
+  "name": "Freesm 토큰 빌더",
+  "id": "freesm-token-builder",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["*"],
+    "reasoning": "build-payload.json 을 URL 로 불러오기 위해서입니다. 붙여넣기만 쓸 경우 네트워크는 사용하지 않습니다."
+  }
+}

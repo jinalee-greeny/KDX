@@ -105,11 +105,6 @@
       },
       {
         "collection": "Radius",
-        "from": "radius/2xs",
-        "to": "radius/undefined"
-      },
-      {
-        "collection": "Radius",
         "from": "radius/s",
         "to": "radius/sm"
       },
@@ -122,11 +117,6 @@
         "collection": "Radius",
         "from": "radius/l",
         "to": "radius/lg"
-      },
-      {
-        "collection": "Radius",
-        "from": "radius/2xl",
-        "to": "radius/undefined"
       }
     ],
     "variableSplits": [

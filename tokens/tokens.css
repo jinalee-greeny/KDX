@@ -1,5 +1,6 @@
-/* Freesm Design System — tokens.css (Claude Code handoff)
+/* Freesm Design System — tokens.css (Claude Code 핸드오프)
    아키텍처: Scale(원시) → Brand(교체 지점) → Semantic(의미) → Radius(곡률 모드) → Web(반응형)
+   이름 기준: 데모 SCHEMA v0.78 (참조 브리프 정렬판). 척도는 2xs · xs · sm · md · lg · xl · 2xl 로 통일한다.
    ⚠ Brand 컬렉션만 교체하면 accent/link/focus/강조배경이 전체 캐스케이드됨. Primary는 임시 Deep Blue.
    ⚠ chart/status 등락색(up 빨강 / down 파랑)은 브랜드 무관 고정(한국 증시 관례). */
 
@@ -122,6 +123,7 @@
   --dimension-0: 0px;
   --dimension-1: 1px;
   --dimension-2: 2px;
+  --dimension-3: 3px;
   --dimension-4: 4px;
   --dimension-6: 6px;
   --dimension-8: 8px;
@@ -139,7 +141,10 @@
 }
 
 /* ===== Layer 1 · BRAND (★ 교체 지점 — 이 블록만 바꾸면 전체 캐스케이드) ===== */
-:root, [data-brand="deepblue"]{
+/* ⚠ Radius 층과 같은 함정이 여기에도 있다. 브랜드가 둘 이상이 되는 순간
+   `:root, [data-brand="A"]` 로 묶인 블록이 뒤에 오는 `[data-brand="B"]` 를 이기거나 지는 문제가
+   소스 순서로 갈린다. 기본 브랜드는 셀렉터 없는 :root 로 깔고, 교체 브랜드만 속성 블록으로 덧쓴다. */
+:root{
   --color-primary-05: #F2F5FA;
   --color-primary-10: #D9E1F2;
   --color-primary-20: #AFC0E9;
@@ -158,7 +163,7 @@
   --brand-asset-logo: none; --brand-asset-icon-set: 'lucide'; --brand-asset-image-tone: normal;
 }
 
-/* ===== Layer 2 · SEMANTIC · color (71) — 의미 별칭 ===== */
+/* ===== Layer 2 · SEMANTIC · color — 의미 별칭 ===== */
 /* ⚠ 동일 값이어도 맥락이 다르면 분리 유지(병합 금지). 모드: Light 기준, Dark는 추후. */
 :root{
   /* -- bg -- */
@@ -179,24 +184,15 @@
   --fg-subtler: var(--color-alpha-black-40);
   --fg-subtlest: var(--color-alpha-black-30);
   --fg-faint: var(--color-alpha-black-15);
-  --fg-disabled: var(--color-alpha-black-20);
   --fg-accent-primary: var(--color-primary-50); /* ★brand */
   --fg-link-default: var(--color-primary-55); /* ★brand */
   --fg-link-visited: var(--color-primary-70); /* ★brand */
   --fg-inverse-default: var(--color-gray-100);
   --fg-inverse-subtle: var(--color-alpha-white-70);
   --fg-inverse-subtler: var(--color-alpha-white-50);
-  /* -- bdr -- */
-  --bdr-default: var(--color-alpha-black-50);
-  --bdr-subtle: var(--color-alpha-black-30);
-  --bdr-subtler: var(--color-alpha-black-10);
-  --bdr-subtlest: var(--color-alpha-black-05);
-  --bdr-strong: var(--color-gray-05);
-  --bdr-inverse-default: var(--color-alpha-white-50);
-  --bdr-inverse-subtle: var(--color-alpha-white-30);
-  /* -- comp -- */
+  /* -- comp (컨트롤이 소유하는 색 — 표면색과 분리한다) -- */
   --comp-fill-accent-primary: var(--color-primary-50); /* ★brand */
-  --comp-fill-accent-secondary: var(--color-primary-40); /* ★brand */
+  --comp-fill-accent-secondary: var(--color-primary-40); /* ★brand · SD-1 미해결: 옅은 틴트여야 하는데 채도 높은 파랑이다 */
   --comp-fill-neutral-primary: var(--color-gray-05);
   --comp-fill-neutral-secondary: var(--color-gray-94);
   --comp-fill-neutral-tertiary: var(--color-gray-96);
@@ -205,20 +201,28 @@
   --comp-fill-field-default: var(--color-gray-100);
   --comp-fill-field-disabled: var(--color-alpha-black-05);
   --comp-fill-inverse-default: var(--color-gray-100);
-  --comp-state-pressed: var(--color-alpha-black-05);
-  --comp-bdr-default: var(--color-alpha-black-60);
-  --comp-bdr-strong: var(--color-gray-00);
-  --comp-bdr-subtle: var(--color-alpha-black-20);
+  --comp-state-hover: var(--color-alpha-black-05);
+  --comp-state-pressed: var(--color-alpha-black-10);
+  --comp-fg-disabled: var(--color-alpha-black-20); /* v0.74 · fg/disabled 에서 이관 */
+  /* -- comp/bdr (선 색 — v0.78 에서 bdr/* 와 comp/bdr/* 중복을 comp/bdr/* 로 단일화) -- */
+  --comp-bdr-default: var(--color-alpha-black-50);
+  --comp-bdr-strong: var(--color-gray-05);
+  --comp-bdr-subtle: var(--color-alpha-black-30);
   --comp-bdr-subtler: var(--color-alpha-black-10);
-  --comp-bdr-focus-ring: var(--color-primary-40); /* ★brand */
+  --comp-bdr-subtlest: var(--color-alpha-black-05);
+  --comp-bdr-inverse-default: var(--color-alpha-white-50);
+  --comp-bdr-inverse-subtle: var(--color-alpha-white-30);
+  --comp-bdr-focused: var(--color-primary-40); /* ★brand · v0.77 · focus-ring 에서 개명 */
   --comp-bdr-disabled: var(--color-alpha-black-05);
-  /* -- status -- */
-  --status-fg-critical: var(--color-red-50);
+  /* -- status (v0.77 · critical→error, info 신설) -- */
+  --status-fg-error: var(--color-red-50);
   --status-fg-success: var(--color-green-60);
   --status-fg-warning: var(--color-orange-60);
-  --status-bg-critical: var(--color-alpha-red-10);
+  --status-fg-info: var(--color-blue-50);
+  --status-bg-error: var(--color-alpha-red-10);
   --status-bg-success: var(--color-alpha-green-10);
   --status-bg-warning: var(--color-alpha-orange-10);
+  --status-bg-info: var(--color-alpha-blue-20);
   /* -- chart -- */
   --chart-status-fg-up: var(--color-red-55);
   --chart-status-fg-down: var(--color-blue-50);
@@ -241,7 +245,7 @@
   --static-light-gray: var(--color-gray-70);
 }
 
-/* ===== Layer 2 · SEMANTIC · numeric (38) — 수치도 dimension/spacing에 별칭(2단 캐스케이드) ===== */
+/* ===== Layer 2 · SEMANTIC · numeric — 수치도 dimension/spacing에 별칭(2단 캐스케이드) ===== */
 :root{
   /* spacing (간격·여백 스텝) */
   --spacing-0: var(--dimension-0);
@@ -258,54 +262,84 @@
   --spacing-500: var(--dimension-40);
   --spacing-600: var(--dimension-48);
   --spacing-800: var(--dimension-64);
-  /* size (아이콘·컨트롤·아바타·터치타깃) */
-  --size-icon-xs: var(--dimension-12);
-  --size-icon-s: var(--dimension-16);
-  --size-icon-m: var(--dimension-20);
-  --size-icon-l: var(--dimension-24);
-  --size-icon-xl: var(--dimension-32);
-  --size-control-s: var(--dimension-32);
-  --size-control-m: var(--dimension-40);
-  --size-control-l: var(--dimension-48);
-  --size-avatar-s: var(--dimension-24);
-  --size-avatar-m: var(--dimension-32);
-  --size-avatar-l: var(--dimension-48);
-  --size-touch-target-min: var(--dimension-48);
-  /* border (보더 두께) */
+
+  /* w · h (v0.77 · 정사각이던 size/* 를 두 축으로 해체했다.
+     정사각이라 값은 같지만, 축이 나뉘어야 비정사각 컨트롤을 같은 어휘로 적을 수 있다) */
+  --w-icon-xs: var(--dimension-12);  --h-icon-xs: var(--dimension-12);
+  --w-icon-sm: var(--dimension-16);  --h-icon-sm: var(--dimension-16);
+  --w-icon-md: var(--dimension-20);  --h-icon-md: var(--dimension-20);
+  --w-icon-lg: var(--dimension-24);  --h-icon-lg: var(--dimension-24);
+  --w-icon-xl: var(--dimension-32);  --h-icon-xl: var(--dimension-32);
+  --w-control-sm: var(--dimension-32); --h-control-sm: var(--dimension-32);
+  --w-control-md: var(--dimension-40); --h-control-md: var(--dimension-40);
+  --w-control-lg: var(--dimension-48); --h-control-lg: var(--dimension-48);
+  --w-avatar-sm: var(--dimension-24); --h-avatar-sm: var(--dimension-24);
+  --w-avatar-md: var(--dimension-32); --h-avatar-md: var(--dimension-32);
+  --w-avatar-lg: var(--dimension-48); --h-avatar-lg: var(--dimension-48);
+
+  /* border (선 두께 · SD-2 해소 — 이름은 tokens.json v0.78 의 border/* 를 따른다) */
   --border-hairline: var(--dimension-1);
   --border-default: var(--dimension-1);
   --border-strong: var(--dimension-2);
-  /* comp/pad (컴포넌트 패딩 → spacing) */
-  --comp-pad-button-x: var(--spacing-250);
-  --comp-pad-button-y: var(--spacing-150);
-  --comp-pad-card: var(--spacing-300);
-  --comp-pad-field-x: var(--spacing-200);
-  --comp-pad-field-y: var(--spacing-150);
-  /* comp/gap (컴포넌트 내부 간격 → spacing) */
+
+  /* comp/padding (v0.77 · comp/pad 에서 개명 + 방향축 분리) */
+  --comp-padding-button-x: var(--spacing-250);
+  --comp-padding-button-y: var(--spacing-150);
+  --comp-padding-field-x: var(--spacing-200);
+  --comp-padding-field-y: var(--spacing-150);
+  --comp-padding-card: var(--spacing-300);
+  /* comp/gap (v0.77 · s/m/l → sm/md/lg) */
   --comp-gap-xs: var(--spacing-50);
-  --comp-gap-s: var(--spacing-100);
-  --comp-gap-m: var(--spacing-150);
-  --comp-gap-l: var(--spacing-250);
+  --comp-gap-sm: var(--spacing-100);
+  --comp-gap-md: var(--spacing-150);
+  --comp-gap-lg: var(--spacing-250);
+  /* comp/track (v0.75 · 트랙 두께 전용 — 원시 스케일 직접 참조를 걷어내려고 신설) */
+  --comp-track-slider-height: var(--dimension-4);
+  --comp-track-bar-height: var(--dimension-6);
+  --comp-track-spinner-stroke: var(--dimension-2);
+
+  /* a11y (v0.77 신설 — 접근성 하한은 디자인 취향이 아니라 지켜야 하는 수치다) */
+  --a11y-touch-target-min: var(--dimension-48);
+  --a11y-focus-ring-width: var(--dimension-3);
+  --a11y-contrast-text: 4.5;
+  --a11y-contrast-large-text: 3;
+  --a11y-contrast-non-text: 3;
 }
 
 /* ===== Layer 3 · RADIUS (곡률 · 모드 스왑: sharp/default/rounded) ===== */
-/* Figma 변수는 곱셈이 안 되므로 배율 대신 모드로 곡률 성격을 교체한다. */
+/* Figma 변수는 곱셈이 안 되므로 배율 대신 모드로 곡률 성격을 교체한다.
+
+   ⚠ 순서가 규칙이다. `:root` 와 `[data-radius="…"]` 는 명시도가 (0,1,0)로 같다.
+   같으면 가까운 쪽이 아니라 소스에서 나중에 적힌 쪽이 이긴다. 그래서 기본값 블록을
+   `:root, [data-radius="default"]` 로 묶어 sharp 앞에 두면, data-radius="sharp" 를 걸어도
+   뒤에 오는 default 블록이 덮어써서 sharp 가 영원히 먹지 않는다(v0.77 이전 판의 실제 결함).
+   기본값은 셀렉터 없는 `:root` 로 먼저 깔고, 세 모드 블록을 그 뒤에 나란히 둔다. */
+:root{
+  --radius-2xs: var(--dimension-2);
+  --radius-xs: var(--dimension-4);
+  --radius-sm: var(--dimension-8);
+  --radius-md: var(--dimension-12);
+  --radius-lg: var(--dimension-16);
+  --radius-xl: var(--dimension-20);
+  --radius-2xl: var(--dimension-24);
+  --radius-full: 999px;
+}
 [data-radius="sharp"]{
   --radius-2xs: var(--dimension-0);
   --radius-xs: var(--dimension-2);
-  --radius-s: var(--dimension-2);
-  --radius-m: var(--dimension-4);
-  --radius-l: var(--dimension-6);
+  --radius-sm: var(--dimension-2);
+  --radius-md: var(--dimension-4);
+  --radius-lg: var(--dimension-6);
   --radius-xl: var(--dimension-8);
   --radius-2xl: var(--dimension-12);
   --radius-full: 999px;
 }
-:root, [data-radius="default"]{
+[data-radius="default"]{
   --radius-2xs: var(--dimension-2);
   --radius-xs: var(--dimension-4);
-  --radius-s: var(--dimension-8);
-  --radius-m: var(--dimension-12);
-  --radius-l: var(--dimension-16);
+  --radius-sm: var(--dimension-8);
+  --radius-md: var(--dimension-12);
+  --radius-lg: var(--dimension-16);
   --radius-xl: var(--dimension-20);
   --radius-2xl: var(--dimension-24);
   --radius-full: 999px;
@@ -313,21 +347,32 @@
 [data-radius="rounded"]{
   --radius-2xs: var(--dimension-4);
   --radius-xs: var(--dimension-8);
-  --radius-s: var(--dimension-12);
-  --radius-m: var(--dimension-20);
-  --radius-l: var(--dimension-24);
+  --radius-sm: var(--dimension-12);
+  --radius-md: var(--dimension-20);
+  --radius-lg: var(--dimension-24);
   --radius-xl: var(--dimension-28);
   --radius-2xl: var(--dimension-32);
   --radius-full: 999px;
 }
 /* comp/radius → radius 별칭 (모드 무관, 위 모드값을 물려받음) */
 :root{
-  --comp-radius-button: var(--radius-m);
-  --comp-radius-input: var(--radius-s);
-  --comp-radius-card: var(--radius-l);
+  --comp-radius-button: var(--radius-md);
+  --comp-radius-input: var(--radius-sm);
+  --comp-radius-card: var(--radius-lg);
   --comp-radius-chip: var(--radius-full);
-  --comp-radius-modal: var(--radius-xl);
   --comp-radius-pill: var(--radius-full);
+  --comp-radius-modal: var(--radius-xl);
+  /* v0.75 · 8개 컴포넌트가 원시 스케일을 직접 보던 것을 전용 토큰으로 돌렸다 */
+  --comp-radius-checkbox: var(--radius-xs);
+  --comp-radius-radio: var(--radius-full);
+  --comp-radius-switch: var(--radius-full);
+  --comp-radius-tooltip: var(--radius-sm);
+  --comp-radius-toast: var(--radius-md);
+  --comp-radius-slider: var(--radius-full);
+  --comp-radius-progress: var(--radius-full);
+  --comp-radius-image-sm: var(--radius-sm);
+  --comp-radius-image-md: var(--radius-md);
+  --comp-radius-image-lg: var(--radius-lg);
 }
 
 /* ===== Layer 4 · WEB (반응형 · 모바일 1st · 3단계) ===== */
@@ -341,8 +386,8 @@
   --space-section: 64px;
   --space-block: 40px;
   --web-display-xl: 36px;
-  --web-display-l: 30px;
-  --web-display-m: 26px;
+  --web-display-lg: 30px;
+  --web-display-md: 26px;
 }
 @media (min-width: 768px){ :root{
   --container-max: 720px;
@@ -352,8 +397,8 @@
   --space-section: 96px;
   --space-block: 56px;
   --web-display-xl: 52px;
-  --web-display-l: 40px;
-  --web-display-m: 32px;
+  --web-display-lg: 40px;
+  --web-display-md: 32px;
 }}
 @media (min-width: 1024px){ :root{
   --container-max: 1200px;
@@ -363,19 +408,19 @@
   --space-section: 120px;
   --space-block: 72px;
   --web-display-xl: 72px;
-  --web-display-l: 56px;
-  --web-display-m: 44px;
+  --web-display-lg: 56px;
+  --web-display-md: 44px;
 }}
 
-/* ===== EFFECT · shadow ===== */
+/* ===== EFFECT · elevation (v0.77 · shadow/* 에서 개명) ===== */
 :root{
-  --shadow-1: 0 2px 2px rgba(0,0,0,.10);
-  --shadow-2: 0 4px 4px rgba(0,0,0,.10);
-  --shadow-3: 0 4px 8px rgba(0,0,0,.10);
-  --shadow-4: 0 8px 16px rgba(0,0,0,.10);
-  --shadow-upper: 0 -8px 16px rgba(0,0,0,.05);
-  --shadow-right: 2px 0 2px rgba(0,0,0,.05);
+  --elevation-1: 0 2px 2px rgba(0,0,0,.10);
+  --elevation-2: 0 4px 4px rgba(0,0,0,.10); /* ⚠ blur=offset·spread 0이라 가장자리가 딱딱하다 — 2겹 값으로 통일 검토 */
+  --elevation-3: 0 4px 8px rgba(0,0,0,.10);
+  --elevation-4: 0 8px 16px rgba(0,0,0,.10);
+  --elevation-upper: 0 -8px 16px rgba(0,0,0,.05);
+  --elevation-right: 2px 0 2px rgba(0,0,0,.05);
 }
 
-/* ===== TYPOGRAPHY — 서체는 var(--brand-font-*), 사이즈/행간은 아래 스텝 (예시 핵심만) ===== */
+/* ===== TYPOGRAPHY — 서체는 var(--brand-font-*), 사이즈/행간은 6롤(Display·Heading·Body·Utility·Number·Link) ===== */
 :root{ --font-display: var(--brand-font-display); --font-text: var(--brand-font-text); }
