@@ -215,6 +215,38 @@ html[data-modal] .gnb-tabs,html[data-modal] .gnb .gmwrap{pointer-events:none}
 .ps-f.info i{background:var(--line-2);color:var(--fg-sub)}
 .ps-note{font-size:11px;color:var(--fg-mut);line-height:1.6;margin-top:10px}
 .ps-note b{color:var(--fg-sub)}
+/* ===== Figma 내보내기 패널 (v0.82) ==========================================
+   인제스트가 '밖에서 안으로'라면 이쪽은 '안에서 밖으로'다. 다만 대칭이 완전하지
+   않다 — 인제스트는 서버가 해석해 주지만, 내보내기는 브라우저가 Figma 파일을
+   만질 수 없다. 그래서 이 패널의 일은 '페이로드를 확인해서 손에 쥐여 주는 것'
+   까지이고, 파일을 실제로 고치는 것은 Figma 안의 플러그인이다. */
+.fx-st{margin-top:16px;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:var(--bg-sub);font-size:12px;color:var(--fg-sub);line-height:1.6}
+.fx-st.err{border-color:var(--status-bdr-error,#e5b4b4);background:var(--status-bg-error,#fdf3f3);color:var(--status-fg-error,#a3312f)}
+.fx-st.warn{border-color:#e6cfa6;background:#fdf8ee;color:#8a6412}
+.fx-st b{color:inherit;font-weight:700}
+.fx-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px;margin-top:14px}
+.fx-c{border:1px solid var(--line);border-radius:10px;padding:10px 11px;background:var(--bg)}
+.fx-c i{display:block;font-style:normal;font-size:10.5px;color:var(--fg-mut);letter-spacing:.02em}
+.fx-c b{display:block;font-size:19px;font-weight:800;letter-spacing:-.02em;margin-top:3px;font-variant-numeric:tabular-nums}
+.fx-c small{display:block;font-size:10px;color:var(--fg-mut);margin-top:2px;line-height:1.45}
+.fx-sec{border-top:1px solid var(--line);margin-top:18px;padding-top:15px}
+.fx-sec h4{font-size:12.5px;font-weight:800;letter-spacing:-.01em;margin-bottom:3px}
+.fx-sec p{font-size:11.5px;color:var(--fg-mut);line-height:1.65}
+.fx-sec p b{color:var(--fg-sub)}
+.fx-rows{margin-top:9px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.fx-r{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:7px 11px;font-size:11.5px;border-top:1px solid var(--line)}
+.fx-r:first-child{border-top:0}
+.fx-r>span{flex:none}
+.fx-r em{font-style:normal;color:var(--fg-mut);font-size:10.5px;text-align:right;flex:1 1 auto;min-width:0}
+.fx-r code{font-size:11px;color:var(--fg-sub)}
+.fx-acts{display:flex;gap:8px;margin-top:15px;flex-wrap:wrap}
+.fx-acts .ig-run{margin-top:0}
+.fx-acts .sbtn{height:40px;padding:0 15px;border-radius:9px;font-size:12.5px}
+.fx-ol{counter-reset:fx;margin-top:9px}
+.fx-ol li{counter-increment:fx;list-style:none;position:relative;padding:5px 0 5px 26px;font-size:11.5px;color:var(--fg-sub);line-height:1.6}
+.fx-ol li::before{content:counter(fx);position:absolute;left:0;top:5px;width:17px;height:17px;border-radius:50%;background:var(--line-2);color:var(--fg-sub);font-size:10px;font-weight:800;display:grid;place-items:center}
+.fx-ol li b{color:var(--fg)}
+.fx-ol code,.fx-sec code{background:var(--line);border-radius:4px;padding:1px 5px;font-size:10.5px}
 /* ===== 프리셋 섹션 리듬 — 상자를 겹치지 않고 규칙선으로만 나눈다 =====
    v0.67: ①색·폰트 ②조건 ③생성 범위 세 섹션이 같은 리듬으로 흐른다.
    브랜드 연결은 더 이상 별도 모달이 아니라 ①의 본문이다 — 색·폰트는
@@ -1417,11 +1449,13 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
       <div class="gm-sep"></div>
       <button data-m="brand" role="menuitem"><b><svg class="i"><use href="#icon-action-external"/></svg>브랜드 연결</b><small>소스에서 색·폰트 추출 — 프리셋 ① 섹션이 바로 열립니다</small></button>
       <div class="gm-sep"></div>
+      <button data-m="figma" role="menuitem"><b><svg class="i"><use href="#icon-nav-movedown"/></svg>Figma 내보내기</b><small>토큰·스타일을 페이로드로 확인하고 플러그인에 넘깁니다</small></button>
+      <div class="gm-sep"></div>
       <div class="gm-row"><div class="gm-rowl"><b><svg class="i"><use href="#icon-status-alert"/></svg>스펙 힌트</b><small>요소에 마우스를 올리면 토큰·스펙이 바로 보입니다</small></div><button class="swtch on" id="spHintSw" role="switch" aria-checked="true" title="힌트 켬/끔"><i></i></button></div>
       <button data-m="spec" role="menuitem"><b><svg class="i"><use href="#icon-action-search"/></svg>스펙 시트<span class="kb">S</span></b><small>컴포넌트·모듈·패턴 스펙 색인</small></button>
     </div>
   </div>
-  <span class="gver">섹션 내용 편집 · v0.81</span>
+  <span class="gver">Figma 내보내기 · v0.82</span>
 </header>
 <div class="app">
 
@@ -1751,6 +1785,57 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
 
 <!-- ============ 화면 · 섹션 고르기 모달 ============ -->
 <div class="pickmask" id="pickMask"><div class="pick" id="pick" role="dialog" aria-label="화면 고르기"></div></div>
+
+<!-- ============ Figma 내보내기 (v0.82) ============
+     인제스트가 '밖에서 안으로'라면 이쪽은 '안에서 밖으로'다. 다만 브라우저는
+     Figma 파일을 열 수 없으므로, 이 창의 일은 페이로드를 확인시키고 손에
+     쥐여 주는 데서 끝난다. 파일을 실제로 고치는 것은 Figma 안의 플러그인이다. -->
+<div class="ig-ov" id="fxOv" hidden>
+  <div class="ig" role="dialog" aria-label="Figma 내보내기">
+    <div class="ig-head">
+      <div><h2>Figma 내보내기</h2><p>토큰·스타일을 <b>페이로드</b> 한 벌로 확인하고, Figma 플러그인에 넘깁니다. 이 창은 파일을 직접 고치지 않습니다.</p></div>
+      <button class="iconbtn" id="fxClose" title="닫기" style="font-size:17px"><svg class="i"><use href="#icon-action-close"/></svg></button>
+    </div>
+
+    <div class="fx-st" id="fxSt">페이로드를 불러오는 중입니다…</div>
+    <div class="fx-grid" id="fxGrid" hidden></div>
+
+    <div class="fx-sec" id="fxMig" hidden>
+      <h4>이관 — 기존 파일을 어떻게 고칠지</h4>
+      <p>이미 만들어 둔 변수는 <b>지우지 않고 이름만 고칩니다</b>. Figma 는 이름이 아니라 ID 로 묶기 때문에, 제자리 개명이면 기존 바인딩이 그대로 살아납니다.</p>
+      <div class="fx-rows" id="fxMigRows"></div>
+    </div>
+
+    <div class="fx-sec" id="fxManual" hidden>
+      <h4>사람이 해야 하는 일</h4>
+      <p>플러그인 API 로는 못 하는 것들입니다. 적용 뒤 Figma 안에서 직접 정리해 주세요.</p>
+      <div class="fx-rows" id="fxManualRows"></div>
+    </div>
+
+    <div class="fx-sec">
+      <h4>넘기는 방법</h4>
+      <ol class="fx-ol">
+        <li>아래에서 <b>페이로드를 내려받거나 복사</b>합니다.</li>
+        <li>Figma 데스크톱에서 대상 파일을 열고 <code>Plugins → Development → Import plugin from manifest</code> 로 <code>figma-plugin/manifest.json</code> 을 불러옵니다.</li>
+        <li>플러그인 창에 페이로드를 붙여넣고 <b>미리보기(dry-run)</b> 를 먼저 돌립니다.</li>
+        <li>신규·개명·값 변경 목록을 눈으로 확인한 뒤에 <b>적용</b>합니다.</li>
+      </ol>
+    </div>
+
+    <div class="fx-acts">
+      <button class="ig-run" id="fxDl">페이로드 내려받기</button>
+      <button class="sbtn" id="fxCopy">클립보드로 복사</button>
+      <button class="sbtn" id="fxReload">다시 불러오기</button>
+      <button class="sbtn" id="fxPick" hidden>파일 고르기…</button>
+      <input type="file" id="fxFile" accept=".json,application/json" hidden>
+    </div>
+
+    <div class="fx-sec">
+      <h4>원칙</h4>
+      <p><b>삭제 없음</b> — 페이로드에는 지우라는 지시가 없습니다. 짝이 없는 변수는 보고만 합니다. · <b>개명은 제자리</b> — 지우고 새로 만들지 않습니다. · <b>dry-run 필수</b> — 적용 전에 사람이 확인합니다. · <b>컴포넌트는 만들지 않습니다</b> — Figma 에는 원칙적으로 컴포넌트를 직접 만들지 않습니다.</p>
+    </div>
+  </div>
+</div>
 
 <!-- ============ 스펙 시트 (어느 화면에서든 열리는 스펙 색인) ============ -->
 <div class="spscrim" id="spScrim" hidden></div>
@@ -2906,7 +2991,7 @@ document.getElementById('cbFontFile').addEventListener('change',async e=>{
    그대로 남아 뒤에서 무언가 반응하는 것처럼 보인다. pointer-events:none 은
    히트 테스트 자체를 없애 그 잔상까지 즉시 걷어낸다. */
 /* v0.67: 브랜드 연결은 더 이상 독립 모달이 아니라 프리셋 ① 섹션의 본문이다 */
-const MODALS=['psOv','pickMask','spSheet'];
+const MODALS=['psOv','fxOv','pickMask','spSheet'];
 function modalAnyOpen(){return MODALS.some(id=>{const el=document.getElementById(id);
   if(!el)return false;return id==='pickMask'?el.classList.contains('on'):!el.hidden;});}
 function modalSync(){const on=modalAnyOpen(),H=document.documentElement;
@@ -2948,6 +3033,147 @@ gMenu.addEventListener('click',e=>{const b=e.target.closest('button[data-m]');if
   if(m==='preset')psOpenModal(false);
   else if(m==='brand'){psOpenModal(false,true);}
   else if(m==='spec'){const s=document.getElementById('spSheet');s.hidden?spSheetOpen(null):spSheetClose();}
+  else if(m==='figma')fxOpen();
+});
+
+/* --- Figma 내보내기 (v0.82) --------------------------------------------------
+   페이로드는 데모 안에 복사해 두지 않고 매번 ../figma/build-payload.json 을
+   읽는다. 복사본을 두면 토큰이 바뀔 때마다 두 곳이 어긋나고, 그 어긋남은
+   조용히 잘못된 파일을 만든다. 대신 읽어 온 페이로드의 schemaVersion 을
+   데모가 들고 있는 SCHEMA.version 과 맞춰 보고, 다르면 낡았다고 말한다. */
+const fxOv=document.getElementById('fxOv');
+let fxData=null,fxRaw='';
+
+function fxEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fxStat(kind,html){const el=document.getElementById('fxSt');
+  el.className='fx-st'+(kind?' '+kind:'');el.innerHTML=html;}
+function fxRows(id,rows){const box=document.getElementById(id);
+  box.innerHTML=rows.map(r=>'<div class="fx-r"><span>'+r[0]+'</span><em>'+r[1]+'</em></div>').join('');}
+
+function fxOpen(){fxOv.hidden=false;if(!fxData)fxLoad();}
+function fxClose(){fxOv.hidden=true;}
+
+async function fxLoad(){
+  document.getElementById('fxGrid').hidden=true;
+  document.getElementById('fxMig').hidden=true;
+  document.getElementById('fxManual').hidden=true;
+  document.getElementById('fxPick').hidden=true;
+  fxStat('','페이로드를 불러오는 중입니다…');
+  try{
+    const res=await fetch('../figma/build-payload.json',{cache:'no-store'});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const txt=await res.text();
+    fxTake(txt,'../figma/build-payload.json');
+  }catch(err){
+    /* file:// 로 연 경우와 404 를 구분하지 못한다 — 브라우저가 둘 다 같은
+       TypeError 로 준다. 그래서 원인을 단정하지 않고 두 가지를 다 적는다. */
+    fxStat('err','<b>페이로드를 읽지 못했습니다.</b><br>'+fxEsc(String(err&&err.message||err))
+      +'<br>데모를 <code>file://</code> 로 열었거나 <code>figma/build-payload.json</code> 이 배포에 없을 때 이렇게 됩니다. '
+      +'로컬에서 보고 있다면 아래 <b>파일 고르기</b>로 직접 열 수 있습니다.');
+    document.getElementById('fxPick').hidden=false;
+  }
+}
+
+function fxTake(txt,src){
+  let d;
+  try{d=JSON.parse(txt);}
+  catch(e){fxStat('err','<b>페이로드가 JSON 이 아닙니다.</b><br>'+fxEsc(e.message));return;}
+  if(!d||!d.$meta||!Array.isArray(d.variables)){
+    fxStat('err','<b>페이로드 모양이 다릅니다.</b> <code>$meta</code> 와 <code>variables</code> 가 있어야 합니다.');return;}
+  fxData=d;fxRaw=txt;fxRender(src);
+}
+
+function fxRender(src){
+  const d=fxData,m=d.$meta||{},mig=d.migrations||{};
+  const sr=mig.styleRenames||{};
+  const styleRenames=(sr.text||[]).length+(sr.effect||[]).length;
+  const nStyle=(d.styles&&((d.styles.text||[]).length+(d.styles.effect||[]).length))||0;
+
+  /* 카운트 — 하나도 상수로 적지 않는다. 전부 페이로드에서 센다. */
+  document.getElementById('fxGrid').innerHTML=[
+    ['컬렉션',(d.collections||[]).length,(d.collections||[]).reduce((a,c)=>a+(c.modes||[]).length,0)+'개 모드'],
+    ['변수',(d.variables||[]).length,'값·스코프 포함'],
+    ['스타일',nStyle,(d.styles&&(d.styles.fontsToLoad||[]).length||0)+'개 폰트'],
+    ['컴포넌트',(d.components||[]).length,'스펙만 전달']
+  ].map(c=>'<div class="fx-c"><i>'+c[0]+'</i><b>'+c[1]+'</b><small>'+fxEsc(c[2])+'</small></div>').join('');
+  document.getElementById('fxGrid').hidden=false;
+
+  fxRows('fxMigRows',[
+    ['개명 <code>rename</code>',(mig.variableRenames||[]).length+'건 · 제자리'],
+    ['분할 <code>split</code>',(mig.variableSplits||[]).length+'건 · 개명 + 신규'],
+    ['이름 충돌',(mig.conflicts||[]).length+'건 · 남길 쪽을 고름'],
+    ['스타일 개명',styleRenames+'건 · 텍스트 '+((sr.text||[]).length)+' · 이펙트 '+((sr.effect||[]).length)]
+  ]);
+  document.getElementById('fxMig').hidden=false;
+
+  const manual=[];
+  if((mig.crossCollection||[]).length)
+    manual.push(['컬렉션 이동',(mig.crossCollection||[]).length+'건 — 컬렉션 사이로는 못 옮깁니다']);
+  (d.collections||[]).forEach(c=>{
+    if(c.defaultMode&&(c.modes||[])[0]!==c.defaultMode)
+      manual.push([fxEsc(c.name)+' 기본 모드','<code>'+fxEsc(c.defaultMode)+'</code> 로 직접 지정 — API 로는 읽기 전용']);
+  });
+  if(manual.length){fxRows('fxManualRows',manual);document.getElementById('fxManual').hidden=false;}
+
+  /* 자체 점검 — 플러그인이 거절할 이관 항목을 미리 잡는다. 개명은 사실상
+     되돌릴 수 없으므로, 사람의 눈이 마지막 방어선이면 안 된다. */
+  const bad=fxUnsafe(mig);
+  const drift=(typeof SCHEMA!=='undefined'&&SCHEMA&&SCHEMA.version&&m.schemaVersion&&SCHEMA.version!==m.schemaVersion);
+
+  let head='<b>페이로드를 읽었습니다.</b> tokens <code>'+fxEsc(m.tokensVersion||'?')+'</code> · schema <code>'
+    +fxEsc(m.schemaVersion||'?')+'</code> · 출처 <code>'+fxEsc(src)+'</code>';
+  const warn=(m.warnings||[]).map(w=>'<br>· '+fxEsc(w)).join('');
+
+  if(bad.length){
+    fxStat('err',head+'<br><b>이관 표에 문제가 '+bad.length+'건 있습니다 — 적용하지 마세요.</b>'
+      +bad.slice(0,6).map(b=>'<br>· '+fxEsc(b)).join('')+(bad.length>6?'<br>· … 외 '+(bad.length-6)+'건':'')+warn);
+  }else if(drift){
+    fxStat('warn',head+'<br><b>페이로드가 낡았습니다.</b> 데모 스키마는 <code>'+fxEsc(SCHEMA.version)
+      +'</code> 인데 페이로드는 <code>'+fxEsc(m.schemaVersion)+'</code> 입니다 — <code>node figma/gen-payload.js</code> 로 다시 만드세요.'+warn);
+  }else{
+    fxStat('',head+(warn?'<br>참고'+warn:''));
+  }
+}
+
+/* 플러그인 code.js 의 unsafe() 와 같은 세 가지 거절 조건 */
+function fxUnsafe(mig){
+  const out=[],canon=new Set();
+  (mig.variableRenames||[]).forEach(r=>canon.add(r.collection+' '+r.to));
+  (mig.variableSplits||[]).forEach(s=>(s.into||[]).forEach(n=>canon.add(s.collection+' '+n)));
+  (mig.variableRenames||[]).forEach(r=>{
+    if(!r.to||/(^|\/)undefined$/.test(r.to))out.push('개명 대상 이름이 비었거나 undefined 로 끝납니다: '+r.from+' → '+r.to);
+    if(canon.has(r.collection+' '+r.from))out.push('개명 원본이 이 표의 결과 이름이기도 합니다: '+r.from);
+  });
+  (mig.variableSplits||[]).forEach(s=>{
+    if(!s.into||s.into.length<2)out.push('분할 결과가 하나뿐입니다: '+s.from);
+    (s.into||[]).forEach(n=>{if(!n||/(^|\/)undefined$/.test(n))out.push('분할 결과 이름이 비었거나 undefined 로 끝납니다: '+s.from);});
+  });
+  return out;
+}
+
+document.getElementById('fxClose').addEventListener('click',fxClose);
+fxOv.addEventListener('click',e=>{if(e.target===fxOv)fxClose();});
+document.getElementById('fxReload').addEventListener('click',()=>{fxData=null;fxRaw='';fxLoad();});
+document.getElementById('fxPick').addEventListener('click',()=>document.getElementById('fxFile').click());
+document.getElementById('fxFile').addEventListener('change',e=>{
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{fxTake(String(rd.result),f.name);document.getElementById('fxPick').hidden=true;};
+  rd.onerror=()=>fxStat('err','<b>파일을 읽지 못했습니다.</b>');
+  rd.readAsText(f);e.target.value='';
+});
+document.getElementById('fxDl').addEventListener('click',()=>{
+  if(!fxRaw){toast('아직 페이로드가 없습니다','먼저 불러오기가 끝나야 내려받을 수 있습니다');return;}
+  const b=new Blob([fxRaw],{type:'application/json'}),u=URL.createObjectURL(b);
+  const a=document.createElement('a');a.href=u;a.download='build-payload.json';a.click();
+  setTimeout(()=>URL.revokeObjectURL(u),1000);
+  toast('페이로드를 내려받았습니다','build-payload.json — Figma 플러그인 창에 붙여넣으세요');
+});
+document.getElementById('fxCopy').addEventListener('click',async()=>{
+  if(!fxRaw){toast('아직 페이로드가 없습니다','먼저 불러오기가 끝나야 복사할 수 있습니다');return;}
+  try{await navigator.clipboard.writeText(fxRaw);
+    toast('클립보드로 복사했습니다',Math.round(fxRaw.length/1024)+'KB — 플러그인 창에 붙여넣으세요');}
+  catch(err){toast('복사하지 못했습니다','브라우저가 클립보드를 막았습니다 — 내려받기를 쓰세요');}
 });
 
 const psOv=document.getElementById('psOv');
@@ -4683,6 +4909,7 @@ document.addEventListener('keydown',e=>{
   /* 프리셋 안에서는 펼친 ① 섹션이 먼저 접힌다 — 한 번의 Esc 로 창까지 닫히면
      길게 스크롤해 온 브랜드 결과가 예고 없이 사라진다 */
   if(e.key==='Escape'&&!psOv.hidden&&!document.getElementById('psBrandBody').hidden){psBrandBodySet(false);return;}
+  if(e.key==='Escape'&&!fxOv.hidden){fxClose();return;}
   if(e.key==='Escape'&&!spSheet.hidden){spSheetClose();return;}
   if(e.key==='Escape'&&!psOv.hidden){psOv.hidden=true;return;}
   if(e.key==='Escape'&&!document.getElementById('toast').hidden){toastHide();return;}
