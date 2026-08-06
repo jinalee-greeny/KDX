@@ -714,6 +714,34 @@ function allCombos(build) {
   return rows;
 }
 
+/* combineAsVariants 는 자식 위치를 잡아 주지 않는다 — 변형이 전부 (0,0) 에 겹쳐 쌓이고
+   세트 크기도 변형 한 개짜리로 접힌다. 마지막 축을 열로 두고 격자로 편다.
+   allCombos 가 마지막 축을 가장 빠르게 돌리므로 자식 순서가 곧 행 우선 순서다. */
+function layoutVariants(set, build, gap, pad) {
+  const G = gap === undefined ? 40 : gap, P = pad === undefined ? 32 : pad;
+  const kids = set.children.slice();
+  if (!kids.length) return;
+  const last = build.order[build.order.length - 1];
+  const cols = Math.max(1, Math.min(((build.axes || {})[last] || []).length || kids.length, kids.length));
+  const rows = Math.ceil(kids.length / cols);
+  const colW = new Array(cols).fill(0), rowH = new Array(rows).fill(0);
+  kids.forEach((k, i) => {
+    const c = i % cols, r = Math.floor(i / cols);
+    colW[c] = Math.max(colW[c], k.width);
+    rowH[r] = Math.max(rowH[r], k.height);
+  });
+  const xs = [], ys = [];
+  let acc = P;
+  for (let c = 0; c < cols; c++) { xs.push(acc); acc += colW[c] + G; }
+  const totalW = acc - G + P;
+  acc = P;
+  for (let r = 0; r < rows; r++) { ys.push(acc); acc += rowH[r] + G; }
+  const totalH = acc - G + P;
+  kids.forEach((k, i) => { k.x = xs[i % cols]; k.y = ys[Math.floor(i / cols)]; });
+  try { set.resizeWithoutConstraints(Math.max(totalW, 1), Math.max(totalH, 1)); }
+  catch (e) { try { set.resize(Math.max(totalW, 1), Math.max(totalH, 1)); } catch (e2) { /* 무시 */ } }
+}
+
 /* ---------- dry-run ---------- */
 
 async function dryRunComponents(payload) {
@@ -780,9 +808,19 @@ async function applyComponents(payload, push, problems) {
   const R = makeNumResolver(payload);
   for (const a of R.ambiguous) problems.push('토큰 이름이 두 컬렉션에 있습니다 — ' + a);
 
-  for (const f of (payload.styles && payload.styles.fontsToLoad) || []) {
-    try { await figma.loadFontAsync(f); } catch (e) { /* 스타일 단계에서 이미 보고했다 */ }
-  }
+  /* 폰트 — 새로 만든 텍스트 노드는 '파일 기본 폰트'(보통 Inter Regular)로 시작한다.
+     그 폰트를 안 불러온 채 characters 를 건드리면 그 자리에서 던지고,
+     예외가 세트 단위 catch 까지 올라가 세트 하나가 통째로 날아간다. */
+  const loadedFonts = new Set();
+  const ensureFont = async (fn) => {
+    if (!fn || fn === figma.mixed || typeof fn.family !== 'string') return false;
+    const k = fn.family + '|' + fn.style;
+    if (loadedFonts.has(k)) return true;
+    try { await figma.loadFontAsync(fn); loadedFonts.add(k); return true; }
+    catch (e) { problems.push('폰트를 불러오지 못했습니다 — ' + fn.family + ' ' + fn.style); return false; }
+  };
+  for (const f of (payload.styles && payload.styles.fontsToLoad) || []) await ensureFont(f);
+
   const texts = await figma.getLocalTextStylesAsync();
   const effects = await figma.getLocalEffectStylesAsync();
   const tByName = new Map(texts.map((s) => [s.name, s]));
@@ -833,12 +871,22 @@ async function applyComponents(payload, push, problems) {
   for (const c of page.children) originX = Math.max(originX, c.x + c.width + 160);
   let cursorY = 0;
 
+  /* 같은 토큰이 136개 변형에서 반복해 실패한다 — 한 번만 알린다 */
+  const said = new Set();
+  const sayOnce = (m) => { if (said.has(m)) return; said.add(m); problems.push(m); };
+
   /* ---- 한 노드에 속성 한 벌 적용 ---- */
   const applyProps = async (node, p, parentAuto, parentBox) => {
+    // 토큰을 못 풀면 예전에는 조용히 24 를 넣었다 — 선 두께·간격에서는 재앙이다.
+    // 이제는 null 을 돌려주고(=그 속성은 건드리지 않는다) 반드시 보고한다.
     const num = (v) => {
       const k = valueKind(v);
       if (k.kind === 'num') return k.value;
-      if (k.kind === 'token') { const n = R.num(k.name); return n === null ? 24 : n; }
+      if (k.kind === 'token') {
+        const n = R.num(k.name);
+        if (n === null) sayOnce('컴포넌트 — 토큰 값을 못 읽었습니다 ' + k.name + ' (해당 속성은 그대로 둡니다)');
+        return n;
+      }
       return null;
     };
 
@@ -859,13 +907,12 @@ async function applyComponents(payload, push, problems) {
       if (p.gap !== undefined) { node.itemSpacing = num(p.gap) || 0; const k = valueKind(p.gap); if (k.kind === 'token') bindNum(node, 'itemSpacing', k.name); }
     }
 
-    // 크기
-    const sizeAxis = (key, dim, field, sizingProp) => {
-      if (p[key] === undefined) return;
-      if (p[key] === 'HUG') {
-        if (auto || node.type === 'TEXT') { try { node[sizingProp] = 'HUG'; } catch (e) { /* 무시 */ } }
-        return;
-      }
+    // 크기 — 숫자를 먼저, HUG 를 나중에.
+    // resize() 는 두 축의 sizing 모드를 모두 FIXED 로 되돌린다. HUG 를 먼저 걸면
+    // 반대 축의 숫자 지정이 방금 건 HUG 를 지워 버린다.
+    const isHug = (v) => v === 'HUG';
+    const sizeNum = (key, dim, field, sizingProp) => {
+      if (p[key] === undefined || isHug(p[key])) return;
       const k = valueKind(p[key]);
       const n = num(p[key]);
       if (n === null) return;
@@ -874,13 +921,40 @@ async function applyComponents(payload, push, problems) {
       catch (e) { problems.push(node.name + ' 크기 — ' + e.message); }
       if (k.kind === 'token') bindNum(node, field, k.name);
     };
-    if (node.type === 'TEXT' && (p.w !== undefined || p.h !== undefined)) node.textAutoResize = 'NONE';
-    sizeAxis('w', 'w', 'width', 'layoutSizingHorizontal');
-    sizeAxis('h', 'h', 'height', 'layoutSizingVertical');
+    const sizeHug = (key, sizingProp) => {
+      if (!isHug(p[key])) return;
+      if (node.type === 'TEXT') {
+        // 오토레이아웃 밖의 텍스트에는 layoutSizing 을 걸 수 없다 — 자동 크기가 같은 결과를 낸다
+        if (!parentAuto) {
+          try { node.textAutoResize = isHug(p.w) && (p.h === undefined || isHug(p.h)) ? 'WIDTH_AND_HEIGHT' : 'HEIGHT'; }
+          catch (e) { /* 무시 */ }
+          return;
+        }
+      } else if (!auto) {
+        sayOnce(node.name + ' — 오토레이아웃이 아니라 HUG 을 걸지 못했습니다 (' + node.type + ') · 크기는 그대로 둡니다');
+        return;
+      }
+      try { node[sizingProp] = 'HUG'; }
+      catch (e) { sayOnce(node.name + ' — HUG 실패 (' + sizingProp + ') ' + e.message); }
+    };
+    if (node.type === 'TEXT') {
+      const wn = p.w !== undefined && !isHug(p.w), hn = p.h !== undefined && !isHug(p.h);
+      if (wn && hn) node.textAutoResize = 'NONE';
+      else if (wn) node.textAutoResize = 'HEIGHT';
+    }
+    sizeNum('w', 'w', 'width', 'layoutSizingHorizontal');
+    sizeNum('h', 'h', 'height', 'layoutSizingVertical');
+    sizeHug('w', 'layoutSizingHorizontal');
+    sizeHug('h', 'layoutSizingVertical');
+    // minWidth 는 오토레이아웃 프레임과 그 직계 자식에만 통한다.
+    // 아무 데나 대입하면 던지고, 그 예외가 세트 하나를 통째로 날린다.
     if (p.minW !== undefined) {
       const k = valueKind(p.minW);
       const n = num(p.minW);
-      if ('minWidth' in node && n !== null) { node.minWidth = n; if (k.kind === 'token') bindNum(node, 'minWidth', k.name); }
+      if (n !== null && n > 0 && (auto || parentAuto) && 'minWidth' in node) {
+        try { node.minWidth = n; if (k.kind === 'token') bindNum(node, 'minWidth', k.name); }
+        catch (e) { sayOnce(node.name + ' 최소 폭 — ' + e.message); }
+      }
     }
 
     // 모서리
@@ -925,16 +999,24 @@ async function applyComponents(payload, push, problems) {
       } else node.effects = [];
     }
 
-    // 글자
+    // 글자 — 스타일을 먼저 걸어 폰트를 확정하고, 그 폰트를 불러온 뒤에 글자를 쓴다.
+    // 순서가 바뀌면 "Cannot write to node with unloaded font" 로 세트가 통째로 날아간다.
     if (node.type === 'TEXT') {
-      if (p.chars !== undefined) node.characters = String(p.chars);
       if (p.textStyle !== undefined) {
         const k = valueKind(p.textStyle);
         const s = k.kind === 'style' ? tByName.get(k.name) : null;
-        if (s) { try { await node.setTextStyleIdAsync(s.id); } catch (e) { problems.push(node.name + ' 텍스트 스타일 — ' + e.message); } }
-        else if (k.kind === 'style') problems.push('컴포넌트 — 없는 텍스트 스타일 ' + k.name);
+        if (s) { try { await node.setTextStyleIdAsync(s.id); } catch (e) { sayOnce(node.name + ' 텍스트 스타일 — ' + e.message); } }
+        else if (k.kind === 'style') sayOnce('컴포넌트 — 없는 텍스트 스타일 ' + k.name);
       }
-      if (p.decoration !== undefined) node.textDecoration = p.decoration === 'NONE' ? 'NONE' : p.decoration;
+      if (p.chars !== undefined) {
+        if (await ensureFont(node.fontName)) {
+          try { node.characters = String(p.chars); } catch (e) { sayOnce(node.name + ' 글자 — ' + e.message); }
+        }
+      }
+      if (p.decoration !== undefined) {
+        try { node.textDecoration = p.decoration === 'NONE' ? 'NONE' : p.decoration; }
+        catch (e) { sayOnce(node.name + ' 밑줄 — ' + e.message); }
+      }
     }
 
     // 아이콘 색은 프레임이 아니라 안쪽 선에 건다
@@ -997,14 +1079,18 @@ async function applyComponents(payload, push, problems) {
     parent.appendChild(node);
 
     const parentAuto = 'layoutMode' in parent && parent.layoutMode !== 'NONE';
-    if (node.type === 'TEXT') { node.textAutoResize = 'WIDTH_AND_HEIGHT'; node.characters = ' '; }
+    if (node.type === 'TEXT') {
+      // 새 텍스트 노드는 파일 기본 폰트를 쓴다 — 불러오기 전에는 characters 를 못 쓴다
+      node.textAutoResize = 'WIDTH_AND_HEIGHT';
+      if (await ensureFont(node.fontName)) { try { node.characters = ' '; } catch (e) { /* 아래에서 다시 알린다 */ } }
+    }
     await applyProps(node, props, parentAuto, parentBox);
 
     if (spec.children && spec.children.length) {
-      const box = { w: node.width, h: node.height };
       for (const ch of spec.children) {
         const chProps = mergeDelta(mergeDelta({}, ch), (props.slots || {})[ch.name]);
-        await makeSlot(ch, chProps, node, box);
+        // 자식을 붙일 때마다 HUG 부모의 크기가 바뀐다 — 상자를 매번 새로 잰다
+        await makeSlot(ch, chProps, node, { w: node.width, h: node.height });
       }
     }
     return node;
@@ -1013,6 +1099,7 @@ async function applyComponents(payload, push, problems) {
   /* ---- 컴포넌트셋 하나 ---- */
   for (const b of builds) {
     let variants = [];
+    let madeSet = null;
     try {
       for (const combo of allCombos(b)) {
         const p = effectiveProps(b, combo);
@@ -1021,16 +1108,19 @@ async function applyComponents(payload, push, problems) {
         root.fills = [];
         page.appendChild(root);
         await applyProps(root, p, false, null);
-        const box = { w: root.width, h: root.height };
         for (const spec of (b.slots || [])) {
           const sp = mergeDelta(mergeDelta({}, spec), (p.slots || {})[spec.name]);
-          await makeSlot(spec, sp, root, box);
+          // HUG 루트는 슬롯이 붙을 때마다 커진다 — 절대 배치의 기준 상자를 매번 새로 잰다
+          await makeSlot(spec, sp, root, { w: root.width, h: root.height });
         }
         variants.push(root);
       }
 
       const set = figma.combineAsVariants(variants, page);
+      madeSet = set;
       set.name = b.name;
+      // combineAsVariants 는 변형을 (0,0) 에 겹쳐 쌓아 둔다 — 여기서 격자로 편다
+      layoutVariants(set, b);
       set.x = originX;
       set.y = cursorY;
       cursorY += set.height + 120;
@@ -1049,8 +1139,10 @@ async function applyComponents(payload, push, problems) {
       rep.variants += variants.length;
       push('ok', '컴포넌트 — ' + b.name + ' (' + variants.length + '개 변형)');
     } catch (e) {
-      // 실패한 세트의 조각을 페이지에 남기지 않는다 — 아직 세트가 아니라 낱개 컴포넌트다
-      for (const v of variants) { try { if (!v.removed && v.parent === page) v.remove(); } catch (e2) { /* 무시 */ } }
+      // 실패한 세트의 조각을 페이지에 남기지 않는다.
+      // combineAsVariants 뒤에 터지면 변형의 부모가 이미 세트라 낱개 제거로는 안 지워진다 — 세트를 지운다.
+      if (madeSet) { try { if (!madeSet.removed) madeSet.remove(); } catch (e2) { /* 무시 */ } }
+      else for (const v of variants) { try { if (!v.removed && v.parent === page) v.remove(); } catch (e2) { /* 무시 */ } }
       rep.skipped++;
       problems.push('컴포넌트 ' + b.name + ' 생성 실패 — ' + (e && e.message ? e.message : String(e)));
       push('err', '컴포넌트 실패 — ' + b.name);
