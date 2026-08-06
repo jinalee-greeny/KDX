@@ -722,7 +722,7 @@ async function dryRunComponents(payload) {
   const out = {
     page: BUILD_PAGE,
     pageExists: !!figma.root.children.find((p) => p.name === BUILD_PAGE),
-    create: [], renamePrev: [], elsewhere: [],
+    create: [], renamePrev: [], elsewhere: [], unread: [],
     missingStyles: [], missingTokens: [],
     provisional: meta.provisional || [],
     totalVariants: 0
@@ -741,9 +741,11 @@ async function dryRunComponents(payload) {
     if (!col || !st.varByKey.get(KEY(col, n))) out.missingTokens.push(n);
   }
 
+  // manifest 가 documentAccess:"dynamic-page" 라 페이지 내용은 열어야 보인다.
+  // 안 열고 .children 을 만지면 그 자리에서 던진다 — dry-run 이 통째로 죽는다.
   const page = figma.root.children.find((p) => p.name === BUILD_PAGE);
   const onPage = new Map();
-  if (page) for (const c of page.children) onPage.set(c.name, c);
+  if (page) { await page.loadAsync(); for (const c of page.children) onPage.set(c.name, c); }
 
   for (const b of builds) {
     out.totalVariants += b.variantCount;
@@ -755,6 +757,7 @@ async function dryRunComponents(payload) {
   const names = new Set(builds.map((b) => b.name));
   for (const p of figma.root.children) {
     if (p.name === BUILD_PAGE) continue;
+    try { await p.loadAsync(); } catch (e) { out.unread.push(p.name); continue; }
     for (const c of p.children) {
       if ((c.type === 'COMPONENT_SET' || c.type === 'COMPONENT') && names.has(c.name))
         out.elsewhere.push({ page: p.name, name: c.name, type: c.type });
@@ -807,6 +810,7 @@ async function applyComponents(payload, push, problems) {
   /* 페이지 확보 */
   let page = figma.root.children.find((p) => p.name === BUILD_PAGE);
   if (!page) { page = figma.createPage(); page.name = BUILD_PAGE; push('ok', '페이지 신규 — ' + BUILD_PAGE); }
+  else await page.loadAsync();   // dynamic-page — 열지 않으면 children 접근이 던진다
   await figma.setCurrentPageAsync(page);
 
   /* 같은 이름이 이 페이지에 이미 있으면 지우지 않고 옆으로 밀어 둔다.
