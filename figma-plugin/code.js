@@ -37,6 +37,41 @@ function rgbaToHex(c) {
   return '#' + q(c.r) + q(c.g) + q(c.b) + (a >= 0.999 ? '' : q(a));
 }
 
+/* 그라디언트 한 벌을 Figma 페인트로 만든다.
+ * 변수는 단색만 담을 수 있어서 브랜드 그라디언트는 '스타일'로만 내려온다.
+ * 정지점 위치가 비어 있으면 균등 분할한다 — 페이로드가 이미 채워 보내지만,
+ * 손으로 만든 페이로드가 들어와도 무너지지 않게 여기서도 막는다. */
+function paintFromSpec(g) {
+  const raw = g.stops || [];
+  const stops = raw.map((s, i) => ({
+    position: (s && typeof s.position === 'number') ? s.position : (raw.length > 1 ? i / (raw.length - 1) : 0),
+    color: hexToRgba(s && s.hex ? s.hex : s)
+  }));
+  return {
+    type: g.paintType || 'GRADIENT_LINEAR',
+    gradientTransform: g.gradientTransform || [[1, 0, 0], [0, 1, 0]],
+    gradientStops: stops
+  };
+}
+
+function samePaint(a, b) {
+  if (!a || !b || a.type !== b.type) return false;
+  const as = a.gradientStops || [], bs = b.gradientStops || [];
+  if (as.length !== bs.length) return false;
+  for (let i = 0; i < as.length; i++) {
+    if (Math.abs(as[i].position - bs[i].position) > 0.001) return false;
+    if (!sameColor(as[i].color, bs[i].color)) return false;
+  }
+  const at = a.gradientTransform || [], bt = b.gradientTransform || [];
+  for (let r = 0; r < 2; r++) {
+    for (let c = 0; c < 3; c++) {
+      const x = (at[r] || [])[c] || 0, y = (bt[r] || [])[c] || 0;
+      if (Math.abs(x - y) > 0.001) return false;
+    }
+  }
+  return true;
+}
+
 function sameColor(a, b) {
   if (!a || !b) return false;
   const e = 1 / 400; // 8비트 반올림 오차 허용
@@ -336,6 +371,7 @@ async function dryRunStyles(payload) {
   const out = {
     text: { rename: [], create: [], update: [], same: 0 },
     effect: { rename: [], create: [], update: [], same: 0 },
+    paint: { create: [], update: [], same: 0 },
     fontsToLoad: S.fontsToLoad || []
   };
   const ren = (payload.migrations && payload.migrations.styleRenames) || {};
@@ -379,6 +415,18 @@ async function dryRunStyles(payload) {
     const cur = live || eByName.get((ren.effect || []).find((r) => r.to === e.name).from);
     if (JSON.stringify(cur.effects) === JSON.stringify(e.effects)) out.effect.same++;
     else out.effect.update.push({ name: e.name, source: e.source });
+  }
+
+  /* 페인트 스타일 — 브랜드 그라디언트. 개명표는 없다(이번에 처음 생기는 종류라 옛 이름이 없다). */
+  const paints = await figma.getLocalPaintStylesAsync();
+  const pByName = new Map(paints.map((s) => [s.name, s]));
+  for (const g of (S.paint || [])) {
+    const live = pByName.get(g.name);
+    if (!live) { out.paint.create.push(g.name); continue; }
+    let want = null;
+    try { want = paintFromSpec(g); } catch (err) { out.paint.update.push({ name: g.name, source: '색 형식 오류 — ' + err.message }); continue; }
+    if (samePaint((live.paints || [])[0], want)) out.paint.same++;
+    else out.paint.update.push({ name: g.name, source: g.source });
   }
 
   return out;
@@ -526,7 +574,7 @@ async function apply(payload, opts) {
 async function applyStyles(payload, push, problems) {
   const S = payload.styles || {};
   const ren = (payload.migrations && payload.migrations.styleRenames) || {};
-  const rep = { text: 0, effect: 0, renamed: 0 };
+  const rep = { text: 0, effect: 0, paint: 0, renamed: 0 };
 
   for (const f of (S.fontsToLoad || [])) {
     try { await figma.loadFontAsync(f); }
@@ -579,6 +627,27 @@ async function applyStyles(payload, push, problems) {
     }
   }
   push('ok', '이펙트 스타일 ' + rep.effect + '개 반영');
+
+  /* 페인트 스타일 — 브랜드 그라디언트.
+   * 컴포넌트는 이 스타일을 쓰지 않는다(면 한정 브랜드 표현이라 사람이 직접 얹는다).
+   * 브랜드에 그라디언트가 없으면 페이로드에 styles.paint 가 아예 없고, 여기도 조용히 지나간다.
+   * 기존 스타일은 지우지 않고 덮어쓴다 — 이 스타일을 쓰던 도형의 연결이 끊기지 않는다. */
+  if ((S.paint || []).length) {
+    const paints = await figma.getLocalPaintStylesAsync();
+    const pByName = new Map(paints.map((s) => [s.name, s]));
+    for (const g of (S.paint || [])) {
+      try {
+        let s = pByName.get(g.name);
+        if (!s) { s = figma.createPaintStyle(); s.name = g.name; pByName.set(g.name, s); }
+        s.paints = [paintFromSpec(g)];
+        if (g.source) s.description = g.source + (g.note ? '\n' + g.note : '');
+        rep.paint++;
+      } catch (err) {
+        problems.push('페인트 스타일 ' + g.name + ' — ' + err.message);
+      }
+    }
+    push('ok', '페인트 스타일 ' + rep.paint + '개 반영');
+  }
 
   return rep;
 }

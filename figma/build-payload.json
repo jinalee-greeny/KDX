@@ -2,12 +2,19 @@
   "$meta": {
     "payloadVersion": 1,
     "generator": "figma/gen-payload.js",
-    "tokensVersion": "0.78",
+    "tokensVersion": "0.79",
     "schemaVersion": "0.78",
     "schemaSource": "demo/index.html 내장 SCHEMA",
     "brand": {
       "connected": false,
-      "source": "placeholder Deep Blue #1245BA"
+      "source": "placeholder Deep Blue #1245BA",
+      "seed": "#1245BA",
+      "stops": 12,
+      "font": {
+        "display": "\"Pretendard Variable\", system-ui, sans-serif",
+        "text": "\"Pretendard Variable\", system-ui, sans-serif"
+      },
+      "gradient": null
     },
     "naming": "토큰 키는 슬래시 계층 표기. 붙임표는 단어 내부에만 쓴다(light-gray, touch-target, focus-ring).",
     "policy": {
@@ -3295,7 +3302,7 @@
         "Light": {
           "kind": "alias",
           "collection": "Brand",
-          "name": "color/primary/40"
+          "name": "color/primary/05"
         }
       }
     },
@@ -6791,7 +6798,8 @@
         ],
         "source": "2px 0 2px rgba(0,0,0,.05)"
       }
-    ]
+    ],
+    "paint": []
   },
   "components": [
     {

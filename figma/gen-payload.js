@@ -77,6 +77,8 @@ for (const [name, v] of Object.entries(T.scale.dimension)) {
 // 3) Brand — 색 (연결된 브랜드가 있으면 그 값으로 덮어씀)
 let brandSource = T.$meta.brand_status || 'placeholder';
 let brandColors = Object.assign({}, T.brand['color/primary']);
+let brandFonts  = Object.assign({}, T.brand.font || {});
+let brandGradient = null;
 let brandConnected = false;
 if (BRAND_PATH) {
   const B = JSON.parse(fs.readFileSync(BRAND_PATH, 'utf8'));
@@ -88,14 +90,19 @@ if (BRAND_PATH) {
   }
   if (hit === 0) W('--brand 파일에서 color/primary/* 를 하나도 찾지 못해 플레이스홀더를 유지합니다.');
   else { brandConnected = true; brandSource = B.name || B.source || path.basename(BRAND_PATH); }
-  if (hit > 0 && hit < Object.keys(brandColors).length) W('브랜드 색 ' + hit + '/12만 채워졌습니다 — 나머지는 플레이스홀더.');
+  if (hit > 0 && hit < Object.keys(brandColors).length)
+    W('브랜드 색 ' + hit + '/' + Object.keys(brandColors).length + '만 채워졌습니다 — 나머지는 플레이스홀더.');
+  // 서체 — 색만 갈고 서체를 두면 화면은 절반만 그 브랜드가 된다.
+  // 텍스트 스타일도 아래에서 같은 값을 쓴다(변수만 갈면 스타일이 옛 서체를 붙든다).
+  for (const k of ['display', 'text']) if (B.font && B.font[k]) { brandFonts[k] = B.font[k]; brandConnected = true; }
+  if (B.gradient && Array.isArray(B.gradient.stops) && B.gradient.stops.length >= 2) brandGradient = B.gradient;
 }
 for (const [name, hex] of Object.entries(brandColors)) {
   V({ collection: 'Brand', name, type: 'COLOR', values: { Value: val(hex) } });
 }
 // 3b) Brand — 서체 (CSS 스택에서 첫 패밀리만 뽑는다. Figma는 스택을 모른다.)
 const firstFamily = stack => String(stack).split(',')[0].trim().replace(/^["']|["']$/g, '');
-for (const [k, v] of Object.entries(T.brand.font || {})) {
+for (const [k, v] of Object.entries(brandFonts)) {
   V({ collection: 'Brand', name: 'font/' + k, type: 'STRING', scopes: ['FONT_FAMILY'],
       values: { Value: val(firstFamily(v)) }, codeSyntax: { WEB: css('brand/font/' + k) },
       note: 'CSS 원본: ' + v });
@@ -196,8 +203,8 @@ for (const [name, per] of Object.entries(T.web)) {
 // tokens.json의 typography 키가 이미 그 형태다.
 const WEIGHT_STYLE = { 100: 'Thin', 200: 'ExtraLight', 300: 'Light', 400: 'Regular',
                        500: 'Medium', 600: 'SemiBold', 700: 'Bold', 800: 'ExtraBold', 900: 'Black' };
-const displayFamily = firstFamily((T.brand.font || {}).display || 'Pretendard Variable');
-const textFamily    = firstFamily((T.brand.font || {}).text    || 'Pretendard Variable');
+const displayFamily = firstFamily(brandFonts.display || 'Pretendard Variable');
+const textFamily    = firstFamily(brandFonts.text    || 'Pretendard Variable');
 const textStyles = [];
 for (const [name, d] of Object.entries(T.typography)) {
   const style = WEIGHT_STYLE[d.weight];
@@ -252,6 +259,42 @@ for (const [name, cssStr] of Object.entries(T.effect.elevation)) {
   const e = parseShadow(cssStr);
   if (!e) { W('effect ' + name + ' 의 그림자 문자열을 해석하지 못했습니다: ' + cssStr); continue; }
   effectStyles.push({ name, effects: [e], source: cssStr });
+}
+
+// ---------- 페인트 스타일 (브랜드 그라디언트) ----------
+// 그라디언트는 변수로 표현할 수 없다 — Figma 변수는 단색만 담는다.
+// 그래서 브랜드 그라디언트는 '스타일'로 나간다. 컴포넌트는 이 스타일을 쓰지 않는다
+// (면 한정 브랜드 표현이라 사람이 직접 얹는다). 브랜드가 없으면 스타일도 없다.
+const paintStyles = [];
+if (brandGradient) {
+  const g = brandGradient;
+  const stops = g.stops.map(s => (typeof s === 'string' ? { hex: s } : s))
+    .map(s => ({ hex: String(s.hex).trim(), position: s.position }))
+    .filter(s => /^#[0-9a-fA-F]{6}$/.test(s.hex));
+  if (stops.length < 2) W('브랜드 그라디언트의 정지점이 2개 미만이라 페인트 스타일을 만들지 않습니다.');
+  else {
+    for (let i = 0; i < stops.length; i++)
+      if (typeof stops[i].position !== 'number') stops[i].position = i / (stops.length - 1);
+    // CSS 각도(0deg=위쪽, 시계 방향) → Figma gradientTransform.
+    // t = a·x + b·y + c 가 시작 0, 끝 1 이 되도록 단위 사각형 안에서 정규화한다.
+    const deg = parseFloat(String(g.dir || '135deg')) || 135;
+    const rad = deg * Math.PI / 180;
+    const dx = Math.sin(rad), dy = -Math.cos(rad);
+    const k = 1 / (Math.abs(dx) + Math.abs(dy));
+    const a = k * dx, b = k * dy;
+    const linear = [[a, b, 0.5 - (a + b) / 2], [-b, a, 0.5 - (a - b) / 2]];
+    // 방사형은 캔버스 중심의 원으로만 낸다 — 데모가 수집하는 방향값이 CSS 표기라
+    // Figma 의 타원 축까지 복원할 근거가 없다. 근사임을 이름과 note 에 적어 둔다.
+    const radial = [[0.5, 0, 0.25], [0, 0.5, 0.25]];
+    paintStyles.push({
+      name: 'brand/gradient',
+      paintType: g.type === 'radial' ? 'GRADIENT_RADIAL' : 'GRADIENT_LINEAR',
+      stops,
+      gradientTransform: g.type === 'radial' ? radial : linear,
+      source: g.css || (g.type || 'linear') + '-gradient(' + (g.dir || '135deg') + ', ' + stops.map(s => s.hex).join(', ') + ')',
+      note: g.type === 'radial' ? '방사형은 중심 원으로 근사했습니다 — 필요하면 Figma 에서 손잡이를 옮기세요.' : null
+    });
+  }
 }
 
 // ---------- 컴포넌트 ----------
@@ -433,7 +476,14 @@ const payload = {
     tokensVersion: T.$meta.version,
     schemaVersion: S.version,
     schemaSource: SCHEMA_SRC.src,
-    brand: { connected: brandConnected, source: brandSource },
+    brand: {
+      connected: brandConnected,
+      source: brandSource,
+      seed: brandColors['color/primary/50'] || null,
+      stops: Object.keys(brandColors).length,
+      font: { display: brandFonts.display || null, text: brandFonts.text || null },
+      gradient: brandGradient ? (paintStyles.length ? 'brand/gradient' : 'dropped') : null
+    },
     naming: T.$meta.naming,
     policy: {
       deletes: 'never',
@@ -449,7 +499,7 @@ const payload = {
   },
   collections,
   variables,
-  styles: { fontsToLoad, text: textStyles, effect: effectStyles },
+  styles: { fontsToLoad, text: textStyles, effect: effectStyles, paint: paintStyles },
   components,
   componentBuilds,
   $componentBuilds: componentBuildMeta
@@ -497,7 +547,11 @@ console.log('이관표 — 개명 ' + variableRenames.length + ' · 분할 ' + v
   + ' · 이름충돌 ' + conflicts.length + ' · 컬렉션 이동(개명 불가) ' + crossCollection.length
   + ' · 스타일 개명 ' + (styleRenames.text.length + styleRenames.effect.length));
 console.log('텍스트 스타일 ' + textStyles.length + ' · 이펙트 스타일 ' + effectStyles.length
+  + ' · 페인트 스타일 ' + paintStyles.length
   + ' · 폰트 조합 ' + fontsToLoad.length + ' · 컴포넌트 ' + components.length);
+console.log('브랜드 ' + (brandConnected ? '연결됨 — ' + brandSource : '플레이스홀더 — ' + brandSource)
+  + ' · 램프 ' + Object.keys(brandColors).length + '스톱 · 서체 ' + firstFamily(brandFonts.display || '?')
+  + (brandGradient ? ' · 그라디언트 1' : ''));
 console.log('컴포넌트 빌드표 ' + componentBuilds.length + ' 세트 · 변형 '
   + componentBuildMeta.totalVariants + ' · 참조 토큰 ' + componentBuildMeta.usesTokens.length
   + ' · 참조 스타일 ' + componentBuildMeta.usesStyles.length

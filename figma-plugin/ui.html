@@ -142,8 +142,15 @@ function parseSrc(){
       + ' · 컬렉션 '+o.collections.length+' · 변수 '+o.variables.length
       + ' · 텍스트 스타일 '+(((o.styles||{}).text)||[]).length
       + ' · 이펙트 '+(((o.styles||{}).effect)||[]).length
+      + ((((o.styles||{}).paint)||[]).length ? ' · 페인트 '+(((o.styles||{}).paint)||[]).length : '')
       + ' · 컴포넌트 '+((o.componentBuilds||[]).length)+' 세트'
-      + '/'+(((o.$componentBuilds||{}).totalVariants)||0)+' 변형';
+      + '/'+(((o.$componentBuilds||{}).totalVariants)||0)+' 변형'
+      /* 브랜드가 실제로 실려 있는지 여기서 바로 보인다 — 파랗게 나오는 사고를 눈으로 먼저 잡는다 */
+      + (m.brand ? '<br><span class="'+(m.brand.connected?'ok':'warn')+'">브랜드 '
+          +(m.brand.connected?'연결됨':'플레이스홀더')+' — '+esc(String(m.brand.source||'?'))+'</span>'
+          +' · 씨앗 '+esc(String(m.brand.seed||'?'))+' · 램프 '+(m.brand.stops||0)+'스톱'
+          +(m.brand.font&&m.brand.font.display?' · 서체 '+esc(String(m.brand.font.display).split(',')[0].replace(/^["']|["']$/g,'')):'')
+          +(m.brand.gradient?' · 그라디언트 '+esc(String(m.brand.gradient)):'') : '');
     $('go').disabled = false;
   } catch(e){
     payload=null; $('p1msg').innerHTML = '<span class="err">✘ '+e.message+'</span>'; $('go').disabled=true;
@@ -245,7 +252,7 @@ function renderPlan(p){
   h += box('모드 추가', p.collections.addModes.length,
       p.collections.addModes.map(c=>'<tr><td class="k">'+esc(c.collection)+'</td><td class="v">'+esc(c.modes.join(', '))+'</td></tr>').join(''), true);
 
-  const T = p.styles.text, E = p.styles.effect;
+  const T = p.styles.text, E = p.styles.effect, PA = p.styles.paint || {create:[],update:[],same:0};
   h += '<h3>스타일</h3>';
   h += box('텍스트 — 개명', T.rename.length,
       T.rename.map(r=>'<tr><td class="k">'+esc(r.from)+'</td><td class="v">→ '+esc(r.to)+'</td></tr>').join(''));
@@ -256,7 +263,11 @@ function renderPlan(p){
   h += box('이펙트 — 신규·변경', E.create.length + E.update.length,
       E.create.map(n=>'<tr><td class="k">'+esc(n)+'</td><td class="v">신규</td></tr>').join('')
       + E.update.map(u=>'<tr><td class="k">'+esc(u.name)+'</td><td class="v">'+esc(u.source||'값 변경')+'</td></tr>').join(''));
-  const sameStyles = T.same + E.same;
+  if (PA.create.length + PA.update.length)
+    h += box('페인트(브랜드 그라디언트) — 신규·변경', PA.create.length + PA.update.length,
+        PA.create.map(n=>'<tr><td class="k">'+esc(n)+'</td><td class="v">신규</td></tr>').join('')
+        + PA.update.map(u=>'<tr><td class="k">'+esc(u.name)+'</td><td class="v">'+esc(u.source||'값 변경')+'</td></tr>').join(''));
+  const sameStyles = T.same + E.same + (PA.same||0);
   if (sameStyles) h += '<p class="hint">변화 없는 스타일 '+sameStyles+'개는 건드리지 않습니다.</p>';
 
   h += '<h3>고아 <span class="n">삭제하지 않음</span></h3>';
@@ -340,6 +351,7 @@ onmessage = (e) => {
       + '<b>'+(m.report.problems.length?'문제 '+m.report.problems.length+'건과 함께 끝났습니다':'모두 반영했습니다')+'</b><br>'
       + '신규 '+s.created+' · 값 주입 '+s.valuesSet+' · 개명 '+s.renamed+' · 분할 '+s.split
       + ' · 텍스트 스타일 '+s.styles.text+' · 이펙트 '+s.styles.effect
+      + (s.styles.paint?' · 페인트 '+s.styles.paint:'')
       + (s.components?' · 컴포넌트 '+s.components.sets+' 세트/'+s.components.variants+' 변형'
           +(s.components.renamedPrev?' (이전 '+s.components.renamedPrev+'건 개명)':'')
           +(s.components.skipped?' · 실패 '+s.components.skipped:''):'')
