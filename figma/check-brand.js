@@ -20,7 +20,7 @@ const has = k => argv.indexOf(k) >= 0;
 const ROOT = path.resolve(__dirname, '..');
 const BRAND_PATH = arg('--brand', null);
 const TOKENS_PATH = arg('--tokens', path.join(ROOT, 'tokens', 'tokens.json'));
-const rest = argv.filter((a, i) => !a.startsWith('--') && !(i > 0 && ['--brand', '--tokens'].includes(argv[i - 1])));
+const rest = argv.filter((a, i) => !a.startsWith('--') && !(i > 0 && ['--brand', '--tokens', '--demo'].includes(argv[i - 1])));
 const PAYLOAD_PATH = rest[0] ? path.resolve(rest[0]) : path.join(__dirname, 'build-payload.json');
 
 if (!BRAND_PATH) { console.error('--brand <brand.json> 이 필요합니다.'); process.exit(2); }
@@ -33,6 +33,8 @@ const T = JSON.parse(fs.readFileSync(TOKENS_PATH, 'utf8'));
 const STOPS = Object.keys(T.brand['color/primary']).map(k => k.replace('color/primary/', ''));
 const PLACEHOLDER = new Map();               // 플레이스홀더 딥블루 hex → 스톱 이름
 for (const [k, v] of Object.entries(T.brand['color/primary'])) PLACEHOLDER.set(v.toLowerCase(), k);
+
+const DEMO_PATH = arg('--demo', path.join(ROOT, 'demo', 'index.html'));
 
 const fail = [], note = [];
 const F = m => fail.push(m);
@@ -73,6 +75,83 @@ function trace(name, seen) {
   const t = idx.get(e.collection + '::' + e.name);
   if (!t) return { hex: null, via };
   return trace(t.name, via.concat(name));
+}
+
+/* ---------- 0. 데모와 노드가 같은 계산기·같은 표를 쓰는가 ----------
+   on-accent 는 브랜드마다 답이 달라지는 유일한 자리다. 계산기(pickOnAccent)나
+   후보표(OA_SPEC ↔ tokens.json autoContrast)가 한 글자라도 갈라지면, 화면은
+   검은 글자인데 파일은 흰 글자로 나가고 아무 검사도 빨개지지 않는다. */
+const MARK = /\/\* ONACCENT-SHARED-BEGIN \*\/[\s\S]*?\/\* ONACCENT-SHARED-END \*\//;
+const oaSrc = fs.readFileSync(path.join(__dirname, 'onaccent.js'), 'utf8').match(MARK);
+let demoSrc = null, demoSpec = null;
+try { demoSrc = fs.readFileSync(DEMO_PATH, 'utf8'); } catch (e) { N('데모를 못 읽어 대조를 건너뜁니다: ' + DEMO_PATH); }
+if (demoSrc) {
+  const m = demoSrc.match(MARK);
+  if (!m) F('데모에 ONACCENT-SHARED 블록이 없습니다 — 브라우저는 아직 옛 규칙으로 색을 고릅니다.');
+  else if (!oaSrc) F('figma/onaccent.js 에 ONACCENT-SHARED 표식이 없습니다.');
+  else if (m[0] !== oaSrc[0]) F('데모와 figma/onaccent.js 의 공유 블록이 다릅니다 — 두 곳이 다른 답을 낼 수 있습니다.');
+  const sm = demoSrc.match(/const OA_SPEC\s*=\s*(\[[\s\S]*?\n\]);/);
+  if (!sm) F('데모에서 OA_SPEC 표를 찾지 못했습니다.');
+  else { try { demoSpec = new (require('vm').Script)('(' + sm[1] + ')').runInNewContext({}); }
+         catch (e) { F('데모 OA_SPEC 을 읽지 못했습니다: ' + e.message); } }
+}
+
+/* tokens.json 이 정본. 데모 표는 이것과 항목·순서·후보까지 같아야 한다. */
+const refOf = c => (c.brand ? 'Brand/' + c.brand : 'Scale/' + c.scale);
+const acList = Object.entries(T.semantic.color).filter(([, d]) => d.autoContrast);
+if (demoSpec) {
+  if (demoSpec.length !== acList.length)
+    F('데모 OA_SPEC 이 ' + demoSpec.length + '개 · tokens.json autoContrast 는 ' + acList.length + '개');
+  acList.forEach(([name, d], i) => {
+    const sp = demoSpec[i]; if (!sp) return;
+    const ac = d.autoContrast;
+    const onD = T.semantic.color[ac.on] || {};
+    const eq = (what, a, b) => { if (String(a) !== String(b)) F('OA_SPEC[' + i + '] ' + what + ' 데모=' + a + ' · tokens=' + b); };
+    eq('token', sp.token, name);
+    eq('on', sp.on, ac.on);
+    eq('min', sp.min, ac.min);
+    eq('배경 스톱', 'color/primary/' + sp.onStop, onD.alias);
+    eq('후보 수', (sp.cand || []).length, (ac.candidates || []).length);
+    (ac.candidates || []).forEach((c, k) => { if ((sp.cand || [])[k]) eq('후보 ' + k, sp.cand[k].ref, refOf(c)); });
+    const ff = ac.fillFallback;
+    if (!ff) { if (sp.fill) F('OA_SPEC[' + i + '] 에 채움 대안이 있는데 tokens.json 에는 없습니다.'); }
+    else if (!sp.fill) F('OA_SPEC[' + i + '] 에 채움 대안이 없는데 tokens.json 에는 있습니다.');
+    else {
+      eq('채움 토큰', sp.fill.token, ff.token);
+      eq('채움 단계 수', sp.fill.steps.length, ff.steps.length);
+      ff.steps.forEach((st, k) => eq('채움 단계 ' + k, 'color/primary/' + sp.fill.steps[k], st));
+    }
+  });
+}
+
+/* ---------- 0b. 페이로드의 on-accent 별칭이 "다시 재 본" 답과 같은가 ---------- */
+const { pickOnAccent } = require('./onaccent');
+const brandHexOf = n => brandRamp[String(n).replace('color/primary/', '')] || null;
+const poolHex = c => (c.brand ? brandHexOf(c.brand) : T.scale.color[c.scale]) || null;
+const semHex = n => { const d = T.semantic.color[n]; if (!d) return null;
+  return d.brand ? brandHexOf(d.alias) : T.scale.color[d.alias]; };
+const pageHex = semHex('bg/default') || '#ffffff';
+const wantAlias = new Map();                       // 시맨틱 이름 → '컬렉션/이름'
+for (const [name, d] of acList) {
+  const ac = d.autoContrast;
+  const back = semHex(ac.on);
+  const cand = (ac.candidates || []).map(poolHex);
+  const steps = ((ac.fillFallback || {}).steps || []).map(n => brandHexOf(n) || T.scale.color[n] || null);
+  if (!back || cand.some(h => !h) || steps.some(h => !h)) { N('autoContrast ' + name + ' 의 색을 다 찾지 못해 대조를 건너뜁니다.'); continue; }
+  const r = pickOnAccent(back, cand, ac.min, steps, pageHex);
+  wantAlias.set(name, refOf(ac.candidates[r.fg]));
+  if (r.fill >= 0) {
+    const ft = ac.fillFallback.token;
+    wantAlias.set(ft, (T.semantic.color[ft] || {}).brand ? 'Brand/' + ac.fillFallback.steps[r.fill] : 'Scale/' + ac.fillFallback.steps[r.fill]);
+  }
+  if (r.short) N('autoContrast ' + name + ' 은 이 브랜드에서 ' + ac.min + ':1 을 못 넘깁니다 — 최선이 ' + r.ratio.toFixed(2) + ':1.');
+}
+for (const [name, want] of wantAlias) {
+  const v = idx.get('Semantic::' + name);
+  if (!v) { F('시맨틱 ' + name + ' 변수가 페이로드에 없습니다.'); continue; }
+  const e = v.values.Light || {};
+  const got = e.kind === 'alias' ? e.collection + '/' + e.name : '값 ' + e.value;
+  if (got !== want) F('시맨틱 ' + name + ' 이 ' + got + ' 을 가리킵니다 — 이 브랜드에서 대비가 맞는 것은 ' + want + ' 입니다.');
 }
 
 /* ---------- 1. $meta ---------- */

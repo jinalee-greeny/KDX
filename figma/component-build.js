@@ -65,8 +65,8 @@ C({
   slots: [{ kind: 'text', name: 'Label', chars: 'Label' }],
   per: {
     style: {
-      Primary:   { fill: t('comp/fill/accent/primary'),   border: null, slots: { Label: { fill: t('fg/inverse/default') } } },
-      Secondary: { fill: t('comp/fill/accent/secondary'), border: null, slots: { Label: { fill: t('fg/accent/primary') } } },
+      Primary:   { fill: t('comp/fill/accent/primary'),   border: null, slots: { Label: { fill: t('comp/fg/on-accent/primary') } } },
+      Secondary: { fill: t('comp/fill/accent/secondary'), border: null, slots: { Label: { fill: t('comp/fg/on-accent/secondary') } } },
       Neutral:   { fill: t('comp/fill/neutral/primary'),  border: null, slots: { Label: { fill: t('fg/inverse/default') } } },
       Ghost:     { fill: t('comp/fill/neutral/ghost'),    border: t('comp/bdr/default'), slots: { Label: { fill: t('fg/default') } } }
     },
@@ -155,7 +155,7 @@ C({
   per: {
     state: {
       Default:  { fill: t('comp/fill/neutral/secondary'), border: null,                    slots: { Label: { fill: t('fg/default') },       Remove: { fill: t('fg/default') } } },
-      Selected: { fill: t('comp/fill/accent/secondary'),  border: t('comp/bdr/focused'),   slots: { Label: { fill: t('fg/accent/primary') }, Remove: { fill: t('fg/accent/primary') } } },
+      Selected: { fill: t('comp/fill/accent/secondary'),  border: t('comp/bdr/focused'),   slots: { Label: { fill: t('comp/fg/on-accent/secondary') }, Remove: { fill: t('comp/fg/on-accent/secondary') } } },
       Disabled: { fill: t('comp/fill/neutral/disabled'),  border: null,                    slots: { Label: { fill: t('comp/fg/disabled') }, Remove: { fill: t('comp/fg/disabled') } } }
     }
   },
@@ -221,8 +221,8 @@ C({
   slots: [{ kind: 'icon', name: 'Icon', glyph: 'search' }],
   per: {
     style: {
-      Primary:   { fill: t('comp/fill/accent/primary'),   border: null, slots: { Icon: { fill: t('fg/inverse/default') } } },
-      Secondary: { fill: t('comp/fill/accent/secondary'), border: null, slots: { Icon: { fill: t('fg/accent/primary') } } },
+      Primary:   { fill: t('comp/fill/accent/primary'),   border: null, slots: { Icon: { fill: t('comp/fg/on-accent/primary') } } },
+      Secondary: { fill: t('comp/fill/accent/secondary'), border: null, slots: { Icon: { fill: t('comp/fg/on-accent/secondary') } } },
       Neutral:   { fill: t('comp/fill/neutral/primary'),  border: null, slots: { Icon: { fill: t('fg/inverse/default') } } },
       Ghost:     { fill: t('comp/fill/neutral/ghost'),    border: t('comp/bdr/default'), slots: { Icon: { fill: t('fg/default') } } }
     },
@@ -256,8 +256,8 @@ C({
   per: {
     state: {
       Unchecked:     { slots: { Box: { fill: t('comp/fill/neutral/ghost'),    border: t('comp/bdr/default') },  Mark: { visible: false } } },
-      Checked:       { slots: { Box: { fill: t('comp/fill/accent/primary'),   border: null },                   Mark: { visible: true,  glyph: 'check', fill: t('fg/inverse/default') } } },
-      Indeterminate: { slots: { Box: { fill: t('comp/fill/accent/primary'),   border: null },                   Mark: { visible: true,  glyph: 'minus', fill: t('fg/inverse/default') } } },
+      Checked:       { slots: { Box: { fill: t('comp/fill/accent/primary'),   border: null },                   Mark: { visible: true,  glyph: 'check', fill: t('comp/fg/on-accent/primary') } } },
+      Indeterminate: { slots: { Box: { fill: t('comp/fill/accent/primary'),   border: null },                   Mark: { visible: true,  glyph: 'minus', fill: t('comp/fg/on-accent/primary') } } },
       Disabled:      { slots: { Box: { fill: t('comp/fill/neutral/disabled'), border: t('comp/bdr/disabled') }, Mark: { visible: true,  glyph: 'check', fill: t('comp/fg/disabled') } } }
     }
   },
@@ -545,9 +545,9 @@ C({
   per: {
     tone: {
       Neutral: { slots: { Icon: { fill: t('fg/inverse/subtle') } } },
-      Success: { slots: { Icon: { fill: t('status/fg/success') } } },
-      Warning: { slots: { Icon: { fill: t('status/fg/warning') } } },
-      Error:   { slots: { Icon: { fill: t('status/fg/error') } } }
+      Success: { slots: { Icon: { fill: t('status/fg/inverse/success') } } },
+      Warning: { slots: { Icon: { fill: t('status/fg/inverse/warning') } } },
+      Error:   { slots: { Icon: { fill: t('status/fg/inverse/error') } } }
     }
   },
   notes: ['최대 폭은 Web 컬렉션 container 를 참조하는 배치 규칙이다 — 변형 축이 아니므로 여기서는 HUG 로 둔다.']
@@ -611,7 +611,7 @@ C({
     h: px(160, 'Image Frame 기본 높이 160 — 3:2 기준'),
     padX: 0, padY: 0, fill: t('comp/fill/neutral/tertiary')
   },
-  slots: [{ kind: 'icon', name: 'Placeholder', glyph: 'image', w: t('w/icon/lg'), h: t('h/icon/lg'), fill: t('fg/subtler') }],
+  slots: [{ kind: 'icon', name: 'Placeholder', glyph: 'image', w: t('w/icon/lg'), h: t('h/icon/lg'), fill: t('fg/subtle') }],
   per: {
     radius: {
       Small:  { radius: t('comp/radius/image/sm') },
@@ -640,7 +640,7 @@ C({
   per: {
     state: {
       Default:  { fill: t('comp/fill/field/default'),  border: t('comp/bdr/default'),  slots: { Icon: { fill: t('fg/subtle') },          Label: { fill: t('fg/subtle') } } },
-      DragOver: { fill: t('bg/accent/subtle'),         border: t('comp/bdr/focused'),  slots: { Icon: { fill: t('fg/accent/primary') },  Label: { fill: t('fg/accent/primary') } } },
+      DragOver: { fill: t('bg/accent/subtle'),         border: t('comp/bdr/focused'),  slots: { Icon: { fill: t('comp/fg/on-accent/secondary') },  Label: { fill: t('comp/fg/on-accent/secondary') } } },
       Error:    { fill: t('comp/fill/field/default'),  border: t('status/fg/error'),   slots: { Icon: { fill: t('status/fg/error') },    Label: { fill: t('status/fg/error') } } },
       Disabled: { fill: t('comp/fill/field/disabled'), border: t('comp/bdr/disabled'), slots: { Icon: { fill: t('comp/fg/disabled') },   Label: { fill: t('comp/fg/disabled') } } }
     }

@@ -14,7 +14,27 @@
         "display": "\"Pretendard Variable\", system-ui, sans-serif",
         "text": "\"Pretendard Variable\", system-ui, sans-serif"
       },
-      "gradient": null
+      "gradient": null,
+      "onAccent": [
+        {
+          "token": "comp/fg/on-accent/primary",
+          "on": "comp/fill/accent/primary",
+          "min": 4.5,
+          "picked": "Scale/color/gray/100",
+          "ratio": 8.12,
+          "fillStepped": null,
+          "short": false
+        },
+        {
+          "token": "comp/fg/on-accent/secondary",
+          "on": "comp/fill/accent/secondary",
+          "min": 4.5,
+          "picked": "Brand/color/primary/50",
+          "ratio": 7.43,
+          "fillStepped": null,
+          "short": false
+        }
+      ]
     },
     "naming": "토큰 키는 슬래시 계층 표기. 붙임표는 단어 내부에만 쓴다(light-gray, touch-target, focus-ring).",
     "policy": {
@@ -3052,6 +3072,44 @@
     },
     {
       "scopes": [
+        "TEXT_FILL",
+        "SHAPE_FILL"
+      ],
+      "codeSyntax": {
+        "WEB": "var(--comp-fg-on-accent-primary)"
+      },
+      "collection": "Semantic",
+      "name": "comp/fg/on-accent/primary",
+      "type": "COLOR",
+      "values": {
+        "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/100"
+        }
+      }
+    },
+    {
+      "scopes": [
+        "TEXT_FILL",
+        "SHAPE_FILL"
+      ],
+      "codeSyntax": {
+        "WEB": "var(--comp-fg-on-accent-secondary)"
+      },
+      "collection": "Semantic",
+      "name": "comp/fg/on-accent/secondary",
+      "type": "COLOR",
+      "values": {
+        "Light": {
+          "kind": "alias",
+          "collection": "Brand",
+          "name": "color/primary/50"
+        }
+      }
+    },
+    {
+      "scopes": [
         "TEXT_FILL"
       ],
       "codeSyntax": {
@@ -3574,7 +3632,7 @@
         "Light": {
           "kind": "alias",
           "collection": "Scale",
-          "name": "color/red/50"
+          "name": "color/red/40"
         }
       }
     },
@@ -3593,7 +3651,7 @@
         "Light": {
           "kind": "alias",
           "collection": "Scale",
-          "name": "color/green/60"
+          "name": "color/green/40"
         }
       }
     },
@@ -3612,7 +3670,7 @@
         "Light": {
           "kind": "alias",
           "collection": "Scale",
-          "name": "color/orange/60"
+          "name": "color/orange/40"
         }
       }
     },
@@ -3631,7 +3689,83 @@
         "Light": {
           "kind": "alias",
           "collection": "Scale",
-          "name": "color/blue/50"
+          "name": "color/blue/40"
+        }
+      }
+    },
+    {
+      "scopes": [
+        "TEXT_FILL",
+        "SHAPE_FILL"
+      ],
+      "codeSyntax": {
+        "WEB": "var(--status-fg-inverse-success)"
+      },
+      "collection": "Semantic",
+      "name": "status/fg/inverse/success",
+      "type": "COLOR",
+      "values": {
+        "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/green/70"
+        }
+      }
+    },
+    {
+      "scopes": [
+        "TEXT_FILL",
+        "SHAPE_FILL"
+      ],
+      "codeSyntax": {
+        "WEB": "var(--status-fg-inverse-warning)"
+      },
+      "collection": "Semantic",
+      "name": "status/fg/inverse/warning",
+      "type": "COLOR",
+      "values": {
+        "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/orange/70"
+        }
+      }
+    },
+    {
+      "scopes": [
+        "TEXT_FILL",
+        "SHAPE_FILL"
+      ],
+      "codeSyntax": {
+        "WEB": "var(--status-fg-inverse-error)"
+      },
+      "collection": "Semantic",
+      "name": "status/fg/inverse/error",
+      "type": "COLOR",
+      "values": {
+        "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/red/70"
+        }
+      }
+    },
+    {
+      "scopes": [
+        "TEXT_FILL",
+        "SHAPE_FILL"
+      ],
+      "codeSyntax": {
+        "WEB": "var(--status-fg-inverse-info)"
+      },
+      "collection": "Semantic",
+      "name": "status/fg/inverse/info",
+      "type": "COLOR",
+      "values": {
+        "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/blue/70"
         }
       }
     },
@@ -6844,12 +6978,12 @@
         "style": {
           "Primary": {
             "fill": "comp/fill/accent/primary",
-            "text": "fg/inverse/default",
+            "text": "comp/fg/on-accent/primary",
             "border": null
           },
           "Secondary": {
             "fill": "comp/fill/accent/secondary",
-            "text": "fg/accent/primary",
+            "text": "comp/fg/on-accent/secondary",
             "border": null
           },
           "Neutral": {
@@ -7095,7 +7229,7 @@
           },
           "Selected": {
             "fill": "comp/fill/accent/secondary",
-            "text": "fg/accent/primary",
+            "text": "comp/fg/on-accent/secondary",
             "border": "comp/bdr/focused",
             "note": "전용 Selected 토큰(예: comp/fill/neutral/selected) 부재 확인 — Button의 Secondary 스타일과 동일한 accent-secondary 조합으로 잠정 대체"
           },
@@ -7294,12 +7428,12 @@
         "style": {
           "Primary": {
             "fill": "comp/fill/accent/primary",
-            "icon": "fg/inverse/default",
+            "icon": "comp/fg/on-accent/primary",
             "border": null
           },
           "Secondary": {
             "fill": "comp/fill/accent/secondary",
-            "icon": "fg/accent/primary",
+            "icon": "comp/fg/on-accent/secondary",
             "border": null
           },
           "Neutral": {
@@ -7399,12 +7533,12 @@
           "Checked": {
             "fill": "comp/fill/accent/primary",
             "border": null,
-            "mark": "fg/inverse/default"
+            "mark": "comp/fg/on-accent/primary"
           },
           "Indeterminate": {
             "fill": "comp/fill/accent/primary",
             "border": null,
-            "mark": "fg/inverse/default",
+            "mark": "comp/fg/on-accent/primary",
             "note": "체크 대신 가로줄 마크 — 아이콘 세트 확정 후 실제 글리프 결정"
           },
           "Disabled": {
@@ -8089,13 +8223,13 @@
             "icon": "fg/inverse/subtle"
           },
           "Success": {
-            "icon": "status/fg/success"
+            "icon": "status/fg/inverse/success"
           },
           "Warning": {
-            "icon": "status/fg/warning"
+            "icon": "status/fg/inverse/warning"
           },
           "Error": {
-            "icon": "status/fg/error"
+            "icon": "status/fg/inverse/error"
           }
         }
       },
@@ -8272,7 +8406,7 @@
           "Large": "comp/radius/image/lg"
         },
         "placeholderFill": "comp/fill/neutral/tertiary",
-        "placeholderIcon": "fg/subtler"
+        "placeholderIcon": "fg/subtle"
       },
       "properties": [
         {
@@ -8338,8 +8472,8 @@
           "DragOver": {
             "fill": "bg/accent/subtle",
             "border": "comp/bdr/focused",
-            "text": "fg/accent/primary",
-            "icon": "fg/accent/primary"
+            "text": "comp/fg/on-accent/secondary",
+            "icon": "comp/fg/on-accent/secondary"
           },
           "Error": {
             "fill": "comp/fill/field/default",
@@ -8448,7 +8582,7 @@
             "slots": {
               "Label": {
                 "fill": {
-                  "t": "fg/inverse/default"
+                  "t": "comp/fg/on-accent/primary"
                 }
               }
             }
@@ -8461,7 +8595,7 @@
             "slots": {
               "Label": {
                 "fill": {
-                  "t": "fg/accent/primary"
+                  "t": "comp/fg/on-accent/secondary"
                 }
               }
             }
@@ -8854,12 +8988,12 @@
             "slots": {
               "Label": {
                 "fill": {
-                  "t": "fg/accent/primary"
+                  "t": "comp/fg/on-accent/secondary"
                 }
               },
               "Remove": {
                 "fill": {
-                  "t": "fg/accent/primary"
+                  "t": "comp/fg/on-accent/secondary"
                 }
               }
             }
@@ -9112,7 +9246,7 @@
             "slots": {
               "Icon": {
                 "fill": {
-                  "t": "fg/inverse/default"
+                  "t": "comp/fg/on-accent/primary"
                 }
               }
             }
@@ -9125,7 +9259,7 @@
             "slots": {
               "Icon": {
                 "fill": {
-                  "t": "fg/accent/primary"
+                  "t": "comp/fg/on-accent/secondary"
                 }
               }
             }
@@ -9325,7 +9459,7 @@
                 "visible": true,
                 "glyph": "check",
                 "fill": {
-                  "t": "fg/inverse/default"
+                  "t": "comp/fg/on-accent/primary"
                 }
               }
             }
@@ -9342,7 +9476,7 @@
                 "visible": true,
                 "glyph": "minus",
                 "fill": {
-                  "t": "fg/inverse/default"
+                  "t": "comp/fg/on-accent/primary"
                 }
               }
             }
@@ -10465,7 +10599,7 @@
             "slots": {
               "Icon": {
                 "fill": {
-                  "t": "status/fg/success"
+                  "t": "status/fg/inverse/success"
                 }
               }
             }
@@ -10474,7 +10608,7 @@
             "slots": {
               "Icon": {
                 "fill": {
-                  "t": "status/fg/warning"
+                  "t": "status/fg/inverse/warning"
                 }
               }
             }
@@ -10483,7 +10617,7 @@
             "slots": {
               "Icon": {
                 "fill": {
-                  "t": "status/fg/error"
+                  "t": "status/fg/inverse/error"
                 }
               }
             }
@@ -10731,7 +10865,7 @@
             "t": "h/icon/lg"
           },
           "fill": {
-            "t": "fg/subtler"
+            "t": "fg/subtle"
           }
         }
       ],
@@ -10844,12 +10978,12 @@
             "slots": {
               "Icon": {
                 "fill": {
-                  "t": "fg/accent/primary"
+                  "t": "comp/fg/on-accent/secondary"
                 }
               },
               "Label": {
                 "fill": {
-                  "t": "fg/accent/primary"
+                  "t": "comp/fg/on-accent/secondary"
                 }
               }
             }
@@ -10954,6 +11088,8 @@
       "comp/bdr/focused",
       "comp/bdr/subtle",
       "comp/fg/disabled",
+      "comp/fg/on-accent/primary",
+      "comp/fg/on-accent/secondary",
       "comp/fill/accent/primary",
       "comp/fill/accent/secondary",
       "comp/fill/field/default",
@@ -10993,7 +11129,6 @@
       "comp/track/spinner-stroke",
       "dimension/1",
       "dimension/8",
-      "fg/accent/primary",
       "fg/default",
       "fg/inverse/default",
       "fg/inverse/subtle",
@@ -11018,6 +11153,9 @@
       "status/bg/success",
       "status/bg/warning",
       "status/fg/error",
+      "status/fg/inverse/error",
+      "status/fg/inverse/success",
+      "status/fg/inverse/warning",
       "status/fg/success",
       "status/fg/warning",
       "w/avatar/lg",

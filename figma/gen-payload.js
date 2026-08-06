@@ -110,12 +110,61 @@ for (const [k, v] of Object.entries(brandFonts)) {
 
 // 4) Semantic — 색
 // 별칭 대상이 Brand인지 Scale인지는 tokens.json의 brand 플래그가 알려준다.
+//
+// 4a) 먼저 autoContrast 를 가진 토큰들의 별칭을 "재서" 정한다.
+// 브랜드가 밝으면 흰 글자가 무너진다 — 그때 따라 움직여야 하는 것은 글자이지 사람이 아니다.
+const { pickOnAccent } = require('./onaccent');
+const hexOfSemantic = n => {
+  const d = T.semantic.color[n];
+  if (!d) return null;
+  return (d.brand ? brandColors : T.scale.color)[d.alias] || null;
+};
+const hexOfRef = c => (c.brand ? brandColors[c.brand] : T.scale.color[c.scale]) || null;
+const pageHex = hexOfSemantic('bg/default') || '#ffffff';
+const aliasOverride = {};      // 토큰 이름 → { collection, name }
+const onAccentReport = [];
 for (const [name, d] of Object.entries(T.semantic.color)) {
-  const target = d.brand ? 'Brand' : 'Scale';
-  const pool = d.brand ? brandColors : T.scale.color;
-  if (!(d.alias in pool)) W('semantic.color ' + name + ' → ' + target + '/' + d.alias + ' 대상 없음');
+  const ac = d.autoContrast;
+  if (!ac) continue;
+  const backdrop = hexOfSemantic(ac.on);
+  const candHex = (ac.candidates || []).map(hexOfRef);
+  const steps = (ac.fillFallback && ac.fillFallback.steps) || [];
+  const stepHex = steps.map(n => brandColors[n] || T.scale.color[n] || null);
+  if (!backdrop || candHex.some(h => !h) || stepHex.some(h => !h)) {
+    W('autoContrast ' + name + ' 의 배경/후보 색을 다 찾지 못해 기본 별칭을 그대로 둡니다.');
+    continue;
+  }
+  const r = pickOnAccent(backdrop, candHex, ac.min, stepHex, pageHex);
+  const win = ac.candidates[r.fg];
+  aliasOverride[name] = win.brand
+    ? { collection: 'Brand', name: win.brand }
+    : { collection: 'Scale', name: win.scale };
+  let stepped = null;
+  if (r.fill >= 0) {
+    const ft = ac.fillFallback.token;
+    const fd = T.semantic.color[ft];
+    stepped = steps[r.fill];
+    aliasOverride[ft] = { collection: fd && fd.brand ? 'Brand' : 'Scale', name: stepped };
+    W('대비를 맞추려고 ' + ft + ' 를 ' + stepped + ' 로 한 스톱 어둡게 했습니다.');
+  }
+  if (r.short) W('autoContrast ' + name + ' 이 ' + ac.min + ':1 을 못 넘겼습니다 — 최선이 ' + r.ratio.toFixed(2) + ':1.');
+  onAccentReport.push({
+    token: name, on: ac.on, min: ac.min,
+    picked: aliasOverride[name].collection + '/' + aliasOverride[name].name,
+    ratio: Math.round(r.ratio * 100) / 100,
+    fillStepped: stepped, short: r.short
+  });
+}
+
+// 4b) 그 다음에 전부 내보낸다(재계산 결과가 있으면 그쪽이 이긴다).
+for (const [name, d] of Object.entries(T.semantic.color)) {
+  const ov = aliasOverride[name];
+  const target = ov ? ov.collection : (d.brand ? 'Brand' : 'Scale');
+  const aliasName = ov ? ov.name : d.alias;
+  const pool = target === 'Brand' ? brandColors : T.scale.color;
+  if (!(aliasName in pool)) W('semantic.color ' + name + ' → ' + target + '/' + aliasName + ' 대상 없음');
   V({ collection: 'Semantic', name, type: 'COLOR', scopes: d.scopes || ['FRAME_FILL'],
-      values: { Light: alias(target, d.alias) } });
+      values: { Light: alias(target, aliasName) } });
 }
 
 // 5) Semantic — 수치
@@ -482,7 +531,8 @@ const payload = {
       seed: brandColors['color/primary/50'] || null,
       stops: Object.keys(brandColors).length,
       font: { display: brandFonts.display || null, text: brandFonts.text || null },
-      gradient: brandGradient ? (paintStyles.length ? 'brand/gradient' : 'dropped') : null
+      gradient: brandGradient ? (paintStyles.length ? 'brand/gradient' : 'dropped') : null,
+      onAccent: onAccentReport
     },
     naming: T.$meta.naming,
     policy: {
