@@ -1587,6 +1587,13 @@ async function applyScreens(payload, push, problems) {
       if (ts) { try { await node.setTextStyleIdAsync(ts.id); } catch (e) { problems.push('화면 — 텍스트 스타일 적용 실패 ' + spec.text.style); } }
       /* 스케일 밖 크기는 스타일을 얹은 뒤에 덮어쓴다 — 순서가 반대면 스타일이 되돌린다. */
       if (spec.text && spec.text.size) T('글자 크기 ' + node.name, () => { node.fontSize = spec.text.size; });
+      /* 디스플레이 크기는 Web 컬렉션이 정한다 — 숫자로 박지 않고 변수에 건다.
+         그래야 Figma 에서 모드를 mobile/tablet/desktop 으로 돌릴 때 제목이 따라 움직인다. */
+      if (spec.text && spec.text.sizeToken) {
+        const v = varOf(spec.text.sizeToken);
+        if (v) { try { node.setBoundVariable('fontSize', v); rep.bound++; } catch (e) { rep.unbound++; } }
+        else rep.unbound++;
+      }
       if (spec.text && spec.text.lh) T('행간 ' + node.name, () => { node.lineHeight = { unit: 'PIXELS', value: spec.text.lh }; });
       if (spec.text && spec.text.fill) T('글자색 ' + node.name, () => { const p = paintOf(spec.text.fill); node.fills = p ? [p] : []; });
     } else {
