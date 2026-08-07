@@ -107,6 +107,7 @@
   <span class="sp"></span>
   <label class="ck" id="stylewrap"><input type="checkbox" id="dostyles" checked> 스타일도 적용</label>
   <label class="ck" id="compwrap"><input type="checkbox" id="docomponents" checked> 컴포넌트도 생성</label>
+  <label class="ck" id="scrwrap" hidden><input type="checkbox" id="doscreens" checked> 화면도 생성</label>
   <button id="back" hidden>뒤로</button>
   <button id="go" class="pri" disabled>차이 확인</button>
 </footer>
@@ -124,6 +125,10 @@ function setStep(n){
   $('back').hidden = n===1;
   $('stylewrap').style.display = n===2 ? 'flex' : 'none';
   $('compwrap').style.display = n===2 ? 'flex' : 'none';
+  /* 화면 옵션은 페이로드에 화면표가 실려 있을 때만 꺼낸다 — 없는 스위치를 보여 주면
+     '토큰만' 페이로드를 넣고도 화면이 나올 거라고 기대하게 된다. */
+  $('scrwrap').hidden = !(n===2 && payload && (payload.screenBuilds||[]).length);
+  $('scrwrap').style.display = $('scrwrap').hidden ? 'none' : 'flex';
   $('go').textContent = n===1 ? '차이 확인' : n===2 ? '적용' : '닫기';
   $('go').disabled = n===2 ? false : (n===1 ? !payload : false);
   $('go').className = n===2 ? 'pri' : (n===3 ? '' : 'pri');
@@ -145,6 +150,8 @@ function parseSrc(){
       + ((((o.styles||{}).paint)||[]).length ? ' · 페인트 '+(((o.styles||{}).paint)||[]).length : '')
       + ' · 컴포넌트 '+((o.componentBuilds||[]).length)+' 세트'
       + '/'+(((o.$componentBuilds||{}).totalVariants)||0)+' 변형'
+      + ((o.screenBuilds||[]).length ? ' · 화면 '+o.screenBuilds.length+' 프레임'
+          +'/'+(((o.$screens||{}).screens)||0)+' 스크린' : '')
       /* 브랜드가 실제로 실려 있는지 여기서 바로 보인다 — 파랗게 나오는 사고를 눈으로 먼저 잡는다 */
       + (m.brand ? '<br><span class="'+(m.brand.connected?'ok':'warn')+'">브랜드 '
           +(m.brand.connected?'연결됨':'플레이스홀더')+' — '+esc(String(m.brand.source||'?'))+'</span>'
@@ -196,7 +203,8 @@ function renderPlan(p){
     + chip('b', c.splits, '분할')
     + chip('', c.same, '변화 없음')
     + chip('c', c.orphans, '고아(유지)')
-    + (c.componentSets ? chip('a', c.componentSets, '컴포넌트 세트') + chip('a', c.componentVariants, '변형') : '');
+    + (c.componentSets ? chip('a', c.componentSets, '컴포넌트 세트') + chip('a', c.componentVariants, '변형') : '')
+    + (c.screenFrames ? chip('a', c.screenFrames, '화면 프레임') + chip('a', c.screenNodes, '화면 노드') : '');
 
   let h = '';
 
@@ -308,6 +316,31 @@ function renderPlan(p){
           cp.provisional.map(n=>'<tr><td class="k">'+esc(n)+'</td><td class="v">토큰이 생기면 교체</td></tr>').join(''));
   }
 
+  /* 화면 — 페이로드에 화면표가 실렸을 때만 나온다. 없으면 없다고 한 줄로 말한다. */
+  const sp = p.screens || null;
+  if (!sp || !sp.frames) {
+    h += '<h3>화면 <span class="n">생성 안 함</span></h3>';
+    h += '<p class="hint">페이로드에 화면표(screenBuilds)가 없습니다 — 데모의 내보내기 창에서 범위를 <b>토큰 + 화면</b>으로 고르면 실립니다.</p>';
+  } else {
+    const sm = sp.meta || {};
+    h += '<h3>화면 <span class="n">'+sp.frames+' 프레임 · '+sp.nodes+' 노드</span></h3>';
+    h += '<p class="hint">전용 페이지 <b>[Freesm] Screens</b> 안에서만 만듭니다. 페이지 밖의 프레임은 손대지 않습니다.'
+       + (sm.layout ? ' 배치는 데모가 검산해 보낸 그대로 따릅니다 — 오토레이아웃 '+sm.layout.auto+'개 · 절대배치 '+sm.layout.abs+'개.' : '')
+       + '</p>';
+    h += box('만들 화면', sp.create.length,
+        sp.create.map(c=>'<tr><td class="k">'+esc(c.name)+'</td><td class="v">'+c.width+'px · '+esc(c.mode)+'</td></tr>').join(''));
+    if (sm.bind)
+      h += '<p class="hint">색 되짚기 <b>'+sm.bind.color.pct+'%</b> ('+sm.bind.color.bound+' 토큰 / '+sm.bind.color.literal+' 리터럴)'
+         + ' · 치수 되짚기 <b>'+sm.bind.num.pct+'%</b>. 되짚지 못한 값은 변수에 걸지 않고 값 그대로 넣습니다 — '
+         + '아무 토큰이나 걸어 주는 편이 화면은 그럴듯하지만 그 순간 파일이 거짓말을 시작합니다.</p>';
+    if (sp.prev.length)
+      h += box('같은 이름이 이 페이지에 있어 “— 이전”으로 밀어 둘 화면', sp.prev.length,
+          sp.prev.map(n=>'<tr><td class="k">'+esc(n)+'</td><td class="v">개명 · 삭제 안 함</td></tr>').join(''));
+    if (sp.elsewhere.length)
+      h += box('다른 페이지에 같은 이름 (알리기만 함)', sp.elsewhere.length,
+          sp.elsewhere.map(n=>'<tr><td class="k">'+esc(n)+'</td><td class="v">손대지 않음</td></tr>').join(''));
+  }
+
   $('plan').innerHTML = h;
   $('foot').textContent = '적용을 누르면 위 내용이 이 파일에 반영됩니다.';
 }
@@ -334,7 +367,7 @@ $('go').onclick = () => {
   } else if (step === 2) {
     $('log').innerHTML=''; $('result').innerHTML=''; setStep(3);
     $('go').disabled = true; $('foot').textContent = '적용하는 중…';
-    parent.postMessage({pluginMessage:{type:'apply', payload, opts:{styles:$('dostyles').checked, components:$('docomponents').checked}}}, '*');
+    parent.postMessage({pluginMessage:{type:'apply', payload, opts:{styles:$('dostyles').checked, components:$('docomponents').checked, screens:$('doscreens').checked}}}, '*');
   } else {
     parent.postMessage({pluginMessage:{type:'close'}}, '*');
   }
@@ -355,6 +388,10 @@ onmessage = (e) => {
       + (s.components?' · 컴포넌트 '+s.components.sets+' 세트/'+s.components.variants+' 변형'
           +(s.components.renamedPrev?' (이전 '+s.components.renamedPrev+'건 개명)':'')
           +(s.components.skipped?' · 실패 '+s.components.skipped:''):'')
+      + (s.screens&&s.screens.frames?' · 화면 '+s.screens.frames+' 프레임/'+s.screens.nodes+' 노드'
+          +(s.screens.instances?' · 인스턴스 '+s.screens.instances:'')
+          +(s.screens.instanceMiss?' · 컴포넌트 못 찾음 '+s.screens.instanceMiss:'')
+          +(s.screens.failed?' · 실패 '+s.screens.failed:''):'')
       + (s.crossCollection?'<br><span class="warn">컬렉션 이동 '+s.crossCollection+'건은 손으로 처리해야 합니다.</span>':'')
       + '</div>';
     $('go').disabled = false; $('go').textContent='닫기'; $('go').className='';

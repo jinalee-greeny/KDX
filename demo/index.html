@@ -1450,13 +1450,13 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
       <div class="gm-sep"></div>
       <button data-m="brand" role="menuitem"><b><svg class="i"><use href="#icon-action-external"/></svg>브랜드 연결</b><small>소스에서 색·폰트 추출 — 프리셋 ① 섹션이 바로 열립니다</small></button>
       <div class="gm-sep"></div>
-      <button data-m="figma" role="menuitem"><b><svg class="i"><use href="#icon-nav-movedown"/></svg>Figma 내보내기</b><small>토큰·스타일을 페이로드로 확인하고 플러그인에 넘깁니다</small></button>
+      <button data-m="figma" role="menuitem"><b><svg class="i"><use href="#icon-nav-movedown"/></svg>Figma 내보내기</b><small>토큰만, 또는 만들어 둔 화면까지 함께 넘깁니다</small></button>
       <div class="gm-sep"></div>
       <div class="gm-row"><div class="gm-rowl"><b><svg class="i"><use href="#icon-status-alert"/></svg>스펙 힌트</b><small>요소에 마우스를 올리면 토큰·스펙이 바로 보입니다</small></div><button class="swtch on" id="spHintSw" role="switch" aria-checked="true" title="힌트 켬/끔"><i></i></button></div>
       <button data-m="spec" role="menuitem"><b><svg class="i"><use href="#icon-action-search"/></svg>스펙 시트<span class="kb">S</span></b><small>컴포넌트·모듈·패턴 스펙 색인</small></button>
     </div>
   </div>
-  <span class="gver">Figma 내보내기 · v0.83</span>
+  <span class="gver">화면 내보내기 · v0.85</span>
 </header>
 <div class="app">
 
@@ -1799,7 +1799,23 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
     </div>
 
     <div class="fx-st" id="fxSt">페이로드를 불러오는 중입니다…</div>
+
+    <div class="fx-sec" id="fxScope" style="border-top:0;margin-top:14px;padding-top:0">
+      <h4>무엇을 내보낼까</h4>
+      <p>토큰만 내보내면 Figma 에는 변수·스타일·컴포넌트만 섭니다. <b>화면까지</b> 고르면 지금 만들어 둔 스크린을 <b>모바일 · 태블릿 · 데스크톱</b> 세 폭으로 훑어 프레임 트리로 함께 넘깁니다.</p>
+      <div class="seg sm" id="fxModeSeg" style="margin-top:9px">
+        <button data-fxm="tokens" class="on">토큰만</button>
+        <button data-fxm="screens">토큰 + 화면</button>
+      </div>
+    </div>
+
     <div class="fx-grid" id="fxGrid" hidden></div>
+
+    <div class="fx-sec" id="fxScr" hidden>
+      <h4>화면 — 지금 보고 있는 스크린이 그대로 나갑니다</h4>
+      <p>브라우저가 그려 놓은 것을 훑어 옮깁니다. 고친 글자·항목 수·변형·숨긴 섹션이 전부 따라옵니다. 오토레이아웃은 <b>검산을 통과한 자리에만</b> 겁니다 — 되짚어 계산한 자리가 측정값과 1px 이상 어긋나면 그 자리는 절대배치로 냅니다.</p>
+      <div class="fx-rows" id="fxScrRows"></div>
+    </div>
 
     <div class="fx-sec" id="fxBrand" hidden>
       <h4>브랜드 — 지금 보고 있는 브랜드가 그대로 나갑니다</h4>
@@ -3179,6 +3195,538 @@ gMenu.addEventListener('click',e=>{const b=e.target.closest('button[data-m]');if
   else if(m==='figma')fxOpen();
 });
 
+/* ================= 스크린 → Figma 화면 페이로드 (v0.85) =======================
+   토큰만 내보내면 Figma 에는 변수와 컴포넌트만 남는다. 그것들이 실제 화면에서
+   어떻게 서는지는 여전히 데모에서만 볼 수 있다. 여기서 하는 일은 '지금 브라우저가
+   그려 놓은 것'을 그대로 훑어 노드 트리로 옮기는 것이다.
+
+   왜 섹션 26종의 빌드표를 손으로 쓰지 않았나 — 그 표는 쓰는 순간 데모와 갈라진다.
+   글자를 고치고 항목 수를 바꾸고 섹션을 숨기는 편집이 전부 화면 쪽에만 있기 때문이다.
+   DOM 을 훑으면 그 편집이 공짜로 따라온다.
+
+   세 가지 원칙
+   1) 재구성하지 않는다 — 오토레이아웃은 '추측'이 아니라 '검산'을 통과한 자리에만 건다.
+      추측한 배치를 되짚어 계산해 측정값과 1px 이상 어긋나면 그 자리는 절대배치로 낸다.
+   2) 못 되짚은 값은 숨기지 않는다 — 토큰으로 되짚지 못한 색·숫자는 리터럴로 내고 센다.
+   3) 컴포넌트 치환은 낱개 컨트롤에만 한다 — 카드·모달처럼 속이 풍부한 컨테이너를
+      제네릭 인스턴스로 바꾸면 화면이 통째로 빈다.
+   ========================================================================== */
+
+/* 잡아낼 폭. 데모 프리뷰의 데스크톱 프레임은 1080 이지만 그건 미리보기 크롬의 제약이지
+   브레이크포인트가 아니다 — Web/container/max 가 1200 이므로 1440 에서 잡아야 그 값이 실제로 선다. */
+const SXW = [
+  { mode: 'mobile',  w: 390  },
+  { mode: 'tablet',  w: 768  },
+  { mode: 'desktop', w: 1440 }
+];
+/* 검산 허용 오차(px). 브라우저의 서브픽셀 배치를 감안한 값이다. */
+const SXTOL = 1.0;
+
+/* ---- 값 읽기 ---------------------------------------------------------- */
+function sxN(v) { const n = parseFloat(v); return isFinite(n) ? n : 0; }
+function sxHex2(n) { n = Math.max(0, Math.min(255, Math.round(n))); return (n < 16 ? '0' : '') + n.toString(16); }
+/* rgb()/rgba() 만 다룬다 — getComputedStyle 이 색을 돌려주는 유일한 모양이다. */
+function sxColor(str) {
+  const m = /^rgba?\(([^)]+)\)$/.exec(String(str).trim());
+  if (!m) return null;
+  const p = m[1].split(/[,\s/]+/).filter(Boolean).map(parseFloat);
+  if (p.length < 3 || !isFinite(p[0])) return null;
+  const a = (p.length > 3 && isFinite(p[3])) ? p[3] : 1;
+  if (a <= 0.001) return null;
+  return { hex: ('#' + sxHex2(p[0]) + sxHex2(p[1]) + sxHex2(p[2])).toUpperCase(), a: a };
+}
+
+/* ---- 토큰 되짚기 ------------------------------------------------------
+   계산된 값에서 변수 이름을 되찾는다. CSS 의 var(--…) 이름은 데모의 축약어라
+   토큰 이름이 아니다. 그래서 이름이 아니라 '값'으로 되짚고, 후보가 여럿이면
+   scopes 로 거른다 — 페이로드가 이미 들고 있는 정보다. */
+const SXSCOPE = {
+  fill:   ['FRAME_FILL', 'SHAPE_FILL'],
+  text:   ['TEXT_FILL'],
+  stroke: ['STROKE_COLOR'],
+  radius: ['CORNER_RADIUS'],
+  gap:    ['GAP'],
+  size:   ['WIDTH_HEIGHT'],
+  strokeW:['STROKE_FLOAT']
+};
+/* 되짚기 우선순위 — 의미가 굵은 층부터. 같은 값을 여러 토큰이 가질 때
+   comp/* 를 먼저 집는 이유는, 화면이 실제로 참조하는 것이 그 층이기 때문이다. */
+function sxRank(name, col) {
+  if (/^comp\//.test(name)) return 0;
+  if (/^status\//.test(name)) return 1;
+  if (col === 'Semantic') return 2;
+  if (col === 'Web') return 3;
+  if (col === 'Brand') return 4;
+  return 5;
+}
+function sxMakeIndex(payload) {
+  const byKey = new Map(), colOf = new Map();
+  for (const v of (payload.variables || [])) {
+    byKey.set(v.collection + ' ' + v.name, v);
+    if (!colOf.has(v.name)) colOf.set(v.name, v.collection);
+  }
+  const defMode = new Map();
+  for (const c of (payload.collections || [])) defMode.set(c.name, c.defaultMode || (c.modes || [])[0]);
+
+  function resolve(col, name, mode, d) {
+    const v = byKey.get(col + ' ' + name);
+    if (!v || d > 8) return null;
+    const mv = v.values[mode] || v.values[defMode.get(col)] || v.values[Object.keys(v.values)[0]];
+    if (!mv) return null;
+    if (mv.kind === 'alias') return resolve(mv.collection, mv.name, defMode.get(mv.collection), d + 1);
+    return mv.value;
+  }
+
+  /* 모드마다 표를 따로 만든다 — Web 컬렉션은 모드에 따라 값이 다르고,
+     그 차이가 곧 반응형이라서 한 표로 뭉개면 되짚기가 틀린다. */
+  const tables = {};
+  for (const bp of SXW) {
+    const color = new Map(), num = new Map();
+    for (const v of (payload.variables || [])) {
+      const mode = (v.collection === 'Web') ? bp.mode : defMode.get(v.collection);
+      const val = resolve(v.collection, v.name, mode, 0);
+      if (val == null) continue;
+      const ent = { name: v.name, col: v.collection, scopes: v.scopes || [], rank: sxRank(v.name, v.collection) };
+      if (v.type === 'COLOR' && typeof val === 'string') {
+        /* 알파까지 키에 넣는다 — fg/subtle 은 color/alpha/black/60 이라
+           앞 6자리만 보면 불투명 gray 토큰과 같은 칸에 들어가 서로를 가린다. */
+        let hx = String(val).trim().toUpperCase();
+        if (hx.length === 7) hx += 'FF';
+        const k = hx.slice(0, 9);
+        if (!color.has(k)) color.set(k, []);
+        color.get(k).push(ent);
+      } else if (v.type === 'FLOAT' && typeof val === 'number') {
+        const k = Math.round(val * 100) / 100;
+        if (!num.has(k)) num.set(k, []);
+        num.get(k).push(ent);
+      }
+    }
+    for (const m of [color, num]) for (const arr of m.values())
+      arr.sort((a, b) => a.rank - b.rank || a.name.length - b.name.length || (a.name < b.name ? -1 : 1));
+    tables[bp.mode] = { color: color, num: num };
+  }
+  return tables;
+}
+/* 후보 중 scope 가 맞는 첫 항목. 하나도 안 맞으면 null 을 돌려 리터럴로 내보낸다 —
+   아무거나 집어 주는 편이 화면은 그럴듯하지만, 그 순간 페이로드가 거짓말을 시작한다. */
+function sxPick(list, use) {
+  if (!list || !list.length) return null;
+  const want = SXSCOPE[use] || [];
+  for (const e of list) {
+    if (!e.scopes.length) continue;
+    if (e.scopes.indexOf('ALL_SCOPES') >= 0) return e.name;
+    for (const s of want) if (e.scopes.indexOf(s) >= 0) return e.name;
+  }
+  return null;
+}
+
+/* ---- 텍스트 스타일 맞추기 ---------------------------------------------
+   서체 이름을 화면에서 그대로 옮기면 Figma 에서 그 폰트가 없을 때 통째로 죽는다.
+   그래서 글자는 늘 44개 텍스트 스타일 중 하나에 붙이고, 크기가 다른 자리만
+   따로 덮어쓴다 — 폰트는 언제나 스타일이 들고 있는 것 하나뿐이다. */
+function sxMakeTextMatch(payload) {
+  const list = ((payload.styles || {}).text || []).map(s => ({
+    name: s.name, size: s.fontSize, weight: s.fontWeight,
+    lh: (s.lineHeight && s.lineHeight.unit === 'PIXELS') ? s.lineHeight.value : null
+  }));
+  return function (size, weight, lh) {
+    let best = null, bestD = Infinity;
+    for (const s of list) {
+      const d = Math.abs(s.size - size) * 10
+              + Math.abs((s.weight || 400) - (weight || 400)) / 50
+              + (s.lh != null && lh ? Math.abs(s.lh - lh) : 0);
+      if (d < bestD) { bestD = d; best = s; }
+    }
+    if (!best) return null;
+    return {
+      style: best.name,
+      exact: Math.abs(best.size - size) < 0.5 && Math.abs((best.weight || 400) - (weight || 400)) < 1,
+      size: Math.round(size * 100) / 100,
+      lh: lh ? Math.round(lh * 100) / 100 : null
+    };
+  };
+}
+
+/* ---- 컴포넌트 치환표 --------------------------------------------------
+   낱개 컨트롤만 바꾼다. 카드·모달처럼 속이 풍부한 컨테이너는 제네릭 인스턴스로
+   바꾸는 순간 화면이 비어 버리므로 프레임으로 그대로 둔다. */
+const SXCOMP = [
+  { sel: '.btn', comp: 'Button',
+    v: el => ({
+      style: el.classList.contains('btn-primary') ? 'Primary'
+           : el.classList.contains('btn-neutral') ? 'Neutral'
+           : el.classList.contains('btn-ghost')   ? 'Ghost' : 'Secondary',
+      size:  el.classList.contains('btn-lg') ? 'Large'
+           : el.classList.contains('btn-sm') ? 'Small' : 'Medium',
+      state: el.disabled ? 'Disabled' : 'Default'
+    }),
+    ov: el => ({ Label: (el.textContent || '').trim() }) },
+  { sel: '.pg', comp: 'Button',
+    v: el => ({ style: el.classList.contains('on') ? 'Primary' : 'Ghost', size: 'Small', state: 'Default' }),
+    ov: el => ({ Label: (el.textContent || '').trim() }) },
+  { sel: '.inp', comp: 'Input',
+    v: el => ({ size: 'Medium', state: 'Default' }),
+    ov: el => ({ Placeholder: ((el.querySelector('.ph') || el).textContent || '').trim() }) },
+  { sel: '.chk', comp: 'Checkbox',
+    v: el => ({ state: el.classList.contains('on') ? 'Checked' : 'Unchecked' }), ov: () => ({}) },
+  { sel: '.fchip', comp: 'Chip',
+    v: el => ({ state: el.classList.contains('on') ? 'Selected' : 'Default' }),
+    ov: el => ({ Label: (el.textContent || '').trim() }) },
+  { sel: '.tag,.ntag,.pst,.evstate,.pb,.mylv', comp: 'Badge / Tag',
+    v: el => ({ form: 'Label',
+      tone: /success|on\b/.test(el.className) ? 'Success' : 'Neutral' }),
+    ov: el => ({ Label: (el.textContent || '').trim() }) }
+];
+function sxCompMatch(el) {
+  for (const r of SXCOMP) if (el.matches(r.sel)) return r;
+  return null;
+}
+
+/* ---- 아이콘 ----------------------------------------------------------
+   스프라이트의 <symbol> 을 홀로 서는 <svg> 로 옮겨 담는다. 플러그인이
+   createNodeFromSvg 로 진짜 벡터를 만든다 — 네모 자리표가 아니다. */
+function sxIconSvg(useEl, color, sw) {
+  const href = useEl.getAttribute('href') || useEl.getAttribute('xlink:href') || '';
+  const sym = href.charAt(0) === '#' ? document.getElementById(href.slice(1)) : null;
+  if (!sym) return null;
+  const vb = sym.getAttribute('viewBox') || '0 0 24 24';
+  return {
+    id: href.slice(1),
+    svg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + vb + '" fill="none" stroke="' + color
+       + '" stroke-width="' + sw + '" stroke-linecap="round" stroke-linejoin="round">' + sym.innerHTML + '</svg>'
+  };
+}
+
+/* ---- 배치 추론 + 검산 -------------------------------------------------
+   추론한 오토레이아웃으로 자식 자리를 되짚어 계산해, 실제 측정값과 어긋나면
+   그 자리는 통째로 절대배치로 내린다. 검산을 통과한 자리에만 오토레이아웃을 건다. */
+function sxLayout(cs, box, kids) {
+  const disp = cs.display;
+  let dir;
+  if (disp === 'flex' || disp === 'inline-flex') dir = /column/.test(cs.flexDirection) ? 'VERTICAL' : 'HORIZONTAL';
+  else if (disp === 'block' || disp === 'flow-root' || disp === 'list-item') dir = 'VERTICAL';
+  else return null;                       /* grid·table·inline 은 검산이 서지 않는다 */
+  if (/wrap/.test(cs.flexWrap) && dir === 'HORIZONTAL') return null;  /* 줄바꿈은 v1 범위 밖 */
+  if (!kids.length) return null;
+  if (/reverse/.test(cs.flexDirection)) return null;
+
+  const bt = sxN(cs.borderTopWidth), br = sxN(cs.borderRightWidth),
+        bb = sxN(cs.borderBottomWidth), bl = sxN(cs.borderLeftWidth);
+  const pad = {
+    t: sxN(cs.paddingTop) + bt, r: sxN(cs.paddingRight) + br,
+    b: sxN(cs.paddingBottom) + bb, l: sxN(cs.paddingLeft) + bl
+  };
+  const A = dir === 'VERTICAL'
+    ? { s: 'y', e: k => k.y + k.h, p0: pad.t, p1: pad.b, cs0: 'x', cw: 'w', box: box.h, cbox: box.w, cp0: pad.l, cp1: pad.r }
+    : { s: 'x', e: k => k.x + k.w, p0: pad.l, p1: pad.r, cs0: 'y', cw: 'h', box: box.w, cbox: box.h, cp0: pad.t, cp1: pad.b };
+
+  const ord = kids.slice().sort((a, b) => a[A.s] - b[A.s]);
+  /* 주축이 겹치면 오토레이아웃이 아니다(절대·음수여백·겹침 배치) */
+  for (let i = 1; i < ord.length; i++) if (ord[i][A.s] < A.e(ord[i - 1]) - SXTOL) return null;
+
+  let gap = 0;
+  if (ord.length > 1) {
+    const gs = [];
+    for (let i = 1; i < ord.length; i++) gs.push(ord[i][A.s] - A.e(ord[i - 1]));
+    gap = gs[0];
+    for (const g of gs) if (Math.abs(g - gap) > SXTOL) return null;   /* 간격이 제각각 → 절대배치 */
+    if (gap < -SXTOL) return null;
+  }
+  gap = Math.max(0, Math.round(gap * 100) / 100);
+
+  /* 주축 시작이 padding 과 맞는지 — 어긋나면 정렬이 MIN 이 아니라는 뜻이고,
+     그 경우 CENTER/MAX 를 추정하기보다 절대배치로 내리는 편이 정직하다. */
+  if (Math.abs(ord[0][A.s] - A.p0) > SXTOL) return null;
+
+  /* 교차축 정렬 — 전부 같은 시작이면 MIN, 전부 꽉 차면 STRETCH, 중심이 같으면 CENTER */
+  const inner = A.cbox - A.cp0 - A.cp1;
+  let counter = null, allFill = true;
+  for (const k of ord) if (Math.abs(k[A.cw] - inner) > SXTOL) { allFill = false; break; }
+  if (allFill) counter = 'MIN';
+  else {
+    const minOK = ord.every(k => Math.abs(k[A.cs0] - A.cp0) <= SXTOL);
+    const ctrOK = ord.every(k => Math.abs((k[A.cs0] + k[A.cw] / 2) - (A.cp0 + inner / 2)) <= SXTOL);
+    const maxOK = ord.every(k => Math.abs((k[A.cs0] + k[A.cw]) - (A.cp0 + inner)) <= SXTOL);
+    counter = minOK ? 'MIN' : ctrOK ? 'CENTER' : maxOK ? 'MAX' : null;
+    if (counter === null) return null;
+  }
+
+  /* 검산 — 정한 값으로 자리를 다시 깔아 측정값과 맞춰 본다. */
+  let cur = A.p0;
+  for (const k of ord) {
+    if (Math.abs(k[A.s] - cur) > SXTOL) return null;
+    const c0 = counter === 'MIN' ? A.cp0
+             : counter === 'CENTER' ? A.cp0 + (inner - k[A.cw]) / 2
+             : A.cp0 + inner - k[A.cw];
+    if (Math.abs(k[A.cs0] - c0) > SXTOL) return null;
+    cur = A.e(k) + gap;
+  }
+  /* 끝 여백까지 맞아야 HUG/FIXED 판정이 선다. 남으면 FIXED 로 두고 넘어간다. */
+  const tail = A.box - (cur - gap) - A.p1;
+
+  return {
+    dir: dir, gap: gap, counter: counter, allFill: allFill,
+    pad: [Math.round(pad.t * 100) / 100, Math.round(pad.r * 100) / 100,
+          Math.round(pad.b * 100) / 100, Math.round(pad.l * 100) / 100],
+    hug: Math.abs(tail) <= SXTOL,
+    order: ord
+  };
+}
+
+/* ---- 훑기 ------------------------------------------------------------- */
+function sxCapture(root, mode, ix, tmatch, rep) {
+  const T = ix[mode];
+  const colTok = (str, use) => {
+    const c = sxColor(str);
+    if (!c) return null;
+    const ak = c.hex + sxHex2(Math.round(c.a * 255)).toUpperCase();
+    const t = sxPick(T.color.get(ak), use) || sxPick(T.color.get(c.hex + 'FF'), use);
+    if (t) { rep.bind.color.bound++; return { token: t, a: c.a }; }
+    rep.bind.color.literal++;
+    if (rep.literals.color.indexOf(c.hex) < 0 && rep.literals.color.length < 40) rep.literals.color.push(c.hex);
+    return { hex: c.hex, a: c.a };
+
+  };
+  const numTok = (n, use) => {
+    if (!(n > 0)) return { v: 0 };
+    const t = sxPick(T.num.get(Math.round(n * 100) / 100), use);
+    if (t) { rep.bind.num.bound++; return { token: t, v: n }; }
+    rep.bind.num.literal++;
+    return { v: Math.round(n * 100) / 100 };
+  };
+
+  /* 이 요소가 '글자 한 덩어리'인가 — 안쪽이 전부 인라인이고 svg·img 가 없으면 그렇다. */
+  function isTextLeaf(el) {
+    if (!el.textContent || !el.textContent.trim()) return false;
+    if (el.querySelector('svg,img,input,canvas')) return false;
+    for (const d of el.querySelectorAll('*')) {
+      const dd = getComputedStyle(d).display;
+      if (dd !== 'inline' && dd !== 'contents') return false;
+    }
+    return true;
+  }
+
+  function walk(el, pRect, depth) {
+    const cs = getComputedStyle(el);
+    if (cs.display === 'none' || cs.visibility === 'hidden' || sxN(cs.opacity) === 0) return null;
+    const r = el.getBoundingClientRect();
+    if (r.width < 0.5 || r.height < 0.5) return null;
+    if (depth > 24) { rep.notes.depth++; return null; }
+    rep.nodes++;
+
+    const box = {
+      x: Math.round((r.left - pRect.left) * 100) / 100,
+      y: Math.round((r.top - pRect.top) * 100) / 100,
+      w: Math.round(r.width * 100) / 100,
+      h: Math.round(r.height * 100) / 100
+    };
+    const name = el.getAttribute('data-figma-name')
+      || (el.className && typeof el.className === 'string' && el.className.trim().split(/\s+/)[0])
+      || el.tagName.toLowerCase();
+
+    /* ① 아이콘 */
+    if (el.tagName.toLowerCase() === 'svg') {
+      const u = el.querySelector('use');
+      const ic = u ? sxIconSvg(u, sxColor(cs.color) ? sxColor(cs.color).hex : '#000000', sxN(cs.strokeWidth) || 1.75) : null;
+      if (!ic) return null;
+      rep.icons++;
+      return Object.assign({ t: 'svg', name: ic.id, svg: ic.svg }, box);
+    }
+
+    /* ② 컴포넌트 인스턴스 치환 */
+    const cm = sxCompMatch(el);
+    if (cm) {
+      rep.inst.matched++;
+      rep.inst.by[cm.comp] = (rep.inst.by[cm.comp] || 0) + 1;
+      return Object.assign({ t: 'instance', name: cm.comp, comp: cm.comp, variants: cm.v(el), overrides: cm.ov(el) }, box);
+    }
+
+    /* 공통 표면 속성 */
+    const node = Object.assign({ t: 'frame', name: name }, box);
+    const bg = colTok(cs.backgroundColor, 'fill');
+    if (bg) node.fill = bg;
+    const bw = sxN(cs.borderTopWidth);
+    if (bw > 0 && cs.borderTopStyle !== 'none') {
+      const sc = colTok(cs.borderTopColor, 'stroke');
+      if (sc) {
+        node.stroke = sc; node.strokeW = numTok(bw, 'strokeW');
+        const sides = [bw, sxN(cs.borderRightWidth), sxN(cs.borderBottomWidth), sxN(cs.borderLeftWidth)];
+        if (sides.some(s => Math.abs(s - bw) > 0.01)) node.strokeSides = sides;
+      }
+    }
+    const rr = sxN(cs.borderTopLeftRadius);
+    if (rr > 0) {
+      const four = [rr, sxN(cs.borderTopRightRadius), sxN(cs.borderBottomRightRadius), sxN(cs.borderBottomLeftRadius)];
+      node.radius = four.every(v => Math.abs(v - rr) < 0.01) ? numTok(rr, 'radius') : { v4: four };
+    }
+    if (sxN(cs.opacity) < 1) node.opacity = Math.round(sxN(cs.opacity) * 1000) / 1000;
+    if (cs.overflow === 'hidden' || cs.overflowX === 'hidden') {
+      node.clip = true;
+      /* 잘라 내는 상자에 내용이 넘치면 브라우저에서 이미 잘려 보이고 있다는 뜻이다.
+         Figma 로 옮기면 그 잘림이 그대로 따라가므로, 옮기기 전에 여기서 먼저 말한다. */
+      if (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1) {
+        const k = mode + ' · ' + name + ' ' + Math.round(el.clientWidth) + '→' + Math.round(el.scrollWidth);
+        if (rep.clipped.indexOf(k) < 0) rep.clipped.push(k);
+      }
+    }
+
+    /* ③ 글자 한 덩어리 */
+    if (isTextLeaf(el)) {
+      rep.texts++;
+      const fs = sxN(cs.fontSize), fw = parseInt(cs.fontWeight, 10) || 400;
+      const lhv = cs.lineHeight === 'normal' ? null : sxN(cs.lineHeight);
+      const m = tmatch(fs, fw, lhv);
+      if (m && !m.exact) {
+        rep.textOverride++;
+        const k = Math.round(fs * 10) / 10 + 'px/' + fw;
+        rep.drift.type[k] = (rep.drift.type[k] || 0) + 1;
+      }
+      node.t = 'text';
+      node.text = {
+        chars: el.textContent.replace(/\s+/g, ' ').trim(),
+        style: m ? m.style : null, exact: m ? m.exact : false,
+        size: m && m.exact ? null : Math.round(fs * 100) / 100,
+        lh: m && m.exact ? null : (lhv ? Math.round(lhv * 100) / 100 : null),
+        fill: colTok(cs.color, 'text'),
+        align: cs.textAlign === 'center' ? 'CENTER' : cs.textAlign === 'right' ? 'RIGHT' : 'LEFT'
+      };
+      if (!node.text.chars) return null;
+      return node;
+    }
+
+    /* ④ 자식 프레임 */
+    const kids = [];
+    for (const ch of el.children) {
+      const k = walk(ch, r, depth + 1);
+      if (k) kids.push(k);
+    }
+    /* 자식이 없고 표면도 없으면 낼 이유가 없다 */
+    if (!kids.length && !node.fill && !node.stroke) return null;
+    if (!kids.length) { node.t = 'rect'; return node; }
+
+    const L = sxLayout(cs, { w: box.w, h: box.h }, kids);
+    if (L) {
+      rep.layout.auto++;
+      node.layout = L.dir; node.gap = L.gap; node.pad = L.pad;
+      node.alignCounter = L.counter;
+      node.kids = L.order;
+      for (const k of node.kids) {
+        k.grow = (L.dir === 'VERTICAL')
+          ? { h: L.allFill ? 'FILL' : 'FIXED', v: 'FIXED' }
+          : { h: 'FIXED', v: L.allFill ? 'FILL' : 'FIXED' };
+        /* 잰 자리는 지우지 않고 _x·_y 로 남긴다. 오토레이아웃이 다시 깐 자리가
+           브라우저에서 잰 자리와 같은지 하네스가 대조할 수 있어야 하기 때문이다 —
+           '검산을 통과한 자리에만 오토레이아웃' 이라는 약속을 증명하는 유일한 방법이다. */
+        k._x = k.x; k._y = k.y;
+        delete k.x; delete k.y;
+      }
+    } else {
+      rep.layout.abs++;
+      node.layout = 'NONE';
+      node.kids = kids;
+    }
+    return node;
+  }
+
+  const out = walk(root, root.getBoundingClientRect(), 0);
+  return out;
+}
+
+/* ---- 오프스크린 3폭 렌더 ---------------------------------------------
+   화면을 눈앞에서 흔들지 않는다. 컨테이너 쿼리(container-type:inline-size)를
+   쓰는 데모라서, 뷰포트를 건드리지 않고 폭만 정해 준 상자 안에서 다시 그리면
+   모바일·태블릿 규칙이 그대로 발화한다. */
+function sxHost(width) {
+  const h = document.createElement('div');
+  h.className = 'frame sx-host';
+  h.setAttribute('aria-hidden', 'true');
+  h.style.cssText = 'position:fixed;left:-100000px;top:0;--dev:' + width + 'px;width:' + (width + 2)
+                  + 'px;max-width:none;transition:none;overflow:visible;contain:none';
+  document.body.appendChild(h);
+  return h;
+}
+function sxScreenMarkup(s) {
+  const ctx = s.ctx || DEF_CTX;
+  const phAt = s.secs.indexOf('pagehead');
+  const isDoc = s.secs.some(k => DOCSEC.has(k));
+  const cells = s.secs.map((k, i) => {
+    if (s.off[i]) return '';                       /* 숨긴 섹션은 내보내지 않는다 */
+    const raw = SEC[k], mk = (typeof raw === 'function') ? raw(ctx) : (raw || '');
+    const nohead = (phAt >= 0 && i > phAt && HEADSEC.has(k)) ? ' data-nohead' : '';
+    const lay = VARSEC.has(k) ? ' data-layout="' + (s.vr[i] || scrLay) + '"' : '';
+    return '<div class="cell" data-i="' + i + '" data-k="' + k + '"' + nohead + lay + '>' + mk + '</div>';
+  }).join('');
+  return '<div class="page"' + (isDoc ? ' data-doc' : '') + '><div class="inner">' + cells + '</div></div>';
+}
+/* 편집 반영 — renderScreen 이 screenEl 에 하던 일을 임의 루트에도 할 수 있게 한다.
+   같은 함수를 쓰지 않으면 캡처만 옛 글자를 담는 드리프트가 생긴다. */
+function sxApplyEdits(s, root) {
+  root.querySelectorAll('.cell').forEach(cell => {
+    const i = +cell.dataset.i;
+    const box = repBox(cell);
+    if (box && s.ct[i] != null && s.ct[i] !== box.children.length) applyCount(box, s.ct[i]);
+    const ov = s.txt[i];
+    if (!ov) return;
+    edUnits(cell).forEach((el, n) => { if (ov[n] != null) el.innerHTML = ov[n]; });
+  });
+}
+
+async function sxBuild(payload) {
+  const ix = sxMakeIndex(payload);
+  const tmatch = sxMakeTextMatch(payload);
+  const rep = {
+    nodes: 0, texts: 0, icons: 0, textOverride: 0,
+    layout: { auto: 0, abs: 0 },
+    bind: { color: { bound: 0, literal: 0 }, num: { bound: 0, literal: 0 } },
+    inst: { matched: 0, by: {} },
+    literals: { color: [] }, drift: { type: {} }, clipped: [], notes: { depth: 0 }
+  };
+  const builds = [];
+  const list = screens.slice();
+  for (const s of list) {
+    scrOff(s);
+    for (const bp of SXW) {
+      const host = sxHost(bp.w);
+      try {
+        host.innerHTML = sxScreenMarkup(s);
+        sxApplyEdits(s, host);
+        /* 배치가 끝나기 전에 재면 전부 0 이 나온다 — 한 프레임 넘긴다. */
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+        const page = host.querySelector('.page');
+        const root = sxCapture(page, bp.mode, ix, tmatch, rep);
+        if (root) {
+          root.name = s.name + ' · ' + bp.mode;
+          builds.push({ id: s.id + '-' + bp.mode, screen: s.name, mode: bp.mode, width: bp.w, root: root });
+        }
+      } finally { host.remove(); }
+    }
+  }
+  const cb = rep.bind.color, nb = rep.bind.num;
+  return {
+    screenBuilds: builds,
+    $screens: {
+      widths: SXW.reduce((a, b) => (a[b.mode] = b.w, a), {}),
+      screens: list.length, frames: builds.length, nodes: rep.nodes,
+      texts: rep.texts, icons: rep.icons, textSizeOverrides: rep.textOverride,
+      layout: rep.layout,
+      bind: {
+        color: { bound: cb.bound, literal: cb.literal,
+                 pct: cb.bound + cb.literal ? Math.round(cb.bound / (cb.bound + cb.literal) * 1000) / 10 : 0 },
+        num: { bound: nb.bound, literal: nb.literal,
+               pct: nb.bound + nb.literal ? Math.round(nb.bound / (nb.bound + nb.literal) * 1000) / 10 : 0 }
+      },
+      instances: rep.inst,
+      literalColors: rep.literals.color,
+      /* 되짚지 못한 것은 곧 '데모 CSS 가 토큰 값으로 그리지 않는 자리'다.
+         숨기면 화면은 그럴듯해지지만 그 드리프트를 아무도 모르게 된다. */
+      clipped: rep.clipped,
+      driftType: Object.keys(rep.drift.type).sort((a, b) => rep.drift.type[b] - rep.drift.type[a])
+        .slice(0, 12).map(k => k + '×' + rep.drift.type[k]),
+      note: '카드·모달처럼 속이 풍부한 컨테이너는 일부러 인스턴스로 바꾸지 않습니다 — 제네릭 인스턴스로 치환하면 화면이 비어 버립니다.'
+    }
+  };
+}
+
 /* --- Figma 내보내기 (v0.83) --------------------------------------------------
    페이로드는 데모 안에 복사해 두지 않고 매번 ../figma/build-payload.json 을
    읽는다. 복사본을 두면 토큰이 바뀔 때마다 두 곳이 어긋나고, 그 어긋남은
@@ -3294,6 +3842,10 @@ function fxApplyBrand(base,b){
 
 const fxOv=document.getElementById('fxOv');
 let fxBase=null,fxSrc='',fxData=null,fxRaw='',fxBrand=null,fxRep=null;
+/* 내보낼 범위 — 'tokens' 면 변수·스타일·컴포넌트만, 'screens' 면 화면까지.
+   캡처 결과를 캐시하지 않는 이유: 스크린은 창을 닫아 둔 사이에도 계속 편집되기 때문이다.
+   창을 열 때마다·범위를 고를 때마다 다시 훑는 편이 느리지만 거짓말하지 않는다. */
+let fxMode='tokens',fxScr=null,fxBusy=false;
 
 function fxEsc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function fxStat(kind,html){const el=document.getElementById('fxSt');
@@ -3303,6 +3855,13 @@ function fxRows(id,rows){const box=document.getElementById(id);
 
 /* 열 때마다 지금 브랜드로 다시 만든다 — 닫아 둔 사이에 브랜드가 바뀌었을 수 있다. */
 function fxOpen(){fxOv.hidden=false;if(!fxBase)fxLoad();else fxApply();}
+document.getElementById('fxModeSeg').addEventListener('click',e=>{
+  const b=e.target.closest('[data-fxm]');if(!b||fxBusy)return;
+  const m=b.dataset.fxm;if(m===fxMode)return;
+  fxMode=m;
+  document.querySelectorAll('#fxModeSeg [data-fxm]').forEach(x=>x.classList.toggle('on',x.dataset.fxm===m));
+  fxApply();
+});
 function fxClose(){fxOv.hidden=true;}
 
 async function fxLoad(){
@@ -3338,12 +3897,30 @@ function fxTake(txt,src){
 
 /* 읽어 온 원본(fxBase)은 그대로 두고, 브랜드를 얹은 사본만 내보낸다.
    fxRaw 가 내려받기·복사가 쓰는 문자열이므로 여기서 갈아야 '보이는 화면 = 내보내는 페이로드'가 된다. */
-function fxApply(){
-  if(!fxBase)return;
-  fxBrand=brandNow();
-  const r=fxApplyBrand(fxBase,fxBrand);
-  fxData=r.payload;fxRep=r.report;fxRaw=JSON.stringify(fxData,null,2);
-  fxRender(fxSrc);
+async function fxApply(){
+  if(!fxBase||fxBusy)return;
+  fxBusy=true;
+  try{
+    fxBrand=brandNow();
+    const r=fxApplyBrand(fxBase,fxBrand);
+    fxData=r.payload;fxRep=r.report;fxScr=null;
+    if(fxMode==='screens'){
+      if(!screens.length){
+        fxScr={screenBuilds:[],$screens:{screens:0,frames:0,nodes:0,empty:true}};
+      }else{
+        fxStat('','스크린을 세 폭으로 훑는 중입니다… <b>'+screens.length+'개 화면 × 3폭</b>');
+        /* 배치가 실제로 끝나야 잰 값이 맞다 — 캡처 안에서 프레임을 넘기고 있다. */
+        fxScr=await sxBuild(fxData);
+      }
+      fxData.screenBuilds=fxScr.screenBuilds;
+      fxData.$screens=fxScr.$screens;
+    }
+    fxRaw=JSON.stringify(fxData,null,2);
+    fxRender(fxSrc);
+  }catch(err){
+    fxStat('err','<b>화면을 훑는 중에 멈췄습니다.</b><br>'+fxEsc(String(err&&err.message||err))
+      +'<br>범위를 <b>토큰만</b>으로 되돌리면 토큰 페이로드는 그대로 내보낼 수 있습니다.');
+  }finally{fxBusy=false;}
 }
 
 function fxRender(src){
@@ -3358,8 +3935,45 @@ function fxRender(src){
     ['변수',(d.variables||[]).length,'값·스코프 포함'],
     ['스타일',nStyle,(d.styles&&(d.styles.fontsToLoad||[]).length||0)+'개 폰트'],
     ['컴포넌트',(d.componentBuilds||[]).length+' 세트',((((d.$componentBuilds||{}).totalVariants)||0))+'개 변형']
-  ].map(c=>'<div class="fx-c"><i>'+c[0]+'</i><b>'+c[1]+'</b><small>'+fxEsc(c[2])+'</small></div>').join('');
+  ].concat(fxMode==='screens'?[['화면',((d.screenBuilds||[]).length)+' 프레임',
+      ((d.$screens||{}).screens||0)+'개 스크린 × 3폭']]:[])
+   .map(c=>'<div class="fx-c"><i>'+c[0]+'</i><b>'+c[1]+'</b><small>'+fxEsc(c[2])+'</small></div>').join('');
   document.getElementById('fxGrid').hidden=false;
+
+  /* 화면 — 훑은 결과를 숫자로 그대로 보여 준다. 되짚지 못한 값은 숨기지 않는다. */
+  const sc=d.$screens;
+  if(fxMode==='screens'&&sc){
+    const rows=[];
+    if(sc.empty){
+      rows.push(['만들어 둔 스크린','<b>없습니다</b> — 좌측 <code>스크린</code>에서 화면을 먼저 만들어 주세요']);
+    }else{
+      rows.push(['잡은 폭','<code>mobile '+sc.widths.mobile+'</code> · <code>tablet '+sc.widths.tablet
+        +'</code> · <code>desktop '+sc.widths.desktop+'</code>']);
+      rows.push(['노드',sc.nodes+'개 · 글자 '+sc.texts+' · 아이콘 '+sc.icons]);
+      rows.push(['배치','오토레이아웃 <b>'+sc.layout.auto+'</b>개 · 절대배치 '+sc.layout.abs
+        +'개 <em>— 검산을 통과한 자리에만 오토레이아웃</em>']);
+      rows.push(['색 되짚기','토큰 <b>'+sc.bind.color.bound+'</b> · 리터럴 '+sc.bind.color.literal
+        +' ('+sc.bind.color.pct+'%)'+(sc.literalColors.length?'<br>못 되짚은 색 '
+        +sc.literalColors.slice(0,8).map(h=>'<code>'+fxEsc(h)+'</code>').join(' ')
+        +(sc.literalColors.length>8?' 외 '+(sc.literalColors.length-8)+'개':''):'')]);
+      rows.push(['치수 되짚기','토큰 <b>'+sc.bind.num.bound+'</b> · 리터럴 '+sc.bind.num.literal
+        +' ('+sc.bind.num.pct+'%)']);
+      const by=sc.instances.by||{};
+      rows.push(['컴포넌트 인스턴스',sc.instances.matched?('<b>'+sc.instances.matched+'</b>개 — '
+        +Object.keys(by).map(k=>fxEsc(k)+' '+by[k]).join(' · ')):'없음']);
+      rows.push(['글자 스타일','44개 중에서 고름'+(sc.textSizeOverrides?' · 크기를 덮어쓴 자리 '+sc.textSizeOverrides+'개':' · 덮어쓴 자리 없음')]);
+      if((sc.clipped||[]).length)
+        rows.push(['<b>브라우저에서도 잘려 보이는 자리</b>',(sc.clipped||[]).map(x=>'<code>'+fxEsc(x)+'</code>').join('<br>')
+          +'<br><em>내보내기의 문제가 아니라 데모 CSS 의 문제입니다 — 지금 화면에서 이미 잘려 보이고 있고, Figma 로 옮기면 그 잘림이 그대로 따라갑니다.</em>']);
+      if((sc.driftType||[]).length)
+        rows.push(['<b>토큰 밖 글자 크기</b>',(sc.driftType||[]).map(x=>'<code>'+fxEsc(x)+'</code>').join(' ')
+          +'<br><em>타입 스케일은 16·14·12 와 굵기 400·500·600 인데 데모 섹션 CSS 는 그 밖의 값을 씁니다 — 화면 내보내기가 그 드리프트를 드러낸 것입니다.</em>']);
+    }
+    fxRows('fxScrRows',rows);
+    document.getElementById('fxScr').hidden=false;
+  }else{
+    document.getElementById('fxScr').hidden=true;
+  }
 
   fxRows('fxMigRows',[
     ['개명 <code>rename</code>',(mig.variableRenames||[]).length+'건 · 제자리'],
@@ -3451,9 +4065,10 @@ document.getElementById('fxFile').addEventListener('change',e=>{
 document.getElementById('fxDl').addEventListener('click',()=>{
   if(!fxRaw){toast('아직 페이로드가 없습니다','먼저 불러오기가 끝나야 내려받을 수 있습니다');return;}
   const b=new Blob([fxRaw],{type:'application/json'}),u=URL.createObjectURL(b);
-  const a=document.createElement('a');a.href=u;a.download='build-payload.json';a.click();
+  const fn=fxMode==='screens'?'build-payload-screens.json':'build-payload.json';
+  const a=document.createElement('a');a.href=u;a.download=fn;a.click();
   setTimeout(()=>URL.revokeObjectURL(u),1000);
-  toast('페이로드를 내려받았습니다','build-payload.json — Figma 플러그인 창에 붙여넣으세요');
+  toast('페이로드를 내려받았습니다',fn+' — Figma 플러그인 창에 붙여넣으세요');
 });
 document.getElementById('fxBrandDl').addEventListener('click',()=>{
   const j=JSON.stringify(brandJson(fxBrand||brandNow()),null,2);

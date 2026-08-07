@@ -339,6 +339,7 @@ async function dryRun(payload) {
 
   /* 5) 컴포넌트 */
   const componentPlan = await dryRunComponents(payload);
+  const screenPlan = await dryRunScreens(payload);
 
   return {
     meta: payload.$meta || {},
@@ -361,8 +362,11 @@ async function dryRun(payload) {
             + mg.splits.filter((s) => s.status === 'unsafe').length,
       orphans: orphanFiltered.length,
       componentSets: componentPlan.create.length,
-      componentVariants: componentPlan.totalVariants
-    }
+      componentVariants: componentPlan.totalVariants,
+      screenFrames: screenPlan.frames,
+      screenNodes: screenPlan.nodes
+    },
+    screens: screenPlan
   };
 }
 
@@ -437,6 +441,7 @@ async function dryRunStyles(payload) {
 async function apply(payload, opts) {
   const doStyles = !opts || opts.styles !== false;
   const doComponents = !opts || opts.components !== false;
+  const doScreens = !opts || opts.screens !== false;
   const log = [];
   const problems = [];
   const push = (t, m) => { log.push({ t, m }); figma.ui.postMessage({ type: 'progress', line: { t, m } }); };
@@ -554,6 +559,11 @@ async function apply(payload, opts) {
   if (doComponents) componentReport = await applyComponents(payload, push, problems);
   else push('skip', '컴포넌트 단계는 껐습니다.');
 
+  /* 8) 화면 — 컴포넌트 다음이어야 한다. 화면 안의 인스턴스가 방금 만든 세트를 가리킨다. */
+  let screenReport = null;
+  if (doScreens) screenReport = await applyScreens(payload, push, problems);
+  else push('skip', '화면 단계는 껐습니다.');
+
   for (const p of problems) push('err', p);
 
   return {
@@ -566,6 +576,7 @@ async function apply(payload, opts) {
       split: mg.splits.filter((s) => s.status === 'split').length,
       styles: styleReport,
       components: componentReport,
+      screens: screenReport,
       crossCollection: mg.crossCollection.length
     }
   };
@@ -728,6 +739,12 @@ function makeIcon(glyph, size) {
     + paths.map((d) => '<path d="' + d + '"/>').join('') + '</svg>';
   const node = figma.createNodeFromSvg(svg);
   node.name = 'icon/' + glyph;
+  /* createNodeFromSvg 는 viewBox 크기(24×24) 프레임을 준다. 자식 제약이 기본값(MIN)이면
+     프레임만 줄고 안의 벡터는 24 그대로 남아 잘리거나 삐져나온다 — 16px 아이콘이
+     24px 그림을 물고 있는 셈이다. SCALE 로 바꿔야 내용이 같이 줄어든다. */
+  for (const c of (node.children || [])) {
+    try { c.constraints = { horizontal: 'SCALE', vertical: 'SCALE' }; } catch (e) { /* 무시 */ }
+  }
   node.resize(size || 24, size || 24);
   return node;
 }
@@ -1324,6 +1341,352 @@ async function applyComponents(payload, push, problems) {
     + (rep.skipped ? ' · 세트 실패 ' + rep.skipped + '건' : ''));
   if ((meta.provisional || []).length)
     push('skip', '잠정 수치 ' + meta.provisional.length + '건 — 전용 토큰이 없어 숫자로 넣었습니다.');
+  return rep;
+}
+
+/* ───────────────────────── 화면 생성 ─────────────────────────
+ *
+ * 읽는 것은 payload.screenBuilds — 데모가 브라우저에서 실제로 그린 것을 훑어 낸 트리다.
+ * 페이로드에 이 항목이 없으면(= '토큰만' 으로 내보낸 페이로드) 이 단계는 통째로 건너뛴다.
+ *
+ * 안전 규칙은 컴포넌트 단계와 같다.
+ *   · 만든 것은 전용 페이지 '[Freesm] Screens' 에만 둔다.
+ *   · 같은 이름이 그 페이지에 있으면 지우지 않고 '— 이전' 으로 밀어 둔다.
+ *   · 다른 페이지의 같은 이름은 손대지 않고 보고만 한다.
+ *
+ * 배치는 데모가 검산해 보낸 그대로 따른다. 여기서 다시 추론하지 않는다 —
+ * 두 곳이 각자 추론하면 어느 쪽이 맞는지 아무도 모르게 된다.
+ */
+
+const SCREEN_PAGE = '[Freesm] Screens';
+const SCREEN_HOLDER = '[Freesm] 화면';
+
+function scrLabel(b) { return b.root && b.root.name ? b.root.name : (b.screen + ' · ' + b.mode); }
+
+async function dryRunScreens(payload) {
+  const builds = payload.screenBuilds || [];
+  const out = { create: [], elsewhere: [], prev: [], nodes: 0, frames: builds.length, meta: payload.$screens || null };
+  if (!builds.length) return out;
+
+  let count = 0;
+  const walk = (n) => { count++; for (const k of (n.kids || [])) walk(k); };
+  for (const b of builds) if (b.root) walk(b.root);
+  out.nodes = count;
+
+  const page = figma.root.children.find((p) => p.name === SCREEN_PAGE) || null;
+  if (page) await page.loadAsync();
+  const holder = page ? page.children.find((c) => c.type === 'FRAME' && c.name === SCREEN_HOLDER) : null;
+  const here = new Set();
+  if (page) for (const c of page.children) here.add(c.name);
+  if (holder) for (const c of holder.children) here.add(c.name);
+
+  /* 다른 페이지의 같은 이름은 알리기만 한다 — 사용자가 손으로 만든 화면일 수 있다. */
+  for (const b of builds) {
+    const nm = scrLabel(b);
+    out.create.push({ name: nm, mode: b.mode, width: b.width });
+    if (here.has(nm)) out.prev.push(nm);
+  }
+  for (const p of figma.root.children) {
+    if (p.name === SCREEN_PAGE) continue;
+    try {
+      await p.loadAsync();
+      for (const c of p.children) if (out.create.some((x) => x.name === c.name)) out.elsewhere.push(p.name + ' / ' + c.name);
+    } catch (e) { /* 못 여는 페이지는 건너뛴다 */ }
+  }
+  return out;
+}
+
+async function applyScreens(payload, push, problems) {
+  const builds = payload.screenBuilds || [];
+  const rep = { frames: 0, nodes: 0, texts: 0, icons: 0, instances: 0, instanceMiss: 0,
+                variantPartial: 0, bound: 0, unbound: 0, renamedPrev: 0, failed: 0 };
+  if (!builds.length) { push('skip', '화면표가 없어 화면 단계를 건너뜁니다 — 토큰만 담긴 페이로드입니다.'); return rep; }
+
+  const st = await readState();
+  const mg = planMigrations(payload, st);
+  const lookup = makeLookup(st, mg);
+  const R = makeNumResolver(payload);
+  const varOf = (name) => { const col = R.collectionOf(name); return col ? lookup(col, name) : null; };
+
+  /* 폰트 — 글자는 전부 44개 텍스트 스타일 중 하나에 붙인다. 그 스타일들이 쓰는 폰트가
+     fontsToLoad 이므로, 여기만 먼저 받아 두면 화면 어디에서도 폰트로 죽지 않는다.
+     새로 만든 텍스트 노드가 처음 갖는 파일 기본 폰트도 같이 받는다. */
+  const loaded = new Set();
+  const ensureFont = async (fn) => {
+    if (!fn || fn === figma.mixed || typeof fn.family !== 'string') return false;
+    const k = fn.family + '|' + fn.style;
+    if (loaded.has(k)) return true;
+    try { await figma.loadFontAsync(fn); loaded.add(k); return true; }
+    catch (e) { problems.push('화면 — 폰트를 불러오지 못했습니다 ' + fn.family + ' ' + fn.style); return false; }
+  };
+  for (const f of (payload.styles && payload.styles.fontsToLoad) || []) await ensureFont(f);
+  await ensureFont({ family: 'Inter', style: 'Regular' });
+
+  const textStyles = await figma.getLocalTextStylesAsync();
+  const tByName = new Map(textStyles.map((s) => [s.name, s]));
+
+  /* 컴포넌트 인스턴스가 가리킬 세트를 모은다. 없으면 프레임으로 떨어뜨리고 보고한다 —
+     조용히 빈 자리를 남기면 화면을 열어 보기 전까지 아무도 모른다. */
+  const setsByName = new Map();
+  {
+    const cp = figma.root.children.find((p) => p.name === BUILD_PAGE);
+    if (cp) {
+      await cp.loadAsync();
+      const scan = cp.children.slice();
+      const holder = cp.children.find((c) => c.type === 'FRAME' && c.name === COMP_HOLDER);
+      if (holder) for (const c of holder.children) scan.push(c);
+      for (const c of scan) if (c.type === 'COMPONENT_SET' || c.type === 'COMPONENT') setsByName.set(c.name, c);
+    }
+  }
+
+  /* ---- 값 적용기 ---- */
+  const T = (what, fn) => { try { fn(); } catch (e) { problems.push('화면 — ' + what + ' 실패 · ' + e.message); } };
+
+  function paintOf(spec) {
+    if (!spec) return null;
+    let paint = { type: 'SOLID', color: { r: 0.5, g: 0.5, b: 0.5 }, opacity: spec.a == null ? 1 : spec.a };
+    if (spec.hex) {
+      const c = hexToRgba(spec.hex);
+      if (c) paint = { type: 'SOLID', color: { r: c.r, g: c.g, b: c.b }, opacity: spec.a == null ? 1 : spec.a };
+      rep.unbound++;
+      return paint;
+    }
+    const v = spec.token ? varOf(spec.token) : null;
+    if (!v) { rep.unbound++; problems.push('화면 — 없는 토큰 ' + spec.token); return paint; }
+    try { paint = figma.variables.setBoundVariableForPaint(paint, 'color', v); rep.bound++; }
+    catch (e) { rep.unbound++; problems.push('화면 색 바인딩 실패 ' + spec.token + ' — ' + e.message); }
+    if (spec.a != null && spec.a < 1) paint.opacity = spec.a;
+    return paint;
+  }
+  function bindNum(node, field, spec) {
+    if (!spec) return;
+    if (spec.token) {
+      const v = varOf(spec.token);
+      if (v) { try { node.setBoundVariable(field, v); rep.bound++; return; } catch (e) { /* 아래로 흘려 숫자로 */ } }
+    }
+    rep.unbound++;
+  }
+
+  function applySurface(node, spec) {
+    if (spec.fill) T('채우기 ' + spec.name, () => { const p = paintOf(spec.fill); node.fills = p ? [p] : []; });
+    else if (node.type === 'FRAME') T('채우기 비우기 ' + spec.name, () => { node.fills = []; });
+    if (spec.stroke) {
+      T('선 ' + spec.name, () => { const p = paintOf(spec.stroke); node.strokes = p ? [p] : []; });
+      T('선 굵기 ' + spec.name, () => {
+        const w = spec.strokeW || {};
+        node.strokeWeight = (typeof w.v === 'number' ? w.v : 1);
+        node.strokeAlign = 'INSIDE';
+        if (spec.strokeSides) {
+          node.strokeTopWeight = spec.strokeSides[0]; node.strokeRightWeight = spec.strokeSides[1];
+          node.strokeBottomWeight = spec.strokeSides[2]; node.strokeLeftWeight = spec.strokeSides[3];
+        } else bindNum(node, 'strokeWeight', w);
+      });
+    }
+    if (spec.radius) {
+      T('모서리 ' + spec.name, () => {
+        if (spec.radius.v4) {
+          node.topLeftRadius = spec.radius.v4[0]; node.topRightRadius = spec.radius.v4[1];
+          node.bottomRightRadius = spec.radius.v4[2]; node.bottomLeftRadius = spec.radius.v4[3];
+        } else {
+          node.cornerRadius = spec.radius.v || 0;
+          if (spec.radius.token) {
+            const v = varOf(spec.radius.token);
+            if (v) for (const f of ['topLeftRadius', 'topRightRadius', 'bottomLeftRadius', 'bottomRightRadius'])
+              try { node.setBoundVariable(f, v); } catch (e) { /* 무시 */ }
+          }
+        }
+      });
+    }
+    if (spec.opacity != null) T('불투명도 ' + spec.name, () => { node.opacity = spec.opacity; });
+    if (spec.clip != null && node.type === 'FRAME') T('자르기 ' + spec.name, () => { node.clipsContent = !!spec.clip; });
+  }
+
+  function instanceOf(spec) {
+    const set = setsByName.get(spec.comp);
+    if (!set) { rep.instanceMiss++; return null; }
+    let comp = null;
+    if (set.type === 'COMPONENT') comp = set;
+    else {
+      const want = spec.variants || {};
+      let best = null, bestHit = -1, bestKeys = 0;
+      for (const c of set.children) {
+        if (c.type !== 'COMPONENT') continue;
+        const vp = c.variantProperties || {};
+        let hit = 0, keys = 0;
+        for (const k of Object.keys(want)) { keys++; if (vp[k] === want[k]) hit++; }
+        if (hit > bestHit) { bestHit = hit; best = c; bestKeys = keys; }
+        if (keys && hit === keys) { best = c; bestKeys = keys; bestHit = hit; break; }
+      }
+      comp = best;
+      /* 변형을 다 맞추지 못하면 가장 가까운 것을 쓴다 — 그 사실을 조용히 넘기지 않는다.
+         화면에는 그럴듯한 버튼이 서지만 상태 축이 틀린 버튼일 수 있다. */
+      if (comp && bestKeys && bestHit < bestKeys) {
+        rep.variantPartial++;
+        problems.push('화면 — 변형을 다 맞추지 못했습니다 ' + spec.comp + ' ' + JSON.stringify(want)
+          + ' → ' + comp.name);
+      }
+    }
+    if (!comp) { rep.instanceMiss++; return null; }
+    let inst = null;
+    try { inst = comp.createInstance(); } catch (e) { rep.instanceMiss++; problems.push('화면 — 인스턴스 생성 실패 ' + spec.comp + ' · ' + e.message); return null; }
+    rep.instances++;
+    /* 글자 덮어쓰기 — 슬롯 이름으로 찾는다. 못 찾으면 원래 글자를 그대로 둔다. */
+    for (const k of Object.keys(spec.overrides || {})) {
+      const txt = inst.findOne ? inst.findOne((n) => n.type === 'TEXT' && n.name === k) : null;
+      if (!txt) continue;
+      T('인스턴스 글자 ' + spec.comp + '/' + k, () => { txt.characters = String(spec.overrides[k] || ''); });
+    }
+    return inst;
+  }
+
+  /* ---- 노드 한 그루 ---- */
+  async function build(spec, parent, parentIsAuto) {
+    rep.nodes++;
+    let node = null;
+
+    if (spec.t === 'svg') {
+      try {
+        node = figma.createNodeFromSvg(spec.svg); node.name = spec.name || 'icon'; rep.icons++;
+        /* createNodeFromSvg 는 viewBox 크기(24×24)의 프레임을 준다. 그냥 resize 하면
+           프레임만 줄고 안의 벡터는 24 그대로 남아 밖으로 삐져나온다.
+           자식 제약을 SCALE 로 바꿔 두어야 프레임을 줄일 때 내용도 같이 줄어든다. */
+        for (const c of (node.children || [])) {
+          try { c.constraints = { horizontal: 'SCALE', vertical: 'SCALE' }; } catch (e2) { /* 무시 */ }
+        }
+        try { node.clipsContent = false; } catch (e2) { /* 무시 */ }
+      }
+      catch (e) { problems.push('화면 — 아이콘을 만들지 못했습니다 ' + spec.name + ' · ' + e.message); return null; }
+    } else if (spec.t === 'instance') {
+      node = instanceOf(spec);
+      if (!node) {                                  /* 세트가 없으면 빈 프레임으로 자리라도 남긴다 */
+        node = figma.createFrame(); node.name = spec.name + ' (컴포넌트 없음)';
+        T('대체 프레임 채우기', () => { node.fills = []; });
+      }
+    } else if (spec.t === 'text') {
+      node = figma.createText();
+      node.name = (spec.text && spec.text.chars ? spec.text.chars.slice(0, 24) : spec.name) || 'text';
+      rep.texts++;
+    } else {
+      node = figma.createFrame();
+      node.name = spec.name || 'frame';
+    }
+
+    parent.appendChild(node);
+
+    /* 크기 — 부모가 오토레이아웃이어도 FIXED 로 두면 데모에서 잰 그대로 선다.
+       여기서 HUG 로 두면 폰트가 조금만 달라도 화면 전체가 흔들린다. */
+    if (spec.t === 'text') {
+      T('글자 ' + node.name, () => {
+        node.textAutoResize = 'NONE';
+        node.resize(Math.max(1, spec.w), Math.max(1, spec.h));
+        node.characters = (spec.text && spec.text.chars) || '';
+        node.textAlignHorizontal = (spec.text && spec.text.align) || 'LEFT';
+        node.textAlignVertical = 'TOP';
+      });
+      const ts = spec.text && spec.text.style ? tByName.get(spec.text.style) : null;
+      if (ts) { try { await node.setTextStyleIdAsync(ts.id); } catch (e) { problems.push('화면 — 텍스트 스타일 적용 실패 ' + spec.text.style); } }
+      /* 스케일 밖 크기는 스타일을 얹은 뒤에 덮어쓴다 — 순서가 반대면 스타일이 되돌린다. */
+      if (spec.text && spec.text.size) T('글자 크기 ' + node.name, () => { node.fontSize = spec.text.size; });
+      if (spec.text && spec.text.lh) T('행간 ' + node.name, () => { node.lineHeight = { unit: 'PIXELS', value: spec.text.lh }; });
+      if (spec.text && spec.text.fill) T('글자색 ' + node.name, () => { const p = paintOf(spec.text.fill); node.fills = p ? [p] : []; });
+    } else {
+      T('크기 ' + node.name, () => { node.resize(Math.max(1, spec.w), Math.max(1, spec.h)); });
+    }
+
+    if (!parentIsAuto) T('자리 ' + node.name, () => { node.x = spec.x || 0; node.y = spec.y || 0; });
+
+    if (spec.t === 'frame' || spec.t === 'rect') applySurface(node, spec);
+
+    const auto = spec.layout && spec.layout !== 'NONE';
+    if (auto) {
+      T('오토레이아웃 ' + node.name, () => {
+        node.layoutMode = spec.layout;
+        node.primaryAxisSizingMode = 'FIXED';
+        node.counterAxisSizingMode = 'FIXED';
+        node.itemSpacing = spec.gap || 0;
+        node.paddingTop = spec.pad[0]; node.paddingRight = spec.pad[1];
+        node.paddingBottom = spec.pad[2]; node.paddingLeft = spec.pad[3];
+        node.counterAxisAlignItems = spec.alignCounter || 'MIN';
+        node.primaryAxisAlignItems = 'MIN';
+        node.clipsContent = !!spec.clip;
+      });
+    }
+
+    for (const k of (spec.kids || [])) {
+      const child = await build(k, node, auto);
+      if (child && auto && k.grow) {
+        T('자식 크기규칙 ' + child.name, () => {
+          if (k.grow.h === 'FILL') child.layoutSizingHorizontal = 'FILL';
+          if (k.grow.v === 'FILL') child.layoutSizingVertical = 'FILL';
+        });
+      }
+    }
+    return node;
+  }
+
+  /* ---- 페이지·담는 프레임 ---- */
+  let page = figma.root.children.find((p) => p.name === SCREEN_PAGE);
+  if (!page) { page = figma.createPage(); page.name = SCREEN_PAGE; push('ok', '페이지 신규 — ' + SCREEN_PAGE); }
+  else await page.loadAsync();
+  await figma.setCurrentPageAsync(page);
+
+  let holder = page.children.find((c) => c.type === 'FRAME' && c.name === SCREEN_HOLDER) || null;
+  const holderIsNew = !holder;
+  if (!holder) { holder = figma.createFrame(); holder.name = SCREEN_HOLDER; page.appendChild(holder); }
+  T('화면 담는 프레임', () => {
+    holder.layoutMode = 'HORIZONTAL';
+    holder.layoutWrap = 'NO_WRAP';
+    holder.primaryAxisSizingMode = 'AUTO';
+    holder.counterAxisSizingMode = 'AUTO';
+    holder.counterAxisAlignItems = 'MIN';
+    holder.itemSpacing = 120;
+    holder.paddingLeft = holder.paddingRight = holder.paddingTop = holder.paddingBottom = 80;
+    holder.fills = [];
+    holder.clipsContent = false;
+  });
+  if (holderIsNew) {
+    let ox = 0;
+    for (const c of page.children) if (c !== holder) ox = Math.max(ox, c.x + c.width + 200);
+    T('담는 프레임 자리', () => { holder.x = ox; holder.y = 0; });
+  }
+
+  /* 같은 이름은 지우지 않고 밀어 둔다 */
+  {
+    const want = new Set(builds.map(scrLabel));
+    const scan = page.children.concat(holder.children);
+    const taken = new Set(scan.map((x) => x.name));
+    for (const c of scan) {
+      if (c === holder || !want.has(c.name)) continue;
+      let n = c.name + ' — 이전', i = 2;
+      while (taken.has(n)) { n = c.name + ' — 이전 ' + i; i++; }
+      c.name = n; taken.add(n); rep.renamedPrev++;
+    }
+  }
+
+  for (const b of builds) {
+    if (!b.root) continue;
+    try {
+      const f = await build(b.root, holder, true);
+      if (f) {
+        f.name = scrLabel(b);
+        T('화면 폭 고정 ' + f.name, () => { f.layoutSizingHorizontal = 'FIXED'; f.layoutSizingVertical = 'FIXED'; });
+        rep.frames++;
+        push('ok', '화면 — ' + f.name + ' (' + b.width + '×' + Math.round(b.root.h) + ')');
+      }
+    } catch (e) {
+      rep.failed++;
+      problems.push('화면 생성 실패 ' + scrLabel(b) + ' — ' + e.message);
+      push('err', '화면 실패 — ' + scrLabel(b) + ' · ' + e.message);
+    }
+  }
+
+  push('ok', '화면 ' + rep.frames + '개 · 노드 ' + rep.nodes + '개 · 글자 ' + rep.texts
+    + ' · 아이콘 ' + rep.icons + ' · 인스턴스 ' + rep.instances
+    + (rep.instanceMiss ? ' · 컴포넌트 못 찾음 ' + rep.instanceMiss : '')
+    + (rep.renamedPrev ? ' · 기존 개명 ' + rep.renamedPrev : '')
+    + (rep.failed ? ' · 실패 ' + rep.failed : ''));
+  if (rep.instanceMiss)
+    push('skip', '인스턴스로 바꾸지 못한 자리 ' + rep.instanceMiss + '개 — 컴포넌트 단계를 먼저 돌려야 세트가 생깁니다.');
   return rep;
 }
 
