@@ -19,16 +19,19 @@ function hex(s) {
   if (t.length === 8) return { r: n(0), g: n(2), b: n(4), a: n(6) };
   return null;
 }
-/* 토큰 이름 하나를 최종 색까지 따라간다. 못 풀면 null. */
-function resolve(name, seen) {
+/* 토큰 이름 하나를 최종 색까지 따라간다. 못 풀면 null.
+   mode 는 Semantic 컬렉션에만 뜻이 있다 — Scale·Brand 는 모드가 하나뿐이라
+   그 이름이 없으면 첫 모드로 떨어진다. Dark 를 안 재면 Dark 는 아무도 안 본 채로 나간다. */
+function resolve(name, mode, seen) {
   seen = seen || [];
   if (seen.includes(name)) return null;
   const v = byName.get(name) || null;
   if (!v || v.type !== 'COLOR') return null;
-  const e = v.values[Object.keys(v.values)[0]];
+  const e = v.values[mode] || v.values[Object.keys(v.values)[0]];
+  if (!e) return null;
   if (e.kind === 'value') return hex(e.value);
   const t = idx.get(e.collection + '::' + e.name);
-  return t ? resolve(t.name, seen.concat(name)) : null;
+  return t ? resolve(t.name, mode, seen.concat(name)) : null;
 }
 function over(top, bottom) {
   if (!top) return bottom;
@@ -84,9 +87,16 @@ function flatten(slots, parent, out) {
   return out;
 }
 
-const PAGE = resolve('bg/default') || { r: 1, g: 1, b: 1, a: 1 };   // 배경이 비면 페이지 색이 밑에 깔린다
 const tok = (v) => (v && typeof v === 'object' && typeof v.t === 'string' ? v.t : null);
 
+/* 재야 하는 모드 — Semantic 컬렉션이 들고 있는 것 전부. Light 만 재던 시절에는
+   Dark 가 아무도 안 본 채로 나갔다. */
+const SEM = (P.collections || []).find((c) => c.name === 'Semantic');
+const MODES = (SEM && SEM.modes && SEM.modes.length) ? SEM.modes : ['Light'];
+
+let exitBad = 0;
+for (const MODE of MODES) {
+const PAGE = resolve('bg/default', MODE) || { r: 1, g: 1, b: 1, a: 1 };   // 배경이 비면 페이지 색이 밑에 깔린다
 const found = new Map();   // "배경 + 전경" → {bg, fg, r, where[]}
 
 for (const b of P.componentBuilds || []) {
@@ -103,7 +113,7 @@ for (const b of P.componentBuilds || []) {
       let color = PAGE, tokenName = null;
       for (const anc of stack.reverse()) {
         const t = anc === null ? tok(p.fill) : tok(slotProps(anc).fill);
-        if (t) { const c = resolve(t); if (c) { color = over(c, color); tokenName = t; } }
+        if (t) { const c = resolve(t, MODE); if (c) { color = over(c, color); tokenName = t; } }
       }
       return { color: color, token: tokenName };
     };
@@ -114,7 +124,7 @@ for (const b of P.componentBuilds || []) {
       if (sp.visible === false) continue;
       const fgTok = tok(sp.fill);
       if (!fgTok) continue;
-      const raw = resolve(fgTok);
+      const raw = resolve(fgTok, MODE);
       if (!raw) continue;
       const bd = backdrop(name);
       const key = (bd.token || '(페이지 배경)') + '  +  ' + fgTok;
@@ -136,9 +146,11 @@ for (const [key, rec] of found) {
   else if (rec.r < 4.5) warn.push(line);
 }
 
-console.log('검사한 전경/배경 쌍 ' + found.size + '개');
-if (bad.length) console.log('\n판독 불가 (3:1 미만) ' + bad.length + '건\n  · ' + bad.join('\n  · '));
-if (warn.length) console.log('\n본문 글자에는 모자람 (3–4.5:1) ' + warn.length + '건\n  · ' + warn.join('\n  · '));
-if (soft.length) console.log('\n비활성 — 기준에서 뺌 ' + soft.length + '건\n  · ' + soft.join('\n  · '));
-console.log(bad.length ? '' : '\n판독 불가 조합 없음');
-process.exitCode = bad.length ? 1 : 0;
+console.log('\n[' + MODE + '] 검사한 전경/배경 쌍 ' + found.size + '개');
+if (bad.length) console.log('판독 불가 (3:1 미만) ' + bad.length + '건\n  · ' + bad.join('\n  · '));
+if (warn.length) console.log('본문 글자에는 모자람 (3–4.5:1) ' + warn.length + '건\n  · ' + warn.join('\n  · '));
+if (soft.length) console.log('비활성 — 기준에서 뺌 ' + soft.length + '건\n  · ' + soft.join('\n  · '));
+if (!bad.length) console.log('판독 불가 조합 없음');
+exitBad += bad.length;
+}
+process.exitCode = exitBad ? 1 : 0;

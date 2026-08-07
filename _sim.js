@@ -12,7 +12,7 @@ const vm = require('vm');
 const PAYLOAD = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
 const CODE = fs.readFileSync(process.argv[3], 'utf8');
 
-const calls = { bindNum: [], bindPaint: [], textStyle: [], effectStyle: [], svg: [] };
+const calls = { bindNum: [], bindPaint: [], textStyle: [], effectStyle: [], svg: [], effectBind: [] };
 const errors = [];
 
 const PROPS = {
@@ -387,14 +387,28 @@ const figma = {
       calls.bindPaint.push(v.name);
       return Object.assign({}, paint, { boundVariables: { color: { type: 'VARIABLE_ALIAS', id: v.id, __label: v.name } } });
     },
-    createVariableAlias: (v) => ({ type: 'VARIABLE_ALIAS', id: v.id })
+    createVariableAlias: (v) => ({ type: 'VARIABLE_ALIAS', id: v.id }),
+    /* 이펙트 색 바인딩 — 스타일은 모드를 모르지만 그 안의 색은 변수에 걸 수 있다.
+       흉내 내지 않으면 이 경로가 하네스에서 통과하고 실제 Figma 에서만 터진다. */
+    setBoundVariableForEffect(effect, field, v) {
+      if (!effect || typeof effect !== 'object') throw new Error('setBoundVariableForEffect 인자가 이펙트가 아님');
+      if (['color', 'radius', 'spread', 'offsetX', 'offsetY'].indexOf(field) < 0)
+        throw new Error('setBoundVariableForEffect: 걸 수 없는 필드 ' + field);
+      if (!v || !v.id) throw new Error('setBoundVariableForEffect 대상 없음');
+      calls.effectBind.push(v.name + ' → ' + field);
+      return Object.assign({}, effect, {
+        boundVariables: Object.assign({}, effect.boundVariables,
+          (function () { const o = {}; o[field] = { type: 'VARIABLE_ALIAS', id: v.id, __label: v.name }; return o; })())
+      });
+    }
   },
   ui: { postMessage() {}, set onmessage(_) {} }
 };
 
 const ctx = vm.createContext({ figma, __html__: '', console, Math, JSON, Object, Array, Set, Map, String, Number, isFinite, parseFloat, parseInt, Promise, Error });
 vm.runInContext(CODE + '\n;globalThis.__applyComponents = applyComponents; globalThis.__dryRunComponents = dryRunComponents;'
-  + ' globalThis.__applyScreens = applyScreens; globalThis.__dryRunScreens = dryRunScreens;', ctx, { filename: 'code.js' });
+  + ' globalThis.__applyScreens = applyScreens; globalThis.__dryRunScreens = dryRunScreens;'
+  + ' globalThis.__applyStyles = applyStyles;', ctx, { filename: 'code.js' });
 
 (async () => {
   const problems = [];
@@ -405,6 +419,18 @@ vm.runInContext(CODE + '\n;globalThis.__applyComponents = applyComponents; globa
     + ' · 다른 페이지 중복 ' + plan.elsewhere.length);
   if (plan.missingTokens.length) console.log('  없는 토큰: ' + plan.missingTokens.join(', '));
   if (plan.missingStyles.length) console.log('  없는 스타일: ' + plan.missingStyles.join(', '));
+
+  /* 스타일 단계 — 컴포넌트가 텍스트·이펙트 스타일을 이름으로 찾으므로 먼저 돈다.
+     이펙트 색 바인딩이 여기서만 일어나서, 안 태우면 그 경로가 통째로 안 검사된다. */
+  const srep = await ctx.__applyStyles(PAYLOAD, (t, m) => log.push(t + ' | ' + m), problems);
+  console.log('[styles] 텍스트 ' + srep.text + ' · 이펙트 ' + srep.effect + ' · 페인트 ' + srep.paint
+    + ' · 개명 ' + srep.renamed + ' · 이펙트 색 바인딩 ' + calls.effectBind.length);
+  {
+    const want = (PAYLOAD.styles && PAYLOAD.styles.effect || []).filter((e) => (e.effects || []).some((x) => x.colorToken)).length;
+    if (want && calls.effectBind.length < want)
+      console.log('이펙트 색을 변수에 못 건 스타일 ' + (want - calls.effectBind.length) + '건 ← 문제');
+    else if (want) console.log('이펙트 색 ' + want + '건 전부 변수에 걸렸습니다');
+  }
 
   const rep = await ctx.__applyComponents(PAYLOAD, (t, m) => log.push(t + ' | ' + m), problems);
   console.log('\n[apply] 세트 ' + rep.sets + ' · 변형 ' + rep.variants + ' · 실패 ' + rep.skipped);

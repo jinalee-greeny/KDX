@@ -2,7 +2,7 @@
   "$meta": {
     "payloadVersion": 1,
     "generator": "figma/gen-payload.js",
-    "tokensVersion": "0.79",
+    "tokensVersion": "0.81",
     "schemaVersion": "0.78",
     "schemaSource": "demo/index.html 내장 SCHEMA",
     "brand": {
@@ -15,26 +15,48 @@
         "text": "\"Pretendard Variable\", system-ui, sans-serif"
       },
       "gradient": null,
-      "onAccent": [
-        {
-          "token": "comp/fg/on-accent/primary",
-          "on": "comp/fill/accent/primary",
-          "min": 4.5,
-          "picked": "Scale/color/gray/100",
-          "ratio": 8.12,
-          "fillStepped": null,
-          "short": false
-        },
-        {
-          "token": "comp/fg/on-accent/secondary",
-          "on": "comp/fill/accent/secondary",
-          "min": 4.5,
-          "picked": "Brand/color/primary/50",
-          "ratio": 7.43,
-          "fillStepped": null,
-          "short": false
-        }
-      ]
+      "onAccent": {
+        "Light": [
+          {
+            "token": "comp/fg/on-accent/primary",
+            "on": "comp/fill/accent/primary",
+            "min": 4.5,
+            "picked": "Scale/color/gray/100",
+            "ratio": 8.12,
+            "fillStepped": null,
+            "short": false
+          },
+          {
+            "token": "comp/fg/on-accent/secondary",
+            "on": "comp/fill/accent/secondary",
+            "min": 4.5,
+            "picked": "Brand/color/primary/50",
+            "ratio": 7.43,
+            "fillStepped": null,
+            "short": false
+          }
+        ],
+        "Dark": [
+          {
+            "token": "comp/fg/on-accent/primary",
+            "on": "comp/fill/accent/primary",
+            "min": 4.5,
+            "picked": "Scale/color/gray/100",
+            "ratio": 8.12,
+            "fillStepped": null,
+            "short": false
+          },
+          {
+            "token": "comp/fg/on-accent/secondary",
+            "on": "comp/fill/accent/secondary",
+            "min": 4.5,
+            "picked": "Brand/color/primary/30",
+            "ratio": 6.03,
+            "fillStepped": null,
+            "short": false
+          }
+        ]
+      }
     },
     "naming": "토큰 키는 슬래시 계층 표기. 붙임표는 단어 내부에만 쓴다(light-gray, touch-target, focus-ring).",
     "policy": {
@@ -545,10 +567,11 @@
     {
       "name": "Semantic",
       "modes": [
-        "Light"
+        "Light",
+        "Dark"
       ],
       "defaultMode": "Light",
-      "note": "Dark 모드는 아직 없다 — 추가되면 modes에 붙는다."
+      "note": "모드 축. Dark 는 tokens.json 의 dark 별칭이 정한다(figma/dark-map.js)."
     },
     {
       "name": "Radius",
@@ -2270,6 +2293,21 @@
     {
       "scopes": [],
       "codeSyntax": {
+        "WEB": "var(--color-alpha-orange-20)"
+      },
+      "collection": "Scale",
+      "name": "color/alpha/orange/20",
+      "type": "COLOR",
+      "values": {
+        "Value": {
+          "kind": "value",
+          "value": "#bf5a0e33"
+        }
+      }
+    },
+    {
+      "scopes": [],
+      "codeSyntax": {
         "WEB": "var(--dimension-0)"
       },
       "collection": "Scale",
@@ -2769,6 +2807,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/100"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/05"
         }
       }
     },
@@ -2788,6 +2831,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/96"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/00"
         }
       }
     },
@@ -2807,6 +2855,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/10"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/94"
         }
       }
     },
@@ -2826,6 +2879,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/100"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/10"
         }
       }
     },
@@ -2845,6 +2903,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/100"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/10"
         }
       }
     },
@@ -2864,6 +2927,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/black/50"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/black/70"
         }
       }
     },
@@ -2883,6 +2951,11 @@
           "kind": "alias",
           "collection": "Brand",
           "name": "color/primary/05"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Brand",
+          "name": "color/primary/90"
         }
       }
     },
@@ -2902,6 +2975,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/96"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/10"
         }
       }
     },
@@ -2921,6 +2999,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/96"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/10"
         }
       }
     },
@@ -2940,6 +3023,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/black/30"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/black/50"
         }
       }
     },
@@ -2959,6 +3047,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/10"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/94"
         }
       }
     },
@@ -2977,6 +3070,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/05"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/100"
         }
       }
     },
@@ -2995,6 +3093,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/black/60"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/white/70"
         }
       }
     },
@@ -3013,6 +3116,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/black/40"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/white/50"
         }
       }
     },
@@ -3031,6 +3139,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/black/30"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/white/40"
         }
       }
     },
@@ -3049,6 +3162,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/black/15"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/white/20"
         }
       }
     },
@@ -3067,6 +3185,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/black/20"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/white/30"
         }
       }
     },
@@ -3083,6 +3206,11 @@
       "type": "COLOR",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/100"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/100"
@@ -3105,6 +3233,11 @@
           "kind": "alias",
           "collection": "Brand",
           "name": "color/primary/50"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Brand",
+          "name": "color/primary/30"
         }
       }
     },
@@ -3123,6 +3256,11 @@
           "kind": "alias",
           "collection": "Brand",
           "name": "color/primary/50"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Brand",
+          "name": "color/primary/30"
         }
       }
     },
@@ -3141,6 +3279,11 @@
           "kind": "alias",
           "collection": "Brand",
           "name": "color/primary/55"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Brand",
+          "name": "color/primary/30"
         }
       }
     },
@@ -3159,6 +3302,11 @@
           "kind": "alias",
           "collection": "Brand",
           "name": "color/primary/70"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Brand",
+          "name": "color/primary/20"
         }
       }
     },
@@ -3177,6 +3325,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/100"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/05"
         }
       }
     },
@@ -3195,6 +3348,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/white/70"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/black/60"
         }
       }
     },
@@ -3213,6 +3371,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/white/50"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/black/40"
         }
       }
     },
@@ -3231,6 +3394,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/black/50"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/white/50"
         }
       }
     },
@@ -3249,6 +3417,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/black/30"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/white/30"
         }
       }
     },
@@ -3267,6 +3440,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/black/05"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/white/10"
         }
       }
     },
@@ -3285,6 +3463,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/05"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/100"
         }
       }
     },
@@ -3303,6 +3486,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/white/50"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/black/50"
         }
       }
     },
@@ -3321,6 +3509,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/white/30"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/black/30"
         }
       }
     },
@@ -3338,6 +3531,11 @@
       "type": "COLOR",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Brand",
+          "name": "color/primary/50"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Brand",
           "name": "color/primary/50"
@@ -3361,6 +3559,11 @@
           "kind": "alias",
           "collection": "Brand",
           "name": "color/primary/05"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Brand",
+          "name": "color/primary/90"
         }
       }
     },
@@ -3381,6 +3584,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/05"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/100"
         }
       }
     },
@@ -3401,6 +3609,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/94"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/20"
         }
       }
     },
@@ -3421,6 +3634,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/96"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/10"
         }
       }
     },
@@ -3438,6 +3656,11 @@
       "type": "COLOR",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/white/00"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/white/00"
@@ -3461,6 +3684,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/90"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/20"
         }
       }
     },
@@ -3481,6 +3709,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/100"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/10"
         }
       }
     },
@@ -3501,6 +3734,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/black/05"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/white/10"
         }
       }
     },
@@ -3521,6 +3759,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/100"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/05"
         }
       }
     },
@@ -3540,6 +3783,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/black/05"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/white/10"
         }
       }
     },
@@ -3560,6 +3808,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/black/10"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/white/20"
         }
       }
     },
@@ -3578,6 +3831,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/black/10"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/white/20"
         }
       }
     },
@@ -3596,6 +3854,11 @@
           "kind": "alias",
           "collection": "Brand",
           "name": "color/primary/40"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Brand",
+          "name": "color/primary/30"
         }
       }
     },
@@ -3614,6 +3877,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/black/05"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/white/10"
         }
       }
     },
@@ -3633,6 +3901,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/red/40"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/red/70"
         }
       }
     },
@@ -3652,6 +3925,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/green/40"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/green/70"
         }
       }
     },
@@ -3671,6 +3949,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/orange/40"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/orange/70"
         }
       }
     },
@@ -3690,6 +3973,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/blue/40"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/blue/70"
         }
       }
     },
@@ -3709,6 +3997,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/green/70"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/green/40"
         }
       }
     },
@@ -3728,6 +4021,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/orange/70"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/orange/40"
         }
       }
     },
@@ -3747,6 +4045,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/red/70"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/red/40"
         }
       }
     },
@@ -3766,6 +4069,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/blue/70"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/blue/40"
         }
       }
     },
@@ -3785,6 +4093,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/red/10"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/red/20"
         }
       }
     },
@@ -3804,6 +4117,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/green/10"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/green/20"
         }
       }
     },
@@ -3823,6 +4141,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/orange/10"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/orange/20"
         }
       }
     },
@@ -3842,6 +4165,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/blue/20"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/blue/30"
         }
       }
     },
@@ -3861,6 +4189,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/red/55"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/red/70"
         }
       }
     },
@@ -3880,6 +4213,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/blue/50"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/blue/60"
         }
       }
     },
@@ -3899,6 +4237,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/50"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/60"
         }
       }
     },
@@ -3918,6 +4261,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/red/58"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/red/60"
         }
       }
     },
@@ -3937,6 +4285,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/blue/50"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/blue/60"
         }
       }
     },
@@ -3956,6 +4309,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/50"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/60"
         }
       }
     },
@@ -3975,6 +4333,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/red/20"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/red/30"
         }
       }
     },
@@ -3994,6 +4357,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/blue/20"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/blue/30"
         }
       }
     },
@@ -4013,6 +4381,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/alpha/gray/05"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/white/10"
         }
       }
     },
@@ -4032,6 +4405,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/green/60"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/green/70"
         }
       }
     },
@@ -4051,6 +4429,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/purple/50"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/purple/60"
         }
       }
     },
@@ -4070,6 +4453,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/blue/60"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/blue/70"
         }
       }
     },
@@ -4089,6 +4477,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/orange/60"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/orange/70"
         }
       }
     },
@@ -4108,6 +4501,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/80"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/60"
         }
       }
     },
@@ -4125,6 +4523,11 @@
       "type": "COLOR",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/100"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/100"
@@ -4148,6 +4551,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/00"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/00"
         }
       }
     },
@@ -4165,6 +4573,11 @@
       "type": "COLOR",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/30"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/30"
@@ -4188,6 +4601,81 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "color/gray/70"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/70"
+        }
+      }
+    },
+    {
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL"
+      ],
+      "codeSyntax": {
+        "WEB": "var(--comp-fill-track)"
+      },
+      "collection": "Semantic",
+      "name": "comp/fill/track",
+      "type": "COLOR",
+      "values": {
+        "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/80"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/gray/30"
+        }
+      }
+    },
+    {
+      "scopes": [
+        "EFFECT_COLOR"
+      ],
+      "codeSyntax": {
+        "WEB": "var(--comp-shadow-default)"
+      },
+      "collection": "Semantic",
+      "name": "comp/shadow/default",
+      "type": "COLOR",
+      "values": {
+        "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/black/10"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/black/50"
+        }
+      }
+    },
+    {
+      "scopes": [
+        "EFFECT_COLOR"
+      ],
+      "codeSyntax": {
+        "WEB": "var(--comp-shadow-subtle)"
+      },
+      "collection": "Semantic",
+      "name": "comp/shadow/subtle",
+      "type": "COLOR",
+      "values": {
+        "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/black/05"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "color/alpha/black/40"
         }
       }
     },
@@ -4204,6 +4692,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/0"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/0"
@@ -4226,6 +4719,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/2"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/2"
         }
       }
     },
@@ -4242,6 +4740,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/4"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/4"
@@ -4264,6 +4767,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/6"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/6"
         }
       }
     },
@@ -4280,6 +4788,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/8"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/8"
@@ -4302,6 +4815,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/10"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/10"
         }
       }
     },
@@ -4318,6 +4836,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/12"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/12"
@@ -4340,6 +4863,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/16"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/16"
         }
       }
     },
@@ -4356,6 +4884,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/20"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/20"
@@ -4378,6 +4911,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/24"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/24"
         }
       }
     },
@@ -4394,6 +4932,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/32"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/32"
@@ -4416,6 +4959,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/40"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/40"
         }
       }
     },
@@ -4432,6 +4980,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/48"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/48"
@@ -4454,6 +5007,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/64"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/64"
         }
       }
     },
@@ -4469,6 +5027,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/12"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/12"
@@ -4490,6 +5053,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/12"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/12"
         }
       }
     },
@@ -4505,6 +5073,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/16"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/16"
@@ -4526,6 +5099,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/16"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/16"
         }
       }
     },
@@ -4541,6 +5119,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/20"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/20"
@@ -4562,6 +5145,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/20"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/20"
         }
       }
     },
@@ -4577,6 +5165,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/24"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/24"
@@ -4598,6 +5191,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/24"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/24"
         }
       }
     },
@@ -4613,6 +5211,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/32"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/32"
@@ -4634,6 +5237,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/32"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/32"
         }
       }
     },
@@ -4649,6 +5257,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/32"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/32"
@@ -4670,6 +5283,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/32"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/32"
         }
       }
     },
@@ -4685,6 +5303,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/40"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/40"
@@ -4706,6 +5329,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/40"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/40"
         }
       }
     },
@@ -4721,6 +5349,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/48"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/48"
@@ -4742,6 +5375,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/48"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/48"
         }
       }
     },
@@ -4757,6 +5395,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/24"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/24"
@@ -4778,6 +5421,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/24"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/24"
         }
       }
     },
@@ -4793,6 +5441,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/32"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/32"
@@ -4814,6 +5467,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/32"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/32"
         }
       }
     },
@@ -4829,6 +5487,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/48"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/48"
@@ -4850,6 +5513,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/48"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/48"
         }
       }
     },
@@ -4865,6 +5533,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/48"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/48"
@@ -4886,6 +5559,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/1"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/1"
         }
       }
     },
@@ -4901,6 +5579,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/1"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/1"
@@ -4922,6 +5605,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/2"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/2"
         }
       }
     },
@@ -4937,6 +5625,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Semantic",
+          "name": "spacing/250"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Semantic",
           "name": "spacing/250"
@@ -4958,6 +5651,11 @@
           "kind": "alias",
           "collection": "Semantic",
           "name": "spacing/150"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Semantic",
+          "name": "spacing/150"
         }
       }
     },
@@ -4973,6 +5671,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Semantic",
+          "name": "spacing/300"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Semantic",
           "name": "spacing/300"
@@ -4994,6 +5697,11 @@
           "kind": "alias",
           "collection": "Semantic",
           "name": "spacing/200"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Semantic",
+          "name": "spacing/200"
         }
       }
     },
@@ -5009,6 +5717,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Semantic",
+          "name": "spacing/150"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Semantic",
           "name": "spacing/150"
@@ -5030,6 +5743,11 @@
           "kind": "alias",
           "collection": "Semantic",
           "name": "spacing/50"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Semantic",
+          "name": "spacing/50"
         }
       }
     },
@@ -5045,6 +5763,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Semantic",
+          "name": "spacing/100"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Semantic",
           "name": "spacing/100"
@@ -5066,6 +5789,11 @@
           "kind": "alias",
           "collection": "Semantic",
           "name": "spacing/150"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Semantic",
+          "name": "spacing/150"
         }
       }
     },
@@ -5081,6 +5809,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Semantic",
+          "name": "spacing/250"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Semantic",
           "name": "spacing/250"
@@ -5102,6 +5835,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/3"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/3"
         }
       }
     },
@@ -5115,6 +5853,10 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "value",
+          "value": 4.5
+        },
+        "Dark": {
           "kind": "value",
           "value": 4.5
         }
@@ -5133,6 +5875,10 @@
         "Light": {
           "kind": "value",
           "value": 3
+        },
+        "Dark": {
+          "kind": "value",
+          "value": 3
         }
       },
       "note": "WCAG 대비 하한 (치수 아님 · 검증용 상수)"
@@ -5147,6 +5893,10 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "value",
+          "value": 3
+        },
+        "Dark": {
           "kind": "value",
           "value": 3
         }
@@ -5168,6 +5918,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/4"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/4"
         }
       }
     },
@@ -5186,6 +5941,11 @@
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/6"
+        },
+        "Dark": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/6"
         }
       }
     },
@@ -5201,6 +5961,11 @@
       "type": "FLOAT",
       "values": {
         "Light": {
+          "kind": "alias",
+          "collection": "Scale",
+          "name": "dimension/2"
+        },
+        "Dark": {
           "kind": "alias",
           "collection": "Scale",
           "name": "dimension/2"
@@ -6809,13 +7574,14 @@
               "r": 0,
               "g": 0,
               "b": 0,
-              "a": 0.1
+              "a": 0.10196078431372549
             },
             "blendMode": "NORMAL",
-            "visible": true
+            "visible": true,
+            "colorToken": "comp/shadow/default"
           }
         ],
-        "source": "0 2px 2px rgba(0,0,0,.10)"
+        "source": "0 2px 2px comp/shadow/default"
       },
       {
         "name": "elevation/2",
@@ -6832,13 +7598,14 @@
               "r": 0,
               "g": 0,
               "b": 0,
-              "a": 0.1
+              "a": 0.10196078431372549
             },
             "blendMode": "NORMAL",
-            "visible": true
+            "visible": true,
+            "colorToken": "comp/shadow/default"
           }
         ],
-        "source": "0 4px 4px rgba(0,0,0,.10)"
+        "source": "0 4px 4px comp/shadow/default"
       },
       {
         "name": "elevation/3",
@@ -6855,13 +7622,14 @@
               "r": 0,
               "g": 0,
               "b": 0,
-              "a": 0.1
+              "a": 0.10196078431372549
             },
             "blendMode": "NORMAL",
-            "visible": true
+            "visible": true,
+            "colorToken": "comp/shadow/default"
           }
         ],
-        "source": "0 4px 8px rgba(0,0,0,.10)"
+        "source": "0 4px 8px comp/shadow/default"
       },
       {
         "name": "elevation/4",
@@ -6878,13 +7646,14 @@
               "r": 0,
               "g": 0,
               "b": 0,
-              "a": 0.1
+              "a": 0.10196078431372549
             },
             "blendMode": "NORMAL",
-            "visible": true
+            "visible": true,
+            "colorToken": "comp/shadow/default"
           }
         ],
-        "source": "0 8px 16px rgba(0,0,0,.10)"
+        "source": "0 8px 16px comp/shadow/default"
       },
       {
         "name": "elevation/upper",
@@ -6901,13 +7670,14 @@
               "r": 0,
               "g": 0,
               "b": 0,
-              "a": 0.05
+              "a": 0.050980392156862744
             },
             "blendMode": "NORMAL",
-            "visible": true
+            "visible": true,
+            "colorToken": "comp/shadow/subtle"
           }
         ],
-        "source": "0 -8px 16px rgba(0,0,0,.05)"
+        "source": "0 -8px 16px comp/shadow/subtle"
       },
       {
         "name": "elevation/right",
@@ -6924,13 +7694,14 @@
               "r": 0,
               "g": 0,
               "b": 0,
-              "a": 0.05
+              "a": 0.050980392156862744
             },
             "blendMode": "NORMAL",
-            "visible": true
+            "visible": true,
+            "colorToken": "comp/shadow/subtle"
           }
         ],
-        "source": "2px 0 2px rgba(0,0,0,.05)"
+        "source": "2px 0 2px comp/shadow/subtle"
       }
     ],
     "paint": []
@@ -9665,7 +10436,7 @@
           "Off": {
             "alignPrimary": "MIN",
             "fill": {
-              "t": "comp/bdr/default"
+              "t": "comp/fill/track"
             },
             "slots": {
               "Thumb": {
@@ -10400,7 +11171,7 @@
               "t": "comp/radius/progress"
             },
             "fill": {
-              "t": "comp/fill/neutral/tertiary"
+              "t": "comp/fill/track"
             },
             "slots": {
               "Fill": {
@@ -10752,7 +11523,7 @@
             "t": "comp/radius/slider"
           },
           "fill": {
-            "t": "comp/fill/neutral/tertiary"
+            "t": "comp/fill/track"
           },
           "children": [
             {
@@ -11100,6 +11871,7 @@
       "comp/fill/neutral/primary",
       "comp/fill/neutral/secondary",
       "comp/fill/neutral/tertiary",
+      "comp/fill/track",
       "comp/gap/md",
       "comp/gap/sm",
       "comp/gap/xs",

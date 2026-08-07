@@ -53,7 +53,7 @@ const W = m => { warn.push(m); };
 const collections = [
   { name: 'Scale',    modes: ['Value'], defaultMode: 'Value',   note: '원시값. 아무 것도 별칭하지 않는다.' },
   { name: 'Brand',    modes: ['Value'], defaultMode: 'Value',   note: '★ 교체 지점. 여기만 갈면 전체가 따라온다.' },
-  { name: 'Semantic', modes: ['Light'], defaultMode: 'Light',   note: 'Dark 모드는 아직 없다 — 추가되면 modes에 붙는다.' },
+  { name: 'Semantic', modes: ['Light', 'Dark'], defaultMode: 'Light', note: '모드 축. Dark 는 tokens.json 의 dark 별칭이 정한다(figma/dark-map.js).' },
   { name: 'Radius',   modes: ['sharp', 'default', 'rounded'], defaultMode: 'default', note: '곡률 성격 스왑. 직교 모드축.' },
   { name: 'Web',      modes: ['mobile', 'tablet', 'desktop'],  defaultMode: 'mobile', note: '반응형 스텝. 직교 모드축.' }
 ];
@@ -114,57 +114,70 @@ for (const [k, v] of Object.entries(brandFonts)) {
 // 4a) 먼저 autoContrast 를 가진 토큰들의 별칭을 "재서" 정한다.
 // 브랜드가 밝으면 흰 글자가 무너진다 — 그때 따라 움직여야 하는 것은 글자이지 사람이 아니다.
 const { pickOnAccent } = require('./onaccent');
-const hexOfSemantic = n => {
+const SEMODES = ['Light', 'Dark'];
+/* 모드마다 시맨틱이 가리키는 원시값이 다르다 — Dark 는 tokens.json 의 dark 별칭을 쓰고,
+   없으면(static/* 처럼 뜻이 '모드 무관'인 것) Light 와 같은 값을 그대로 쓴다. */
+const aliasFor = (d, mode) => (mode === 'Dark' && d.dark) ? d.dark : d.alias;
+const hexOfSemantic = (n, mode) => {
   const d = T.semantic.color[n];
   if (!d) return null;
-  return (d.brand ? brandColors : T.scale.color)[d.alias] || null;
+  return (d.brand ? brandColors : T.scale.color)[aliasFor(d, mode)] || null;
 };
 const hexOfRef = c => (c.brand ? brandColors[c.brand] : T.scale.color[c.scale]) || null;
-const pageHex = hexOfSemantic('bg/default') || '#ffffff';
-const aliasOverride = {};      // 토큰 이름 → { collection, name }
-const onAccentReport = [];
-for (const [name, d] of Object.entries(T.semantic.color)) {
-  const ac = d.autoContrast;
-  if (!ac) continue;
-  const backdrop = hexOfSemantic(ac.on);
-  const candHex = (ac.candidates || []).map(hexOfRef);
-  const steps = (ac.fillFallback && ac.fillFallback.steps) || [];
-  const stepHex = steps.map(n => brandColors[n] || T.scale.color[n] || null);
-  if (!backdrop || candHex.some(h => !h) || stepHex.some(h => !h)) {
-    W('autoContrast ' + name + ' 의 배경/후보 색을 다 찾지 못해 기본 별칭을 그대로 둡니다.');
-    continue;
+
+/* 4a) autoContrast 를 모드마다 따로 잰다.
+   같은 브랜드라도 바닥이 흰 종이일 때와 먹지일 때 이기는 후보가 다르다 —
+   한 번만 재고 두 모드에 같은 답을 쓰면, 한쪽은 반드시 틀린다. */
+const aliasOverride = { Light: {}, Dark: {} };
+const onAccentReport = { Light: [], Dark: [] };
+for (const mode of SEMODES) {
+  const pageHex = hexOfSemantic('bg/default', mode) || (mode === 'Dark' ? '#0e0f10' : '#ffffff');
+  for (const [name, d] of Object.entries(T.semantic.color)) {
+    const ac = d.autoContrast;
+    if (!ac) continue;
+    const backdrop = hexOfSemantic(ac.on, mode);
+    const candHex = (ac.candidates || []).map(hexOfRef);
+    const steps = (ac.fillFallback && ac.fillFallback.steps) || [];
+    const stepHex = steps.map(n => brandColors[n] || T.scale.color[n] || null);
+    if (!backdrop || candHex.some(h => !h) || stepHex.some(h => !h)) {
+      W('autoContrast ' + name + '(' + mode + ') 의 배경/후보 색을 다 찾지 못해 기본 별칭을 그대로 둡니다.');
+      continue;
+    }
+    const r = pickOnAccent(backdrop, candHex, ac.min, stepHex, pageHex);
+    const win = ac.candidates[r.fg];
+    aliasOverride[mode][name] = win.brand
+      ? { collection: 'Brand', name: win.brand }
+      : { collection: 'Scale', name: win.scale };
+    let stepped = null;
+    if (r.fill >= 0) {
+      const ft = ac.fillFallback.token;
+      const fd = T.semantic.color[ft];
+      stepped = steps[r.fill];
+      aliasOverride[mode][ft] = { collection: fd && fd.brand ? 'Brand' : 'Scale', name: stepped };
+      W('대비를 맞추려고 ' + ft + '(' + mode + ') 를 ' + stepped + ' 로 한 스톱 어둡게 했습니다.');
+    }
+    if (r.short) W('autoContrast ' + name + '(' + mode + ') 이 ' + ac.min + ':1 을 못 넘겼습니다 — 최선이 ' + r.ratio.toFixed(2) + ':1.');
+    onAccentReport[mode].push({
+      token: name, on: ac.on, min: ac.min,
+      picked: aliasOverride[mode][name].collection + '/' + aliasOverride[mode][name].name,
+      ratio: Math.round(r.ratio * 100) / 100,
+      fillStepped: stepped, short: r.short
+    });
   }
-  const r = pickOnAccent(backdrop, candHex, ac.min, stepHex, pageHex);
-  const win = ac.candidates[r.fg];
-  aliasOverride[name] = win.brand
-    ? { collection: 'Brand', name: win.brand }
-    : { collection: 'Scale', name: win.scale };
-  let stepped = null;
-  if (r.fill >= 0) {
-    const ft = ac.fillFallback.token;
-    const fd = T.semantic.color[ft];
-    stepped = steps[r.fill];
-    aliasOverride[ft] = { collection: fd && fd.brand ? 'Brand' : 'Scale', name: stepped };
-    W('대비를 맞추려고 ' + ft + ' 를 ' + stepped + ' 로 한 스톱 어둡게 했습니다.');
-  }
-  if (r.short) W('autoContrast ' + name + ' 이 ' + ac.min + ':1 을 못 넘겼습니다 — 최선이 ' + r.ratio.toFixed(2) + ':1.');
-  onAccentReport.push({
-    token: name, on: ac.on, min: ac.min,
-    picked: aliasOverride[name].collection + '/' + aliasOverride[name].name,
-    ratio: Math.round(r.ratio * 100) / 100,
-    fillStepped: stepped, short: r.short
-  });
 }
 
 // 4b) 그 다음에 전부 내보낸다(재계산 결과가 있으면 그쪽이 이긴다).
 for (const [name, d] of Object.entries(T.semantic.color)) {
-  const ov = aliasOverride[name];
-  const target = ov ? ov.collection : (d.brand ? 'Brand' : 'Scale');
-  const aliasName = ov ? ov.name : d.alias;
-  const pool = target === 'Brand' ? brandColors : T.scale.color;
-  if (!(aliasName in pool)) W('semantic.color ' + name + ' → ' + target + '/' + aliasName + ' 대상 없음');
-  V({ collection: 'Semantic', name, type: 'COLOR', scopes: d.scopes || ['FRAME_FILL'],
-      values: { Light: alias(target, aliasName) } });
+  const values = {};
+  for (const mode of SEMODES) {
+    const ov = aliasOverride[mode][name];
+    const target = ov ? ov.collection : (d.brand ? 'Brand' : 'Scale');
+    const aliasName = ov ? ov.name : aliasFor(d, mode);
+    const pool = target === 'Brand' ? brandColors : T.scale.color;
+    if (!(aliasName in pool)) W('semantic.color ' + name + '(' + mode + ') → ' + target + '/' + aliasName + ' 대상 없음');
+    values[mode] = alias(target, aliasName);
+  }
+  V({ collection: 'Semantic', name, type: 'COLOR', scopes: d.scopes || ['FRAME_FILL'], values });
 }
 
 // 5) Semantic — 수치
@@ -193,12 +206,15 @@ for (const [name, d] of Object.entries(T.semantic.numeric)) {
     const inScale = d.alias in T.scale.dimension;
     const inSem   = d.alias in T.semantic.numeric;
     if (!inScale && !inSem) { W('semantic.numeric ' + name + ' → ' + d.alias + ' 대상 없음'); }
+    /* 수치는 모드에 따라 달라지지 않는다. 그래도 두 모드에 같은 값을 넣어야 한다 —
+       Figma 는 모드마다 값을 요구하고, 비워 두면 그 모드에서 변수가 비어 보인다. */
+    const a = alias(inScale ? 'Scale' : 'Semantic', d.alias);
     V({ collection: 'Semantic', name, type: 'FLOAT', scopes,
-        values: { Light: alias(inScale ? 'Scale' : 'Semantic', d.alias) } });
+        values: { Light: a, Dark: a } });
   } else {
     // a11y/contrast/* 같은 원시 상수 — 별칭이 없고 값만 있다
     V({ collection: 'Semantic', name, type: 'FLOAT', scopes,
-        values: { Light: val(d.value) }, note: d.note || null });
+        values: { Light: val(d.value), Dark: val(d.value) }, note: d.note || null });
   }
 }
 
@@ -304,9 +320,29 @@ function parseShadow(cssStr) {
   };
 }
 const effectStyles = [];
-for (const [name, cssStr] of Object.entries(T.effect.elevation)) {
-  const e = parseShadow(cssStr);
+for (const [name, def] of Object.entries(T.effect.elevation)) {
+  /* 예전에는 색까지 문자열에 박혀 있었다('0 2px 2px rgba(0,0,0,.10)').
+     이펙트 스타일 자체는 모드를 모르지만 그 안의 색은 변수에 걸 수 있으므로,
+     색만 토큰으로 빼면 스타일 하나가 Light·Dark 를 다 산다.
+     옛 문자열 형태도 계속 받는다 — 남이 만든 tokens.json 이 들어와도 무너지지 않게. */
+  const isObj = def && typeof def === 'object';
+  const geom = isObj ? def.shadow : def;
+  const colorToken = isObj ? def.color : null;
+  const cssStr = colorToken ? (geom + ' ' + colorToken) : geom;
+  const base = colorToken ? (geom + ' rgba(0,0,0,.10)') : geom;   // 색은 곧 변수가 덮는다
+  const e = parseShadow(base);
   if (!e) { W('effect ' + name + ' 의 그림자 문자열을 해석하지 못했습니다: ' + cssStr); continue; }
+  if (colorToken) {
+    if (!T.semantic.color[colorToken]) W('effect ' + name + ' 이 없는 색 토큰을 가리킵니다: ' + colorToken);
+    e.colorToken = colorToken;
+    /* 변수가 안 걸릴 때를 대비한 초깃값 — Light 값을 그대로 넣어 둔다.
+       걸리면 이 숫자는 안 보이고, 못 걸리면 적어도 라이트에서는 맞다. */
+    const lit = T.scale.color[T.semantic.color[colorToken] && T.semantic.color[colorToken].alias];
+    if (lit && /^#[0-9a-fA-F]{8}$/.test(lit)) {
+      e.color = { r: parseInt(lit.substr(1,2),16)/255, g: parseInt(lit.substr(3,2),16)/255,
+                  b: parseInt(lit.substr(5,2),16)/255, a: parseInt(lit.substr(7,2),16)/255 };
+    }
+  }
   effectStyles.push({ name, effects: [e], source: cssStr });
 }
 

@@ -110,7 +110,13 @@ if (demoSpec) {
     eq('token', sp.token, name);
     eq('on', sp.on, ac.on);
     eq('min', sp.min, ac.min);
-    eq('배경 스톱', 'color/primary/' + sp.onStop, onD.alias);
+    /* 배경 스톱은 이제 모드마다 다르다 — 라이트만 맞춰 보면 다크가 갈라져도 초록이 뜬다. */
+    if (sp.onStop && typeof sp.onStop === 'object') {
+      eq('배경 스톱(Light)', 'color/primary/' + sp.onStop.light, onD.alias);
+      eq('배경 스톱(Dark)', 'color/primary/' + sp.onStop.dark, onD.dark || onD.alias);
+    } else {
+      F('OA_SPEC[' + i + '] 의 onStop 이 아직 모드별이 아닙니다 — {light,dark} 여야 합니다.');
+    }
     eq('후보 수', (sp.cand || []).length, (ac.candidates || []).length);
     (ac.candidates || []).forEach((c, k) => { if ((sp.cand || [])[k]) eq('후보 ' + k, sp.cand[k].ref, refOf(c)); });
     const ff = ac.fillFallback;

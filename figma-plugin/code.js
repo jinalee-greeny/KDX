@@ -223,12 +223,36 @@ function makeLookup(st, mg) {
   for (const r of mg.renames) if (r.status === 'rename') moved.add(KEY(r.collection, r.from));
   for (const s of mg.splits) if (s.status === 'split') moved.add(KEY(s.collection, s.from));
 
-  return (col, name) => {
+  /* 이름만으로 찾는 예비 표.
+     같은 시스템을 담고 있어도 파일마다 컬렉션 이름이 다를 수 있다 — 이 저장소의
+     페이로드는 5컬렉션(Scale·Brand·Semantic·Radius·Web)인데, 예전 split7 경로로
+     만든 파일은 7컬렉션(Primitive·Brand·Semantic/color·Semantic/typo·
+     Semantic/dimension·Radius·Web)이다. 컬렉션 이름만 다르고 변수 이름은 같은데
+     (컬렉션,이름) 짝으로만 찾으면 전부 못 찾는다. 그 결과가 '색이 하나도 안 걸린 화면'이다.
+     이름이 파일 안에서 유일할 때만 쓴다 — 둘 이상이면 어느 쪽인지 알 수 없으므로 포기한다. */
+  const byName = new Map();
+  for (const [k, v] of st.varByKey) {
+    const nm = k.slice(k.indexOf('\u0000') + 1);
+    if (byName.has(nm)) byName.set(nm, null);
+    else byName.set(nm, v);
+  }
+  const crossed = [];
+  const fn = (col, name) => {
     const k = KEY(col, name);
     if (extra.has(k)) return st.varById.get(extra.get(k));
     if (moved.has(k)) return null; // 이 이름은 곧 사라진다
-    return st.varByKey.get(k) || null;
+    const hit = st.varByKey.get(k);
+    if (hit) return hit;
+    const alt = byName.get(name);
+    if (alt) {
+      const real = (st.colById.get(alt.variableCollectionId) || {}).name || '?';
+      crossed.push(col + ' → ' + real + ' / ' + name);
+      return alt;
+    }
+    return null;
   };
+  fn.crossed = crossed;
+  return fn;
 }
 
 /* ───────────────────────── dry-run ───────────────────────── */
@@ -626,15 +650,34 @@ async function applyStyles(payload, push, problems) {
   effects = await figma.getLocalEffectStylesAsync();
   eByName = new Map(effects.map((s) => [s.name, s]));
 
-  for (const e of (S.effect || [])) {
-    try {
-      let s = eByName.get(e.name);
-      if (!s) { s = figma.createEffectStyle(); s.name = e.name; eByName.set(e.name, s); }
-      s.effects = e.effects;
-      if (e.source) s.description = e.source;
-      rep.effect++;
-    } catch (err) {
-      problems.push('이펙트 스타일 ' + e.name + ' — ' + err.message);
+  /* 이펙트 스타일 자체는 모드를 모른다. 그런데 그 안의 '색' 은 변수에 걸 수 있다 —
+     그래서 색만 모드를 아는 변수에 걸면 스타일 하나가 Light·Dark 를 다 산다.
+     못 걸면 페이로드가 실어 보낸 라이트 값이 그대로 남는다(적어도 한쪽은 맞다). */
+  {
+    const st2 = await readState();
+    const mg2 = planMigrations(payload, st2);
+    const look2 = makeLookup(st2, mg2);
+    const R2 = makeNumResolver(payload);
+    for (const e of (S.effect || [])) {
+      try {
+        let s = eByName.get(e.name);
+        if (!s) { s = figma.createEffectStyle(); s.name = e.name; eByName.set(e.name, s); }
+        const list = (e.effects || []).map((raw) => {
+          if (!raw.colorToken) return raw;
+          const col = R2.collectionOf(raw.colorToken);
+          const v = col ? look2(col, raw.colorToken) : null;
+          const eff = Object.assign({}, raw);
+          delete eff.colorToken;
+          if (!v) { problems.push('이펙트 색 토큰을 못 찾았습니다 — ' + raw.colorToken); return eff; }
+          try { return figma.variables.setBoundVariableForEffect(eff, 'color', v); }
+          catch (err2) { problems.push('이펙트 색 바인딩 실패 ' + e.name + ' — ' + err2.message); return eff; }
+        });
+        s.effects = list;
+        if (e.source) s.description = e.source;
+        rep.effect++;
+      } catch (err) {
+        problems.push('이펙트 스타일 ' + e.name + ' — ' + err.message);
+      }
     }
   }
   push('ok', '이펙트 스타일 ' + rep.effect + '개 반영');

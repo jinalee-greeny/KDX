@@ -7,61 +7,93 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css">
 <style>
 /* ===== TIER 0 SCALE + 뉴트럴 ===== */
-/* ===== TIER 0 — 값은 전부 tokens.json 에서 온다 (v0.86 정렬) =====
-   여기 적힌 색은 하나도 손으로 고른 것이 아니다. 오른쪽 주석의 토큰이 원본이고,
-   이 파일은 그 값을 CSS 가 읽을 수 있는 이름으로 옮겨 적기만 한다.
-   ★ 값을 고칠 일이 생기면 tokens.json 을 고치고 여기로 옮겨 적는다 — 반대 방향은 없다.
-
-   왜 이 정렬을 했나: 화면 내보내기(v0.85)가 데모의 색을 페이로드 변수로 되짚으려다
-   20.8% 에서 멈췄다. 못 되짚은 #8B909A · #5B616B · #14171C · #ECEDF0 · #F7F8FA 는
-   tokens.json 에 아예 없는 값이었다 — 데모의 중립 램프가 푸른기 도는 별도 램프였고,
-   토큰의 중립 램프는 진짜 무채색이었다. 데모가 토큰으로 그리지 않으면
-   '보이는 화면 = 내보내는 페이로드' 라는 약속이 색에서만 깨진다. */
+/* DEMOCSS-COLORS-BEGIN — 이 블록은 node figma/gen-democss.js --write 가 만든다. 손으로 고치지 말 것. */
+/* 값의 출처는 전부 tokens/tokens.json 이다. 바꿀 일이 있으면 거기를 고치고 다시 생성한다. */
 :root{
-  --bg:#ffffff;                    /* bg/default          ← color/gray/100 */
-  --bg-sunken:#f3f4f6;             /* bg/sunken           ← color/gray/96  */
-  --bg-canvas:#edeef0;             /* (워크벤치 크롬 — .page 밖) ← color/gray/94 */
-  --fg:#0e0f10;                    /* fg/default          ← color/gray/05  */
-  --fg-sub:#00000099;              /* fg/subtle           ← color/alpha/black/60 */
-  --fg-mut:#00000066;              /* fg/subtler          ← color/alpha/black/40 */
-  --fg-inverse:#ffffff;            /* fg/inverse/default  ← color/gray/100 */
-  --line:#0000000d;                /* comp/bdr/subtlest   ← color/alpha/black/05 */
-  --line-2:#0000001a;              /* comp/bdr/subtler    ← color/alpha/black/10 */
-  /* elevation — 브랜드 무관 그림자 스케일 (effect/elevation 토큰).
-     그림자의 검정도 토큰이다 — color/gray/05 = rgb(14,15,16). */
+  --bg:#ffffff;                     /* bg/default ← color/gray/100 */
+  --bg-sunken:#f3f4f6;              /* bg/sunken ← color/gray/96 */
+  --bg-canvas:#edeef0;              /* 워크벤치 크롬 — .page 밖이라 토큰 대상이 아니다 */
+  --fg:#0e0f10;                     /* fg/default ← color/gray/05 */
+  --fg-sub:#00000099;               /* fg/subtle ← color/alpha/black/60 */
+  --fg-mut:#00000066;               /* fg/subtler ← color/alpha/black/40 */
+  --fg-inverse:#ffffff;             /* fg/inverse/default ← color/gray/100 */
+  --line:#0000000d;                 /* comp/bdr/subtlest ← color/alpha/black/05 */
+  --line-2:#0000001a;               /* comp/bdr/subtler ← color/alpha/black/10 */
+  --st-success:#1a6b45;             /* status/fg/success ← color/green/40 */
+  --st-success-bg:#0789551a;        /* status/bg/success ← color/alpha/green/10 */
+  --st-warning:#9b4500;             /* status/fg/warning ← color/orange/40 */
+  --st-warning-bg:#bf5a0e1a;        /* status/bg/warning ← color/alpha/orange/10 */
+  --st-critical:#b7211f;            /* status/fg/error ← color/red/40 */
+  --st-critical-bg:#ec483f1a;       /* status/bg/error ← color/alpha/red/10 */
+  --st-critical-strong:#93000b;     /* 더 진한 단계 — 전용 토큰 없음 */
+  --comp-disabled-fill:#e3e4e6;     /* comp/fill/neutral/disabled ← color/gray/90 */
+  --comp-disabled-fg:#00000033;     /* comp/fg/disabled ← color/alpha/black/20 */
+  --comp-disabled-bdr:#0000000d;    /* comp/bdr/disabled ← color/alpha/black/05 */
+  --comp-track:#c7c8cb;             /* comp/fill/track ← color/gray/80 */
+  --up:#ec483f;                     /* chart/status/fg/up ← color/red/55 */
+  --down:#1772ed;                   /* chart/status/fg/down ← color/blue/50 */
+  --flat:#76777a;                   /* chart/status/fg/flat ← color/gray/50 */
   --elev-0:none;
-  --elev-1:0 1px 2px rgba(14,15,16,.04),0 1px 3px rgba(14,15,16,.06);   /* 카드 rest */
+  --elev-1:0 1px 2px rgba(14,15,16,.04),0 1px 3px rgba(14,15,16,.06);  /* 카드 rest */
   --elev-2:0 4px 10px rgba(14,15,16,.06),0 2px 5px rgba(14,15,16,.05);  /* 카드 hover */
   --elev-3:0 8px 24px rgba(14,15,16,.10),0 3px 8px rgba(14,15,16,.06);  /* 드롭다운·팝오버 */
-  --elev-4:0 20px 48px rgba(14,15,16,.16),0 8px 18px rgba(14,15,16,.08);/* 모달·다이얼로그 */
-  --elev-up:0 -8px 24px rgba(14,15,16,.08);                             /* 바텀시트·스티키 */
+  --elev-4:0 20px 48px rgba(14,15,16,.16),0 8px 18px rgba(14,15,16,.08);  /* 모달·다이얼로그 */
+  --elev-up:0 -8px 24px rgba(14,15,16,.08);  /* 바텀시트·스티키 */
   --sh-1:var(--elev-1); --sh-2:var(--elev-2); --sh-frame:var(--elev-4);
-  /* 상태색 — status/fg/* 는 스톱 40, status/bg/* 는 알파 10~20% (v0.85 대비 교정 결과) */
-  --st-success:#1a6b45;            /* status/fg/success   ← color/green/40  */
-  --st-success-bg:#0789551a;       /* status/bg/success   ← color/alpha/green/10 */
-  --st-warning:#9b4500;            /* status/fg/warning   ← color/orange/40 */
-  --st-warning-bg:#bf5a0e1a;       /* status/bg/warning   ← color/alpha/orange/10 */
-  --st-critical:#b7211f;           /* status/fg/error     ← color/red/40    */
-  --st-critical-bg:#ec483f1a;      /* status/bg/error     ← color/alpha/red/10 */
-  --st-critical-strong:#93000b;    /* (더 진한 단계 — 전용 토큰 없음) ← color/red/30 */
-  /* 컴포넌트 상태 토큰 (브랜드 무관) */
-  --comp-disabled-fill:#e3e4e6;    /* comp/fill/neutral/disabled ← color/gray/90 */
-  --comp-disabled-fg:#00000033;    /* comp/fg/disabled    ← color/alpha/black/20 */
-  --comp-disabled-bdr:#0000000d;   /* comp/bdr/disabled   ← color/alpha/black/05 */
-  --comp-track:#c7c8cb;            /* ★ 전용 토큰 없음 — comp/fill/track 신설 대상 ← color/gray/80 */
-  /* 컴포넌트 지오메트리 (comp/padding·comp/gap·a11y/touch-target) — 고정 높이 w·h/control 폐기, hug 방식 */
+  /* 컴포넌트 지오메트리 — 색이 아니라 이 생성기의 대상이 아니다 */
   --pad-btn-x:20px; --pad-btn-y:12px; --pad-fld-x:16px; --pad-fld-y:12px; --pad-card:24px;
   --gap-comp-sm:8px; --gap-comp-md:12px;
   --touch-min:48px; --bw-comp:1px; --ring-w:3px;
 }
+html[data-theme="dark"]{
+  --bg:#0e0f10;                     /* bg/default ← color/gray/05 */
+  --bg-sunken:#000000;              /* bg/sunken ← color/gray/00 */
+  --bg-canvas:#000000;              /* 워크벤치 크롬 — .page 밖이라 토큰 대상이 아니다 */
+  --fg:#ffffff;                     /* fg/default ← color/gray/100 */
+  --fg-sub:#ffffffb2;               /* fg/subtle ← color/alpha/white/70 */
+  --fg-mut:#ffffff80;               /* fg/subtler ← color/alpha/white/50 */
+  --fg-inverse:#0e0f10;             /* fg/inverse/default ← color/gray/05 */
+  --line:#ffffff1a;                 /* comp/bdr/subtlest ← color/alpha/white/10 */
+  --line-2:#ffffff33;               /* comp/bdr/subtler ← color/alpha/white/20 */
+  --st-success:#3ac280;             /* status/fg/success ← color/green/70 */
+  --st-success-bg:#07895533;        /* status/bg/success ← color/alpha/green/20 */
+  --st-warning:#ff8d44;             /* status/fg/warning ← color/orange/70 */
+  --st-warning-bg:#bf5a0e33;        /* status/bg/warning ← color/alpha/orange/20 */
+  --st-critical:#ff897d;            /* status/fg/error ← color/red/70 */
+  --st-critical-bg:#ec483f33;       /* status/bg/error ← color/alpha/red/20 */
+  --st-critical-strong:#ffb4ab;     /* 더 진한 단계 — 전용 토큰 없음 */
+  --comp-disabled-fill:#2f3032;     /* comp/fill/neutral/disabled ← color/gray/20 */
+  --comp-disabled-fg:#ffffff4d;     /* comp/fg/disabled ← color/alpha/white/30 */
+  --comp-disabled-bdr:#ffffff1a;    /* comp/bdr/disabled ← color/alpha/white/10 */
+  --comp-track:#46474a;             /* comp/fill/track ← color/gray/30 */
+  --up:#ff897d;                     /* chart/status/fg/up ← color/red/70 */
+  --down:#6f91ff;                   /* chart/status/fg/down ← color/blue/60 */
+  --flat:#909194;                   /* chart/status/fg/flat ← color/gray/60 */
+  --elev-0:none;
+  --elev-1:0 1px 2px rgba(0,0,0,.30),0 1px 3px rgba(0,0,0,.40);  /* 카드 rest */
+  --elev-2:0 4px 10px rgba(0,0,0,.40),0 2px 5px rgba(0,0,0,.34);  /* 카드 hover */
+  --elev-3:0 8px 24px rgba(0,0,0,.52),0 3px 8px rgba(0,0,0,.40);  /* 드롭다운·팝오버 */
+  --elev-4:0 20px 48px rgba(0,0,0,.64),0 8px 18px rgba(0,0,0,.48);  /* 모달·다이얼로그 */
+  --elev-up:0 -8px 24px rgba(0,0,0,.44);  /* 바텀시트·스티키 */
+  --sh-1:var(--elev-1); --sh-2:var(--elev-2); --sh-frame:var(--elev-4);
+  /* 브랜드 파생 — 라이트는 [data-brand] 가 들고 있고 여기서 다크만 덮어쓴다 */
+  --accent:var(--brand-p50);  /* comp/fill/accent/primary ← color/primary/50 */
+  --accent-subtle:var(--brand-p90);  /* bg/accent/subtle ← color/primary/90 */
+  --accent-line:var(--brand-p30);  /* comp/bdr/focused ← color/primary/30 */
+  --on-accent-subtle:var(--brand-p30);  /* comp/fg/on-accent/secondary ← color/primary/30 */
+  --accent-strong:var(--brand-p40);  /* 누르기 전 강조 — 다크에서는 밝은 쪽으로 */
+  --accent-press:var(--brand-p30);  /* 누른 상태 — 한 단계 더 밝게 */
+}
+/* DEMOCSS-COLORS-END */
 /* ===== TIER 1 BRAND (교체 지점) ===== */
 [data-brand="deepblue"]{--brand-p05:#F2F5FA;--brand-p10:#D9E1F2;--brand-p20:#AFC0E9;--brand-p30:#6B90E5;--brand-p40:#205CE9;--brand-p50:#1245BA;--brand-p55:#103CA2;--brand-p60:#0E348B;--brand-p70:#0F2762;--brand-p80:#0C1C40;--brand-p90:#091125;--brand-p96:#050A14;--brand-font:"Pretendard Variable",system-ui,sans-serif}
 [data-brand="emerald"]{--brand-p05:#EAFAF4;--brand-p10:#C7F0E1;--brand-p20:#8FE0C4;--brand-p30:#3ADAAB;--brand-p40:#12A87C;--brand-p50:#098A68;--brand-p55:#08795B;--brand-p60:#06694E;--brand-p70:#054E3B;--brand-p80:#053327;--brand-p90:#051D17;--brand-p96:#03100C;--brand-font:"Pretendard Variable",system-ui,sans-serif}
 [data-brand="violet"]{--brand-p05:#F4EEFB;--brand-p10:#E4D3F5;--brand-p20:#C9A8EB;--brand-p30:#A16CDE;--brand-p40:#7A2FD1;--brand-p50:#5B14B8;--brand-p55:#5012A1;--brand-p60:#450F8B;--brand-p70:#320B63;--brand-p80:#220940;--brand-p90:#150825;--brand-p96:#0B0414;--brand-font:"Pretendard Variable",system-ui,sans-serif}
 /* ===== TIER 2 SEMANTIC ===== */
 [data-brand]{--accent:var(--brand-p50);--accent-strong:var(--brand-p60);--accent-press:var(--brand-p70);--accent-subtle:var(--brand-p05);--accent-line:var(--brand-p20);--on-accent:#fff;--on-accent-subtle:var(--accent);--font:var(--brand-font);
-  /* 등락색도 토큰이다 — chart/status/fg/{up,down,flat} */
-  --up:#ec483f;/* ← color/red/55 */--down:#1772ed;/* ← color/blue/50 */--flat:#76777a;/* ← color/gray/50 */--r-full:999px;
+  /* 등락색(--up·--down·--flat)은 생성 블록으로 옮겼다 — 여기 두면 명시도가 높아
+     다크 블록을 덮어써서 다크에서 라이트 색이 나온다. */
+  --r-full:999px;
   --focus-ring:0 0 0 3px var(--accent-subtle),0 0 0 1.5px var(--accent);
   /* 그라디언트 브랜드(인스타그램류) 대응: 램프에서 기본 그라디언트를 유도, 인제스트가 실제 값으로 덮어씀 */
   --brand-gradient:linear-gradient(135deg,var(--brand-p40) 0%,var(--brand-p60) 100%);--accent-gradient:var(--brand-gradient)}
@@ -653,7 +685,7 @@ html[data-plat="app"][data-device="tablet"] .frame{--dev:768px}
 /* nav */
 .nav{display:flex;align-items:center;justify-content:space-between;height:70px;border-bottom:1px solid var(--line)}
 .logo{display:flex;align-items:center;gap:9px;font-weight:600;font-size:18px;letter-spacing:-.02em}
-.logo .mark{width:28px;height:28px;border-radius:var(--r-xs);background:var(--accent);display:grid;place-items:center;color:#fff}
+.logo .mark{width:28px;height:28px;border-radius:var(--r-xs);background:var(--accent);display:grid;place-items:center;color:var(--on-accent)}
 .logo .mark svg{width:16px;height:16px}
 .navlinks{display:none;gap:24px;font-size:14px;font-weight:500;color:var(--fg-sub)}   /* utility/standard/sm/500 — 16px 로 올렸더니 태블릿에서 헤더가 겹쳤다 */
 .navlinks a:hover{color:var(--fg)}
@@ -676,13 +708,13 @@ html[data-plat="app"][data-device="tablet"] .frame{--dev:768px}
 .btn-secondary{background:var(--accent-subtle);color:var(--on-accent-subtle)}
 .btn-secondary:hover,.btn-secondary.is-hover{background:var(--accent-line)}
 .btn-secondary:active,.btn-secondary.is-pressed{background:var(--accent-line);color:var(--accent-press)}
-.btn-neutral{background:var(--fg);color:#fff}
+.btn-neutral{background:var(--fg);color:var(--bg)}   /* comp/fill/neutral/primary 위의 글자 = fg/inverse/default. #fff 로 박아 두면 다크에서 흰 버튼에 흰 글자가 된다 */
 .btn-neutral:hover,.btn-neutral.is-hover{background:#2b3038}
 .btn-neutral:active,.btn-neutral.is-pressed{background:#000}
 .btn-ghost{background:transparent;color:var(--fg);border:var(--bw) solid var(--bc)}
 .btn-ghost:hover,.btn-ghost.is-hover{border-color:var(--fg);background:var(--bg-sunken)}
 .btn-ghost:active,.btn-ghost.is-pressed{background:#e7e9ec}
-.btn-danger{background:var(--st-critical);color:#fff}
+.btn-danger{background:var(--st-critical);color:var(--fg-inverse)}   /* 다크에서 status/fg/error 는 red/70(밝은 색)이라 흰 글자가 무너진다 */
 .btn-danger:hover,.btn-danger.is-hover{background:var(--st-critical-strong)}
 .btn-danger:active,.btn-danger.is-pressed{background:#991b1b}
 .btn:focus-visible,.btn.is-focus{outline:none;box-shadow:var(--focus-ring)}
@@ -1485,11 +1517,13 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
       <div class="gm-sep"></div>
       <button data-m="figma" role="menuitem"><b><svg class="i"><use href="#icon-nav-movedown"/></svg>Figma 내보내기</b><small>토큰만, 또는 만들어 둔 화면까지 함께 넘깁니다</small></button>
       <div class="gm-sep"></div>
+      <div class="gm-row"><div class="gm-rowl"><b><svg class="i"><use href="#icon-feature-transparent"/></svg>다크 모드</b><small>Semantic 컬렉션의 <code>Dark</code> 모드를 그대로 켭니다 — 값은 tokens.json 이 정합니다</small></div><button class="swtch" id="themeSw" role="switch" aria-checked="false" title="다크 켬/끔"><i></i></button></div>
+      <div class="gm-sep"></div>
       <div class="gm-row"><div class="gm-rowl"><b><svg class="i"><use href="#icon-status-alert"/></svg>스펙 힌트</b><small>요소에 마우스를 올리면 토큰·스펙이 바로 보입니다</small></div><button class="swtch on" id="spHintSw" role="switch" aria-checked="true" title="힌트 켬/끔"><i></i></button></div>
       <button data-m="spec" role="menuitem"><b><svg class="i"><use href="#icon-action-search"/></svg>스펙 시트<span class="kb">S</span></b><small>컴포넌트·모듈·패턴 스펙 색인</small></button>
     </div>
   </div>
-  <span class="gver">토큰값 정렬 · v0.86</span>
+  <span class="gver">Semantic Dark · v0.87</span>
 </header>
 <div class="app">
 
@@ -2035,27 +2069,37 @@ function pickOnAccent(backdrop, candidates, min, fillSteps, page) {
    같은 표여야 한다(figma/check-brand.js --demo 가 두 표를 대조한다).
    css 는 이 결정이 화면에 닿는 자리다: --on-accent 는 강조 면 위의 글자,
    --on-accent-subtle 은 연한 강조 면(칩 선택·보조 버튼) 위의 글자다. */
-const OA_PAGE='#ffffff';   /* bg/default = color/gray/100 — 알파를 깔 바탕 */
+/* 바탕은 모드마다 다르다 — 알파를 깔 종이가 흰 종이인지 먹지인지에 따라
+   같은 후보가 다른 대비를 낸다. bg/default 의 Light·Dark 값이다. */
+const OA_PAGE={light:'#ffffff',dark:'#0e0f10'};
 const OA_SPEC=[
-  {css:'--on-accent',token:'comp/fg/on-accent/primary',on:'comp/fill/accent/primary',onStop:'50',min:4.5,
+  {css:'--on-accent',token:'comp/fg/on-accent/primary',on:'comp/fill/accent/primary',
+   onStop:{light:'50',dark:'50'},min:4.5,
    cand:[{hex:'#ffffff',ref:'Scale/color/gray/100'},{hex:'#000000',ref:'Scale/color/gray/00'},{stop:'96',ref:'Brand/color/primary/96'}],
    fill:{css:'--accent',token:'comp/fill/accent/primary',steps:['55','60','70']}},
-  {css:'--on-accent-subtle',token:'comp/fg/on-accent/secondary',on:'comp/fill/accent/secondary',onStop:'05',min:4.5,
+  {css:'--on-accent-subtle',token:'comp/fg/on-accent/secondary',on:'comp/fill/accent/secondary',
+   /* 다크에서 연한 강조 면은 램프의 반대쪽 끝(90)이라, 어두운 후보로는 아무도 4.5:1 을 못 넘긴다.
+      그래서 후보 뒤에 밝은 쪽 스톱을 이어 둔다 — 순서대로 재는 규칙이라 라이트는 그대로다. */
+   onStop:{light:'05',dark:'90'},min:4.5,
    cand:[{stop:'50',ref:'Brand/color/primary/50'},{stop:'55',ref:'Brand/color/primary/55'},{stop:'60',ref:'Brand/color/primary/60'},
          {stop:'70',ref:'Brand/color/primary/70'},{stop:'80',ref:'Brand/color/primary/80'},{stop:'90',ref:'Brand/color/primary/90'},
-         {stop:'96',ref:'Brand/color/primary/96'},{hex:'#000000',ref:'Scale/color/gray/00'}],
+         {stop:'96',ref:'Brand/color/primary/96'},{hex:'#000000',ref:'Scale/color/gray/00'},
+         {stop:'30',ref:'Brand/color/primary/30'},{stop:'20',ref:'Brand/color/primary/20'},
+         {stop:'10',ref:'Brand/color/primary/10'},{stop:'05',ref:'Brand/color/primary/05'},
+         {hex:'#ffffff',ref:'Scale/color/gray/100'}],
    fill:null}
 ];
 /* 램프 하나를 받아 "무엇을 골랐는지"를 돌려준다 — 화면 적용과 페이로드 치환이
    같은 함수를 쓰게 해서, 보이는 색과 내보내는 색이 갈라질 자리를 없앤다. */
-function oaResolve(ramp){
+function oaResolve(ramp,mode){
+  mode=mode||'light';
   const out=[];
   OA_SPEC.forEach(sp=>{
-    const back=ramp[sp.onStop];
+    const back=ramp[sp.onStop[mode]];
     const cand=sp.cand.map(c=>c.hex||ramp[c.stop]);
     const steps=sp.fill?sp.fill.steps.map(k=>ramp[k]):[];
     if(!back||cand.some(h=>!h)||steps.some(h=>!h))return;
-    const r=pickOnAccent(back,cand,sp.min,steps,OA_PAGE);
+    const r=pickOnAccent(back,cand,sp.min,steps,OA_PAGE[mode]);
     const w=sp.cand[r.fg];
     out.push({spec:sp,token:sp.token,on:sp.on,min:sp.min,
       hex:String(w.hex||ramp[w.stop]).toUpperCase(),picked:w.ref,
@@ -2073,7 +2117,8 @@ let oaReport=[];
 /* 인라인 커스텀 속성으로 덮는다 — [data-brand] 규칙보다 특이도가 높아서
    프리셋이든 커스텀이든 한 곳에서 이긴다. */
 function applyOnAccent(){
-  oaReport=oaResolve(oaRampNow());
+  const mode=(html.getAttribute('data-theme')==='dark')?'dark':'light';
+  oaReport=oaResolve(oaRampNow(),mode);
   oaReport.forEach(r=>{
     html.style.setProperty(r.spec.css,r.hex);
     if(r.fillHex)html.style.setProperty(r.spec.fill.css,r.fillHex);
@@ -2082,7 +2127,7 @@ function applyOnAccent(){
 }
 /* data-brand 만 본다 — 우리가 쓰는 것은 style 속성이라 되먹임이 생기지 않는다.
    커스텀 브랜드는 <style> 를 갈아 끼우므로 applyCustomBrand 가 직접 한 번 더 부른다. */
-new MutationObserver(applyOnAccent).observe(html,{attributes:true,attributeFilter:['data-brand']});
+new MutationObserver(applyOnAccent).observe(html,{attributes:true,attributeFilter:['data-brand','data-theme']});
 applyOnAccent();
 const KNOBDEF=[['data-layout',[['grid','Grid'],['carousel','Car'],['list','List']]],['data-radius',[['sharp','Sh'],['default','Df'],['rounded','Rd']]],['data-density',[['compact','Cp'],['default','Df'],['comfortable','Cf']]],['data-border',[['hairline','H'],['default','D'],['strong','S']]],['data-size',[['sm','S'],['md','M'],['lg','L']]]];
 /* 브랜드에서 실제로 달라지는 것만: 행=항목, 열=브랜드 */
@@ -3921,20 +3966,27 @@ function fxApplyBrand(base,b){
      나가고, 그 어긋남은 Figma 를 열어 보기 전까지 아무도 모른다.
      규칙은 gen-payload.js 의 4a 단계와 같다 — check-brand.js 가 두 답을 대조한다. */
   const sem={};(p.variables||[]).forEach(v=>{if(v.collection==='Semantic')sem[v.name]=v;});
-  const setAlias=(name,ref)=>{const v=sem[name];if(!v)return false;const i=ref.indexOf('/');
-    v.values=Object.assign({},v.values,{Light:{kind:'alias',collection:ref.slice(0,i),name:ref.slice(i+1)}});return true;};
-  rep.onAccent=[];
-  oaResolve(b.ramp).forEach(r=>{
-    const hit=setAlias(r.token,r.picked);
-    if(r.fillStepped)setAlias(r.spec.fill.token,'Brand/'+r.fillStepped);
-    rep.onAccent.push({token:r.token,on:r.on,min:r.min,picked:r.picked,
-      ratio:r.ratio,fillStepped:r.fillStepped,short:r.short,missing:!hit});
+  const setAlias=(name,ref,mode)=>{const v=sem[name];if(!v)return false;const i=ref.indexOf('/');
+    const d={};d[mode]={kind:'alias',collection:ref.slice(0,i),name:ref.slice(i+1)};
+    v.values=Object.assign({},v.values,d);return true;};
+  /* 모드마다 따로 잰다 — 같은 브랜드라도 흰 종이 위와 먹지 위에서 이기는 후보가 다르다.
+     한 번 재고 두 모드에 같은 답을 쓰면 한쪽은 반드시 틀린다(gen-payload.js 4a 와 같은 규칙). */
+  rep.onAccent={Light:[],Dark:[]};
+  [['light','Light'],['dark','Dark']].forEach(([m,MODE])=>{
+    oaResolve(b.ramp,m).forEach(r=>{
+      const hit=setAlias(r.token,r.picked,MODE);
+      if(r.fillStepped)setAlias(r.spec.fill.token,'Brand/'+r.fillStepped,MODE);
+      rep.onAccent[MODE].push({token:r.token,on:r.on,min:r.min,picked:r.picked,
+        ratio:r.ratio,fillStepped:r.fillStepped,short:r.short,missing:!hit});
+    });
   });
-  rep.onAccent.filter(x=>x.missing).forEach(x=>{if(rep.miss.indexOf(x.token)<0)rep.miss.push(x.token);});
+  ['Light','Dark'].forEach(M=>rep.onAccent[M].filter(x=>x.missing)
+    .forEach(x=>{if(rep.miss.indexOf(x.token)<0)rep.miss.push(x.token);}));
   p.$meta=Object.assign({},p.$meta,{brand:{
     connected:true,source:b.source,seed:b.seed,stops:rep.color,
     font:{display:b.font,text:b.font},gradient:rep.paint?'brand/gradient':null,
-    onAccent:rep.onAccent.filter(x=>!x.missing).map(x=>({token:x.token,on:x.on,min:x.min,picked:x.picked,ratio:x.ratio,fillStepped:x.fillStepped,short:x.short}))}});
+    onAccent:{Light:rep.onAccent.Light.filter(x=>!x.missing).map(x=>({token:x.token,on:x.on,min:x.min,picked:x.picked,ratio:x.ratio,fillStepped:x.fillStepped,short:x.short})),
+              Dark:rep.onAccent.Dark.filter(x=>!x.missing).map(x=>({token:x.token,on:x.on,min:x.min,picked:x.picked,ratio:x.ratio,fillStepped:x.fillStepped,short:x.short}))}}});
   return {payload:p,report:rep};
 }
 
@@ -4092,13 +4144,15 @@ function fxRender(src){
     ['그라디언트',rp.paint?'<code>brand/gradient</code> 페인트 스타일 1개'
       :'없음 — 커스텀 브랜드에서 수집했을 때만 나갑니다'],
     /* 브랜드마다 답이 달라지는 자리라서 숫자를 그대로 보여 준다 — 모자라면 빨갛게 말한다. */
-    ['강조 위 글자색 <code>on-accent</code>',(rp.onAccent||[]).length
-      ?(rp.onAccent||[]).map(x=>'<code>'+fxEsc(x.token.replace('comp/fg/',''))+'</code> → <code>'
-        +fxEsc(x.picked)+'</code> '+x.ratio.toFixed(2)+':1'
-        +(x.fillStepped?' · 채움을 <code>'+fxEsc(x.fillStepped)+'</code> 로 낮춤':'')
-        +(x.short?' · <b>'+x.min+':1 미달</b>':'')
-        +(x.missing?' · <b>페이로드에 변수 없음</b>':'')).join('<br>')
-      :'재지 못했습니다 — 램프가 12스톱이 아닙니다']
+    ['강조 위 글자색 <code>on-accent</code>',['Light','Dark'].map(M=>{
+        const list=((rp.onAccent||{})[M])||[];
+        if(!list.length)return '<b>'+M+'</b> 재지 못했습니다 — 램프가 12스톱이 아닙니다';
+        return '<b>'+M+'</b> '+list.map(x=>'<code>'+fxEsc(x.token.replace('comp/fg/',''))+'</code> → <code>'
+          +fxEsc(x.picked)+'</code> '+x.ratio.toFixed(2)+':1'
+          +(x.fillStepped?' · 채움을 <code>'+fxEsc(x.fillStepped)+'</code> 로 낮춤':'')
+          +(x.short?' · <b>'+x.min+':1 미달</b>':'')
+          +(x.missing?' · <b>페이로드에 변수 없음</b>':'')).join('<br>　');
+      }).join('<br>')]
   ];
   fxRows('fxBrandRows',brows);
   document.getElementById('fxBrand').hidden=false;
@@ -5909,6 +5963,24 @@ spsBody.addEventListener('click',e=>{
   const g=e.target.closest('[data-go]');
   if(g){if(g.dataset.go==='cmp-web'){spSheetCard('web:breakpoints');return;}spSheetClose();route(g.dataset.go,g.dataset.gotab||undefined);}
 });
+/* ── 다크 모드 ──────────────────────────────────────────────────────────
+   토글이 하는 일은 <html> 에 data-theme 을 붙이는 것뿐이다. 값은 전부
+   생성 블록(DEMOCSS-COLORS)이 들고 있고, 그 블록은 tokens.json 이 만든다.
+   그래서 이 토글은 'Semantic 컬렉션의 모드를 Dark 로 돌린 것' 과 같은 뜻이 된다. */
+let scrTheme='light';
+function setTheme(t){
+  scrTheme=t;
+  document.documentElement.setAttribute('data-theme',t);
+  const b=document.getElementById('themeSw');
+  if(b){b.classList.toggle('on',t==='dark');b.setAttribute('aria-checked',String(t==='dark'));}
+  /* 강조 위 글자색은 바닥이 바뀌면 답이 달라진다 — 브랜드를 다시 얹어 재게 한다. */
+  /* MutationObserver 가 data-theme 을 보고 있어 자동으로 돌지만,
+     첫 호출 때는 아직 값이 같아 안 돌 수 있으므로 여기서 한 번 직접 부른다. */
+  if(typeof applyOnAccent==='function'){try{applyOnAccent();}catch(e){}}
+}
+document.getElementById('themeSw').addEventListener('click',()=>setTheme(scrTheme==='dark'?'light':'dark'));
+setTheme('light');
+
 document.getElementById('spHintSw').addEventListener('click',e=>{
   const b=e.currentTarget;spHint=!spHint;
   b.classList.toggle('on',spHint);b.setAttribute('aria-checked',String(spHint));

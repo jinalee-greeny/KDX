@@ -313,7 +313,7 @@ C({
   }],
   per: {
     state: {
-      Off:      { alignPrimary: 'MIN', fill: t('comp/bdr/default'),           slots: { Thumb: { fill: t('comp/fill/inverse/default') } } },
+      Off:      { alignPrimary: 'MIN', fill: t('comp/fill/track'),           slots: { Thumb: { fill: t('comp/fill/inverse/default') } } },
       On:       { alignPrimary: 'MAX', fill: t('comp/fill/accent/primary'),   slots: { Thumb: { fill: t('comp/fill/inverse/default') } } },
       Disabled: { alignPrimary: 'MIN', fill: t('comp/fill/neutral/disabled'), slots: { Thumb: { fill: t('comp/fill/neutral/tertiary') } } }
     }
@@ -488,7 +488,7 @@ C({
       Bar: {
         w: px(240, 'Progress Bar 기본 길이 240 — 스펙은 FILL'), wIntent: 'FILL',
         h: t('comp/track/bar-height'), radius: t('comp/radius/progress'),
-        fill: t('comp/fill/neutral/tertiary'),
+        fill: t('comp/fill/track'),
         slots: { Fill: { visible: true, ratio: 0.6, radius: t('comp/radius/progress') }, Ring: { visible: false } }
       },
       Spinner: {
@@ -586,7 +586,7 @@ C({
   },
   slots: [
     { kind: 'frame', name: 'Track', absolute: true, anchor: 'CENTER_H', h: t('comp/track/slider-height'),
-      radius: t('comp/radius/slider'), fill: t('comp/fill/neutral/tertiary'),
+      radius: t('comp/radius/slider'), fill: t('comp/fill/track'),
       children: [{ kind: 'frame', name: 'Fill', absolute: true, anchor: 'LEFT', ratio: 0.5, radius: t('comp/radius/slider') }] },
     { kind: 'ellipse', name: 'Thumb', absolute: true, anchor: 'RATIO_H', ratio: 0.5,
       w: t('w/icon/md'), h: t('h/icon/md'), radius: t('comp/radius/slider') }
