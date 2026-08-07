@@ -573,6 +573,17 @@ vm.runInContext(CODE + '\n;globalThis.__applyComponents = applyComponents; globa
           + [...new Set(oob)].slice(0, 8).join('\n  · '));
         else console.log('잘려 보일 노드 없음' + (spill.length ? ' (안 자르는 부모를 넘친 자리 ' + spill.length + '건 — CSS overflow:visible 자리)' : ''));
 
+        /* ③a 화면 바닥 — 루트 프레임에 채우기가 없으면 Figma 에서 화면이 통째로 투명해진다.
+           브라우저에서는 .page 바깥 상자(.frame)가 흰 바닥을 내주지만 Figma 에는 그 상자가 없다. */
+        const noFill = [];
+        for (const c of hold.children) {
+          const f = c.fills;
+          if (!f || !f.length || !f.some((x) => x.visible !== false)) noFill.push(c.name);
+        }
+        if (noFill.length) console.log('바닥색 없는 화면 ' + noFill.length + '건 ← 문제\n  · '
+          + noFill.slice(0, 6).join('\n  · '));
+        else console.log('화면 바닥색 이상 없음');
+
         /* ③b 아이콘 — createNodeFromSvg 로 받은 프레임을 줄일 때 안의 벡터가 같이 줄었는가.
            제약을 SCALE 로 바꾸지 않으면 16px 프레임이 24px 그림을 물고 있게 된다. */
         const badIcon = [];

@@ -3342,15 +3342,37 @@ function sxMakeIndex(payload) {
 }
 /* 후보 중 scope 가 맞는 첫 항목. 하나도 안 맞으면 null 을 돌려 리터럴로 내보낸다 —
    아무거나 집어 주는 편이 화면은 그럴듯하지만, 그 순간 페이로드가 거짓말을 시작한다. */
+/* 쓰임에 따라 같은 값이라도 옳은 토큰이 다르다.
+   #ffffff 하나에도 bg/default · bg/ev/raised · comp/fill/field/default · static/white 가
+   같이 걸린다. 배경을 칠하는 자리라면 bg/* 가, 글자라면 fg/* 가 먼저다 —
+   scopes 만으로는 여기까지 못 가른다. */
+const SXPREF = {
+  fill:   [/^bg\//, /^comp\/fill\//, /^status\/bg\//],
+  text:   [/^fg\//, /^status\/fg\//, /^comp\/fg\//],
+  stroke: [/^comp\/bdr\//, /^status\/bdr\//]
+};
 function sxPick(list, use) {
   if (!list || !list.length) return null;
   const want = SXSCOPE[use] || [];
-  for (const e of list) {
-    if (!e.scopes.length) continue;
-    if (e.scopes.indexOf('ALL_SCOPES') >= 0) return e.name;
-    for (const s of want) if (e.scopes.indexOf(s) >= 0) return e.name;
+  const ok = list.filter(function (e) {
+    if (!e.scopes.length) return false;
+    if (e.scopes.indexOf('ALL_SCOPES') >= 0) return true;
+    for (const s of want) if (e.scopes.indexOf(s) >= 0) return true;
+    return false;
+  });
+  if (!ok.length) return null;
+  const pref = SXPREF[use] || [];
+  let best = null, bestScore = Infinity;
+  for (const e of ok) {
+    let score = 100;
+    for (let i = 0; i < pref.length; i++) if (pref[i].test(e.name)) { score = i * 10; break; }
+    /* 같은 값을 상태 토큰과 기본 토큰이 나눠 갖는 일이 흔하다
+       (alpha/black/05 = comp/bdr/subtlest 이면서 comp/bdr/disabled).
+       상태를 특정하는 이름은 그 상태일 때만 옳으므로 기본형을 먼저 집는다. */
+    if (/\/(disabled|focused|pressed|hover|visited|error|success|warning|info)(\/|$)/.test(e.name)) score += 5;
+    if (score < bestScore) { bestScore = score; best = e; }
   }
-  return null;
+  return (best || ok[0]).name;
 }
 
 /* ---- 텍스트 스타일 맞추기 ---------------------------------------------
@@ -3509,7 +3531,7 @@ function sxLayout(cs, box, kids) {
 }
 
 /* ---- 훑기 ------------------------------------------------------------- */
-function sxCapture(root, mode, ix, tmatch, rep) {
+function sxCapture(root, mode, ix, tmatch, rep, host) {
   const T = ix[mode];
   const colTok = (str, use) => {
     const c = sxColor(str);
@@ -3676,6 +3698,34 @@ function sxCapture(root, mode, ix, tmatch, rep) {
   }
 
   const out = walk(root, root.getBoundingClientRect(), 0);
+
+  /* 루트에 채우기를 얹는다.
+     .page 자체는 투명하고 흰 바닥은 그 바깥 상자(.frame, background:var(--bg))가 낸다.
+     브라우저에서는 그게 보이지만 Figma 로 옮기면 그 바깥 상자가 없어서 화면이 통째로
+     투명해진다 — '배경 컬러가 안 나온다'는 것이 정확히 이 자리다.
+     그래서 조상을 거슬러 올라가 실제로 색을 낸 첫 상자를 찾아 루트의 채우기로 삼는다.
+     못 찾으면 bg/default 로 떨어진다(캔버스가 흰 종이라는 뜻). */
+  if (out && !out.fill) {
+    let el = root, found = null;
+    while (el && !found) {
+      const c = sxColor(getComputedStyle(el).backgroundColor);
+      if (c && c.a > 0.01) found = c;
+      el = el.parentElement;
+      if (host && el === host.parentElement) break;
+    }
+    const T2 = ix[mode];
+    if (found) {
+      const ak = found.hex + sxHex2(Math.round(found.a * 255)).toUpperCase();
+      const tok = sxPick(T2.color.get(ak), 'fill') || sxPick(T2.color.get(found.hex + 'FF'), 'fill');
+      if (tok) { out.fill = { token: tok, a: found.a }; rep.bind.color.bound++; }
+      else { out.fill = { hex: found.hex, a: found.a }; rep.bind.color.literal++; }
+    } else {
+      const tok = sxPick(T2.color.get('#FFFFFFFF'), 'fill');
+      out.fill = tok ? { token: tok, a: 1 } : { hex: '#FFFFFF', a: 1 };
+      if (tok) rep.bind.color.bound++; else rep.bind.color.literal++;
+    }
+    rep.rootFill = (rep.rootFill || 0) + 1;
+  }
   return out;
 }
 
@@ -3740,7 +3790,7 @@ async function sxBuild(payload) {
         /* 배치가 끝나기 전에 재면 전부 0 이 나온다 — 한 프레임 넘긴다. */
         await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
         const page = host.querySelector('.page');
-        const root = sxCapture(page, bp.mode, ix, tmatch, rep);
+        const root = sxCapture(page, bp.mode, ix, tmatch, rep, host);
         if (root) {
           root.name = s.name + ' · ' + bp.mode;
           builds.push({ id: s.id + '-' + bp.mode, screen: s.name, mode: bp.mode, width: bp.w, root: root });
@@ -3755,7 +3805,7 @@ async function sxBuild(payload) {
       widths: SXW.reduce((a, b) => (a[b.mode] = b.w, a), {}),
       screens: list.length, frames: builds.length, nodes: rep.nodes,
       texts: rep.texts, icons: rep.icons, textSizeOverrides: rep.textOverride,
-      displayBound: rep.dispBound,
+      displayBound: rep.dispBound, rootFillAdded: rep.rootFill || 0,
       layout: rep.layout,
       bind: {
         color: { bound: cb.bound, literal: cb.literal,
