@@ -134,12 +134,151 @@ function aliasLabel(st, id) {
   return (c ? c.name + '/' : '') + v.name;
 }
 
+/* ───────────────────────── 컬렉션 대응 ─────────────────────────
+   페이로드의 컬렉션 이름과 파일의 컬렉션 이름이 다를 수 있다.
+   이 저장소의 페이로드는 5컬렉션(Scale · Brand · Semantic · Radius · Web)인데,
+   구 split7 경로로 만든 파일은 7컬렉션(Primitive · Brand · Semantic/color ·
+   Semantic/typo · Semantic/dimension · Radius · Web)이다. 변수 이름은 하나도
+   안 어긋나는데 컬렉션 이름만 다르다.
+
+   그냥 두면 Scale·Semantic 컬렉션이 새로 생기고, 수치 변수는 파일에 없는
+   Light/Dark 모드에 값을 넣으려다 한 칸도 못 채운 채 빈 변수로 남는다.
+   Figma 는 변수를 컬렉션 사이로 옮길 수 없으므로 되돌릴 방법도 없다.
+
+   그래서 붙일 자리를 페이로드가 미리 선언하고(collections[].targets),
+   여기서 그 선언을 파일의 실제 모양과 맞춰 본다. 결과는 차이확인에 표로 나온다.
+
+   대응은 세 가지 중 하나다.
+     same   — 같은 이름의 컬렉션이 파일에 있다. 그대로 쓴다.
+     mapped — 없지만 targets 중 하나가 파일에 있다. 거기에 붙인다(타입별로 갈릴 수 있다).
+     new    — 아무것도 없다. 페이로드 이름으로 새로 만든다(빈 파일에 처음 붙이는 경우).            */
+
+function planCollections(payload, st) {
+  const byPayload = new Map();
+  const mapping = [];
+  const errors = [];
+
+  /* 페이로드가 이 컬렉션에서 실제로 쓰는 타입 — 갈 곳 없는 타입을 잡아내려고 센다 */
+  const typesUsed = new Map();
+  for (const v of (payload.variables || [])) {
+    if (!typesUsed.has(v.collection)) typesUsed.set(v.collection, new Set());
+    typesUsed.get(v.collection).add(v.type);
+  }
+
+  const ALLTYPES = ['COLOR', 'FLOAT', 'STRING', 'BOOLEAN'];
+
+  for (const c of (payload.collections || [])) {
+    const identity = {};
+    for (const m of (c.modes || [])) identity[m] = m;
+
+    if (st.colByName.has(c.name)) {
+      byPayload.set(c.name, {
+        kind: 'same', readOrder: [c.name], byType: null,
+        only: { real: c.name, modeMap: identity }, modes: (c.modes || []).slice()
+      });
+      mapping.push({ from: c.name, to: c.name, kind: 'same', types: null, modes: null,
+        text: c.name + ' → 파일의 ' + c.name + ' (이름이 같음)' });
+      continue;
+    }
+
+    const hits = (c.targets || []).filter((t) => st.colByName.has(t.match));
+    if (!hits.length) {
+      byPayload.set(c.name, {
+        kind: 'new', readOrder: [c.name], byType: null,
+        only: { real: c.name, modeMap: identity }, modes: (c.modes || []).slice()
+      });
+      mapping.push({ from: c.name, to: c.name, kind: 'new', types: null, modes: null,
+        text: c.name + ' → 새로 만듦 (모드 ' + (c.modes || []).join(', ') + ')' });
+      continue;
+    }
+
+    const byType = new Map();
+    for (const t of hits) {
+      const mm = t.modeMap || identity;
+      for (const ty of (t.types || ALLTYPES)) {
+        if (!byType.has(ty)) byType.set(ty, { real: t.match, modeMap: mm, note: t.note || '' });
+      }
+    }
+    for (const ty of (typesUsed.get(c.name) || [])) {
+      if (!byType.has(ty)) {
+        errors.push(c.name + ' 의 ' + ty + ' 변수가 갈 곳이 없습니다 — '
+          + '파일에 ' + c.name + ' 컬렉션이 없고, targets 중에도 이 타입을 받는 대상이 없습니다. '
+          + '이대로면 이 변수들은 값을 못 받습니다.');
+      }
+    }
+
+    byPayload.set(c.name, { kind: 'mapped', readOrder: hits.map((t) => t.match), byType, only: null, modes: (c.modes || []).slice() });
+
+    /* 사람이 읽는 표 — 대상별로 한 줄 */
+    for (const t of hits) {
+      const types = [...byType.entries()].filter(([, x]) => x.real === t.match).map(([ty]) => ty);
+      if (!types.length) continue;
+      const mm = t.modeMap || identity;
+      const kept = Object.keys(mm).map((k) => k + (mm[k] === k ? '' : ' → ' + mm[k]));
+      const dropped = (c.modes || []).filter((m) => mm[m] === undefined);
+      mapping.push({
+        from: c.name, to: t.match, kind: 'mapped', types: types, modes: mm, dropped: dropped,
+        text: c.name + ' → 파일의 ' + t.match + ' · ' + types.join(', ')
+          + ' · 모드 ' + kept.join(', ')
+          + (dropped.length ? ' · 버림 ' + dropped.join(', ') : '')
+          + (t.note ? ' — ' + t.note : '')
+      });
+    }
+  }
+
+  /* 대상별로 있어야 할 파일 모드 이름 */
+  const wantModes = new Map();   // 실제 컬렉션 이름 → Set(모드 이름)
+  const add = (real, name) => {
+    if (!wantModes.has(real)) wantModes.set(real, []);
+    if (wantModes.get(real).indexOf(name) < 0) wantModes.get(real).push(name);
+  };
+  for (const c of (payload.collections || [])) {
+    const r = byPayload.get(c.name);
+    if (!r) continue;
+    if (r.kind === 'mapped') {
+      for (const [, t] of r.byType) for (const m of (c.modes || [])) {
+        if (t.modeMap[m] !== undefined) add(t.real, t.modeMap[m]);
+      }
+    } else {
+      for (const m of (c.modes || [])) add(r.only.real, m);
+    }
+  }
+
+  const readOrder = (col) => {
+    const r = byPayload.get(col);
+    return r ? r.readOrder : [col];
+  };
+  const target = (col, type) => {
+    const r = byPayload.get(col);
+    if (!r) return { real: col, modeMap: null };
+    if (r.kind !== 'mapped') return r.only;
+    /* 갈 곳이 없으면 아무 데나 넣지 않는다 — 엉뚱한 컬렉션에 만들어 두면
+       Figma 로는 옮길 수 없고, 이름만 겹쳐 예비 경로까지 죽는다. */
+    return r.byType.get(type) || { real: null, modeMap: null, unroutable: true };
+  };
+
+  return { byPayload, mapping, errors, wantModes, readOrder, target,
+    kindOf: (col) => (byPayload.get(col) || {}).kind || 'new' };
+}
+
 /* ───────────────────────── 이관표 해석 ───────────────────────── */
 /* 실제 개명을 하기 전에, "이 옛 이름은 이 새 이름이 될 것"이라는 가상 지도를 만든다.
    dry-run 과 apply 가 같은 지도를 쓰므로 두 결과가 어긋나지 않는다. */
 
-function planMigrations(payload, st) {
+function planMigrations(payload, st, rc) {
   const mig = payload.migrations || {};
+  /* 이관표는 페이로드의 컬렉션 이름으로 적혀 있다. 파일에서 그 이름이 다르면
+     (Semantic → Semantic/color 등) 여기서 풀어 준다 — 안 그러면 옛 이름을 못 찾아
+     전부 '이미 개명됨' 으로 조용히 넘어간다. */
+  const findVar = (col, name) => {
+    const direct = st.varByKey.get(KEY(col, name));
+    if (direct) return direct;
+    for (const real of (rc ? rc.readOrder(col) : [])) {
+      const h = st.varByKey.get(KEY(real, name));
+      if (h) return h;
+    }
+    return null;
+  };
   const renames = [];   // 실제 수행할 개명
   const splits = [];
   const conflicts = [];
@@ -147,7 +286,7 @@ function planMigrations(payload, st) {
   const virtual = new Map(); // KEY(col, 새이름) → 개명으로 확보될 예정
 
   const has = (col, name) =>
-    st.varByKey.has(KEY(col, name)) || virtual.has(KEY(col, name));
+    !!findVar(col, name) || virtual.has(KEY(col, name));
 
   /* 이관표가 잘못돼 있어도 살아 있는 변수를 망가뜨리지 않는다.
      생성기에도 같은 검사가 있지만, 플러그인은 남이 만든 페이로드도 받으므로 여기서 한 번 더 막는다. */
@@ -163,7 +302,7 @@ function planMigrations(payload, st) {
   for (const r of (mig.variableRenames || [])) {
     const danger = unsafe(r.collection, r.from, r.to);
     if (danger) { renames.push({ ...r, status: 'unsafe', why: danger }); continue; }
-    const src = st.varByKey.get(KEY(r.collection, r.from));
+    const src = findVar(r.collection, r.from);
     if (!src) {
       renames.push({ ...r, status: 'source-missing', why: '옛 이름이 파일에 없습니다 — 이미 개명됐거나 신규입니다.' });
       continue;
@@ -182,7 +321,7 @@ function planMigrations(payload, st) {
     const danger = unsafe(s.collection, s.from, keepName) ||
       (!newName ? '분할 결과 이름이 하나뿐입니다 — 이관표가 잘못됐습니다. 건너뜁니다.' : null);
     if (danger) { splits.push({ ...s, status: 'unsafe', why: danger }); continue; }
-    const src = st.varByKey.get(KEY(s.collection, s.from));
+    const src = findVar(s.collection, s.from);
     if (!src) {
       splits.push({ ...s, status: 'source-missing', why: '옛 이름이 파일에 없습니다 — 두 이름 모두 신규 생성으로 처리합니다.' });
       continue;
@@ -196,7 +335,7 @@ function planMigrations(payload, st) {
   }
 
   for (const c of (mig.conflicts || [])) {
-    const dup = st.varByKey.get(KEY(c.collection, c.duplicate));
+    const dup = findVar(c.collection, c.duplicate);
     conflicts.push({
       ...c,
       present: !!dup,
@@ -214,7 +353,7 @@ function planMigrations(payload, st) {
 }
 
 /** 개명·분할이 끝났다고 가정한 이름 조회 */
-function makeLookup(st, mg) {
+function makeLookup(st, mg, rc) {
   const extra = new Map();
   for (const r of mg.renames) if (r.status === 'rename') extra.set(KEY(r.collection, r.to), r.id);
   for (const s of mg.splits) if (s.status === 'split') extra.set(KEY(s.collection, s.keepName), s.id);
@@ -243,6 +382,15 @@ function makeLookup(st, mg) {
     if (moved.has(k)) return null; // 이 이름은 곧 사라진다
     const hit = st.varByKey.get(k);
     if (hit) return hit;
+    /* 선언된 대응을 먼저 본다 — 어느 컬렉션인지 알고 찾으므로 이름 예비 경로보다 안전하다.
+       (예비 경로는 이름이 파일 안에서 유일할 때만 쓸 수 있다.) */
+    if (rc) {
+      for (const real of rc.readOrder(col)) {
+        if (real === col) continue;
+        const h2 = st.varByKey.get(KEY(real, name));
+        if (h2) return h2;
+      }
+    }
     const alt = byName.get(name);
     if (alt) {
       const real = (st.colById.get(alt.variableCollectionId) || {}).name || '?';
@@ -259,39 +407,52 @@ function makeLookup(st, mg) {
 
 async function dryRun(payload) {
   const st = await readState();
-  const mg = planMigrations(payload, st);
-  const lookup = makeLookup(st, mg);
+  const rc = planCollections(payload, st);
+  const mg = planMigrations(payload, st, rc);
+  const lookup = makeLookup(st, mg, rc);
 
   /* 1) 컬렉션·모드 */
-  const collections = { create: [], addModes: [], defaultModeManual: [], ok: [] };
+  const collections = {
+    create: [], addModes: [], defaultModeManual: [], ok: [],
+    mapping: rc.mapping.map((m) => m.text),
+    mapErrors: rc.errors.slice()
+  };
   for (const c of (payload.collections || [])) {
-    const live = st.colByName.get(c.name);
-    if (!live) {
+    if (rc.kindOf(c.name) === 'new') {
       collections.create.push({ name: c.name, modes: c.modes, note: c.note });
       if (c.modes[0] !== c.defaultMode) {
         collections.defaultModeManual.push({ collection: c.name, want: c.defaultMode });
       }
-      continue;
     }
-    const missing = c.modes.filter((m) => !modeIdOf(live, m));
-    if (missing.length) collections.addModes.push({ collection: c.name, modes: missing });
-    else collections.ok.push(c.name);
-    const dm = live.modes.find((m) => m.modeId === live.defaultModeId);
+  }
+  /* 모드는 '붙일 자리' 기준으로 본다 — 페이로드 모드 이름이 아니라 파일 모드 이름이다 */
+  for (const [real, want] of rc.wantModes) {
+    const live = st.colByName.get(real);
+    if (!live) continue;                      // 아직 없는 컬렉션 — 위에서 만든다
+    const missing = want.filter((m) => !modeIdOf(live, m));
+    if (missing.length) collections.addModes.push({ collection: real, modes: missing });
+    else collections.ok.push(real);
+  }
+  for (const c of (payload.collections || [])) {
+    if (rc.kindOf(c.name) !== 'same') continue;   // 대응된 컬렉션의 기본 모드는 그 파일의 사정이다
+    const live = st.colByName.get(c.name);
+    const dm = live && live.modes.find((m) => m.modeId === live.defaultModeId);
     if (dm && dm.name !== c.defaultMode) {
       collections.defaultModeManual.push({ collection: c.name, now: dm.name, want: c.defaultMode });
     }
   }
 
   /* 2) 변수 */
-  const variables = { create: [], update: [], typeMismatch: [], missingAliasTarget: [], same: 0 };
+  const variables = { create: [], update: [], typeMismatch: [], missingAliasTarget: [], same: 0, droppedModes: [] };
   const payloadKeys = new Set();
 
   for (const pv of (payload.variables || [])) {
-    payloadKeys.add(KEY(pv.collection, pv.name));
+    const tgt = rc.target(pv.collection, pv.type);
+    payloadKeys.add(KEY(tgt.real || pv.collection, pv.name));
     const live = lookup(pv.collection, pv.name);
 
     if (!live) {
-      variables.create.push({ collection: pv.collection, name: pv.name, type: pv.type });
+      variables.create.push({ collection: tgt.real || '(갈 곳 없음)', name: pv.name, type: pv.type, unroutable: tgt.unroutable });
       // 별칭 대상이 파일에도 페이로드에도 없으면 미리 잡아 둔다
       for (const mv of Object.values(pv.values)) {
         if (mv.kind === 'alias' && !lookup(mv.collection, mv.name) &&
@@ -312,8 +473,13 @@ async function dryRun(payload) {
 
     const col = st.colById.get(live.variableCollectionId);
     for (const [modeName, mv] of Object.entries(pv.values)) {
-      const modeId = col ? modeIdOf(col, modeName) : null;
+      /* 페이로드 모드 이름 → 파일 모드 이름. 표에 없으면 선언에 따라 버린다. */
+      const fileMode = (tgt.modeMap && tgt.modeMap[modeName] !== undefined) ? tgt.modeMap[modeName]
+        : (tgt.modeMap ? null : modeName);
+      if (fileMode === null) { variables.droppedModes.push(pv.name + ' [' + modeName + ']'); continue; }
+      const modeId = col ? modeIdOf(col, fileMode) : null;
       const cur = modeId ? live.valuesByMode[modeId] : undefined;
+      const modeLabel = modeName + (fileMode === modeName ? '' : ' → ' + fileMode);
 
       if (mv.kind === 'alias') {
         const target = lookup(mv.collection, mv.name);
@@ -321,7 +487,7 @@ async function dryRun(payload) {
         const nowLabel = cur && cur.type === 'VARIABLE_ALIAS' ? aliasLabel(st, cur.id) : show(pv.type, cur);
         if (cur && cur.type === 'VARIABLE_ALIAS' && target && cur.id === target.id) { variables.same++; continue; }
         variables.update.push({
-          collection: pv.collection, name: pv.name, mode: modeName,
+          collection: tgt.real, name: pv.name, mode: modeLabel,
           from: nowLabel, to: '→ ' + want,
           newMode: !modeId || undefined
         });
@@ -333,7 +499,7 @@ async function dryRun(payload) {
         }
         if (equal) { variables.same++; continue; }
         variables.update.push({
-          collection: pv.collection, name: pv.name, mode: modeName,
+          collection: tgt.real, name: pv.name, mode: modeLabel,
           from: cur && cur.type === 'VARIABLE_ALIAS' ? aliasLabel(st, cur.id) : show(pv.type, cur),
           to: show(pv.type, want),
           newMode: !modeId || undefined
@@ -344,13 +510,14 @@ async function dryRun(payload) {
 
   /* 3) 고아 — 페이로드에 없는 파일 변수 (삭제하지 않는다) */
   const consumed = new Set();
-  for (const r of mg.renames) if (r.status === 'rename') consumed.add(KEY(r.collection, r.from));
-  for (const s of mg.splits) if (s.status === 'split') consumed.add(KEY(s.collection, s.from));
+  const allKeys = (col, name) => [col].concat(rc.readOrder(col)).map((r) => KEY(r, name));
+  for (const r of mg.renames) if (r.status === 'rename') for (const k of allKeys(r.collection, r.from)) consumed.add(k);
+  for (const s of mg.splits) if (s.status === 'split') for (const k of allKeys(s.collection, s.from)) consumed.add(k);
 
   const orphans = [];
   for (const [k, v] of st.varByKey) {
     if (payloadKeys.has(k) || consumed.has(k)) continue;
-    const nk = mg.renames.find((r) => r.status === 'rename' && KEY(r.collection, r.to) === k);
+    const nk = mg.renames.find((r) => r.status === 'rename' && allKeys(r.collection, r.to).indexOf(k) >= 0);
     if (nk) continue;
     const col = st.colById.get(v.variableCollectionId);
     orphans.push({ collection: col ? col.name : '?', name: v.name, type: v.resolvedType });
@@ -470,25 +637,34 @@ async function apply(payload, opts) {
   const problems = [];
   const push = (t, m) => { log.push({ t, m }); figma.ui.postMessage({ type: 'progress', line: { t, m } }); };
 
-  /* 1) 컬렉션·모드 */
+  /* 1) 컬렉션·모드 — 페이로드 이름을 고집하지 않고 '붙일 자리'를 먼저 정한다.
+     여기서 잘못 정하면 같은 변수가 두 벌이 되고 Figma 로는 되돌릴 수 없다. */
   let st = await readState();
+  let rc = planCollections(payload, st);
+  for (const m of rc.mapping) push(m.kind === 'mapped' ? 'warn' : 'ok', '컬렉션 대응 — ' + m.text);
+  for (const e of rc.errors) { push('err', '컬렉션 대응 — ' + e); problems.push(e); }
+
   for (const c of (payload.collections || [])) {
-    let live = st.colByName.get(c.name);
-    if (!live) {
-      live = figma.variables.createVariableCollection(c.name);
-      live.renameMode(live.modes[0].modeId, c.modes[0]);
-      for (let i = 1; i < c.modes.length; i++) live.addMode(c.modes[i]);
-      push('ok', '컬렉션 신규 — ' + c.name + ' (모드 ' + c.modes.join(', ') + ')');
-    } else {
-      for (const m of c.modes) {
-        if (!modeIdOf(live, m)) { live.addMode(m); push('ok', '모드 추가 — ' + c.name + ' / ' + m); }
-      }
+    if (rc.kindOf(c.name) !== 'new') continue;
+    const live = figma.variables.createVariableCollection(c.name);
+    live.renameMode(live.modes[0].modeId, c.modes[0]);
+    for (let i = 1; i < c.modes.length; i++) live.addMode(c.modes[i]);
+    push('ok', '컬렉션 신규 — ' + c.name + ' (모드 ' + c.modes.join(', ') + ')');
+  }
+  st = await readState();
+  rc = planCollections(payload, st);
+  for (const [real, want] of rc.wantModes) {
+    const live = st.colByName.get(real);
+    if (!live) continue;
+    for (const m of want) {
+      if (!modeIdOf(live, m)) { live.addMode(m); push('ok', '모드 추가 — ' + real + ' / ' + m); }
     }
   }
 
   /* 2) 개명 · 3) 분할 */
   st = await readState();
-  const mg = planMigrations(payload, st);
+  rc = planCollections(payload, st);
+  const mg = planMigrations(payload, st, rc);
   for (const r of mg.renames) {
     if (r.status === 'unsafe') {
       push('err', '개명 거부 — ' + r.collection + '/' + r.from + ' → ' + r.to + ' · ' + r.why);
@@ -520,12 +696,19 @@ async function apply(payload, opts) {
 
   /* 4) 변수 생성 — 값은 아직 넣지 않는다 (별칭 대상이 다 생겨야 하므로) */
   st = await readState();
-  const lookup0 = makeLookup(st, { renames: [], splits: [] });
+  rc = planCollections(payload, st);
+  const lookup0 = makeLookup(st, { renames: [], splits: [] }, rc);
   let created = 0;
   for (const pv of (payload.variables || [])) {
     if (lookup0(pv.collection, pv.name)) continue;
-    const col = st.colByName.get(pv.collection);
-    if (!col) { push('err', '컬렉션 없음 — ' + pv.collection + ' · ' + pv.name + ' 건너뜀'); continue; }
+    const tgt0 = rc.target(pv.collection, pv.type);
+    if (tgt0.unroutable) {
+      problems.push(pv.collection + '/' + pv.name + ' (' + pv.type + ') — 붙일 컬렉션이 없어 만들지 않았습니다. '
+        + '엉뚱한 컬렉션에 만들면 Figma 로는 옮길 수 없습니다.');
+      continue;
+    }
+    const col = st.colByName.get(tgt0.real);
+    if (!col) { push('err', '컬렉션 없음 — ' + tgt0.real + ' · ' + pv.name + ' 건너뜀'); continue; }
     figma.variables.createVariable(pv.name, col, pv.type);
     created++;
   }
@@ -533,8 +716,9 @@ async function apply(payload, opts) {
 
   /* 5) 값 · 스코프 · 코드신택스 주입 */
   st = await readState();
-  const lookup = makeLookup(st, { renames: [], splits: [] });
-  let setCount = 0, skipCount = 0;
+  rc = planCollections(payload, st);
+  const lookup = makeLookup(st, { renames: [], splits: [] }, rc);
+  let setCount = 0, skipCount = 0, droppedModes = 0;
 
   for (const pv of (payload.variables || [])) {
     const v = lookup(pv.collection, pv.name);
@@ -545,10 +729,16 @@ async function apply(payload, opts) {
       continue;
     }
     const col = st.colById.get(v.variableCollectionId);
+    const tgt = rc.target(pv.collection, pv.type);
 
     for (const [modeName, mv] of Object.entries(pv.values)) {
-      const modeId = modeIdOf(col, modeName);
-      if (!modeId) { problems.push(pv.collection + '/' + pv.name + ' — 모드 ' + modeName + ' 없음'); continue; }
+      /* 페이로드 모드 이름 → 파일 모드 이름. 대응표에 없는 모드는 선언대로 버린다
+         (수치의 Dark 처럼 — 라이트와 같은 값이라 축을 늘릴 이유가 없다). */
+      const fileMode = (tgt.modeMap && tgt.modeMap[modeName] !== undefined) ? tgt.modeMap[modeName]
+        : (tgt.modeMap ? null : modeName);
+      if (fileMode === null) { droppedModes++; continue; }
+      const modeId = modeIdOf(col, fileMode);
+      if (!modeId) { problems.push(pv.collection + '/' + pv.name + ' — 모드 ' + fileMode + ' 없음'); continue; }
       try {
         if (mv.kind === 'alias') {
           const target = lookup(mv.collection, mv.name);
@@ -559,7 +749,7 @@ async function apply(payload, opts) {
         }
         setCount++;
       } catch (e) {
-        problems.push(pv.collection + '/' + pv.name + ' [' + modeName + '] — ' + e.message);
+        problems.push(pv.collection + '/' + pv.name + ' [' + fileMode + '] — ' + e.message);
       }
     }
 
@@ -571,7 +761,8 @@ async function apply(payload, opts) {
       try { v.setVariableCodeSyntax('WEB', pv.codeSyntax.WEB); } catch (e) { /* 무시 */ }
     }
   }
-  push('ok', '값 주입 ' + setCount + '건' + (skipCount ? ' · 건너뜀 ' + skipCount + '건' : ''));
+  push('ok', '값 주입 ' + setCount + '건' + (skipCount ? ' · 건너뜀 ' + skipCount + '건' : '')
+    + (droppedModes ? ' · 대응표에 따라 버린 모드 값 ' + droppedModes + '건' : ''));
 
   /* 6) 스타일 */
   let styleReport = { text: 0, effect: 0, renamed: 0 };
@@ -597,6 +788,8 @@ async function apply(payload, opts) {
       created,
       valuesSet: setCount,
       renamed: mg.renames.filter((r) => r.status === 'rename').length,
+      collectionMapping: rc.mapping.map((m) => m.text),
+      droppedModes: droppedModes,
       split: mg.splits.filter((s) => s.status === 'split').length,
       styles: styleReport,
       components: componentReport,
@@ -970,8 +1163,9 @@ async function applyComponents(payload, push, problems) {
   if (!builds.length) { push('skip', '빌드표가 없어 컴포넌트 단계를 건너뜁니다.'); return rep; }
 
   const st = await readState();
-  const mg = planMigrations(payload, st);
-  const lookup = makeLookup(st, mg);
+  const rc = planCollections(payload, st);
+  const mg = planMigrations(payload, st, rc);
+  const lookup = makeLookup(st, mg, rc);
   const R = makeNumResolver(payload);
   for (const a of R.ambiguous) problems.push('토큰 이름이 두 컬렉션에 있습니다 — ' + a);
 
@@ -1446,8 +1640,9 @@ async function applyScreens(payload, push, problems) {
   if (!builds.length) { push('skip', '화면표가 없어 화면 단계를 건너뜁니다 — 토큰만 담긴 페이로드입니다.'); return rep; }
 
   const st = await readState();
-  const mg = planMigrations(payload, st);
-  const lookup = makeLookup(st, mg);
+  const rc = planCollections(payload, st);
+  const mg = planMigrations(payload, st, rc);
+  const lookup = makeLookup(st, mg, rc);
   const R = makeNumResolver(payload);
   const varOf = (name) => { const col = R.collectionOf(name); return col ? lookup(col, name) : null; };
 

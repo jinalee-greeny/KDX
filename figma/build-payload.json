@@ -554,7 +554,16 @@
         "Value"
       ],
       "defaultMode": "Value",
-      "note": "원시값. 아무 것도 별칭하지 않는다."
+      "note": "원시값. 아무 것도 별칭하지 않는다.",
+      "targets": [
+        {
+          "match": "Primitive",
+          "modeMap": {
+            "Value": "Value"
+          },
+          "note": "구 split7 경로가 쓰던 이름."
+        }
+      ]
     },
     {
       "name": "Brand",
@@ -571,7 +580,31 @@
         "Dark"
       ],
       "defaultMode": "Light",
-      "note": "모드 축. Dark 는 tokens.json 의 dark 별칭이 정한다(figma/dark-map.js)."
+      "note": "모드 축. Dark 는 tokens.json 의 dark 별칭이 정한다(figma/dark-map.js).",
+      "targets": [
+        {
+          "match": "Semantic/color",
+          "types": [
+            "COLOR"
+          ],
+          "modeMap": {
+            "Light": "Light",
+            "Dark": "Dark"
+          },
+          "note": "Dark 는 이 컬렉션에 새로 생긴다."
+        },
+        {
+          "match": "Semantic/dimension",
+          "types": [
+            "FLOAT",
+            "STRING"
+          ],
+          "modeMap": {
+            "Light": "Value"
+          },
+          "note": "수치는 라이트·다크가 같은 값이다. Dark 를 버리는 이유 — 모드축을 붙여 봐야 두 칸이 늘 같고, 파일에는 뜻 없는 축이 하나 는다."
+        }
+      ]
     },
     {
       "name": "Radius",

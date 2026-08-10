@@ -208,8 +208,27 @@ function renderPlan(p){
 
   let h = '';
 
+  /* 컬렉션 대응이 맨 위 — 이걸 잘못 승인하면 같은 변수가 두 벌이 되고 Figma 로는 되돌릴 수 없다.
+     (변수는 컬렉션 사이로 옮길 수 없다.) 사람이 여기부터 읽어야 한다. */
+  const MAP = p.collections.mapping || [];
+  if (MAP.length) {
+    h += '<h3>컬렉션 대응 — 먼저 확인</h3>';
+    h += box('페이로드 컬렉션이 이 파일의 어디에 붙는가', MAP.length,
+        MAP.map(t=>{
+          const i = t.indexOf(' → ');
+          const from = i > 0 ? t.slice(0, i) : t;
+          const to   = i > 0 ? t.slice(i + 3) : '';
+          const cls  = /새로 만듦/.test(to) ? 'ok' : (/이름이 같음/.test(to) ? 'mut' : 'warn');
+          return '<tr><td class="k">'+esc(from)+'</td><td class="v '+cls+'">'+esc(to)+'</td></tr>';
+        }).join(''), true);
+  }
+
   /* 경고 먼저 */
   const warns = [];
+  (p.collections.mapErrors||[]).forEach(e => warns.push('컬렉션 대응 — '+e));
+  if ((p.variables.droppedModes||[]).length)
+    warns.push('대응표에 따라 버리는 모드 값 '+p.variables.droppedModes.length+'건 — '
+      + '붙일 컬렉션에 그 모드가 없고, 값이 다른 모드와 같아서 버립니다. 위 대응표의 "버림" 을 보세요.');
   if (p.variables.typeMismatch.length)
     warns.push('타입이 다른 변수 '+p.variables.typeMismatch.length+'개는 건너뜁니다 — Figma 는 변수 타입을 바꿀 수 없습니다.');
   if (p.variables.missingAliasTarget.length)
@@ -393,6 +412,8 @@ onmessage = (e) => {
           +(s.screens.instanceMiss?' · 컴포넌트 못 찾음 '+s.screens.instanceMiss:'')
           +(s.screens.failed?' · 실패 '+s.screens.failed:''):'')
       + (s.crossCollection?'<br><span class="warn">컬렉션 이동 '+s.crossCollection+'건은 손으로 처리해야 합니다.</span>':'')
+      + ((s.collectionMapping||[]).length?'<br><span class="mut">컬렉션 대응 — '+esc(s.collectionMapping.join(' / '))+'</span>':'')
+      + (s.droppedModes?'<br><span class="mut">대응표에 따라 버린 모드 값 '+s.droppedModes+'건</span>':'')
       + '</div>';
     $('go').disabled = false; $('go').textContent='닫기'; $('go').className='';
     $('foot').textContent = '';

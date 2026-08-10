@@ -50,10 +50,30 @@ const W = m => { warn.push(m); };
 
 // ---------- 컬렉션 ----------
 // Value/Light 단일 모드는 지금의 Figma 파일과 같은 이름을 쓴다(개명이 아니라 매칭 대상).
+//
+// targets — "이 파일에는 이 컬렉션이 다른 이름으로 이미 있다" 는 선언.
+//   Figma 는 변수를 컬렉션 사이로 옮길 수 없다. 그러니 우리 이름으로 컬렉션을 새로 만들면
+//   같은 변수가 두 벌이 되고, 기존 화면·컴포넌트의 바인딩은 그대로 옛 변수를 가리킨 채 남는다.
+//   되돌릴 방법도 없다(386개를 다시 만들고 전부 다시 걸어야 한다).
+//   그래서 페이로드는 자기 이름을 고집하지 않고, 붙일 자리를 미리 적어 둔다.
+//
+//   · match   — 파일에 이 이름의 컬렉션이 있으면 거기에 붙인다
+//   · types   — 이 대상이 받는 변수 타입 (한 컬렉션이 타입별로 쪼개져 있을 때)
+//   · modeMap — 페이로드 모드 이름 → 파일 모드 이름. 표에 없는 모드는 버린다(사유를 적을 것).
+//
+//   파일에 match 가 하나도 없으면 페이로드 이름 그대로 새로 만든다 — 빈 파일에 처음 붙이는 경우다.
+//   대응 결과는 차이확인(dry-run)에 표로 나온다. 사람이 보고 승인한 뒤에만 적용한다.
 const collections = [
-  { name: 'Scale',    modes: ['Value'], defaultMode: 'Value',   note: '원시값. 아무 것도 별칭하지 않는다.' },
+  { name: 'Scale',    modes: ['Value'], defaultMode: 'Value',   note: '원시값. 아무 것도 별칭하지 않는다.',
+    targets: [{ match: 'Primitive', modeMap: { Value: 'Value' }, note: '구 split7 경로가 쓰던 이름.' }] },
   { name: 'Brand',    modes: ['Value'], defaultMode: 'Value',   note: '★ 교체 지점. 여기만 갈면 전체가 따라온다.' },
-  { name: 'Semantic', modes: ['Light', 'Dark'], defaultMode: 'Light', note: '모드 축. Dark 는 tokens.json 의 dark 별칭이 정한다(figma/dark-map.js).' },
+  { name: 'Semantic', modes: ['Light', 'Dark'], defaultMode: 'Light', note: '모드 축. Dark 는 tokens.json 의 dark 별칭이 정한다(figma/dark-map.js).',
+    targets: [
+      { match: 'Semantic/color', types: ['COLOR'], modeMap: { Light: 'Light', Dark: 'Dark' },
+        note: 'Dark 는 이 컬렉션에 새로 생긴다.' },
+      { match: 'Semantic/dimension', types: ['FLOAT', 'STRING'], modeMap: { Light: 'Value' },
+        note: '수치는 라이트·다크가 같은 값이다. Dark 를 버리는 이유 — 모드축을 붙여 봐야 두 칸이 늘 같고, 파일에는 뜻 없는 축이 하나 는다.' }
+    ] },
   { name: 'Radius',   modes: ['sharp', 'default', 'rounded'], defaultMode: 'default', note: '곡률 성격 스왑. 직교 모드축.' },
   { name: 'Web',      modes: ['mobile', 'tablet', 'desktop'],  defaultMode: 'mobile', note: '반응형 스텝. 직교 모드축.' }
 ];
