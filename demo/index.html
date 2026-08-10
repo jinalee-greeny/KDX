@@ -1573,6 +1573,9 @@ html[data-sphint="off"] [data-sp].sp-hl{outline:none}
         <button class="nav-item" data-view="tokens" data-tab="icons">Icons</button>
         <button class="nav-item" data-view="tokens" data-tab="elevation">Elevation</button>
       </div>
+    </div><!-- /.lib-body.nav-body — 이 닫는 태그가 없어서 아래 .lib-expand 가 lib-body 안으로
+         빨려 들어가 있었다. 접으면 .library.collapsed .lib-body{display:none} 이 부모째 숨겨
+         '펼치기' 버튼이 0×0 이 되고, 다시 열 방법이 사라진다. -->
     <div class="lib-expand"><button class="iconbtn" id="libOpen" title="펼치기"><svg class="i"><use href="#icon-nav-right"/></svg></button><span class="vlabel">탐색</span></div>
   </aside>
 
