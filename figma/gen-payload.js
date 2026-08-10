@@ -319,31 +319,40 @@ function parseShadow(cssStr) {
     visible: true
   };
 }
+/* 그림자는 겹의 목록이다. 한 겹짜리는 싸구려로 보인다 —
+   넓게 퍼지는 겹이 깊이를 만들고 바닥에 붙는 겹이 물체를 앉힌다.
+   이펙트 스타일 자체는 모드를 모르지만 그 안의 색은 변수에 걸 수 있으므로,
+   겹마다 색 토큰을 따로 들려 보낸다.
+   옛 형태도 계속 받는다 — 문자열('0 2px 2px rgba(0,0,0,.10)') 하나든, {shadow,color} 하나든. */
+const hexToPaintColor = (hex) => ({
+  r: parseInt(hex.substr(1, 2), 16) / 255, g: parseInt(hex.substr(3, 2), 16) / 255,
+  b: parseInt(hex.substr(5, 2), 16) / 255, a: parseInt(hex.substr(7, 2), 16) / 255
+});
 const effectStyles = [];
 for (const [name, def] of Object.entries(T.effect.elevation)) {
-  /* 예전에는 색까지 문자열에 박혀 있었다('0 2px 2px rgba(0,0,0,.10)').
-     이펙트 스타일 자체는 모드를 모르지만 그 안의 색은 변수에 걸 수 있으므로,
-     색만 토큰으로 빼면 스타일 하나가 Light·Dark 를 다 산다.
-     옛 문자열 형태도 계속 받는다 — 남이 만든 tokens.json 이 들어와도 무너지지 않게. */
-  const isObj = def && typeof def === 'object';
-  const geom = isObj ? def.shadow : def;
-  const colorToken = isObj ? def.color : null;
-  const cssStr = colorToken ? (geom + ' ' + colorToken) : geom;
-  const base = colorToken ? (geom + ' rgba(0,0,0,.10)') : geom;   // 색은 곧 변수가 덮는다
-  const e = parseShadow(base);
-  if (!e) { W('effect ' + name + ' 의 그림자 문자열을 해석하지 못했습니다: ' + cssStr); continue; }
-  if (colorToken) {
-    if (!T.semantic.color[colorToken]) W('effect ' + name + ' 이 없는 색 토큰을 가리킵니다: ' + colorToken);
-    e.colorToken = colorToken;
-    /* 변수가 안 걸릴 때를 대비한 초깃값 — Light 값을 그대로 넣어 둔다.
-       걸리면 이 숫자는 안 보이고, 못 걸리면 적어도 라이트에서는 맞다. */
-    const lit = T.scale.color[T.semantic.color[colorToken] && T.semantic.color[colorToken].alias];
-    if (lit && /^#[0-9a-fA-F]{8}$/.test(lit)) {
-      e.color = { r: parseInt(lit.substr(1,2),16)/255, g: parseInt(lit.substr(3,2),16)/255,
-                  b: parseInt(lit.substr(5,2),16)/255, a: parseInt(lit.substr(7,2),16)/255 };
+  const layers = Array.isArray(def) ? def : [def];
+  const effects = [], srcs = [];
+  for (const layer of layers) {
+    const isObj = layer && typeof layer === 'object';
+    const geom = isObj ? layer.shadow : layer;
+    const colorToken = isObj ? layer.color : null;
+    const base = colorToken ? (geom + ' rgba(0,0,0,.10)') : geom;   // 색은 곧 변수가 덮는다
+    const e = parseShadow(base);
+    if (!e) { W('effect ' + name + ' 의 그림자 문자열을 해석하지 못했습니다: ' + geom); continue; }
+    if (colorToken) {
+      const d = T.semantic.color[colorToken];
+      if (!d) W('effect ' + name + ' 이 없는 색 토큰을 가리킵니다: ' + colorToken);
+      e.colorToken = colorToken;
+      /* 변수가 안 걸릴 때를 대비한 초깃값 — Light 값을 그대로 넣어 둔다.
+         걸리면 이 숫자는 안 보이고, 못 걸리면 적어도 라이트에서는 맞다. */
+      const lit = d && T.scale.color[d.alias];
+      if (lit && /^#[0-9a-fA-F]{8}$/.test(lit)) e.color = hexToPaintColor(lit);
     }
+    effects.push(e);
+    srcs.push(colorToken ? (geom + ' ' + colorToken) : geom);
   }
-  effectStyles.push({ name, effects: [e], source: cssStr });
+  if (!effects.length) continue;
+  effectStyles.push({ name, effects, source: srcs.join(', ') });
 }
 
 // ---------- 페인트 스타일 (브랜드 그라디언트) ----------

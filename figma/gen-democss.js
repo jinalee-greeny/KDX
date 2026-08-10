@@ -66,27 +66,31 @@ const MAP = [
   ['--flat',                'chart/status/fg/flat']
 ];
 
-/* 그림자 — 어두운 바닥에서는 같은 알파로는 안 보인다.
-   색 자체는 이제 토큰이다(comp/shadow/{default,subtle}, Light 10%·5% → Dark 50%·40%).
-   그런데 데모의 그림자는 두 겹이고 겹마다 알파가 다른 반면 effect/elevation 토큰은 한 겹이라,
-   두 값을 그대로 잇지 못한다. ★ 남은 정리: 토큰의 elevation 을 두 겹으로 넓히거나
-   데모를 한 겹으로 줄여 한쪽에 맞춰야 한다. 그때까지는 이 표가 데모 쪽 정본이다. */
-const SHADOW = {
-  light: [
-    ['--elev-1', '0 1px 2px rgba(14,15,16,.04),0 1px 3px rgba(14,15,16,.06)', '카드 rest'],
-    ['--elev-2', '0 4px 10px rgba(14,15,16,.06),0 2px 5px rgba(14,15,16,.05)', '카드 hover'],
-    ['--elev-3', '0 8px 24px rgba(14,15,16,.10),0 3px 8px rgba(14,15,16,.06)', '드롭다운·팝오버'],
-    ['--elev-4', '0 20px 48px rgba(14,15,16,.16),0 8px 18px rgba(14,15,16,.08)', '모달·다이얼로그'],
-    ['--elev-up', '0 -8px 24px rgba(14,15,16,.08)', '바텀시트·스티키']
-  ],
-  dark: [
-    ['--elev-1', '0 1px 2px rgba(0,0,0,.30),0 1px 3px rgba(0,0,0,.40)', '카드 rest'],
-    ['--elev-2', '0 4px 10px rgba(0,0,0,.40),0 2px 5px rgba(0,0,0,.34)', '카드 hover'],
-    ['--elev-3', '0 8px 24px rgba(0,0,0,.52),0 3px 8px rgba(0,0,0,.40)', '드롭다운·팝오버'],
-    ['--elev-4', '0 20px 48px rgba(0,0,0,.64),0 8px 18px rgba(0,0,0,.48)', '모달·다이얼로그'],
-    ['--elev-up', '0 -8px 24px rgba(0,0,0,.44)', '바텀시트·스티키']
-  ]
-};
+/* 그림자도 이제 tokens.json 이 정한다. 겹 목록과 기하는 effect.elevation 이,
+   색은 겹마다 달린 comp/shadow/* 토큰이 들고 있다.
+   여기 남은 일은 CSS 문법으로 옮겨 적는 것뿐 — 손으로 고른 숫자는 하나도 없다. */
+function shadowLines(mode) {
+  const L = [];
+  L.push('  --elev-0:none;');
+  for (const [name, def] of Object.entries(T.effect.elevation)) {
+    const layers = Array.isArray(def) ? def : [def];
+    const parts = [], refs = [];
+    for (const layer of layers) {
+      const isObj = layer && typeof layer === 'object';
+      const geom = isObj ? layer.shadow : String(layer).replace(/\s*rgba?\([^)]*\)\s*/, '');
+      const tokenName = isObj ? layer.color : null;
+      if (!tokenName) { parts.push(geom); continue; }
+      const r = tokenCss(tokenName, mode);
+      parts.push(geom + ' ' + r.css);
+      refs.push(tokenName.replace('comp/shadow/', '') + '←' + r.ref.replace('color/alpha/black/', 'black ') + '%');
+    }
+    /* 데모가 쓰는 이름은 --elev-up 이다(토큰은 elevation/upper). 한 글자 차이로 조용히
+       안 걸리는 자리를 만들지 않도록 여기서 이름을 맞춘다. */
+    const key = name.replace('elevation/', '').replace(/^upper$/, 'up');
+    L.push('  --elev-' + key + ':' + parts.join(',') + ';  /* ' + refs.join(' + ') + ' */');
+  }
+  return L;
+}
 
 function block(mode) {
   const sel = mode === 'light' ? ':root' : 'html[data-theme="dark"]';
@@ -101,8 +105,7 @@ function block(mode) {
       L.push('  ' + pad(name + ':' + manual[mode] + ';', 34) + '/* ' + why + ' */');
     }
   }
-  L.push('  --elev-0:none;');
-  for (const [n, v, why] of SHADOW[mode]) L.push('  ' + n + ':' + v + ';  /* ' + why + ' */');
+  for (const l of shadowLines(mode)) L.push(l);
   L.push('  --sh-1:var(--elev-1); --sh-2:var(--elev-2); --sh-frame:var(--elev-4);');
   if (mode === 'dark') {
     L.push('  /* 브랜드 파생 — 라이트는 [data-brand] 가 들고 있고 여기서 다크만 덮어쓴다 */');

@@ -34,11 +34,12 @@
   --down:#1772ed;                   /* chart/status/fg/down ← color/blue/50 */
   --flat:#76777a;                   /* chart/status/fg/flat ← color/gray/50 */
   --elev-0:none;
-  --elev-1:0 1px 2px rgba(14,15,16,.04),0 1px 3px rgba(14,15,16,.06);  /* 카드 rest */
-  --elev-2:0 4px 10px rgba(14,15,16,.06),0 2px 5px rgba(14,15,16,.05);  /* 카드 hover */
-  --elev-3:0 8px 24px rgba(14,15,16,.10),0 3px 8px rgba(14,15,16,.06);  /* 드롭다운·팝오버 */
-  --elev-4:0 20px 48px rgba(14,15,16,.16),0 8px 18px rgba(14,15,16,.08);  /* 모달·다이얼로그 */
-  --elev-up:0 -8px 24px rgba(14,15,16,.08);  /* 바텀시트·스티키 */
+  --elev-1:0 1px 3px #0000001a,0 1px 2px #0000000d;  /* default←black 10% + subtle←black 05% */
+  --elev-2:0 4px 10px #0000001a,0 2px 5px #0000000d;  /* default←black 10% + subtle←black 05% */
+  --elev-3:0 8px 24px #0000001a,0 3px 8px #0000000d;  /* default←black 10% + subtle←black 05% */
+  --elev-4:0 20px 48px #00000026,0 8px 18px #0000000d;  /* strong←black 15% + subtle←black 05% */
+  --elev-up:0 -8px 24px #0000000d;  /* subtle←black 05% */
+  --elev-right:2px 0 2px #0000000d;  /* subtle←black 05% */
   --sh-1:var(--elev-1); --sh-2:var(--elev-2); --sh-frame:var(--elev-4);
   /* 컴포넌트 지오메트리 — 색이 아니라 이 생성기의 대상이 아니다 */
   --pad-btn-x:20px; --pad-btn-y:12px; --pad-fld-x:16px; --pad-fld-y:12px; --pad-card:24px;
@@ -70,11 +71,12 @@ html[data-theme="dark"]{
   --down:#6f91ff;                   /* chart/status/fg/down ← color/blue/60 */
   --flat:#909194;                   /* chart/status/fg/flat ← color/gray/60 */
   --elev-0:none;
-  --elev-1:0 1px 2px rgba(0,0,0,.30),0 1px 3px rgba(0,0,0,.40);  /* 카드 rest */
-  --elev-2:0 4px 10px rgba(0,0,0,.40),0 2px 5px rgba(0,0,0,.34);  /* 카드 hover */
-  --elev-3:0 8px 24px rgba(0,0,0,.52),0 3px 8px rgba(0,0,0,.40);  /* 드롭다운·팝오버 */
-  --elev-4:0 20px 48px rgba(0,0,0,.64),0 8px 18px rgba(0,0,0,.48);  /* 모달·다이얼로그 */
-  --elev-up:0 -8px 24px rgba(0,0,0,.44);  /* 바텀시트·스티키 */
+  --elev-1:0 1px 3px #00000080,0 1px 2px #00000066;  /* default←black 50% + subtle←black 40% */
+  --elev-2:0 4px 10px #00000080,0 2px 5px #00000066;  /* default←black 50% + subtle←black 40% */
+  --elev-3:0 8px 24px #00000080,0 3px 8px #00000066;  /* default←black 50% + subtle←black 40% */
+  --elev-4:0 20px 48px #00000099,0 8px 18px #00000066;  /* strong←black 60% + subtle←black 40% */
+  --elev-up:0 -8px 24px #00000066;  /* subtle←black 40% */
+  --elev-right:2px 0 2px #00000066;  /* subtle←black 40% */
   --sh-1:var(--elev-1); --sh-2:var(--elev-2); --sh-frame:var(--elev-4);
   /* 브랜드 파생 — 라이트는 [data-brand] 가 들고 있고 여기서 다크만 덮어쓴다 */
   --accent:var(--brand-p50);  /* comp/fill/accent/primary ← color/primary/50 */

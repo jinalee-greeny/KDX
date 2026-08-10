@@ -426,10 +426,15 @@ vm.runInContext(CODE + '\n;globalThis.__applyComponents = applyComponents; globa
   console.log('[styles] 텍스트 ' + srep.text + ' · 이펙트 ' + srep.effect + ' · 페인트 ' + srep.paint
     + ' · 개명 ' + srep.renamed + ' · 이펙트 색 바인딩 ' + calls.effectBind.length);
   {
-    const want = (PAYLOAD.styles && PAYLOAD.styles.effect || []).filter((e) => (e.effects || []).some((x) => x.colorToken)).length;
+    /* 겹 단위로 센다 — 스타일 단위로 세면 두 겹 중 한 겹만 걸려도 초록이 뜬다. */
+    const want = (PAYLOAD.styles && PAYLOAD.styles.effect || [])
+      .reduce((a, e) => a + (e.effects || []).filter((x) => x.colorToken).length, 0);
     if (want && calls.effectBind.length < want)
-      console.log('이펙트 색을 변수에 못 건 스타일 ' + (want - calls.effectBind.length) + '건 ← 문제');
-    else if (want) console.log('이펙트 색 ' + want + '건 전부 변수에 걸렸습니다');
+      console.log('이펙트 색을 변수에 못 건 겹 ' + (want - calls.effectBind.length) + '개 ← 문제');
+    else if (want) console.log('이펙트 색 ' + want + '겹 전부 변수에 걸렸습니다');
+    /* 겹이 통째로 사라지지 않았는지도 본다 — 두 겹짜리가 한 겹으로 나가면 그림자가 납작해진다. */
+    const flat = (PAYLOAD.styles && PAYLOAD.styles.effect || []).filter((e) => (e.effects || []).length < 1);
+    if (flat.length) console.log('겹이 없는 이펙트 ' + flat.length + '건 ← 문제');
   }
 
   const rep = await ctx.__applyComponents(PAYLOAD, (t, m) => log.push(t + ' | ' + m), problems);
