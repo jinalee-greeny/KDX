@@ -3297,6 +3297,11 @@ gMenu.addEventListener('click',e=>{const b=e.target.closest('button[data-m]');if
 
 /* 잡아낼 폭. 데모 프리뷰의 데스크톱 프레임은 1080 이지만 그건 미리보기 크롬의 제약이지
    브레이크포인트가 아니다 — Web/container/max 가 1200 이므로 1440 에서 잡아야 그 값이 실제로 선다. */
+/* SXCORE-BEGIN — 되짚기 핵심. 이 구간은 순수 함수만 담는다(DOM 을 만지지 않는다).
+   figma/screen-import.js 가 이 구간을 그대로 잘라 쓴다 — 사본을 만들지 않는 이유는,
+   내보내기(화면→Figma)와 가져오기(Figma→화면)가 **같은 표로 되짚어야** 두 방향의
+   숫자를 나란히 놓고 비교할 수 있기 때문이다. 사본이 둘이 되는 순간 그 비교는 거짓말이 된다.
+   여기에 DOM 을 참조하는 코드를 넣지 말 것 — 넣는 순간 Node 쪽에서 터진다. */
 const SXW = [
   { mode: 'mobile',  w: 390  },
   { mode: 'tablet',  w: 768  },
@@ -3453,6 +3458,7 @@ function sxMakeTextMatch(payload) {
     };
   };
 }
+/* SXCORE-END */
 
 /* ---- 컴포넌트 치환표 --------------------------------------------------
    낱개 컨트롤만 바꾼다. 카드·모달처럼 속이 풍부한 컨테이너는 제네릭 인스턴스로
